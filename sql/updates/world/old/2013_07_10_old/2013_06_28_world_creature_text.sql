@@ -1,0 +1,22 @@
+DELETE FROM `creature_text` WHERE `entry` IN (40319,40484,40177);
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(40319, 0, 0, 'I will burn you from the inside out!', 14, 0, 100, 0, 0, 18610, 'VO_GB_Drahga_Engage'),
+(40319, 1, 0, 'INCINERATE THEM, MINIONS!', 14, 0, 100, 0, 0, 18616, 'VO_GB_Drahga_Sum_Spirits1'),
+(40319, 2, 0, 'BY FIRE BE... BURNED!', 14, 0, 100, 0, 0, 18619, 'VO_GB_Drahga_Sum_Spirits2'),
+(40319, 3, 0, 'Dragon, you will do as I command! Catch me!', 14, 0, 100, 0, 0, 18621, 'VO_GB_Drahga_Sum_Valiona'),
+(40319, 4, 0, 'Valiona, finish them! Avenge me!', 14, 0, 100, 0, 0, 18614, 'VO_GB_Drahga_Death'),
+(40319, 6, 0, 'You should have come better prepared!', 14, 0, 100, 0, 0, 18612, 'VO_GB_Drahga_Slay01'),
+(40319, 7, 0, 'An easy kill!', 14, 0, 100, 0, 0, 18611, 'VO_GB_Drahga_Slay02'),
+(40484, 0, 0, 'The darkest days are still ahead!', 14, 0, 100, 0, 0, 18638, 'VO_GB_Erudax_Engage'),
+(40484, 1, 0, 'Ywaq maq oou; ywaq maq ssaggh. Yawq ma shg fhn.', 14, 0, 100, 0, 0, 18641, 'VO_GB_Erudax_Death'),
+(40484, 2, 0, 'Come, suffering... Enter, chaos!', 14, 0, 100, 0, 0, 18646, 'VO_GB_Erudax_Guardian'),
+(40484, 3, 0, 'Flakh ghet! The shadows hunger cannot be sated! ', 14, 0, 100, 0, 0, 18644, 'VO_GB_Erudax_Shad_Gale'),
+(40484, 4, 0, 'Flesh for the offering!', 14, 0, 100, 0, 0, 18640, 'VO_GB_Erudax_Slay02'),
+(40484, 5, 0, 'Erudax cackles maniacally.', 16, 0, 100, 0, 0, 18639, 'VO_GB_Erudax_Slay01'),
+(40177, 0, 0, 'NO! Throngus get whipped again if he no finish!', 14, 0, 100, 0, 0, 18943, 'VO_GB_Throngus_Engage'),
+(40177, 1, 0, 'You not get through defenses!', 14, 0, 100, 0, 0, 18947, 'VO_GB_Throngus_Shield'),
+(40177, 2, 0, 'Throngus SLICE you up!', 14, 0, 100, 0, 0, 18948, 'VO_GB_Throngus_Sword'),
+(40177, 3, 0, 'Oh, this is gonna HURT!', 14, 0, 100, 0, 0, 18949, 'VO_GB_Throngus_Mace'),
+(40177, 4, 0, 'You break easy!', 14, 0, 100, 0, 0, 18945, 'VO_GB_Throngus_Slay01'),
+(40177, 5, 0, 'Throngus use your corpse on body. Somewhere...', 14, 0, 100, 0, 0, 18944, 'VO_GB_Throngus_Slay02'),
+(40177, 6, 0, 'Death... Good choice. Not best choice maybe, but better than fail and live.', 14, 0, 100, 0, 0, 18946, 'VO_GB_Throngus_Death');

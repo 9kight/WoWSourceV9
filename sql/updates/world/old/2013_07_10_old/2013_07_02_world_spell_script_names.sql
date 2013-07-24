@@ -1,0 +1,20 @@
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (81206,81208,81585,81206,88685,1680,12472,20707,-58872,-50294,-49158,-49145,-543,-6143,6495,8171,13161,18541,25042,20911,25899,28441,-33851,20425);
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+('12472', 'spell_mage_icy_veins'),
+('20707', 'spell_warl_soul_stone'),
+('-58872', 'spell_warr_damage_shield'),
+(-50294,'spell_dru_starfall_aoe'),
+(-49158,'spell_dk_corpse_explosion'),
+(-49145, 'spell_dk_spell_deflection'),
+(-33851, 'spell_dru_primal_tenacity'),
+(-543,  'spell_mage_fire_frost_ward'),
+(-6143, 'spell_mage_fire_frost_ward'),
+(6495,  'spell_sha_sentry_totem'),
+(8171,'spell_sha_cleansing_totem_pulse'),
+(13161, 'spell_hun_aspect_of_the_beast'),
+(18541, 'spell_warl_ritual_of_doom_effect'),
+(20425,'spell_pal_judgement_of_command'),
+(25042, 'spell_mark_of_nature'),
+(20911,'spell_pal_blessing_of_sanctuary'),
+(25899,'spell_pal_blessing_of_sanctuary'),
+(28441, 'spell_item_ashbringer');
