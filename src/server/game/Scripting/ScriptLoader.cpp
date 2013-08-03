@@ -1460,6 +1460,7 @@ void AddBattlegroundScripts()
 /* This is where custom scripts' loading functions should be declared. */
 //void AddSC_Skirmish_npc();
 void AddSC_npc_tele_gangnam();
+void AddSC_Reset();
 
 #endif
 
@@ -1469,6 +1470,7 @@ void AddCustomScripts()
     /* This is where custom scripts should be added. */
 //    AddSC_Skirmish_npc();
     AddSC_npc_tele_gangnam();
+	AddSC_Reset();
 
 #endif
 }
