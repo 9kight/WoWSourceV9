@@ -93,11 +93,9 @@ INSERT INTO `pickpocketing_loot_template` VALUES ('11082', '4608', '15.63', '1',
 INSERT INTO `pickpocketing_loot_template` VALUES ('11082', '3928', '12.5', '1', '0', '1', '1');
 UPDATE `creature_template` SET pickpocketloot='11082' WHERE entry='11082';
 
-UPDATE `creature_template` SET spell1='6136', spell2='14907', spell3='122832' WHERE entry='10516';
-
 UPDATE `creature_template` SET spell1='8599', spell2='17470' WHERE entry='10808';
 
-UPDATE `creature_template` SET spell1='10101', spell2='110762', spell3='15615', spell4='59146', spell5='17279' WHERE entry='10997';
+UPDATE `creature_template` SET spell1='10101', spell2='15615', spell3='59146', spell4='17279' WHERE entry='10997';
 DELETE FROM `pickpocketing_loot_template` WHERE entry='10997';
 INSERT INTO `pickpocketing_loot_template` VALUES ('10997', '5432', '36.73', '1', '0', '1', '1');
 INSERT INTO `pickpocketing_loot_template` VALUES ('10997', '16884', '26.53', '1', '0', '1', '1');
