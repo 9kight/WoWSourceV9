@@ -1,4 +1,4 @@
--- Blackrock Spire ability spells pickpocket skinning
+
 UPDATE `creature_template` SET spell1='15128', spell2='13737', spell3='41056', spell4='41057' WHERE entry='9596';
 DELETE FROM `pickpocketing_loot_template` WHERE entry='9596';
 INSERT INTO `pickpocketing_loot_template` VALUES ('9596', '5428', '58.62', '1', '0', '1', '1');
@@ -47,7 +47,7 @@ INSERT INTO `pickpocketing_loot_template` VALUES ('10899', '27855', '20.55', '1'
 INSERT INTO `pickpocketing_loot_template` VALUES ('10899', '22829', '13.7', '1', '0', '1', '1');
 UPDATE `creature_template` SET pickpocketloot='10899' WHERE entry='10899';
 
-UPDATE `creature_template` SET spell1='16359', spell2='16390', spell3='16350', spell4='110762', spell5='10101', spell6='16328' WHERE entry='10339';
+UPDATE `creature_template` SET spell1='16359', spell2='16390', spell3='16350', spell4='10101', spell5='16328' WHERE entry='10339';
 DELETE FROM `skinning_loot_template` WHERE entry='10339';
 INSERT INTO `skinning_loot_template` VALUES ('10339', '15415', '113.3', '1', '0', '1', '8');
 INSERT INTO `skinning_loot_template` VALUES ('10339', '15412', '113.28', '1', '0', '1', '7');
@@ -62,7 +62,7 @@ INSERT INTO `skinning_loot_template` VALUES ('10220', '8170', '101.46', '1', '0'
 INSERT INTO `skinning_loot_template` VALUES ('10220', '8171', '11.53', '1', '0', '1', '4');
 UPDATE `creature_template` SET skinloot='10220' WHERE entry='10220';
 
-UPDATE `creature_template` SET spell1='8269', spell2='10101', spell3='110762' WHERE entry='9196';
+UPDATE `creature_template` SET spell1='8269', spell2='10101' WHERE entry='9196';
 DELETE FROM `pickpocketing_loot_template` WHERE entry='9196';
 INSERT INTO `pickpocketing_loot_template` VALUES ('9196', '5428', '48.42', '1', '0', '1', '1');
 INSERT INTO `pickpocketing_loot_template` VALUES ('9196', '16885', '44.29', '1', '0', '1', '1');
