@@ -4167,7 +4167,7 @@ public:
 
 void AddSC_gilneas()
 {
-	new npc_npc_admiral_nightwind();
+	new npc_admiral_nightwind();
     new npc_gilneas_city_guard_phase2();
     new npc_prince_liam_greymane_phase1();
     new npc_prince_liam_greymane_phase2();
