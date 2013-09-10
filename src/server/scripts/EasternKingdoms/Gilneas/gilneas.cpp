@@ -4147,8 +4147,27 @@ public:
     }
 };
 
+/*######
+## npc_admiral_nightwind
+######*/
+class npc_admiral_nightwind : public CreatureScript
+{
+public:
+    npc_admiral_nightwind() : CreatureScript("npc_admiral_nightwind") { }
+	bool OnQuestReward(Player* player, Creature* /*creature*/, Quest const* quest, uint32 /*opt*/)
+	{		
+        if (quest->GetQuestId() == 14434)
+            {
+				player->RemoveAllAuras();
+				player->TeleportTo(1,8343,801,4,4);
+			}
+		return true;
+	}
+};
+
 void AddSC_gilneas()
 {
+	new npc_npc_admiral_nightwind();
     new npc_gilneas_city_guard_phase2();
     new npc_prince_liam_greymane_phase1();
     new npc_prince_liam_greymane_phase2();
