@@ -367,7 +367,7 @@ public:
                 
                 me->SetDisplayId(DISPLAYID_EYE_HUGE);
                 me->SetHomePosition(2361.21f, -5660.45f, 496.7444f, 0);
-                me->GetMotionMaster()->MoveCharge(1758.007f, -5876.785f, 166.8667f, 0); // Position center                
+                me->GetMotionMaster()->MoveCharge(2361.21f, -5660.45f, 496.7444f, 0.0f); // Position center                
                 if (Player* player = me->GetCharmerOrOwnerPlayerOrPlayerItself())
                 Talk(EMOTE_DESTINATION);
                 

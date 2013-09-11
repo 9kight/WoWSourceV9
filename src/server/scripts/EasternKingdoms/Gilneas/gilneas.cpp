@@ -665,7 +665,7 @@ public:
 // Phase 4
 /*######
 ## npc_bloodfang_worgen
-######*/
+######*/ /*
 class npc_bloodfang_worgen : public CreatureScript
 {
 public:
@@ -772,6 +772,8 @@ public:
 
     };
 };
+*/
+
 
 /*######
 ## npc_sergeant_cleese
@@ -2054,6 +2056,34 @@ public:
         }
     };
 };
+/*######
+## spell_attack_lurker
+#####*/
+class spell_attack_lurker : public SpellScriptLoader
+{
+	public:
+		spell_attack_lurker() : SpellScriptLoader("spell_attack_lurker"){}
+		class spell_attack_lurker_SpellScript : public SpellScript
+		{
+			PrepareSpellScript(spell_attack_lurker_SpellScript);
+			void HandleDummy(SpellEffIndex /*index*/)
+			{
+				Unit * caster = GetCaster();
+				caster->CastSpell(caster,SPELL_ATTACK_LURKER,true);
+				caster->SummonCreature(35463,caster->GetPositionX(),caster->GetPositionY(),caster->GetPositionZ(),caster->GetOrientation(),TEMPSUMMON_DEAD_DESPAWN);
+			}
+			void Register()
+			{
+				OnEffectHit += SpellEffectFn(spell_attack_lurker_SpellScript::HandleDummy,EFFECT_0,SPELL_EFFECT_DUMMY);
+			}
+		};
+
+		SpellScript * GetSpellScript() const
+		{
+			return new spell_attack_lurker_SpellScript();
+		}
+
+};
 
 /*######
 ## npc_king_genn_greymane
@@ -2858,6 +2888,7 @@ public:
     }
 };
 
+
 /*######
 ## npc_trigger_event_first_c3
 ######*/
@@ -3267,8 +3298,7 @@ public:
 ######*/
 class npc_prince_liam_greymane_gilneas : public CreatureScript
 {
-public:
-    npc_prince_liam_greymane_gilneas() : CreatureScript("npc_prince_liam_greymane_gilneas") {}
+public:    npc_prince_liam_greymane_gilneas() : CreatureScript("npc_prince_liam_greymane_gilneas") {}
 
     struct npc_prince_liam_greymane_gilneasAI : public npc_escortAI
     {
@@ -3743,6 +3773,7 @@ public:
 /*######
 ## npc_lord_darius_crowley_gilneas
 ######*/
+
 class npc_lord_darius_crowley_gilneas : public CreatureScript
 {
 public:
@@ -4167,6 +4198,7 @@ public:
 
 void AddSC_gilneas()
 {
+	new spell_attack_lurker();
 	new npc_admiral_nightwind();
     new npc_gilneas_city_guard_phase2();
     new npc_prince_liam_greymane_phase1();
@@ -4180,7 +4212,7 @@ void AddSC_gilneas()
 	new npc_lorna_crowley_p4();
 	new npc_bloodfang_lurker();
 	new npc_gilnean_mastiff();
-    new npc_bloodfang_worgen();
+    //new npc_bloodfang_worgen();
     new npc_frightened_citizen();
     new npc_gilnean_royal_guard();
     new npc_mariam_spellwalker();

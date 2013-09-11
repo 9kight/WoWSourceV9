@@ -436,7 +436,7 @@ public:
         return new npc_crosilikAI (creature);
     }
 };
-
+/*
 class npc_augh_fake: public CreatureScript
 {
 public:
@@ -448,11 +448,12 @@ public:
         {
         }
 
+
         void Reset()
         {
         }
 
-        void DamageTaken(Unit* /*target*/, uint32& damage)
+        void DamageTaken(Unit* /*target, uint32& damage)
         {
             if (me->HasReactState(REACT_PASSIVE))
                 return;
@@ -477,16 +478,17 @@ public:
         }
     };
 
+
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_augh_fakeAI (creature);
     }
 };
-
+*/
 void AddSC_boss_lockmaw()
 {
     new boss_lockmaw();
     new npc_augh();
     new npc_crosilik();
-    new npc_augh_fake();
+    //new npc_augh_fake();
 }
