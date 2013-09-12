@@ -24,4 +24,5 @@ UPDATE `creature_template` SET `ScriptName`='npc_grilly_2' WHERE  `entry`=38124;
 UPDATE `creature_template` SET `ScriptName`='go_iron_rune_construct_workbank' WHERE  `entry`=24807;
 UPDATE `creature_template` SET `ScriptName`='npc_lord_darius_crowley_gilneas' WHERE  `entry`=38415;
 UPDATE `creature_template` SET `ScriptName`='npc_king_genn_greymane_c2' WHERE  `entry`=36332;
-UPDATE `creature_template` SET `ScriptName`='npc_Proto_Drake_q11188' WHERE  `entry`=23689;UPDATE `spell_script_names` SET `spell_id`=125042 WHERE  `spell_id`=13161 AND `ScriptName`='spell_hun_aspect_of_the_beast';
+UPDATE `creature_template` SET `ScriptName`='npc_Proto_Drake_q11188' WHERE  `entry`=23689;
+UPDATE `spell_script_names` SET `spell_id`=125042 WHERE  `spell_id`=13161 AND `ScriptName`='spell_hun_aspect_of_the_beast';
