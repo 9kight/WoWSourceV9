@@ -399,6 +399,7 @@ public:
 
                     me->CastSpell(me, SPELL_EYE_FL_BOOST_RUN, true);
                     me->SetSpeed(MOVE_FLIGHT, 6.5f, true); // 6.5spd by sniffs, much to fast.
+
                     me->GetMotionMaster()->MovePoint(0, 1758.0f, -5876.7f, 166.8f); // Travel to end point.
                     return;
                 }
@@ -720,6 +721,20 @@ public:
     {
         return new npc_salanar_the_horsemanAI(creature);
     }
+
+	bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 opt)
+	{
+		if(quest->GetQuestId() == 12687)
+		{
+			if(!player->HasSpell(48778))
+			{
+				player->learnSpell(33391,false);
+				player->learnSpell(48778,false);
+			}
+			
+		}
+		return true;
+	}
 
     struct npc_salanar_the_horsemanAI : public ScriptedAI
     {
