@@ -8,7 +8,7 @@ Copyright (C) WTCore (http://wowsource.info/)
 1. Please push every Commit with the base Information Like DB Core and which File or Sector is affected e.g: Core/Player: Fix Carsh | Core/Guilds: Fix XP gain System | DB/Loot: Correct the loot fro Deathwing
 1.1: Push from now every SQL Update with Dates and from which Table it is. E.g: We modify some thing in creature_template us this as following: 2013_05_23_00_world_creature_template.sql
      [Year]_[Month]_[Day]_[Duplicates]_[WorldDB]_[Table]
-2. Work with your own GUID Ranges for Creatures and GameObjects, you can find the actual List here: https://github.com/leduclinh7141/WTCore/blob/master/GUID
+2. Work with your own GUID Ranges for Creatures and GameObjects, you can find the actual List 
 3. Test all your Fixes first before you Push something
 4. If you Test an unfinished Script, be sure to delink Scriptnames or Set Creatures to Faction 35 or make them invisible, this will prevent future Crashes and Errors
 5. When Developer A is pushing a fix and you have wrong informations about that fix, please do not modify those files and make them fail, speak with the owner of that Fix, or be 100% sure that Developer A make some mistakes
@@ -22,8 +22,7 @@ Copyright (C) WTCore (http://wowsource.info/)
 === ToDo List === (Please modify that list for your future or current Work)
 1. heybaby2707:
 2. cguliver:
-3. tarek:
-4. exonation:
+
 === Lastest world database ===
 1. for the world ask the newst version updated to other  members.
 
