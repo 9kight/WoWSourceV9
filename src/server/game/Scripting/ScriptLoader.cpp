@@ -389,7 +389,12 @@ void AddSC_boss_alakir();                        // Throne of the four Winds
 void AddSC_boss_conclave_of_wind();
 void AddSC_instance_throne_of_the_four_winds();
 void AddSC_throne_of_the_four_winds();
-void AddSC_endtime();
+void AddSC_endtime();                       //EndTime
+void AddSC_instance_endtime();
+void AddSC_endtime_teleporter();
+void AddSC_boss_echo_of_baine();
+void AddSC_boss_echo_of_jaina();
+void AddSC_boss_echo_of_sylvanas();
 
 void AddSC_ashenvale();
 void AddSC_azshara();
