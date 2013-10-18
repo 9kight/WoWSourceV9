@@ -63,6 +63,7 @@ UPDATE `creature_template` SET pickpocketloot='17491' WHERE entry='17491';
 
 UPDATE `creature_template` SET spell1='81219' WHERE entry='17624';
 
+
 UPDATE `creature_template` SET spell1='22427', spell2='31900' WHERE entry='17398';
 DELETE FROM `pickpocketing_loot_template` WHERE entry='17398';
 INSERT INTO `pickpocketing_loot_template` VALUES ('17398', '29569', '1.24', '1', '0', '1', '1');
