@@ -389,6 +389,7 @@ void AddSC_boss_alakir();                        // Throne of the four Winds
 void AddSC_boss_conclave_of_wind();
 void AddSC_instance_throne_of_the_four_winds();
 void AddSC_throne_of_the_four_winds();
+void AddSC_endtime();
 
 void AddSC_ashenvale();
 void AddSC_azshara();
