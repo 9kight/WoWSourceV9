@@ -526,3 +526,10 @@ INSERT INTO `creature` VALUES (323364, 22515, 568, 3805, 3805,  1, 1, 0, 0, -177
 INSERT INTO `creature` VALUES (323365, 24312, 568, 3805, 3805,  1, 1, 0, 0, -209.823, 1116.5, 0.0341543, 4.92183, 7200, 0, 0, 1, 0, 0, 0, 0, 0);
 INSERT INTO `creature` VALUES (323366, 24312, 568, 3805, 3805,  1, 1, 0, 0, -209.437, 1115.29, 0.264964, 1.37881, 7200, 0, 0, 1, 0, 0, 0, 0, 0);
 INSERT INTO `creature` VALUES (323367, 24312, 568, 3805, 3805,  1, 1, 0, 0, -222.574, 1124.88, -0.0573367, 1.32645, 7200, 0, 0, 1, 0, 0, 0, 0, 0);
+
+-- C49871 Black Battle Worg
+-- Removing Questgiver flag and adding random movement
+UPDATE `creature_template` SET `npcflag` = 0, `MovementType` = 1 WHERE `entry` = 49871;
+-- Added random movement and set blizzlike spawn distance
+UPDATE `creature` SET `MovementType` = 1, `spawndist` = 2 WHERE `id` = 49871;
+DELETE FROM creature_questrelation WHERE id=40971;
