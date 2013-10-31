@@ -1019,3 +1019,12 @@ INSERT INTO `creature` VALUES (322647, 52608, 859, 1977, 3384, 1, 1, 0, 0, -1175
 INSERT INTO `creature` VALUES (322648, 52608, 859, 1977, 3384, 1, 1, 0, 0, -11735.1, -1471.47, 37.2874, 2.14875, 7200, 0, 0, 1, 0, 0, 0, 0, 0);
 INSERT INTO `creature` VALUES (322649, 52055, 859, 1977, 3384, 1, 1, 0, 0, -11535.5, -1257.36, 79.5052, 0, 7200, 0, 0, 1, 0, 0, 0, 0, 0);
 INSERT INTO `creature` VALUES (322650, 52417, 859, 1977, 3384, 1, 1, 0, 0, -11809.4, -1425.28, -1.1412, 2.61256, 7200, 0, 0, 1, 0, 0, 0, 0, 0);
+
+-- FIX: Draenai Start Zone,
+-- quest What must be Done id 9293 add item Lasher Sample id 22934 so you can loot to
+-- complete the quest
+UPDATE `creature_template` SET `questitem1`= 22934,`lootid` = 16517 WHERE `entry`=16517;
+DELETE FROM `creature_loot_template` WHERE `entry` = 16517 AND item =22934 ;
+INSERT INTO `creature_loot_template`(`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`)
+ VALUES
+(16517,    22934,    -100    ,1    ,0    ,1    ,1); -- Lasher Sample
