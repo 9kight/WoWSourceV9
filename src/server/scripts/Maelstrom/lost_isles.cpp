@@ -25,14 +25,14 @@
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
 
-#define SAY_D_A "Ecrouabouille, qu'est-ce que tu fais, assis la ? Tu ne reconnais pas celui qui est allonge la ?"
-#define SAY_D_B  "C'est $N ! C'est uniquement grace a $glui:elle; si nous respirons encore au lieu d'etre des bouts de couenne grilles a Kezan."
-#define SAY_D_C  "C'est $N ?! Desole, doc, je $gle croyais mort:la croyais morte; !"
-#define SAY_D_D  "Reste en arriere, je vais $gle:la; ranimer ! En esperant que ce defibrillateur detrempe ne nous tuera pas tous !"
-#define SAY_D_E  "Attention ! Degagez !"
-#define SAY_D_F "C'est tout ce que je peux faire. C''est a $glui:elle; de reagir, maintenant. Vous m'entendez, $N ? Allons, reveillez-vous ! N'allez pas vers la Lumiere !"
-#define SAY_D_G  "Vous avez fait le bon choix. Nous vous devons beaucoup, $N. Essayez de ne pas vous faire tuer par ici."
-#define SAY_D_H  "Il reste d'autres survivants dont je dois m'occuper. Je vous reverrai sur le rivage."
+#define SAY_D_A "Ecrouabouille, what are you doing sitting there? You do not recognize the one who is lying?"
+#define SAY_D_B  "That's $ N! It is only thanks to $ he: she, if we still breath instead of being pieces of rind grids has Kezan."
+#define SAY_D_C  "That's $ N! Sorry, doc, I thought $ ghe death:she death; !"
+#define SAY_D_D  "Remains back, I'm $ ghe: she; revive! Hoping that this soggy defibrillator will not kill us all!"
+#define SAY_D_E  "Caution! OFF!"
+#define SAY_D_F "That's all I can do. C'' is a $ ghe: she; to react now. You hear me, $ N? Come on, wake up now! Do not go to the Light!"
+#define SAY_D_G  "You made the right choice. We need you so much, $ N. Try not to get killed here. "
+#define SAY_D_H  "There are other survivors that I must attend. I'll see you on the shore."
 
 #define GIZMO 36600
 #define SPELL_DEAD_STILL 69010
@@ -205,7 +205,7 @@ public:
                     chariot->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                     mineur->CastSpell(chariot, 68122, true);
                     chariot->GetMotionMaster()->MoveFollow(mineur, 1.0f, 1.0f);
-                    mineur->MonsterSay("Bon allez, on y va. Vous me couvrez, d'accord ?", LANG_UNIVERSAL, 0);
+                    mineur->MonsterSay("Ok, here we go. You cover me, okay?", LANG_UNIVERSAL, 0);
                     CAST_AI(npc_escortAI, (mineur->AI()))->Start(true, true, player->GetGUID(), _Quest);
                 }
         }
@@ -234,17 +234,17 @@ public:
             switch(i)
             {
             case 6:
-                me->MonsterSay("Nous avons touche le gros lot avec cet endroit !", LANG_UNIVERSAL, 0);
+                me->MonsterSay("We touch the jackpot with this place!", LANG_UNIVERSAL, 0);
                 me->LoadEquipment(2901);
                 me->HandleEmoteCommand(467);
                 break;
             case 9:
-                me->MonsterSay("Waou, qu'est-ce que c'est que toutes ces peintures rupestres ? Oh, c'est des singes que j'entends, la ?!", LANG_UNIVERSAL, 0);
+                me->MonsterSay("Wow, what is that all these cave paintings? Oh, I hear monkeys, the?", LANG_UNIVERSAL, 0);
                 me->LoadEquipment(2901);
                 me->HandleEmoteCommand(467);
                 break;
             case 13:
-                me->MonsterSay("Passons au suivant.", LANG_UNIVERSAL, 0);
+                me->MonsterSay("Move to the next.", LANG_UNIVERSAL, 0);
                 break;
             case 12:
                 me->LoadEquipment(2901);
@@ -257,11 +257,11 @@ public:
             case 18:
                 if (Player *player = me->FindNearestPlayer(20))
                 {
-                    me->MonsterSay("Ca suffira pour l'instant. Je vais pouvoir sortir tout seul. Merci de m'avoir escorte, $N.", LANG_UNIVERSAL, player->GetGUID());
+                    me->MonsterSay("It will suffice for now. I can go it alone. Thank you for escorting me, $ N.", LANG_UNIVERSAL, player->GetGUID());
                     player->KilledMonsterCredit(35816, 0);
                 }
                 else
-                    me->MonsterSay("Ca suffira pour l'instant. Je vais pouvoir sortir tout seul. Merci de m'avoir escorte.", LANG_UNIVERSAL, 0);
+                    me->MonsterSay("It will suffice for now. I can go it alone. Thank you for escorting me, $ N.", LANG_UNIVERSAL, 0);
                 if (Creature *c = me->FindNearestCreature(35814, 10))
                     c->DespawnOrUnsummon();
                 break;
@@ -670,7 +670,7 @@ public:
     bool OnGossipHello(Player* player, Creature* creature)
     {
         if (player->GetQuestStatus(14242) != QUEST_STATUS_NONE)
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Voulez vous reprendre un gyrocoptere ?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Would you take a gyrocopter?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
         else if (creature->isQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
         player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
@@ -1286,20 +1286,20 @@ public:
 #define SPELL_CRACK_INVOK 72058
 
 // (Chef des nagas)
-#define NAGA_SAY_A "QUI OSE ?!"
-#define NAGA_SAY_B "De petits gobelins ? Je me rappelle la creation de votre race."
-#define NAGA_SAY_C "Vos menaces ne m'impressionnent pas, ni ces nagas. Preparez-vous a disparaitre de cette realite."
-#define NAGA_SAY_D  "Maintenant, jeune $N, vous allez mourir !"
+#define NAGA_SAY_A "WHO OSE?"
+#define NAGA_SAY_B "Small goblins? I remember the creation of your race."
+#define NAGA_SAY_C "Your threats do not impress me, nor the naga. Get ready to disappear from this reality."
+#define NAGA_SAY_D  "Now, young $ N, you will die!"
 //					(Crack)
 //-Quand on rend la quete d'avant
-#define QUEST_RENDER_CRACK "Je les tiens en laisse, ces petits demons, $N. Les nagas n'attaqueront jamais tant que nous avons leurs petits."
+#define QUEST_RENDER_CRACK "I want to let these little demons, $ N. Nagas will never attack until we have grandchildren."
 
 //-Quand on commence la quete
-#define QUEST_RESET_CRACK "Vous etes $gpret;prete a obliger leur chef a se rendre, $gmon pote: ma grande; ?"
+#define QUEST_RESET_CRACK "You are $ gpret, ready to force their leader to get $ gmy friend: my friend; ?"
 
 //Quand on se rend syur place
-#define CRACK_PROVOC "Allez, chef des nagas, sors de ta cachette et capitule en faveur de $N et du cartel Baille-Fonds !"
-#define CRACK_EVADE "Houla, tresor, ca sent mauvais. Moi je me taille !"
+#define CRACK_PROVOC "Come on, Chief naga, come out of your hiding and surrendered for $ N and Bilgewater Cartel!"
+#define CRACK_EVADE "Hula treasure, it smells bad. I am size!"
 
 #define NPC_CRACK 39198
 
@@ -1742,13 +1742,13 @@ public:
             {
                 case 1:
                     if (Player *player = me->FindNearestPlayer(10))
-                        chipie->MonsterSay("Accrochez-vous $N ! Il faut qu'on degage d'ici, TOUT DE SUITE !", LANG_UNIVERSAL, player->GetGUID());
+                        chipie->MonsterSay("Hang on $ N! We need makes a clearance here, NOW!", LANG_UNIVERSAL, player->GetGUID());
                     break;
                 case 4 :
-                    chipie->MonsterSay("OH MON DIEU ! DERRIERE VOUS !", LANG_UNIVERSAL, 0);
+                    chipie->MonsterSay("OH MY GOD! BEHIND YOU!", LANG_UNIVERSAL, 0);
                     break;
                 case 8:
-                    chipie->MonsterSay("ON BRULE !", LANG_UNIVERSAL, 0);
+                    chipie->MonsterSay("WE BURN !!", LANG_UNIVERSAL, 0);
                     break;
                 case 17 :
                     Creature *chipie;
@@ -1764,7 +1764,7 @@ public:
                         chipie->CastCustomSpell(VEHICLE_SPELL_RIDE_HARDCODED, SPELLVALUE_BASE_POINT0, 1, me, false);
                         me->RemoveAura(73149);
                     }
-                    chipie->MonsterSay("Montez a l'arriere. On s'en va. Je sais ou sont nos vieux amis les orcs ", LANG_UNIVERSAL, 0);
+                    chipie->MonsterSay("Climb in the back. We're going. I know where are our old friends the orcs", LANG_UNIVERSAL, 0);
                     break;
                 case 26 :
                     me->GetVehicleKit()->RemoveAllPassengers();
