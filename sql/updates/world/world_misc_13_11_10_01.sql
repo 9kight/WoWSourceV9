@@ -211,5 +211,10 @@ UPDATE `creature_template` SET `minlevel`=87, `maxlevel`=87, `exp`=3, `mindmg`=2
 -- correcting mob http://www.wowhead.com/npc=39788
 UPDATE `creature_template` SET `minlevel`=87, `maxlevel`=87, `exp`=3, `mindmg`=3019, `maxdmg`=3411, `dmg_multiplier`=5.9, `unit_flags`=0, `dynamicflags`=1, `type_flags`=0, `InhabitType`=1, `Health_mod`=8.187 WHERE `entry`=39788;
 
-
+-- Currency Reward for "Baradin Hold"
+DELETE FROM `creature_onkill_reward` WHERE creature_id IN (47120, 52363, 55869);
+INSERT INTO `creature_onkill_reward` (`creature_id`, `CurrencyId1`, `CurrencyCount1`) VALUES
+(47120, 396, 35),
+(52363, 396, 35),
+(55869, 396, 35);
 
