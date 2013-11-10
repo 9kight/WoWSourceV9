@@ -218,3 +218,13 @@ INSERT INTO `creature_onkill_reward` (`creature_id`, `CurrencyId1`, `CurrencyCou
 (52363, 396, 35),
 (55869, 396, 35);
 
+
+-- correcting mob http://www.wowhead.com/npc=39990
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `mindmg`=1019, `maxdmg`=1411, `dmg_multiplier`=5.9, `unit_flags`=0, `dynamicflags`=1, `type_flags`=0, `InhabitType`=1, `Health_mod`=4.2287, `Mana_mod`=10 WHERE `entry`=39990;
+
+
+-- correcting mob http://www.wowhead.com/npc=40817
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `mindmg`=1134, `maxdmg`=1202, `dmg_multiplier`=5.9, `unit_flags`=0, `dynamicflags`=1, `type_flags`=0, `InhabitType`=1, `Health_mod`=0.8457 WHERE `entry`=40817;
+
+-- correcting mob http://www.wowhead.com/npc=39705
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=87, `exp`=3, `mindmg`=2719, `maxdmg`=3011, `dmg_multiplier`=5.9, `unit_flags`=0, `dynamicflags`=1, `type_flags`=0, `InhabitType`=1, `Health_mod`=49.8201 WHERE `entry`=39705;
