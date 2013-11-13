@@ -851,6 +851,26 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, maxdamage);
                     break;
                 }
+				// Todo, (Blizzlike Code needed here).
+				case 57220:
+				case 58077:
+				{
+					SetCreateHealth(m_owner->GetMaxHealth() / 3.5);
+					float mindamage, maxdamage;
+                    m_owner->ToPlayer()->CalculateMinMaxDamage(BASE_ATTACK, false, false, mindamage, maxdamage);
+                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, GetWeaponDamageRange(BASE_ATTACK, MINDAMAGE) + (m_owner->GetTotalAttackPowerValue(BASE_ATTACK) / 1.5));
+                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, GetWeaponDamageRange(BASE_ATTACK, MAXDAMAGE) + (m_owner->GetTotalAttackPowerValue(BASE_ATTACK) / 1.5));
+				}
+				break;
+				case 58078: 
+				{
+					SetCreateHealth(m_owner->GetMaxHealth() / 2.8);
+					float mindamage, maxdamage;
+                    m_owner->ToPlayer()->CalculateMinMaxDamage(BASE_ATTACK, false, false, mindamage, maxdamage);
+                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, GetWeaponDamageRange(BASE_ATTACK, MINDAMAGE) + (m_owner->GetTotalAttackPowerValue(BASE_ATTACK)));
+                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, GetWeaponDamageRange(BASE_ATTACK, MAXDAMAGE) + (m_owner->GetTotalAttackPowerValue(BASE_ATTACK)));
+				}
+				break;
                 case 1964: //force of nature
                 {
                     if (!pInfo)
