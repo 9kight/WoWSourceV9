@@ -14730,9 +14730,9 @@ void Player::OnGossipSelect(WorldObject* source, uint32 gossipListId, uint32 men
         case GOSSIP_OPTION_ARMORER:
             GetSession()->SendListInventory(guid);
             break;
-        /*case GOSSIP_OPTION_STABLEPET:
+        case GOSSIP_OPTION_STABLEPET:
             GetSession()->SendStablePet(guid);
-            break;*/
+            break;
         case GOSSIP_OPTION_TRAINER:
             GetSession()->SendTrainerList(guid);
             break;
