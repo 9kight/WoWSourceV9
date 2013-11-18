@@ -287,6 +287,34 @@ class spell_branch_of_nordrassil_summon : public SpellScriptLoader
         }
 };
 
+class mob_fl_teleport : public CreatureScript
+{
+public:
+    mob_fl_teleport() : CreatureScript("mob_fl_teleport") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new mob_fl_teleportAI (creature);
+    }
+
+    struct mob_fl_teleportAI : public ScriptedAI
+    {
+        mob_fl_teleportAI(Creature* creature) : ScriptedAI(creature) { }
+
+        void MoveInLineOfSight(Unit* who)
+        {
+            if (!who)
+                return;
+
+            if (!who->ToPlayer())
+                return;
+            
+            if (me->GetExactDist(who) <= 17.0f) // we use here not GetExactDist2d because player fly also into the FL portal
+                who->ToPlayer()->TeleportTo(720, -542.885f, 316.925f, 115.493f, 5.947003f);
+        }
+    };
+};
+
 void AddSC_firelands()
 {
 //    new npc_branch_of_nordrassil(); // Soon phase 2
@@ -294,4 +322,5 @@ void AddSC_firelands()
     new npc_burning_treant();
     new npc_tormented_protector();
     new spell_branch_of_nordrassil_summon();
+    new mob_fl_teleport();
 }
