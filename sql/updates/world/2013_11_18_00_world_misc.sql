@@ -7,3 +7,7 @@ INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entr
 DELETE FROM `creature` WHERE `guid` = 400484;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zone`, `area`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (400484, 111222, 1, 616, 5039, 1, 1, 0, 0, 3979.3, -2925.86, 1017.43, 2.00316, 300, 0, 0, 273, 0, 0, 0, 33554432, 0);
+
+DELETE FROM `areatrigger_teleport` WHERE `id` = 6866;
+INSERT INTO `areatrigger_teleport` (`id`, `name`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
+(6866, 'Firelands (Exit)', 1, 3987.92, -2945.83, 1002.55, 5.11593);
