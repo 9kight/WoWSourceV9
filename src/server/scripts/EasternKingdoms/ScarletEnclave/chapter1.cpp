@@ -319,24 +319,25 @@ public:
 
 enum EyeOfAcherus
 {
-    DISPLAYID_EYE_HUGE          = 26320, // Big Blue
-    DISPLAYID_EYE_SMALL         = 25499, // Little green
+    DISPLAYID_EYE_HUGE          = 26320,
+    DISPLAYID_EYE_SMALL         = 25499,
 
     SPELL_EYE_PHASEMASK         = 70889,
     SPELL_EYE_VISUAL            = 51892,
-    SPELL_EYE_FL_BOOST_RUN      = 51923, // Flight boost to reach new avalon
-    SPELL_EYE_FL_BOOST_FLY      = 51890, // Player flight control
-    SPELL_EYE_CONTROL           = 51852, // Player control aura
+    SPELL_EYE_FL_BOOST_RUN      = 51923,
+    SPELL_EYE_FL_BOOST_FLY      = 51890,
+    SPELL_EYE_CONTROL           = 51852,
+};
 
-    POINT_EYE_DESTINATION       = 1,
-
-    EMOTE_DESTINATION           = -1609017,
-    EMOTE_CONTROL               = -1609018
+enum Texts
+{
+    SAY_EYE_LAUNCHED            = 1,
+    SAY_EYE_UNDER_CONTROL       = 2,
 };
 
 static Position Center[]=
 {
-    { 2361.21f, -5660.45f, 496.7444f, 0.0f },
+    {2346.550049f, -5694.430176f, 426.029999f, 0.0f},
 };
 
 class npc_eye_of_acherus : public CreatureScript
@@ -362,26 +363,25 @@ public:
         void Reset()
         {
             if (Unit* controller = me->GetCharmer())
-                me->SetLevel(controller->getLevel());
-                me->CastSpell(me, SPELL_EYE_FL_BOOST_FLY, true);                
-                
-                me->SetDisplayId(DISPLAYID_EYE_HUGE);
-                me->SetHomePosition(2361.21f, -5660.45f, 496.7444f, 0);
-                me->GetMotionMaster()->MoveCharge(2361.21f, -5660.45f, 496.7444f, 0.0f); // Position center                
-                if (Player* player = me->GetCharmerOrOwnerPlayerOrPlayerItself())
-                Talk(EMOTE_DESTINATION);
-                
-                me->SetReactState(REACT_AGGRESSIVE);
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED);
+            me->SetLevel(controller->getLevel());
 
-            IsActive   = false;
-            startTimer = 4500; // Increased startTimer for testing (orig.2000)
+            me->CastSpell(me, SPELL_EYE_FL_BOOST_FLY, true);
+            me->SetDisplayId(DISPLAYID_EYE_HUGE);
+            Talk(SAY_EYE_LAUNCHED);
+            me->SetSpeed(MOVE_FLIGHT, 3.4f, true);
+            me->SetHomePosition(2363.970589f, -5659.861328f, 504.316833f, 0);
+            me->GetMotionMaster()->MoveCharge(1752.858276f, -5878.270996f, 145.136444f, 0); //position center
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED);
+
+            IsActive = false;
+            startTimer = 2000;
         }
 
         void AttackStart(Unit *) {}
         void MoveInLineOfSight(Unit *) {}
 
-        void JustDied(Unit* /*who*/)
+        void JustDied(Unit* /*killer*/)
         {
             if (Unit* charmer = me->GetCharmer())
                charmer->RemoveAurasDueToSpell(SPELL_EYE_CONTROL);
@@ -391,38 +391,38 @@ public:
         {
             if (me->isCharmed())
             {
-                if (startTimer <= diff && !IsActive)    // Summon to start point
+                if (startTimer <=  diff && !IsActive)    // fly to start point
                 {
                     me->CastSpell(me, SPELL_EYE_PHASEMASK, true);
                     me->CastSpell(me, SPELL_EYE_VISUAL, true);
                     me->CastSpell(me, SPELL_EYE_FL_BOOST_FLY, true);
 
                     me->CastSpell(me, SPELL_EYE_FL_BOOST_RUN, true);
-                    me->SetSpeed(MOVE_FLIGHT, 6.5f, true); // 6.5spd by sniffs, much to fast.
-
-                    me->GetMotionMaster()->MovePoint(0, 1758.0f, -5876.7f, 166.8f); // Travel to end point.
+                    me->SetSpeed(MOVE_FLIGHT, 3.4f, true);
+                    me->GetMotionMaster()->MovePoint(0, 1711.0f, -5820.0f, 147.0f);
                     return;
                 }
                 else
-                    startTimer -= diff;
+                startTimer -= diff;
             }
             else
-                me->DespawnOrUnsummon();
+            me->DespawnOrUnsummon();
         }
 
-        void MovementInform(uint32 type, uint32 id)
+        void MovementInform(uint32 type, uint32 pointId)
         {
-            if (type != POINT_MOTION_TYPE || id != POINT_EYE_DESTINATION)
+            if (type != POINT_MOTION_TYPE || pointId != 0)
                return;
 
-            // This should never happen
+            // I think the green morph is not blizzlike...
             me->SetDisplayId(DISPLAYID_EYE_SMALL);
 
-            // This spell does not work if casted before the wp movement.
+            // for some reason it does not work when this spell is casted before the waypoint movement
             me->CastSpell(me, SPELL_EYE_VISUAL, true);
             me->CastSpell(me, SPELL_EYE_FL_BOOST_FLY, true);
+            Talk(SAY_EYE_UNDER_CONTROL);
             ((Player*)(me->GetCharmer()))->SetClientControl(me, 1);
-            Talk(EMOTE_CONTROL); 
+            me->SetSpeed(MOVE_FLIGHT, 3.4f, true);
         }
     };
 };
