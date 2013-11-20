@@ -1878,7 +1878,7 @@ class spell_dru_swift_flight_passive : public SpellScriptLoader
             {
                 if (Player* caster = GetCaster()->ToPlayer())
                     if (caster->GetSkillValue(SKILL_RIDING) >= 375)
-                        amount = 620;
+                        amount = 310;
             }
 
             void Register()
