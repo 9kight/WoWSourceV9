@@ -173,10 +173,8 @@ void WorldSession::HandleLfgLeaveOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleLfgProposalResultOpcode(WorldPacket& recvData)
 {
-    uint32 lfgGroupID;                                     // Internal lfgGroupID
     bool accept;                                           // Accept to join?
 
-    uint32 roles;
     uint32 ProposalID;
     recvData >> ProposalID;
     recvData.read_skip<uint32>();
