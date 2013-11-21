@@ -88,7 +88,7 @@ class boss_occuthar : public CreatureScript
                 me->SummonCreature(NPC_FOCUSED_FIRE_DUMMY, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim() || !CheckInRoom())
                     return;
@@ -147,7 +147,7 @@ class npc_eye_of_occuthar : public CreatureScript
                 events.ScheduleEvent(EVENT_GAZE_OF_OCCUTHAR, 8000);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim() || !CheckInRoom())
                     return;
@@ -196,7 +196,7 @@ class npc_focused_fire_dummy : public CreatureScript
                 events.ScheduleEvent(EVENT_AOE, 1000);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim() || !CheckInRoom())
                     return;

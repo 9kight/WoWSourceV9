@@ -104,7 +104,7 @@ class boss_chogall : public CreatureScript
                 summons.DespawnAll();
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim())
                     return;
@@ -212,7 +212,7 @@ class npc_corrupting_adherent : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim())
                     return;

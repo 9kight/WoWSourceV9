@@ -354,7 +354,7 @@ class boss_halfus_wyrmbreaker : public CreatureScript
             return true;
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (initTimer)
             {
@@ -457,7 +457,7 @@ class npc_proto_behemoth : public CreatureScript
                 DoCast(me, SPELL_SUPERHEATED_BREATH, true);
         }
 
-        void DoAction(int32 action)
+        void DoAction(int32 const action)
         {
             if (action == ACTION_ENABLE_BLAST)
             {
@@ -482,7 +482,7 @@ class npc_proto_behemoth : public CreatureScript
                 events.ScheduleEvent(EVENT_SCORCHING_BLAST, urand(10000, 12000));
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;

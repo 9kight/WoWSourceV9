@@ -131,7 +131,7 @@ class boss_alizabal : public CreatureScript
                 //_DespawnAtEvade();
             }
 
-            void DoAction(int32 action)
+            void DoAction(int32 const action)
             {
                 switch (action)
                 {
@@ -155,7 +155,7 @@ class boss_alizabal : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim())
                     return;
