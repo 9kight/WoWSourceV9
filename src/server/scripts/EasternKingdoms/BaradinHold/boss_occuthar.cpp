@@ -137,7 +137,7 @@ class npc_eye_of_occuthar : public CreatureScript
             {
             }
 
-            void reset()
+            void Reset()
             {
                 events.ScheduleEvent(EVENT_GAZE_OF_OCCUTHAR, 8000);
             }
