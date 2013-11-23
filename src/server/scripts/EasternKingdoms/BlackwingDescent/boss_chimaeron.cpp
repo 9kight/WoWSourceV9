@@ -38,7 +38,7 @@ enum Events
 enum Misc
 {
     DATA_BOT_GUID,
-    PATH_BILE_O_TRON            = 4441800,
+    PATH_BILE_O_TRON            = 401533,
     ACTION_START_COMBAT         = 1,
     ACTION_DEATH,
     ACTION_FEUD,
