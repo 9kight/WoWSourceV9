@@ -60,7 +60,7 @@ enum CreatureIds
     NPC_YOUNG_STORM_DRAGON      = 45919,
     NPC_WILD_VORTEX             = 45912,
     NPC_SLIPSTREAM              = 45455,
-    NPC_SLIPSTREAM_TWO          = 80043,
+    NPC_SLIPSTREAM_TWO          = 45457,
     NPC_SKYFALL                 = 52019,
 
     // Boss' encounter related NPCs
