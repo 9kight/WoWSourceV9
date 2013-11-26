@@ -61,8 +61,6 @@ enum eSpells
     SPELL_CLEAVE               = 30619,
     SPELL_QUAKE_TRIGGER        = 30657, //must be cast with 30561 as the proc spell
     SPELL_QUAKE_KNOCKBACK      = 30571,
-    SPELL_BLAZE_TARGET         = 30541,
-    SPELL_BLAZE_TRAP           = 30542,
     SPELL_DEBRIS_KNOCKDOWN     = 36449,
     SPELL_DEBRIS_VISUAL        = 30632,
     SPELL_DEBRIS_DAMAGE        = 30631, //core bug, does not support target 8
@@ -111,16 +109,6 @@ class mob_abyssal : public CreatureScript
             void Reset()
             {
                 FireBlast_Timer = 6000;
-            }
-
-            void SpellHit(Unit*, const SpellInfo* spell)
-            {
-                if (trigger == 2 && spell->Id == SPELL_BLAZE_TARGET)
-                {
-                    DoCast(me, SPELL_BLAZE_TRAP, true);
-                    me->SetVisible(false);
-                    Despawn_Timer = 130000;
-                }
             }
 
             void SetTrigger(uint32 _trigger)
@@ -398,25 +386,6 @@ class boss_magtheridon : public CreatureScript
                 }
                 else
                     Quake_Timer -= diff;
-
-                if (Blaze_Timer <= diff)
-                {
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                    {
-                        float x, y, z;
-                        target->GetPosition(x, y, z);
-                        Creature* summon = me->SummonCreature(MOB_ABYSSAL, x, y, z, 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
-                        if (summon)
-                        {
-                            CAST_AI(mob_abyssal::mob_abyssalAI, summon->AI())->SetTrigger(2);
-                            DoCast(summon, SPELL_BLAZE_TARGET, true);
-                            summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                        }
-                    }
-                    Blaze_Timer = urand(20000, 40000);
-                }
-                else
-                    Blaze_Timer -= diff;
 
                 if (!Phase3 && HealthBelowPct(30)
                     && !me->IsNonMeleeSpellCasted(false) // blast nova
