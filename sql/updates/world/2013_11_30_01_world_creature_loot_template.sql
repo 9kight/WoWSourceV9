@@ -53,7 +53,7 @@ INSERT INTO `reference_loot_template` VALUES ('58004', '55271', '0', '1', '1', '
 INSERT INTO `reference_loot_template` VALUES ('58004', '55272', '0', '1', '1', '1', '1');
 INSERT INTO `reference_loot_template` VALUES ('58004', '55270', '0', '1', '1', '1', '1');
 INSERT INTO `reference_loot_template` VALUES ('58004', '55269', '0', '1', '1', '1', '1');
-INSERT INTO `reference_loot_template` VALUES ('58004', '71368', '0', '1', '1', '1', '1');
+INSERT INTO `reference_loot_template` VALUES ('58004', '71638', '0', '1', '1', '1', '1');
 
 DELETE FROM `creature_loot_template` WHERE `entry`='39699';
 INSERT INTO `creature_loot_template` VALUES ('39699', '1', '100', '1', '0', '-58005', '2');
