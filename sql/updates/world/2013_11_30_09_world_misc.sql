@@ -9,7 +9,6 @@ INSERT INTO `npc_vendor` VALUES ('42853', '4', '2320', '0', '0', '0', '1');
 INSERT INTO `npc_vendor` VALUES ('42853', '5', '6217', '0', '0', '0', '1');
 INSERT INTO `npc_vendor` VALUES ('42853', '6', '3371', '0', '0', '0', '1');
 INSERT INTO `npc_vendor` VALUES ('42853', '7', '6256', '0', '0', '0', '1');
-INSERT INTO `npc_vendor` VALUES ('42853', '8', '85663', '0', '0', '0', '1');
 INSERT INTO `npc_vendor` VALUES ('42853', '9', '20815', '0', '0', '0', '1');
 INSERT INTO `npc_vendor` VALUES ('42853', '10', '39354', '0', '0', '0', '1');
 INSERT INTO `npc_vendor` VALUES ('42853', '11', '2678', '0', '0', '0', '1');
