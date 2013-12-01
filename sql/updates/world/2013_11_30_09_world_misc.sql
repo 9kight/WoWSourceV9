@@ -1,6 +1,5 @@
 Update `creature_template` set `npcflag`=3 where `entry`=38738;
 Update `creature_template` set `npcflag`=7 where `entry`=49476;
-INSERT INTO `trinity_string` (`entry`, `content_default`, `content_loc1`, `content_loc2`, `content_loc3`, `content_loc4`, `content_loc5`, `content_loc6`, `content_loc7`, `content_loc8`) VALUES ('106', 'You can not go to player %s from instance to instance.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 DELETE FROM `npc_vendor` WHERE entry='42853';
 INSERT INTO `npc_vendor` VALUES ('42853', '0', '5956', '0', '0', '0', '1');
 INSERT INTO `npc_vendor` VALUES ('42853', '1', '2324', '0', '0', '0', '1');
