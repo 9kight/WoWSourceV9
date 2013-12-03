@@ -1,0 +1,1 @@
+Update `gameobject` set `spawnmask`=15 where `id`=207415;
