@@ -3008,6 +3008,9 @@ void SpellMgr::LoadSpellCustomAttr()
             case 61288:  // Minor Inscription Research
                 spellInfo->RecoveryTime = (1*24) * 60 * 60 * 1000; // 24 Hours Cooldown
                 break;
+            case 1856: // Vanish - Rogue
+                spellInfo->Effects[0].Effect = SPELL_EFFECT_SANCTUARY;
+                break;
             default:
                 break;
         }
