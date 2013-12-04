@@ -124,8 +124,6 @@ public:
             summons.DespawnAll();
             me->SetHover(false);
 
-            Creature * Slipstream = me->SummonCreature(NPC_SLIPSTREAM_TWO, -1198.95f, 106.13f, 743.16f, 1.2f, TEMPSUMMON_CORPSE_DESPAWN, 0);
-            Slipstream->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
         }
 
         void UpdateAI(uint32 const diff)
