@@ -58,7 +58,7 @@ enum Enums
     SAY_FAREWELL                  = 5,
     SAY_ATTACKED                  = 11,
 
-    SPELL_MARK_OF_THE_WILD_RANK_2 = 5232,
+    SPELL_MARK_OF_THE_WILD_RANK_2 = 79833,
     SPELL_SERPENTINE_CLEANSING    = 6270,
     SPELL_NARALEXS_AWAKENING      = 6271,
     SPELL_FLIGHT_FORM             = 33943,
