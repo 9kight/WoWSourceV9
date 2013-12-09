@@ -620,9 +620,6 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
         case SPELLFAMILY_MAGE:
             switch (m_spellInfo->Id)
             {
-                case 55342: // Mirror Images
-                    m_caster->CastSpell(m_caster, 58832, true);
-                    break;
                 case 82731: // Flame orb
                     m_caster->CastSpell(m_caster, 84765, true);
                     break;
