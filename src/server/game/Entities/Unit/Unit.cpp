@@ -8206,6 +8206,12 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 /*damage*/, Aura* triggeredByAura
                     CastCustomSpell(this, 70845, &basepoints0, NULL, NULL, true);
                     break;
                 }
+                // Item - Warrior T12 DPS 2P Bonus
+                case 99234:
+                {
+                    CastSpell(this, 99233, true);
+                    break;
+                }
                 // Recklessness
                 case 1719:
                 {
