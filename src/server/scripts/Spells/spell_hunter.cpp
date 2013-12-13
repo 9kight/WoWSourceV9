@@ -50,6 +50,8 @@ enum HunterSpells
     SPELL_DRAENEI_GIFT_OF_THE_NAARU                 = 59543,
     SPELL_HUNTER_KILL_COMMAND_CRIT_10               = 60110,
     SPELL_HUNTER_KILL_COMMAND_CRIT_20               = 60113,
+    SPELL_HUNTER_STEADY_SHOT                        = 56641,
+	SPELL_HUNTER_IMPROVED_STEADY_SHOT               = 53220,
     SPELL_HUNTER_FOCUSED_FIRE_1                     = 35029,
     SPELL_HUNTER_FOCUSED_FIRE_2                     = 35030
 };
@@ -1875,6 +1877,52 @@ class spell_hun_concussive: public SpellScriptLoader
             return new spell_hun_concussive_SpellScript();
         }
 };
+class spell_hun_improved_steady_shot : public SpellScriptLoader
+{
+    public:
+        spell_hun_improved_steady_shot() : SpellScriptLoader("spell_hun_improved_steady_shot") { }
+
+        class spell_hun_improved_steady_shot_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_hun_improved_steady_shot_AuraScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_HUNTER_IMPROVED_STEADY_SHOT))
+                    return false;
+                return true;
+            }
+
+            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+            {
+                PreventDefaultAction();
+                int32 basepoint = aurEff->GetAmount();
+
+                if (eventInfo.GetDamageInfo()->GetSpellInfo()->Id == SPELL_HUNTER_STEADY_SHOT)
+                {
+                    aurEff->GetBase()->SetCharges(aurEff->GetBase()->GetCharges() + 1);
+
+                    if (aurEff->GetBase()->GetCharges() == 2)
+                    {
+                        GetTarget()->CastCustomSpell(GetTarget(), SPELL_HUNTER_IMPROVED_STEADY_SHOT, &basepoint, NULL, NULL, true, NULL, aurEff);
+                        aurEff->GetBase()->SetCharges(0);
+                    }
+                }
+                else
+                    aurEff->GetBase()->SetCharges(0);
+            }
+
+            void Register()
+            {
+                OnEffectProc += AuraEffectProcFn(spell_hun_improved_steady_shot_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_hun_improved_steady_shot_AuraScript();
+        }
+};
 
 void AddSC_hunter_spell_scripts()
 {
@@ -1915,4 +1963,5 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_pet_damage_spells();
     new spell_hun_pet_spirit_mend();
     new spell_hun_mend_pet();
+    new spell_hun_improved_steady_shot();
 }
