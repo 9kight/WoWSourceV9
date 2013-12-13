@@ -83,6 +83,7 @@ enum MageSpells
     SPELL_MAGE_SUMMON_IMAGES_FROST               = 58832,
     SPELL_MAGE_SUMMON_IMAGES_FIRE                = 88092,
     SPELL_MAGE_SUMMON_IMAGES_ARCANE              = 88091,
+    SPELL_MAGE_SLOW                              = 31589,
 };
 
 enum MageIcons
@@ -1779,6 +1780,51 @@ class spell_mage_mirror_image : public SpellScriptLoader
             return new spell_mage_mirror_image_SpellScript();
         }
 };
+// 86181 - Nether Vortex
+class spell_mage_nether_vortex : public SpellScriptLoader
+{
+    public:
+        spell_mage_nether_vortex() : SpellScriptLoader("spell_mage_nether_vortex") { }
+
+        class spell_mage_nether_vortex_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_mage_nether_vortex_AuraScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_SLOW))
+                    return false;
+               return true;
+            }
+
+            bool DoCheck(ProcEventInfo& eventInfo)
+            {
+                if (Aura* aura = eventInfo.GetProcTarget()->GetAura(SPELL_MAGE_SLOW))
+                    if (aura->GetCasterGUID() != GetTarget()->GetGUID())
+                        return false;
+
+                return true;
+            }
+
+            void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+            {
+                PreventDefaultAction();
+                GetTarget()->CastSpell(eventInfo.GetProcTarget(), SPELL_MAGE_SLOW, true, NULL, aurEff);
+            }
+
+            void Register()
+            {
+                DoCheckProc += AuraCheckProcFn(spell_mage_nether_vortex_AuraScript::DoCheck);
+                OnEffectProc += AuraEffectProcFn(spell_mage_nether_vortex_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_mage_nether_vortex_AuraScript();
+        }
+};
+ 
 
 void AddSC_mage_spell_scripts()
 {
@@ -1813,4 +1859,5 @@ void AddSC_mage_spell_scripts()
     new spell_mage_pet_scaling_05();
     new spell_mage_icy_veins();
     new spell_mage_mirror_image();
+    new spell_mage_nether_vortex();
 }
