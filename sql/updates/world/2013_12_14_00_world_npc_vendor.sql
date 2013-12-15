@@ -1,10 +1,19 @@
--- fix vendor Edlan Halsing <Honor Trade Goods>
-DELETE FROM `npc_vendor` WHERE `entry`='52029';
-INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `ExtendedCost`) VALUES ('52029', '1', '52722', '3750');
-INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `ExtendedCost`) VALUES ('52029', '1', '52721', '600');
-INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `ExtendedCost`) VALUES ('52029', '2', '68813', '1500');
-INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `ExtendedCost`) VALUES ('52029', '3', '52719', '400');
-INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `ExtendedCost`) VALUES ('52029', '4', '52185', '1000');
-INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `ExtendedCost`) VALUES ('52029', '5', '53010', '1250');
-INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `ExtendedCost`) VALUES ('52029', '6', '52555', '100');
-INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `ExtendedCost`) VALUES ('52029', '7', '52976', '375');
+DELETE FROM npc_vendor WHERE entry=52033;
+INSERT INTO `npc_vendor` VALUES (52033, 7, 52185, 0, 0, 3342, 1);
+INSERT INTO `npc_vendor` VALUES (52033, 0, 52555, 0, 0, 3338, 1);
+INSERT INTO `npc_vendor` VALUES (52033, 3, 52719, 0, 0, 3339, 1);
+INSERT INTO `npc_vendor` VALUES (52033, 4, 52721, 0, 0, 3340, 1);
+INSERT INTO `npc_vendor` VALUES (52033, 0, 52722, 0, 0, 3407, 1);
+INSERT INTO `npc_vendor` VALUES (52033, 0, 52976, 0, 0, 3341, 1);
+INSERT INTO `npc_vendor` VALUES (52033, 0, 53010, 0, 0, 3344, 1);
+INSERT INTO `npc_vendor` VALUES (52033, 0, 68813, 0, 0, 3343, 1);
+
+DELETE FROM npc_vendor WHERE entry=52029;
+INSERT INTO `npc_vendor` VALUES (52029, 7, 52185, 0, 0, 3342, 1);
+INSERT INTO `npc_vendor` VALUES (52029, 0, 52555, 0, 0, 3338, 1);
+INSERT INTO `npc_vendor` VALUES (52029, 3, 52719, 0, 0, 3339, 1);
+INSERT INTO `npc_vendor` VALUES (52029, 4, 52721, 0, 0, 3340, 1);
+INSERT INTO `npc_vendor` VALUES (52029, 0, 52722, 0, 0, 3407, 1);
+INSERT INTO `npc_vendor` VALUES (52029, 0, 52976, 0, 0, 3341, 1);
+INSERT INTO `npc_vendor` VALUES (52029, 0, 53010, 0, 0, 3344, 1);
+INSERT INTO `npc_vendor` VALUES (52029, 0, 68813, 0, 0, 3343, 1);
