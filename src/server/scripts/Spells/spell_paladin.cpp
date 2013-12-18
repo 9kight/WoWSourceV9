@@ -67,7 +67,7 @@ enum PaladinSpells
 };
 
 // 31850 - Ardent Defender
-/*class spell_pal_ardent_defender : public SpellScriptLoader
+class spell_pal_ardent_defender : public SpellScriptLoader
 {
     public:
         spell_pal_ardent_defender() : SpellScriptLoader("spell_pal_ardent_defender") { }
@@ -98,34 +98,23 @@ enum PaladinSpells
 
             void Absorb(AuraEffect* aurEff, DamageInfo & dmgInfo, uint32 & absorbAmount)
             {
-                Unit* victim = GetTarget();
-                int32 remainingHealth = victim->GetHealth() - dmgInfo.GetDamage();
-                uint32 allowedHealth = victim->CountPctFromMaxHealth(35);
-                // If damage kills us
-                if (remainingHealth <= 0 && !victim->ToPlayer()->HasSpellCooldown(PAL_SPELL_ARDENT_DEFENDER_HEAL))
+                if(Unit* victim = GetTarget())
                 {
-                    // Cast healing spell, completely avoid damage
-                    absorbAmount = dmgInfo.GetDamage();
+                    uint32 allowedHealth = victim->CountPctFromMaxHealth(100);
+                    int32 remainingHealth = victim->GetHealth() - dmgInfo.GetDamage();
 
-                    uint32 defenseSkillValue = victim->GetDefenseSkillValue();
-                    // Max heal when defense skill denies critical hits from raid bosses
-                    // Formula: max defense at level + 140 (raiting from gear)
-                    uint32 reqDefForMaxHeal  = victim->getLevel() * 5 + 140;
-                    float pctFromDefense = (defenseSkillValue >= reqDefForMaxHeal)
-                        ? 1.0f
-                        : float(defenseSkillValue) / float(reqDefForMaxHeal);
-
-                    int32 healAmount = int32(victim->CountPctFromMaxHealth(uint32(healPct * pctFromDefense)));
-                    victim->CastCustomSpell(victim, PAL_SPELL_ARDENT_DEFENDER_HEAL, &healAmount, NULL, NULL, true, NULL, aurEff);
-                    victim->ToPlayer()->AddSpellCooldown(PAL_SPELL_ARDENT_DEFENDER_HEAL, 0, time(NULL) + 120);
-                }
-                else if (remainingHealth < int32(allowedHealth))
-                {
-                    // Reduce damage that brings us under 35% (or full damage if we are already under 35%) by x%
-                    uint32 damageToReduce = (victim->GetHealth() < allowedHealth)
-                        ? dmgInfo.GetDamage()
-                        : allowedHealth - remainingHealth;
-                    absorbAmount = CalculatePct(damageToReduce, absorbPct);
+                    if (remainingHealth <= 0 && !victim->ToPlayer()->HasSpellCooldown(PAL_SPELL_ARDENT_DEFENDER_HEAL))
+                    {
+                        int32 healAmount = int32(victim->CountPctFromMaxHealth(15));
+                        victim->CastCustomSpell(victim, PAL_SPELL_ARDENT_DEFENDER_HEAL, &healAmount, NULL, NULL, true, NULL, aurEff);
+                    }
+                    else
+                    {
+                        uint32 damageToReduce = (victim->GetHealth() <= allowedHealth)
+                            ? dmgInfo.GetDamage()
+                            : allowedHealth - remainingHealth;
+                        absorbAmount = CalculatePct(damageToReduce, absorbPct);
+                    }
                 }
             }
 
@@ -140,7 +129,7 @@ enum PaladinSpells
         {
             return new spell_pal_ardent_defender_AuraScript();
         }
-};*/
+};
 
 // 37877 - Blessing of Faith
 class spell_pal_blessing_of_faith : public SpellScriptLoader
@@ -1502,7 +1491,7 @@ class spell_pal_sacred_shield : public SpellScriptLoader
 
 void AddSC_paladin_spell_scripts()
 {
-    //new spell_pal_ardent_defender();
+    new spell_pal_ardent_defender();
     new spell_pal_blessing_of_faith();
     new spell_pal_blessing_of_sanctuary();
     new spell_pal_divine_sacrifice();
