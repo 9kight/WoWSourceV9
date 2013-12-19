@@ -379,6 +379,19 @@ class spell_mage_orb_filter : public SpellScriptLoader
                         else
                             caster->CastSpell(target, 95969, true, NULL, NULL, caster->GetOwnerGUID());
                     }
+                    
+                    // (Stealth Check) Removing Stealth if at range.
+                    if (target->HasAura(1784)) 
+						target->RemoveAura(1784);
+						
+					if (target->HasAura(5215))
+						target->RemoveAura(5215);
+						
+					if(target->HasAura(32612))
+					    target->RemoveAura(32612);
+
+
+                    
                     caster->AddSpellCooldown(GetSpellInfo()->Id, 0, time(NULL) + GetSpellInfo()->Effects[EFFECT_0].BasePoints / 1000);
                     caster->CastSpell(target, 86719, true);
                     if (!caster->HasAura(82736))
