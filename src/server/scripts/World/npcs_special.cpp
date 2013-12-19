@@ -2404,32 +2404,52 @@ public:
 /*######
 # npc_shadowfiend
 ######*/
-#define GLYPH_OF_SHADOWFIEND_MANA         58227
-#define GLYPH_OF_SHADOWFIEND              58228
-
-class npc_shadowfiend : public CreatureScript
+enum Shadowfiend
 {
-    public:
-        npc_shadowfiend() : CreatureScript("npc_shadowfiend") { }
-
-        struct npc_shadowfiendAI : public PetAI
-        {
-            npc_shadowfiendAI(Creature* creature) : PetAI(creature) {}
-
-            void JustDied(Unit* /*killer*/)
-            {
-                if (me->isSummon())
-                    if (Unit* owner = me->ToTempSummon()->GetSummoner())
-                        if (owner->HasAura(GLYPH_OF_SHADOWFIEND))
-                            owner->CastSpell(owner, GLYPH_OF_SHADOWFIEND_MANA, true);
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_shadowfiendAI(creature);
-        }
+    MANA_LEECH                       = 28305,
+    GLYPH_OF_SHADOWFIEND_MANA        = 58227,
+    GLYPH_OF_SHADOWFIEND             = 58228
 };
+
+ class npc_shadowfiend : public CreatureScript
+ {
+public:
+    npc_shadowfiend() : CreatureScript("npc_shadowfiend") { }
+
+    struct npc_shadowfiendAI : public ScriptedAI
+    {
+        npc_shadowfiendAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void Reset()
+         {
+            if (me->isSummon())
+                if (Unit* owner = me->ToTempSummon()->GetSummoner())
+                    if (Unit* pet = owner->GetGuardianPet())
+                        pet->CastSpell(pet, MANA_LEECH, true);
+		}
+		
+        void DamageTaken(Unit* /*killer*/, uint32& damage)
+        {
+            if (me->isSummon())
+                if (Unit* owner = me->ToTempSummon()->GetSummoner())
+                    if (owner->HasAura(GLYPH_OF_SHADOWFIEND) && damage >= me->GetHealth())
+                        owner->CastSpell(owner, GLYPH_OF_SHADOWFIEND_MANA, true);
+        }
+
+        void UpdateAI_MANA_LEECH(uint32 const /*diff*/)
+         {
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_shadowfiendAI(creature);
+    }
+ };
 
 /*######
 # npc_fire_elemental
