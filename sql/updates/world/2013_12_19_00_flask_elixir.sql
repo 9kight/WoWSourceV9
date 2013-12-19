@@ -7,3 +7,4 @@ INSERT INTO `spell_script_names` VALUES
 DELETE FROM `spell_script_names` WHERE ScriptName = "Grounded_Plasma_Shield";
 INSERT INTO `spell_script_names`  VALUES
 (82626,"Grounded_Plasma_Shield");
+
