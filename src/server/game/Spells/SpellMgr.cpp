@@ -3011,6 +3011,16 @@ void SpellMgr::LoadSpellCustomAttr()
             case 1856: // Vanish - Rogue
                 spellInfo->Effects[0].Effect = SPELL_EFFECT_SANCTUARY;
                 break;
+            // Immolation Trap
+            case 13795:
+            // Explosive Trap
+            case 13813:
+                spellInfo->Effects[0].Effect = SPELL_EFFECT_SUMMON_OBJECT_SLOT3;
+                break;
+            // Snake Trap
+            case 34600:
+                spellInfo->Effects[0].Effect = SPELL_EFFECT_SUMMON_OBJECT_SLOT4;
+                break;
             default:
                 break;
         }
