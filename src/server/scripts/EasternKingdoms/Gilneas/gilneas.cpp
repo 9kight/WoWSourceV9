@@ -2360,7 +2360,7 @@ public:
 
             if (krennansay <=diff)
             {
-                if (Creature *krennan = me->FindNearestCreature(3871227, 30, true))
+                if (Creature *krennan = me->FindNearestCreature(300693, 30, true))
                     krennansay = urand(4000,7000);
             }
             else
@@ -2566,7 +2566,7 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if (Creature *krennan = me->FindNearestCreature(3871227, 50))
+            if (Creature *krennan = me->FindNearestCreature(300693, 50))
                 if (!KrennanDead)
                 {
                     krennan->DespawnOrUnsummon();
