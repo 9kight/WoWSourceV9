@@ -1920,9 +1920,9 @@ Rate.Reputation.RecruitAFriendBonus = 0.1
 #
 #    Rate.MoveSpeed
 #        Description: Movement speed rate.
-#        Default:     0
+#        Default:     1
 
-Rate.MoveSpeed = 0
+Rate.MoveSpeed = 1
 
 #
 #    Rate.InstanceResetTime
