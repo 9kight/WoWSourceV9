@@ -506,7 +506,7 @@ class spell_dru_rejuv : public SpellScriptLoader
                     uint32 rejuvCount = 0;
                     Player::appliedAurasList const& auras = caster->ToPlayer()->appliedAuras;
 
-                    if (auras.empty())
+                    if (auras && auras.empty())
                         return;
                     
                     for (Player::appliedAurasList::const_iterator itr = auras.begin(); itr != auras.end(); itr++)
