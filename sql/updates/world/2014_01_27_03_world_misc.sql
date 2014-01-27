@@ -1,5 +1,4 @@
-
--- fix rong extended cost
+-- fix wrong extended cost
 DELETE FROM npc_vendor WHERE entry=52033;
 INSERT INTO `npc_vendor` (`entry`,`slot`,`item`,`maxcount`,`incrtime`,`ExtendedCost`,`Type`) VALUES
 (52033,0,52722,0,0,3407,1), -- 52722
@@ -16,7 +15,7 @@ INSERT INTO `npc_vendor` (`entry`,`slot`,`item`,`maxcount`,`incrtime`,`ExtendedC
 DELETE FROM creature WHERE guid IN (254624,254625);
 
 -- missing spawn vendor
-INSERT INTO `creature` VALUES ('NULL', '52036', '1', '1637', '5169', '1', '3969', '0', '0', '1666.86', '-4163.98', '56.1688', '4.27628', '300', '0', '0', '1830', '5013', '0', '0', '0', '0');
+INSERT INTO `creature` VALUES (NULL, 52036, 1, 1637, 5169, 1, 3969, 0, 0, 1666.86, -4163.98, 56.1688, 4.27628, 300, 0, 0, 1830, 5013, 0, 0, 0, 0);
 
 -- fix db error notification
 DELETE FROM game_graveyard_zone WHERE id=589;
