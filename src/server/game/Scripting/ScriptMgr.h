@@ -24,6 +24,7 @@
 #include <ace/Atomic_Op.h>
 
 #include "DBCStores.h"
+#include "Player.h"
 #include "SharedDefines.h"
 #include "World.h"
 #include "Weather.h"
@@ -68,7 +69,7 @@ struct OutdoorPvPData;
 
 #define VISIBLE_RANGE       166.0f                          //MAX visible range (size of grid)
 
-
+void DoScriptText(int32 textEntry, WorldObject* pSource, Unit* target = NULL);
 /*
     TODO: Add more script type classes.
 

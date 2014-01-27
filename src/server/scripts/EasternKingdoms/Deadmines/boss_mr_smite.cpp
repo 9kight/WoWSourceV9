@@ -156,7 +156,7 @@ public:
                             break;
                         case 3:
                             SetCombatMovement(true);
-                            me->GetMotionMaster()->MoveChase(me->getVictim(), me->m_CombatDistance);
+                            me->GetMotionMaster()->MoveChase(me->GetVictim(), me->m_CombatDistance);
                             uiPhase = 0;
                             break;
                     }

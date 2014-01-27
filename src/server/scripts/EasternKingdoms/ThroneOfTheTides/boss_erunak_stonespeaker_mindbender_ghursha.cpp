@@ -124,7 +124,7 @@ public:
                 Talk(RAND(SAY_KILL_PLAYER_1, SAY_KILL_PLAYER_2));
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff) 
         {
             if (!UpdateVictim())
                 return;
@@ -291,7 +291,7 @@ public:
             SummonList.push_back(pSummon->GetGUID());
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff) 
         {
             if (!UpdateVictim())
                 return;

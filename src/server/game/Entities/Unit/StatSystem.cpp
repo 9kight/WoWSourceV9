@@ -321,9 +321,9 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
         // extracted from client
         if (getClass() == CLASS_DRUID && GetShapeshiftForm())
         {
-            if (SpellShapeshiftFormEntry const * entry = sSpellShapeshiftFormStore.LookupEntry(uint32(GetShapeshiftForm())))
+            if (SpellShapeshiftFormEntry const* const entry = sSpellShapeshiftFormStore.LookupEntry(uint32(GetShapeshiftForm())))
                 if (entry->flags1 & 0x20)
-                    val2 += std::max(GetStat(STAT_AGILITY) - 10.0f, 0.0f) * chrEntry->APPerStrenth * 2.0f;
+                    val2 += std::max((GetStat(STAT_AGILITY) - 10.0f) * chrEntry->APPerStrenth * 2, 0.0f);
         }
     }
 

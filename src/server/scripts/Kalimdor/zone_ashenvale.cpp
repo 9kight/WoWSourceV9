@@ -415,7 +415,7 @@ class npc_muglash : public CreatureScript
             {
                 npc_escortAI::UpdateAI(uiDiff);
 
-                if (!me->getVictim())
+                if (!me->GetVictim())
                 {
                     if (HasEscortState(STATE_ESCORT_PAUSED) && IsBrazierExtinguished)
                     {

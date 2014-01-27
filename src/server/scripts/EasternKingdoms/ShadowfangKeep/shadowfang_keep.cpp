@@ -69,11 +69,11 @@ public:
         InstanceScript* instance = creature->GetInstanceScript();
 
         if (instance && instance->GetData(DATA_BARON_SILVERLAINE_EVENT)==DONE)
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleportiert mich zu Baron Silberlein", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport me to Baron Silberlein", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
         if (instance && instance->GetData(DATA_COMMANDER_SPRINGVALE_EVENT)==DONE)
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleportiert mich zu Kommandant Gruental", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport me to Commander Springvale", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
         if (instance && instance->GetData(DATA_LORD_WALDEN_EVENT)==DONE)
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleportiert mich zu Lord Walden", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport me to Lord Walden", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
 
         player->SEND_GOSSIP_MENU(2475, creature->GetGUID());
         return true;

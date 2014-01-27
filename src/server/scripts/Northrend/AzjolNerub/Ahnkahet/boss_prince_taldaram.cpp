@@ -184,7 +184,7 @@ public:
                         Talk(SAY_FEED);
                         me->GetMotionMaster()->Clear();
                         me->SetSpeed(MOVE_WALK, 1.0f, true);
-                        me->GetMotionMaster()->MoveChase(me->getVictim());
+                        me->GetMotionMaster()->MoveChase(me->GetVictim());
                         Phase = FEEDING;
                         uiPhaseTimer = 20*IN_MILLISECONDS;
                         break;

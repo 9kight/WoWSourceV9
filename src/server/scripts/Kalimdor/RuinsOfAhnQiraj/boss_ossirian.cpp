@@ -220,7 +220,7 @@ class boss_ossirian : public CreatureScript
                 events.Update(diff);
 
                 // No kiting!
-                if (me->GetDistance(me->getVictim()) > 60.00f && me->GetDistance(me->getVictim()) < 120.00f)
+                if (me->GetDistance(me->GetVictim()) > 60.00f && me->GetDistance(me->GetVictim()) < 120.00f)
                     DoCastVictim(SPELL_SUMMON);
 
                 bool ApplySupreme = true;

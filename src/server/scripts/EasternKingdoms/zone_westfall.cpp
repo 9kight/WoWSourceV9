@@ -30,7 +30,6 @@ npc_thug
 npc_horatio
 npc_westplains_drifter
 npc_crate_mine
-npc_homeless_citizen
 npc_shadowy_trigger
 npc_shadowy_tower
 npc_rise_br
@@ -779,125 +778,6 @@ public:
                 }
             }
             else EntryTime -= diff;
-        }
-    };
-};
-
-/*#####################
-##npc_homeless_citizen#
-#####################*/
-
-enum eCitizen
-{
-    QUEST_FEEDING_THE_HUNGRY = 26271,
-    NPC_HUNGRY = 42386,
-    NPC_HUNGRY2 = 42384,
-    NPC_STEW = 42617,
-    SPELL_FULL_BELLY = 79451,
-
-    HUNGRY_SAY1 = -1642384,
-    HUNGRY_SAY2 = -1642385,
-    HUNGRY_SAY3 = -1642386
-};
-
-class npc_homeless_citizen : public CreatureScript
-{
-public:
-    npc_homeless_citizen() : CreatureScript("npc_homeless_citizen") {}
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_homeless_citizenAI (creature);
-    }
-
-    struct npc_homeless_citizenAI : public ScriptedAI
-    {
-        npc_homeless_citizenAI(Creature* creature) : ScriptedAI(creature) {}
-
-        uint8 Phase;
-        uint32 HungryTimer;
-
-        void Reset()
-        {
-            Phase = 0;
-            HungryTimer = 2000;
-
-            me->SetStandState(UNIT_STAND_STATE_SLEEP);
-        }
-
-        void Eat()
-        {
-            me->CastSpell(me, SPELL_FULL_BELLY, true);
-            me->SetStandState(UNIT_STAND_STATE_SIT);
-            // DoScriptText(RAND(-1642384,-1642385,-1642386), me);
-        }
-
-        void MoveInFront(Unit* Source, Unit* Target)
-        {
-            float Distance;
-            Distance = Source->GetDistanceOrder(Source, Target);
-            if (Distance < 0)
-                Distance = Distance*2;
-
-            float x = Target->GetPositionX();
-            float y = Target->GetPositionY();
-            float z = Target->GetPositionZ();
-
-            Source->GetClosePoint(x, y, z, DEFAULT_WORLD_OBJECT_SIZE, Distance);
-            Source->GetMotionMaster()->MovePoint(1, x, y, z);
-        }
-
-        void UpdateAI(const uint32 diff)
-        {
-            if (HungryTimer < diff)
-            {
-                if (Creature* stew = me->FindNearestCreature(NPC_STEW, 10.0f, true))
-                {
-                    if (me->HasAura(SPELL_FULL_BELLY) && Phase == 0)
-                        return;
-
-                    switch (Phase)
-                    {
-                    case 0:
-                        {
-                            me->RemoveStandFlags(UNIT_STAND_STATE_SLEEP);
-                            me->SetStandFlags(UNIT_STAND_STATE_STAND);
-                            HungryTimer = 1000;
-                            Phase++;
-                            break;
-                        }
-                    case 1:
-                        {
-                            MoveInFront(me, stew);
-                            HungryTimer = 1500;
-                            Phase++;
-                            break;
-                        }
-                    case 2:
-                        {
-                            Eat();
-                            HungryTimer = 2000;
-                            Phase++;
-                            break;
-                        }
-                    case 3:
-                        {
-                            if (Unit* player = me->GetPlayer(*stew, stew->GetUInt64Value(UNIT_FIELD_SUMMONEDBY)))
-                                player->ToPlayer()->KilledMonsterCredit(42617, NULL);
-                            HungryTimer = 25000;
-                            Phase++;
-                            break;
-                        }
-                    default:
-                        break;
-                    }
-                }
-                else HungryTimer = 3000;
-
-                if (Phase == 4)
-                    Reset();
-            }
-            else HungryTimer -= diff;
         }
     };
 };
@@ -2159,7 +2039,6 @@ void AddSC_westfall()
     new npc_horatio();
     new npc_westplains_drifter();
     new npc_crate_mine();
-    new npc_homeless_citizen();
     new npc_shadowy_trigger();
     new npc_shadowy_tower();
     new npc_rise_br();

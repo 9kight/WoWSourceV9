@@ -19,6 +19,12 @@ enum NpcSanotron500
     SAY_CONTAMINATION_START     = 0,
     SAY_CONTAMINATION_3         = 1,
     SAY_CONTAMINATION_OVERLOAD  = 2,
+    SAY_MINDLESS_LEPER          = 0,
+    SAY_HARD_TIME               = 0,
+    SAY_MULTIBOT_0              = 0,
+    SAY_MULTIBOT_1              = 1,
+    SAY_MULTIBOT_2              = 2,
+    SAY_MULTIBOT_3              = 3,
 
     SAY_UGH_NOT_THIS            = 0,
     SAY_OH_NO                   = 1,
@@ -35,6 +41,10 @@ enum NpcSanotron500
     SPELL_CLEAN_CANNON_CLEAN_BURST      = 86080,
     SPELL_IRRADIATED                    = 80653,
     SPELL_EXPLOSION                     = 30934,
+    
+    QUEST_PINNED_DOWN                   = 27670,
+    QUEST_STAGING_IN_BREWNALL           = 26339,
+    QUEST_JOB_FOR_BOT                   = 26205,
 };
 
 class DistanceSelector
@@ -226,10 +236,123 @@ public:
     };
 };
 
+/*######
+## npc_engineer_grindspark
+######*/
+
+class npc_engineer_grindspark : public CreatureScript
+{
+public:
+    npc_engineer_grindspark() : CreatureScript("npc_engineer_grindspark") { }
+
+     bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+     {
+        if (quest->GetQuestId() == QUEST_JOB_FOR_BOT)
+        {
+        
+          creature->AI()->Talk(SAY_MULTIBOT_0, 3000);
+          creature->AI()->Talk(SAY_MULTIBOT_1, 3000);
+          creature->AI()->Talk(SAY_MULTIBOT_2, 3000);
+          creature->AI()->Talk(SAY_MULTIBOT_3, 3000);
+          player->CastSpell(player, 79419, true);
+
+        }
+          return true;
+     }        
+
+};
+
+/*######
+## npc_gs_9x_multi_bot
+######*/
+
+enum eMultiBotData
+{
+    OBJECT_TOXIC_POOL = 203975,
+    SPELL_CLEAN_UP_TOXIC_POOL = 79424,
+    SPELL_TOXIC_POOL_CREDIT_TO_MASTER = 79422,
+    SAY_MULTI_BOT = 0
+};
+
+class npc_gs_9x_multi_bot : public CreatureScript
+{
+public:
+    npc_gs_9x_multi_bot() : CreatureScript("npc_gs_9x_multi_bot") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_gs_9x_multi_botAI (creature);
+    }
+
+    struct npc_gs_9x_multi_botAI : public ScriptedAI
+    {
+        npc_gs_9x_multi_botAI(Creature* c): ScriptedAI(c) { }
+
+        void UpdateAI(const uint32 /*diff*/)
+        {
+            GameObject* pool = me->FindNearestGameObject(OBJECT_TOXIC_POOL, 2.0f);
+
+            if (pool)
+            {
+                if (Player* player = me->GetCharmerOrOwnerPlayerOrPlayerItself())
+                {
+                    Talk(SAY_MULTI_BOT);
+                    me->CastSpell(me, SPELL_CLEAN_UP_TOXIC_POOL, true);
+                    me->CastSpell(player, SPELL_TOXIC_POOL_CREDIT_TO_MASTER, true);
+                    pool->Delete();
+                }
+            }
+        }
+    };
+};
+
+/*######
+## npc_nevin_twistwrench
+######*/
+
+class npc_nevin_twistwrench : public CreatureScript
+{
+public:
+    npc_nevin_twistwrench() : CreatureScript("npc_nevin_twistwrench") { }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_PINNED_DOWN)
+        {
+          creature->AI()->Talk(SAY_MINDLESS_LEPER, player->GetGUID());
+        }
+        return true;
+    }
+
+};
+
+/*######
+## npc_kelsey_steelspark
+######*/
+
+class npc_kelsey_steelspark : public CreatureScript
+{
+public:
+    npc_kelsey_steelspark() : CreatureScript("npc_kelsey_steelspark") { }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_STAGING_IN_BREWNALL)
+        {
+          creature->AI()->Talk(SAY_HARD_TIME, player->GetGUID());
+        }
+        return true;
+    }
+
+};
 
 void AddSC_dun_morogh()
 {
     new npc_sanotron_500();
     new npc_coldridge_defender();
     new npc_rockjaw_defender();
+    new npc_gs_9x_multi_bot();
+    new npc_nevin_twistwrench();
+    new npc_kelsey_steelspark();
+    new npc_engineer_grindspark();
 }

@@ -141,8 +141,8 @@ public:
 
     bool Execute(uint64 execTime, uint32 /*diff*/)
     {
-        if (_caster->getVictim())
-            _caster->CastSpell(_caster->getVictim(), SPELL_FIFTY_LASHINGS_PROC, true);
+        if (_caster->GetVictim())
+            _caster->CastSpell(_caster->GetVictim(), SPELL_FIFTY_LASHINGS_PROC, true);
         return false;
     }
 

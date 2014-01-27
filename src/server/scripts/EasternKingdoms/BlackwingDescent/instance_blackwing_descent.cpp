@@ -1,236 +1,408 @@
 #include "blackwing_descent.h"
-#include "Object.h"
-#include "InstanceScript.h"
-#include "ScriptMgr.h"
+#include "ScriptPCH.h"
 
-static const Position NefarianPos = {143.501663f, -241.307678f, 74.920464f, 2.260429f};
-static const Position AtramedesPos = {386.093842f, -314.483643f, 137.624100f, 0.0f};
+#define MAX_ENCOUNTER 6
 
 class instance_blackwing_descent : public InstanceMapScript
 {
-    public:
-        instance_blackwing_descent() : InstanceMapScript("instance_blackwing_descent", 669) { }
+public:
+    instance_blackwing_descent() : InstanceMapScript("instance_blackwing_descent", 669) { }
 
-        struct instance_blackwing_descent_InstanceMapScript : public InstanceScript
+    struct instance_blackwing_descent_InstanceMapScript : public InstanceScript
+    {
+        instance_blackwing_descent_InstanceMapScript(InstanceMap* map) : InstanceScript(map)
         {
-            instance_blackwing_descent_InstanceMapScript(InstanceMap* map) : InstanceScript(map)
-            {
-                SetBossNumber(ENCOUNTER_COUNT);
-                drakonidCnt             = 0;
-                dwarvesCnt              = 0;
-                magmawGUID              = 0;
-                nefarianGUID            = 0;
-                omnotronGUID            = 0;
-                arcanotronGUID          = 0;
-                electronGUID            = 0;
-                magmatronGUID           = 0;
-                toxitronGUID            = 0;
-                bellGUID                = 0;
-                atramedesGUID           = 0;
-                omnotronNefarianGUID    = 0;
-                chimaeronGUID           = 0;
-            }
+            memset(&Encounter, 0, sizeof(Encounter));
+        }
 
-            void OnGameObjectCreate(GameObject * go)
-            {
-                if(go->GetEntry() == GO_ANCIENT_BELL)
-                {
-                    bellGUID = go->GetGUID();
-                    if(dwarvesCnt < 7)
-                        go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
-                }
-            }
+        // Magmaw
+        uint64 uiMagmaw;
+        uint64 uiMagmawsHead;
 
-            void OnCreatureCreate(Creature* creature)
+        // Omnotron Defense System
+        uint64 uiOmnotron;
+        uint64 uiArcanotron;
+        uint64 uiElectron;
+        uint64 uiMagmatron;
+        uint64 uiToxitron;
+
+        // Maloriak
+        uint64 uiMaloriak;
+
+        // Atramedes
+        uint64 uiAtramedes;
+        uint64 uiPreNefarian;
+        uint64 uiPreAtramedes;
+
+        // Chimaeron
+        uint64 uiChimaeron;
+        uint64 uiBileOTron;
+        uint64 uiFinkleEinhorn;
+
+        // Nefarian
+        uint64 uiNefarian;
+        uint64 uiOnyxia;
+
+        // Misc
+        uint32 uiEncounter[MAX_ENCOUNTER];
+        uint64 uiLordVictorNefarian;
+        uint32 uidrakonidCount;
+
+        // Gobs
+        uint64 gobPreBossDoor;
+        uint64 gobMaloriaksCauldron;
+        uint64 gobAtramedesBossDoor;
+        uint64 gobOnyxiaPlatform;
+
+        void Initialize()
+        {
+            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                uiEncounter[i] = NOT_STARTED;
+
+            // Magmaw
+            uiMagmaw = 0;
+            uiMagmawsHead = 0;
+
+            // Omnotron Defense System
+            uiOmnotron = 0;
+            uiArcanotron = 0;
+            uiElectron = 0;
+            uiMagmatron = 0;
+            uiToxitron = 0;
+
+            // Maloriak
+            uiMaloriak = 0;
+
+            // Atramedes
+            uiAtramedes = 0;
+            uiPreNefarian = 0;
+            uiPreAtramedes = 0;
+
+            // Chimaeron
+            uiChimaeron = 0;
+            uiBileOTron = 0;
+            uiFinkleEinhorn = 0;
+
+            // Nefarian
+            uiNefarian = 0;
+            uiOnyxia = 0;
+
+            // Misc
+            uiLordVictorNefarian = 0;
+            uidrakonidCount = 0;
+
+            // Gobs
+            gobPreBossDoor = 0;
+            gobMaloriaksCauldron = 0;
+            gobAtramedesBossDoor = 0;
+            gobOnyxiaPlatform = 0;
+        }
+
+        bool IsEncounterInProgress() const
+        {
+            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                if (uiEncounter[i] == IN_PROGRESS)
+                    return true;
+
+            return false;
+        }
+
+        void OnCreatureCreate(Creature* creature)
+        {
+            switch (creature->GetEntry())
             {
-                switch(creature->GetEntry())
+
+                // Magmaw
+            case BOSS_MAGMAW:
+                uiMagmaw = creature->GetGUID();
+                break;
+            case NPC_MAGMAWS_HEAD:
+                uiMagmawsHead = creature->GetGUID();
+                break;
+
+                // Omnotron Defense System
+            case BOSS_OMNOTRON:
+                uiOmnotron = creature->GetGUID();
+                break;
+            case NPC_ARCANOTRON:
+                uiArcanotron = creature->GetGUID();
+                break;
+            case NPC_ELECTRON:
+                uiElectron = creature->GetGUID();
+                break;
+            case NPC_MAGMATRON:
+                uiMagmatron = creature->GetGUID();
+                break;
+            case NPC_TOXITRON:
+                uiToxitron = creature->GetGUID();
+                break;
+
+                // Maloriak
+            case BOSS_MALORIAK:
+                uiMaloriak = creature->GetGUID();
+                break;
+
+                // Atramedes
+            case BOSS_ATRAMEDES:
+                uiAtramedes = creature->GetGUID();
+                break;
+            case NPC_PRE_NEFARIAN:
+                uiPreNefarian = creature->GetGUID();
+                break;
+            case NPC_PRE_ATRAMEDES:
+                uiPreAtramedes = creature->GetGUID();
+                break;
+
+                // Chimaeron
+            case BOSS_CHIMAERON:
+                uiChimaeron = creature->GetGUID();
+                break;
+            case NPC_BILE_O_TRON:
+                uiBileOTron = creature->GetGUID();
+                break;
+            case NPC_FINKLE_EINHORN:
+                uiFinkleEinhorn = creature->GetGUID();
+                break;
+
+                // Nefarian
+            case BOSS_NEFARIAN:
+                uiNefarian = creature->GetGUID();
+                break;
+            case NPC_ONYXIA:
+                uiOnyxia = creature->GetGUID();
+                break;
+
+                // Misc
+            case NPC_LORD_VICTOR_NEFARIAN:
+                uiLordVictorNefarian = creature->GetGUID();
+                break;
+            case NPC_DRAKONID_CHAIN:
+                if(Creature * magmaw = instance->GetCreature(uiMagmaw))
                 {
-                case NPC_DRAKONID_DRUDGE:
-                    if(Creature * magmaw = this->instance->GetCreature(magmawGUID))
+                    if(uidrakonidCount < 2)
                     {
-                        if(drakonidCnt < 2)
-                        {
-                            magmaw->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
-                            magmaw->SetReactState(REACT_PASSIVE);
-                            if(creature->isDead())
-                                SetData(DATA_DRAKONID, 1);
-                        }
-                    }
-                    break;
-                case NPC_MAGMAW:
-                    magmawGUID = creature->GetGUID();
-                    break;
-                case NPC_ATRAMEDES:
-                    atramedesGUID = creature->GetGUID();
-                    break;
-                case NPC_OMNOTRON:
-                    omnotronGUID = creature->GetGUID();
-                    break;
-                case NPC_ELECTRON:
-                    electronGUID = creature->GetGUID();
-                    break;
-                case NPC_TOXITRON:
-                    toxitronGUID = creature->GetGUID();
-                    break;
-                case NPC_MAGMATRON:
-                    magmatronGUID = creature->GetGUID();
-                    break;
-                case NPC_ARCANOTRON:
-                    arcanotronGUID = creature->GetGUID();
-                    break;
-                case NPC_NEFARIUS_OMNOTRON:
-                    omnotronNefarianGUID = creature->GetGUID();
-                    break;
-                case NPC_CHIMAERON:
-                    chimaeronGUID = creature->GetGUID();
-                    break;
-                default:
-                    break;
-                }
-            }
-
-            void OnCreatureDeath(Creature * creature)
-            {
-                if(creature->GetEntry() == NPC_SPIRIT_OF_THAURISSIAN)
-                {
-                    ++dwarvesCnt;
-                    if(dwarvesCnt == 7)
-                    {
-                        instance->SummonCreature(NPC_INTRO_NEFARIAN, NefarianPos);
-                        SaveToDB();
+                        magmaw->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+                        magmaw->SetReactState(REACT_PASSIVE);
+                        if(creature->isDead())
+                            SetData(DATA_DRAKONID, 1);
                     }
                 }
+                break;
+            }
+        }
+
+        void OnGameObjectCreate(GameObject* go)
+        {
+            switch(go->GetEntry())
+            {
+            case GOB_DOOR_PRE_BOSSES:
+                gobPreBossDoor = go->GetGUID();
+                HandleGameObject(NULL, (GetData(DATA_MAGMAW)==DONE) && (GetData(DATA_OMNOTRON_DEFENSE_SYSTEM)==DONE), go);
+                break;
+
+            case GOB_MALORIAKS_CAULDRON:
+                gobMaloriaksCauldron = go->GetGUID();
+                break;
+
+            case GOB_DOOR_ATRAMEDES:
+                gobAtramedesBossDoor = go->GetGUID();
+                HandleGameObject(NULL, (GetData(DATA_MALORIAK)==DONE) && (GetData(DATA_CHIMAERON)==DONE), go);
+                break;
+
+            case GOB_ONYXIA_PLATFORM:
+                gobOnyxiaPlatform = go->GetGUID();
+                //go->SetPhaseMask(GetData(DATA_ATRAMEDES)==DONE ? 1 : 2, true);
+                break;
+            }
+        }
+
+        uint64 GetData64(uint32 identifier) const
+        {
+            switch(identifier)
+            {
+            case BOSS_MAGMAW:
+                return uiMagmaw;
+                break;
+            case NPC_MAGMAWS_HEAD:
+                return uiMagmawsHead;
+                break;
+
+                // Omnotron Defense System
+            case BOSS_OMNOTRON:
+                return uiOmnotron;
+                break;
+            case NPC_ARCANOTRON:
+                return uiArcanotron;
+                break;
+            case NPC_ELECTRON:
+                return uiElectron;
+                break;
+            case NPC_MAGMATRON:
+                return uiMagmatron;
+                break;
+            case NPC_TOXITRON:
+                return uiToxitron;
+                break;
+
+                // Maloriak
+            case BOSS_MALORIAK:
+                return uiMaloriak;
+                break;
+
+                // Atramedes
+            case BOSS_ATRAMEDES:
+                return uiAtramedes;
+                break;
+            case NPC_PRE_NEFARIAN:
+                return uiPreNefarian;
+                break;
+            case NPC_PRE_ATRAMEDES:
+                return uiPreAtramedes;
+                break;
+
+                // Chimaeron
+            case BOSS_CHIMAERON:
+                return uiChimaeron;
+                break;
+            case NPC_BILE_O_TRON:
+                return uiBileOTron;
+                break;
+            case NPC_FINKLE_EINHORN:
+                return uiFinkleEinhorn;
+                break;
+
+                // Nefarian
+            case BOSS_NEFARIAN:
+                return uiNefarian;
+                break;
+            case NPC_ONYXIA:
+                return uiOnyxia;
+                break;
+
+                // Misc
+            case NPC_LORD_VICTOR_NEFARIAN:
+                return uiLordVictorNefarian;
+                break;
+
             }
 
-            void SetData(uint32 type, uint32 /*data*/)
+            return NULL;
+        }
+
+        void SetData(uint32 type, uint32 value)
+        {
+            switch(type)
             {
-                switch(type)
-                {
                 case DATA_DRAKONID:
-                    ++drakonidCnt;
-                    if(drakonidCnt >= 2)
+                    ++uidrakonidCount;
+                    if(uidrakonidCount >= 2)
                     {
-                        if(Creature * magmaw = this->instance->GetCreature(magmawGUID))
+                        if(Creature * magmaw = instance->GetCreature(uiMagmaw))
                         {
                             magmaw->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
                             magmaw->SetReactState(REACT_AGGRESSIVE);
                         }
                     }
                     break;
-                case DATA_ATRAMEDES_INTRO:
-                    if(GameObject * go = instance->GetGameObject(bellGUID))
-                        go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
-                    break;
-                case DATA_ATRAMEDES_SUMMON:
-                    if(!atramedesGUID && GetBossState(DATA_ATRAMEDES) != DONE)
-                        instance->SummonCreature(NPC_ATRAMEDES, AtramedesPos);
-                    break;
-                default:
-                    break;
-                }
             }
-
-            uint64 GetData64(uint32 type) const
-            {
-                switch (type)
-                {
-                case DATA_OMNOTRON_GUID:
-                    return omnotronGUID;
-                    break;
-                case DATA_NEFARIUS_OMNOTRON_GUID:
-                    return omnotronNefarianGUID;
-                    break;
-                case DATA_ARCANOTRON_GUID:
-                    return arcanotronGUID;
-                    break;
-                case DATA_ELECTRON_GUID:
-                    return electronGUID;
-                    break;
-                case DATA_MAGMATRON_GUID:
-                    return magmatronGUID;
-                    break;
-                case DATA_TOXITRON_GUID:
-                    return toxitronGUID;
-                    break;
-                case DATA_MAGMAW_GUID:
-                    return magmawGUID;
-                case DATA_CHIMAERON_GUID:
-                    return chimaeronGUID;
-                    break;
-                default:
-                    return 0;
-                }
-            }
-
-            bool SetBossState(uint32 type, EncounterState state)
-            {
-                if (!InstanceScript::SetBossState(type, state))
-                    return false;
-
-                 return true;
-            }
-
-            std::string GetSaveData()
-            {
-                OUT_SAVE_INST_DATA;
-
-                std::ostringstream saveStream;
-                saveStream << "B D " << GetBossSaveData() << drakonidCnt << " " << dwarvesCnt;
-
-                OUT_SAVE_INST_DATA_COMPLETE;
-                return saveStream.str();
-            }
-
-            void Load(char const* str)
-            {
-                if (!str)
-                {
-                    OUT_LOAD_INST_DATA_FAIL;
-                    return;
-                }
-
-                OUT_LOAD_INST_DATA(str);
-
-                char dataHead1, dataHead2;
-
-                std::istringstream loadStream(str);
-                loadStream >> dataHead1 >> dataHead2;
-
-                if (dataHead1 == 'B' && dataHead2 == 'D')
-                {
-                    for (uint8 i = 0; i < ENCOUNTER_COUNT; ++i)
-                    {
-                        uint32 tmpState;
-                        loadStream >> tmpState;
-                        if (tmpState == IN_PROGRESS || tmpState > SPECIAL)
-                            tmpState = NOT_STARTED;
-                        SetBossState(i, EncounterState(tmpState));
-                    }
-                    loadStream >> drakonidCnt >> dwarvesCnt;
-                } else OUT_LOAD_INST_DATA_FAIL;
-
-                OUT_LOAD_INST_DATA_COMPLETE;
-            }
-        private:
-            uint32 drakonidCnt;
-            uint32 dwarvesCnt;
-            uint64 magmawGUID;
-            uint64 bellGUID;
-            uint64 atramedesGUID;
-            uint64 nefarianGUID;
-            uint64 omnotronGUID;
-            uint64 arcanotronGUID;
-            uint64 electronGUID;
-            uint64 magmatronGUID;
-            uint64 toxitronGUID;
-            uint64 omnotronNefarianGUID;
-            uint64 chimaeronGUID;
-        };
-
-        InstanceScript* GetInstanceScript(InstanceMap* map) const
-        {
-            return new instance_blackwing_descent_InstanceMapScript(map);
         }
+
+        uint32 GetData(uint32 type) const
+        {
+            return Encounter[type];
+        }
+
+        bool SetBossState(uint32 data, EncounterState state) {
+            if (!InstanceScript::SetBossState(data, state))
+                return false;
+
+            if(state == DONE)
+            {
+                switch(data)
+                {
+                case DATA_MAGMAW:
+                case DATA_OMNOTRON_DEFENSE_SYSTEM:
+                    HandleGameObject(gobPreBossDoor, GetBossState(DATA_MAGMAW)==DONE && GetBossState(DATA_OMNOTRON_DEFENSE_SYSTEM)==DONE);
+                    break;
+
+                case DATA_MALORIAK:
+                case DATA_CHIMAERON:
+                    HandleGameObject(gobAtramedesBossDoor, GetBossState(DATA_MALORIAK)==DONE && GetBossState(DATA_CHIMAERON)==DONE);
+                    break;
+
+                case DATA_ATRAMEDES:
+                    if(GameObject* onyxiaPlatform = instance->GetGameObject(gobOnyxiaPlatform))
+                        onyxiaPlatform->SetPhaseMask(PHASEMASK_NORMAL, true);
+                    break;
+                }
+            }
+
+            return true;
+        }
+
+       // bool CheckRequiredBosses(uint32 bossId, Player const* player = NULL) const
+       // {
+            //if ((player->GetSession()->GetSecurity() > SEC_GAMEMASTER ))
+            //    return true;
+
+            /*switch (bossId)
+{
+
+}*/
+
+            //return true;
+       // }
+
+        std::string GetSaveData()
+        {
+            OUT_SAVE_INST_DATA;
+
+            std::ostringstream saveStream;
+            saveStream << "B D" << GetBossSaveData() << uidrakonidCount;
+
+            OUT_SAVE_INST_DATA_COMPLETE;
+            return saveStream.str();
+        }
+
+        void Load(const char* in)
+        {
+            if (!in)
+            {
+                OUT_LOAD_INST_DATA_FAIL;
+                return;
+            }
+
+            OUT_LOAD_INST_DATA(in);
+
+            char dataHead1, dataHead2;
+
+            std::istringstream loadStream(in);
+            loadStream >> dataHead1 >> dataHead2;
+
+            if (dataHead1 == 'B' && dataHead2 == 'D')
+            {
+                for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                {
+                    uint32 tmpState;
+                    loadStream >> tmpState;
+                    if (tmpState == IN_PROGRESS || tmpState > SPECIAL)
+                        tmpState = NOT_STARTED;
+                    Encounter[i] = tmpState;
+                }
+                loadStream >> uidrakonidCount;
+            } else OUT_LOAD_INST_DATA_FAIL;
+
+            OUT_LOAD_INST_DATA_COMPLETE;
+        }
+
+    private:
+        uint32 Encounter[MAX_ENCOUNTER];
+    };
+
+    InstanceScript* GetInstanceScript(InstanceMap* map) const
+    {
+        return new instance_blackwing_descent_InstanceMapScript(map);
+    }
 };
 
 void AddSC_instance_blackwing_descent()

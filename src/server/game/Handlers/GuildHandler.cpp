@@ -828,7 +828,7 @@ void WorldSession::HandleGuildSetGuildMaster(WorldPacket& recvPacket)
         guild->HandleSetNewGuildMaster(this, playerName);
 }
 
-void WorldSession::HandleGuildSwitchRankOpcode(WorldPacket& recvPacket)
+/*void WorldSession::HandleGuildSwitchRankOpcode(WorldPacket& recvPacket)
 {
     uint32 rankId;
     bool up;
@@ -855,10 +855,28 @@ void WorldSession::HandleGuildSwitchRankOpcode(WorldPacket& recvPacket)
     guild->HandleRoster();
     guild->HandleQuery(GetPlayer()->GetSession());
     guild->SendGuildRankInfo(GetPlayer()->GetSession());
-}
+}*/
 
 void WorldSession::HandleGuildRequestChallengeUpdate(WorldPacket& recvPacket)
 {
     if (Guild* guild = GetPlayer()->GetGuild())
         guild->HandleSendChallengeUpdate(this);
+}
+
+void WorldSession::HandleGuildRenameCallback(std::string newName)
+{
+    Guild* pGuild = GetPlayer()->GetGuild();
+
+    bool hasRenamed = ((PreparedQueryResult)_guildRenameCallback.GetFutureResult())->GetRowCount() > 0 ? true : false;
+
+    WorldPacket data(SMSG_GUILD_CHANGE_NAME_RESULT,1);
+    data.WriteBit(hasRenamed);
+    data.FlushBits();
+
+    SendPacket(&data);
+
+    if(pGuild && hasRenamed)
+    {
+        pGuild->SendGuildRename(newName);
+    }
 }

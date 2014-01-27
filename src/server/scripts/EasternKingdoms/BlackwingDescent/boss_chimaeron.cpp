@@ -1,489 +1,588 @@
-#include "blackwing_descent.h"
 #include "ScriptPCH.h"
-#include "Util.h"
+#include "blackwing_descent.h"
+#include "Vehicle.h"
+#include "Unit.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
+#include "ScriptedEscortAI.h"
+#include "Cell.h"
+#include "CellImpl.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "CombatAI.h"
+#include "PassiveAI.h"
+#include "ObjectMgr.h"
+#include "SpellInfo.h"
+#include "SpellScript.h"
+#include "Vehicle.h"
+#include "VehicleDefines.h"
 #include "Spell.h"
-
-enum Spells
-{
-    SPELL_BERSERK               = 26662,
-    SPELL_BREAK                 = 82881,
-    SPELL_CAUSTIC_SLIME         = 82913,
-    SPELL_MASSACRE              = 82848,
-    SPELL_FEUD                  = 88872,
-    SPELL_DOUBLE_ATTACK_EFF     = 82882,
-    SPELL_DOUBLE_ATTACK_VIS     = 88826,
-    SPELL_MORTALITY_AOE         = 82890,
-    SPELL_MORTALITY_SELF        = 82934,
-    SPELL_FAST_ASLEEP           = 82706,
-    SPELL_MIXTURE_VIS           = 91106,
-    SPELL_MIXTURE_EFF           = 82705,
-    SPELL_SYSTEMS_FAILURE       = 88853,
-    SPELL_REROUTE_POWER         = 88861,
-};
+#include "Player.h"
+#include "Map.h"
+#include "InstanceScript.h"
 
 enum Events
 {
-    EVENT_ENRAGE        = 1,
-    EVENT_BREAK,
+    EVENT_DOUBLE_ATTACK = 1,
+    EVENT_DOUBLE_ATTACK_REAL,
     EVENT_CAUSTIC_SLIME,
     EVENT_MASSACRE,
-    EVENT_MASSACRE_FEUD,
-    EVENT_DOUBLE_ATTACK,
-    EVENT_MASSACRE_KNOCKOUT,
-    EVENT_FEUD_INTERRUPT,
+    EVENT_BREAK_BILE_O_TRON,
+    EVENT_FEUD,
+    EVENT_SEC_MASSACRE,
+    EVENT_BREAK,
+    EVENT_REMOVE_FEUD,
 
-    EVENT_GROUP_NORMAL  = 1,
+    EVENT_AGGRO_NEF
 };
 
-enum Misc
+enum Actions
 {
-    DATA_BOT_GUID,
-    PATH_BILE_O_TRON            = 401533,
-    ACTION_START_COMBAT         = 1,
-    ACTION_DEATH,
-    ACTION_FEUD,
-    ACTION_PHASE_2
+    ACTION_BILE_O_TRON_EVENT_START      = 1,
+    ACTION_BILE_O_TRON_SYSTEM_FAILURE,
+    ACTION_BILE_O_TRON_RESET
 };
 
-enum Phases
+enum Spells
 {
-    PHASE_NORMAL        = 1,
-    PHASE_FEUD,
-    PHASE_MORTALITY,
+    // Chimaeron
+    SPELL_ASLEEP                        = 82706,
+    SPELL_DOUBLE_ATTACK                 = 88826,
+    SPELL_DOUBLE_ATTACK_REAL            = 82882,
+    SPELL_CAUSTIC_SLIME                 = 82935,
+    SPELL_MASSACRE                      = 82848,
+    SPELL_FEUD                          = 88872,
+    SPELL_BREAK                         = 82881,
+
+    SPELL_MORTALITY                     = 82934,
+    SPELL_MORTALITY_RAID_DEBUFF         = 82890,
+
+    // Bile O Tron
+    SPELL_FINKLES_MIXTURE               = 82705,
+    SPELL_FINKLES_MIXTURE_VISUAL        = 91106,
+    SPELL_SYSTEM_FAILURE                = 88853,
+    SPELL_REROUTE_POWER                 = 88861,
+
+   // Nefarian
+   SPELL_MOCKING_SHADOWS                = 91307
 };
 
-enum Quotes
+enum ScriptTexts
 {
-    EMOTE_AGGRO,
-    EMOTE_BILE_O_TRON,
-    EMOTE_MASSACRE,
-    EMOTE_KNOCKOUT,
-    SAY_SLAY            = 1,
-    SAY_DEATH
+    SAY_MASSACRE                    = -1900028, // announce - Chimaeron prepares to massacre his foes!
+
+    // Finkle
+    SAY_INTRO                       = -1851023,
+    SAY_SYSTEM_FAILURE              = -1851026,
+    SAY_DEATH                       = -1851027,
+    SAY_F_OUTRO                     = -1851028,
+    SAY_P2                          = -1851029
+};
+
+Position const BilePositions[6] =
+{
+    {-135.795151f, 15.569847f, 73.165909f, 4.646072f},
+    {-129.176636f, -10.488489f, 73.079071f, 5.631739f},
+    {-106.186249f, -18.533386f, 72.798332f, 1.555510f},
+    {-77.951973f, 0.702321f, 73.093552f, 1.509125f},
+    {-77.466125f, 31.038124f, 73.177673f, 4.489712f},
+    {-120.426445f, 34.491863f, 72.057610f, 4.116642f}
 };
 
 class boss_chimaeron : public CreatureScript
 {
-    struct boss_chimaeronAI : public BossAI
-    {
-        boss_chimaeronAI(Creature* creature) : BossAI(creature, DATA_CHIMAERON)
-        {
-            DoCast(SPELL_FAST_ASLEEP);
-        }
-
-        void Reset()
-        {
-            _Reset();
-            botGUID = 0;
-            massacreCnt = 0;
-            nefarianGUID = 0;
-            events.SetPhase(PHASE_NORMAL);
-            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, false);
-            if (Creature* nefarian = me->GetCreature(*me, nefarianGUID))
-                nefarian->DespawnOrUnsummon();
-
-            if (instance)
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-        }
-
-        void KilledUnit(Unit* who)
-        {
-            BossAI::KilledUnit(who);
-            if (who->GetTypeId() == TYPEID_PLAYER)
-                if (Creature* finkle = me->FindNearestCreature(NPC_FINKLE_EINHORN, 200.0f))
-                    finkle->AI()->Talk(SAY_SLAY);
-        }
-
-        void JustDied(Unit* /*killer*/)
-        {
-            _JustDied();
-
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-            if (Creature* finkle = me->FindNearestCreature(NPC_FINKLE_EINHORN, 200.0f))
-            {
-                finkle->AI()->Talk(SAY_DEATH);
-                finkle->DespawnOrUnsummon(1000);
-            }
-            if (Creature* nefarian = me->GetCreature(*me, nefarianGUID))
-                nefarian->AI()->DoAction(ACTION_DEATH);
-
-            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MORTALITY_AOE);
-        }
-
-        void JustReachedHome()
-        {
-            _JustReachedHome();
-            DoCast(SPELL_FAST_ASLEEP);
-            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MORTALITY_AOE);
-        }
-
-        void DamageTaken(Unit* /*done_by*/, uint32 &damage)
-        {
-            if (me->HealthBelowPctDamaged(20, damage) && (events.GetPhaseMask() & (1 << PHASE_MORTALITY)) == 0)
-            {
-                if (IsHeroic())
-                    if (Creature* nefarian = me->GetCreature(*me, nefarianGUID))
-                        nefarian->AI()->DoAction(ACTION_PHASE_2);
-                events.CancelEventGroup(EVENT_GROUP_NORMAL);
-                events.SetPhase(PHASE_MORTALITY);
-                events.ScheduleEvent(EVENT_DOUBLE_ATTACK, 15000, EVENT_GROUP_NORMAL, PHASE_MORTALITY);
-                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
-                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
-                DoCast(me, SPELL_MORTALITY_AOE, true);
-                DoCast(me, SPELL_MORTALITY_SELF, true);
-            }
-        }
-
-        void DoAction(int32 const action)
-        {
-            if (action == ACTION_START_COMBAT && !botGUID)
-            {
-                if (Creature* bot = me->SummonCreature(NPC_BILE_O_TRON_800, 0, 0, 0))
-                {
-                    Talk(EMOTE_BILE_O_TRON);
-                    botGUID = bot->GetGUID();
-                    bot->CastSpell(bot, SPELL_MIXTURE_VIS, true);
-                    bot->CastSpell(bot, SPELL_MIXTURE_EFF, true);
-                    bot->GetMotionMaster()->Clear();
-                    bot->GetMotionMaster()->MovePath(PATH_BILE_O_TRON, true);
-                    me->SetInCombatWithZone();
-                }
-            }
-        }
-
-        void EnterCombat(Unit* /*who*/)
-        {
-            _EnterCombat();
-
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-            Talk(EMOTE_AGGRO);
-            events.ScheduleEvent(EVENT_ENRAGE, 450000);
-            ScheduleEvents();
-            if (Creature* nefarian = me->SummonCreature(NPC_NEFARIUS_CHIMAERON, -73.621025f, -26.955547f, 103.594498f, 2.373125f))
-                nefarianGUID = nefarian->GetGUID();
-        }
-
-        void JustSummoned(Creature* creature)
-        {
-            if (creature->GetEntry() == NPC_NEFARIUS_CHIMAERON)
-                return;
-
-            BossAI::JustSummoned(creature);
-        }
-
-        void ScheduleEvents()
-        {
-            events.ScheduleEvent(EVENT_BREAK, 10000, EVENT_GROUP_NORMAL, PHASE_NORMAL);
-            events.ScheduleEvent(EVENT_DOUBLE_ATTACK, 15000, EVENT_GROUP_NORMAL, PHASE_NORMAL);
-            events.ScheduleEvent(EVENT_CAUSTIC_SLIME, 5000, EVENT_GROUP_NORMAL, PHASE_NORMAL);
-            events.ScheduleEvent(EVENT_MASSACRE, 45000, EVENT_GROUP_NORMAL, PHASE_NORMAL);
-        }
-
-        void MoveInLineOfSight(Unit* /*who*/)
-        {
-            // Do not engage on sight
-        }
-
-        void UpdateAI(uint32 const diff)
-        {
-            if (!UpdateVictim())
-                return;
-
-            events.Update(diff);
-
-            if (me->HasUnitState(UNIT_STATE_CASTING) && (events.GetPhaseMask() & (1 << PHASE_FEUD)) == 0)
-                return;
-
-            while (uint32 eventId = events.ExecuteEvent())
-            {
-                switch (eventId)
-                {
-                case EVENT_ENRAGE:
-                    DoCast(SPELL_BERSERK);
-                    break;
-                case EVENT_BREAK:
-                    DoCastVictim(SPELL_BREAK);
-                    events.ScheduleEvent(EVENT_BREAK, urand(15000, 18000), EVENT_GROUP_NORMAL, IsHeroic() ? 0 : PHASE_NORMAL);
-                    break;
-                case EVENT_CAUSTIC_SLIME:
-                    DoCastRandom(SPELL_CAUSTIC_SLIME, 0.0f, true, -SPELL_BREAK);
-                    if(events.GetPhaseMask() & (1 << PHASE_NORMAL))
-                        events.ScheduleEvent(EVENT_CAUSTIC_SLIME, urand(5000, 8000), EVENT_GROUP_NORMAL, PHASE_NORMAL);
-                    break;
-                case EVENT_MASSACRE:
-                    Talk(EMOTE_MASSACRE);
-                    DoCast(SPELL_MASSACRE);
-                    events.DelayEvents(7000, EVENT_GROUP_NORMAL);
-                    events.ScheduleEvent(EVENT_MASSACRE_KNOCKOUT, 4000, EVENT_GROUP_NORMAL);
-                    break;
-                case EVENT_MASSACRE_KNOCKOUT:
-                    if(roll_chance_i(50 * massacreCnt))
-                    {
-                        massacreCnt = 0;
-                        events.SetPhase(PHASE_FEUD);
-                        events.CancelEventGroup(EVENT_GROUP_NORMAL);
-                        DoCast(SPELL_FEUD);
-                        // 3 Caustic Slime casts in a row
-                        events.ScheduleEvent(EVENT_CAUSTIC_SLIME, 15000, EVENT_GROUP_NORMAL, PHASE_FEUD);
-                        events.ScheduleEvent(EVENT_CAUSTIC_SLIME, 20000, EVENT_GROUP_NORMAL, PHASE_FEUD);
-                        events.ScheduleEvent(EVENT_CAUSTIC_SLIME, 25000, EVENT_GROUP_NORMAL, PHASE_FEUD);
-                        events.ScheduleEvent(EVENT_MASSACRE_FEUD, 26000, EVENT_GROUP_NORMAL, PHASE_FEUD);
-
-                        if(IsHeroic())
-                        {
-                            if(Creature* nefarian = me->GetCreature(*me, nefarianGUID))
-                                nefarian->AI()->DoAction(ACTION_FEUD);
-                            events.ScheduleEvent(EVENT_FEUD_INTERRUPT, 6000);
-                            events.ScheduleEvent(EVENT_DOUBLE_ATTACK, 6000, EVENT_GROUP_NORMAL, PHASE_FEUD);
-                        }
-
-                        if(Creature* bot = me->GetCreature(*me, botGUID))
-                        {
-                            Talk(EMOTE_KNOCKOUT);
-                            bot->RemoveAllAuras();
-                            bot->CastSpell(bot, SPELL_SYSTEMS_FAILURE, true);
-                            bot->CastSpell(bot, SPELL_REROUTE_POWER, false);
-                        }
-                    }
-                    else
-                    {
-                        ++massacreCnt;
-                        events.ScheduleEvent(EVENT_MASSACRE, 26000, EVENT_GROUP_NORMAL);
-                    }
-                    break;
-                case EVENT_FEUD_INTERRUPT:
-                    if(Spell* spell = me->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
-                        spell->SendChannelUpdate(0);
-                        //spell->SendInterrupted(0);
-                    me->RemoveAurasDueToSpell(SPELL_FEUD);
-                    break;
-                case EVENT_MASSACRE_FEUD:
-                    Talk(EMOTE_MASSACRE);
-                    DoCast(SPELL_MASSACRE);
-                    // re-enable bot
-                    if(Creature* bot = me->GetCreature(*me, botGUID))
-                    {
-                        bot->GetMotionMaster()->MovePath(PATH_BILE_O_TRON, true);
-                        bot->RemoveAurasDueToSpell(SPELL_SYSTEMS_FAILURE);
-                    }
-                    // cancel everything except Enrage and re-schedule
-                    events.SetPhase(PHASE_NORMAL);
-                    events.CancelEventGroup(EVENT_GROUP_NORMAL);
-                    ScheduleEvents();
-                    me->resetAttackTimer();
-                    break;
-                case EVENT_DOUBLE_ATTACK:
-                    DoCast(SPELL_DOUBLE_ATTACK_VIS);
-                    DoCast(SPELL_DOUBLE_ATTACK_EFF);
-                    events.ScheduleEvent(EVENT_DOUBLE_ATTACK, urand(10000, 15000), IsHeroic() ? 0 : EVENT_GROUP_NORMAL);
-                    break;
-                }
-            }
-
-            if(me->isAttackReady())
-                me->RemoveAurasDueToSpell(SPELL_DOUBLE_ATTACK_VIS);
-            DoMeleeAttackIfReady();
-        }
-    private:
-        uint64 botGUID;
-        uint64 nefarianGUID;
-        uint8 massacreCnt;
-    };
-
 public:
     boss_chimaeron() : CreatureScript("boss_chimaeron") { }
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new boss_chimaeronAI(creature);
+        return new boss_chimaeronAI (creature);
     }
-};
 
-static const std::string GOSSIP_OPTIONS[5] =
-{
-    "I suppose you'll be needing a key for this cage? Wait, don't tell me. The horrific gibbering monster behind me ate it, right?",
-    "You were trapped, as I recall. This situation seems oddly similar.",
-    "Gnomes in Lava Suits, for example.",
-    "No, I, uh, haven't seen it. You were saying?",
-    "Restrictions? What restrictions?",
-};
-
-static const uint32 GOSSIP_TEXTS[6] = {16565,16593,16594,16595,16596,16597};
-
-class npc_finkle_einhorn : public CreatureScript
-{
-    public:
-        npc_finkle_einhorn() : CreatureScript("npc_finkle_einhorn") { }
-
-        struct npc_finkle_einhornAI : public ScriptedAI
+    struct boss_chimaeronAI: public BossAI
+    {
+        boss_chimaeronAI(Creature* creature) : BossAI(creature, DATA_CHIMAERON)
         {
-            npc_finkle_einhornAI(Creature * creature) : ScriptedAI(creature) {}
+            instance = creature->GetInstanceScript();
+        }
 
-            void Reset()
+        InstanceScript* instance;
+        EventMap events;
+        uint8 phase;
+
+        void Reset()
+        {
+            events.Reset();
+            me->SetReactState(REACT_PASSIVE);
+            phase = 1;
+
+            me->RemoveAura(SPELL_DOUBLE_ATTACK);
+            me->RemoveAura(SPELL_MORTALITY);
+            me->RemoveAura(SPELL_MORTALITY_RAID_DEBUFF);
+            me->AddAura(SPELL_ASLEEP, me);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+
+            if (instance)
+                instance->SetBossState(DATA_CHIMAERON, NOT_STARTED);
+
+            if (Creature* finkle_einhorn = me->FindNearestCreature(NPC_FINKLE_EINHORN, 150.0f, true))
+                finkle_einhorn->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+
+            if (Creature* bilotron = me->FindNearestCreature(NPC_BILE_O_TRON, 150.0f, true))
+                bilotron->AI()->DoAction(ACTION_BILE_O_TRON_RESET);
+
+            if(Creature* nefarianHelperheroic = me->FindNearestCreature(NPC_NEFARIAN_HELPER_HEROIC, 150.0f, true))
+                nefarianHelperheroic->DespawnOrUnsummon(100);
+
+            _Reset();
+        }
+
+        void EnterEvadeMode()
+        {
+            Reset();
+
+            me->GetMotionMaster()->MoveTargetedHome();
+
+            if (instance)
             {
-                done = false;
-                talkTimer = urand(10000, 15000);
+                instance->SetBossState(DATA_CHIMAERON, FAIL);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me); // Remove
             }
 
-            void DoAction(int32 const /*action*/)
+            _EnterEvadeMode();
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            if (instance)
             {
-                done = true;
+                instance->SetBossState(DATA_CHIMAERON, IN_PROGRESS);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me); // Add
             }
 
-            void UpdateAI(uint32 const diff)
+            if(me->GetMap()->IsHeroic())
             {
-                if (done)
-                    return;
+                me->SummonCreature(NPC_NEFARIAN_HELPER_HEROIC,-90.764f, 2.345f, 72.481f, 2.5f ,TEMPSUMMON_MANUAL_DESPAWN);
+                events.ScheduleEvent(EVENT_AGGRO_NEF, 500);
+            }
 
-                if (talkTimer <= diff)
+            events.ScheduleEvent(EVENT_MASSACRE, urand(30000, 35000));
+            events.ScheduleEvent(EVENT_DOUBLE_ATTACK, 13000);
+            events.ScheduleEvent(EVENT_CAUSTIC_SLIME, urand(10000, 12000));
+            events.ScheduleEvent(EVENT_BREAK, urand(14000, 16000));
+
+            _EnterCombat();
+        }
+
+        void JustSummoned(Creature* summon)
+        {
+            summon->AI()->DoZoneInCombat();
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            if(me->GetHealthPct() < 21 && phase == 1)
+            {
+                phase = 2;
+
+                DoCast(me, SPELL_MORTALITY);
+                DoCastAOE(SPELL_MORTALITY_RAID_DEBUFF);
+
+                if (Creature* nefarianHelperheroic = me->FindNearestCreature(NPC_NEFARIAN_HELPER_HEROIC, 150.0f, true))
                 {
-                    Talk(0);
-                    talkTimer = urand(10000, 15000);
-                }else talkTimer -= diff;
+                    nefarianHelperheroic->AI()->Talk(33);
+                    nefarianHelperheroic->CastSpell(nefarianHelperheroic, SPELL_MOCKING_SHADOWS, true);
+                }
+
+                if (Creature* finkle_einhorn = me->FindNearestCreature(NPC_FINKLE_EINHORN, 150.0f, true))
+                    DoScriptText(SAY_P2, finkle_einhorn);
+
+                events.CancelEvent(EVENT_MASSACRE);
+                events.CancelEvent(EVENT_BREAK);
+                events.CancelEvent(EVENT_CAUSTIC_SLIME);
             }
 
-        private:
-            bool done;
-            uint32 talkTimer;
-        };
+            events.Update(diff);
 
-        bool OnGossipHello(Player* player, Creature* creature)
-        {
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_OPTIONS[0], GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-            player->SEND_GOSSIP_MENU(GOSSIP_TEXTS[0], creature->GetGUID());
-
-            creature->AI()->DoAction(0);
-            return true;
-        }
-
-        bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
-        {
-            player->PlayerTalkClass->ClearMenus();
-            uint8 step = uint8(action - GOSSIP_ACTION_INFO_DEF);
-
-            if (step <= 4)
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_OPTIONS[step], GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + step + 1);
-
-            if (step == 5)
-                if (Creature* chimaeron = creature->FindNearestCreature(NPC_CHIMAERON, 100.0f))
-                    chimaeron->AI()->DoAction(ACTION_START_COMBAT);
-
-            player->SEND_GOSSIP_MENU(GOSSIP_TEXTS[step], creature->GetGUID());
-            return true;
-        }
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_finkle_einhornAI(creature);
-        }
-};
-
-class npc_victor_nefarius_chimaeron : public CreatureScript
-{
-    public:
-        npc_victor_nefarius_chimaeron() : CreatureScript("npc_victor_nefarius_chimaeron") {}
-
-        enum
-        {
-            SAY_AGGRO,
-            SAY_DEATH,
-            SAY_MOCKING_SHADOWS,
-            SAY_FEUD,
-            SPELL_SHADOW_WHIP           = 91304,
-            SPELL_MOCKING_SHADOWS       = 91307
-        };
-
-        struct npc_victor_nefarius_chimaeronAI : public ScriptedAI
-        {
-            npc_victor_nefarius_chimaeronAI(Creature* creature) : ScriptedAI(creature)
+            while (uint32 eventId = events.ExecuteEvent())
             {
-                me->SetReactState(REACT_PASSIVE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            }
-
-            void Reset()
-            {
-                deathTimer = 0;
-                outro = false;
-            }
-
-            void IsSummonedBy(Unit* /* who*/)
-            {
-                Talk(SAY_AGGRO);
-            }
-
-            void DoAction(int32 const action)
-            {
-                switch(action)
+                switch (eventId)
                 {
-                case ACTION_DEATH:
-                    outro = true;
-                    deathTimer = 3000;
-                    break;
-                case ACTION_FEUD:
-                    Talk(SAY_FEUD);
-                    DoCast(SPELL_SHADOW_WHIP);
-                    break;
-                case ACTION_PHASE_2:
-                    Talk(SAY_MOCKING_SHADOWS);
-                    DoCast(SPELL_MOCKING_SHADOWS);
-                    break;
+                    
+                    case EVENT_AGGRO_NEF:
+                        if (Creature* nefarianHelperheroic = me->FindNearestCreature(NPC_NEFARIAN_HELPER_HEROIC, 150.0f, true))
+                        nefarianHelperheroic->AI()->Talk(32);
+                        return;
+                    
+                    case EVENT_MASSACRE:
+                        DoCastAOE(SPELL_MASSACRE);
+                    
+                        if (urand(1, 3) == 1)
+                            events.ScheduleEvent(EVENT_BREAK_BILE_O_TRON, 2000);
+                        else
+                            events.ScheduleEvent(EVENT_MASSACRE, 30000);
+                    
+                        break;
+                    case EVENT_BREAK_BILE_O_TRON:
+                        if (Creature* bilotron = me->FindNearestCreature(NPC_BILE_O_TRON, 150.0f, true))
+                        {
+                            bilotron->AI()->DoAction(ACTION_BILE_O_TRON_SYSTEM_FAILURE);
+                    
+                            events.ScheduleEvent(EVENT_MASSACRE, 45000);
+                            events.RescheduleEvent(EVENT_CAUSTIC_SLIME, urand(60000, 64000));
+                            events.ScheduleEvent(EVENT_FEUD, 1000);
+                        }
+                        break;
+                    case EVENT_FEUD:
+                        DoCast(me,SPELL_FEUD);
+                        if (Creature* nefarianHelperheroic = me->FindNearestCreature(NPC_NEFARIAN_HELPER_HEROIC, 150.0f, true))
+                            nefarianHelperheroic->AI()->Talk(34);
+                        events.ScheduleEvent(EVENT_REMOVE_FEUD, 3000);
+                        return;
+
+                    case EVENT_REMOVE_FEUD:
+                        me->RemoveAurasDueToSpell(SPELL_FEUD);
+                        return;
+                        
+                    case EVENT_DOUBLE_ATTACK:
+                        DoCast(me, SPELL_DOUBLE_ATTACK);
+                        events.ScheduleEvent(EVENT_DOUBLE_ATTACK, 15000);
+                        events.ScheduleEvent(EVENT_DOUBLE_ATTACK_REAL, 2000);
+                        break;
+                    
+                    case EVENT_DOUBLE_ATTACK_REAL:
+                        DoCastVictim(SPELL_DOUBLE_ATTACK_REAL);
+                        me->RemoveAura(SPELL_DOUBLE_ATTACK);
+                        return;
+                    
+                    case EVENT_CAUSTIC_SLIME:
+                    {
+                        std::list<Unit*> targets;
+                        SelectTargetList(targets, RAID_MODE(2, 5), SELECT_TARGET_RANDOM, 100.0f, true);
+                            if (!targets.empty())
+                                for (std::list<Unit*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                                    DoCast(*itr, SPELL_CAUSTIC_SLIME);
+                    }
+                        events.ScheduleEvent(EVENT_CAUSTIC_SLIME, urand(18000,22000));                
+                        break;
+                    
+                    case EVENT_BREAK:
+                        DoCastVictim(SPELL_BREAK);
+                        events.ScheduleEvent(EVENT_BREAK, 14000);
+                        break;
+                    
+                    default:
+                        break;
                 }
             }
 
-            void UpdateAI(uint32 const diff)
-            {
-                if (!outro)
-                    return;
+            if(!me->HasAura(SPELL_FEUD))
+                DoMeleeAttackIfReady();
+        }
 
-                if (deathTimer <= diff)
-                {
-                    outro = false;
-                    Talk(SAY_DEATH);
-                    me->DespawnOrUnsummon(5000);
-                } else deathTimer -= diff;
+        void DamageTaken(Unit* who, uint32& damage)
+        {
+            if(me->HasReactState(REACT_PASSIVE))
+            {
+                me->SetReactState(REACT_AGGRESSIVE);
+                me->RemoveAurasDueToSpell(SPELL_ASLEEP);
+                DoZoneInCombat(me);
+            }
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            me->RemoveAllAuras();
+
+            if (instance)
+            {
+                instance->SetBossState(DATA_CHIMAERON, DONE);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me); // Remove
             }
 
-        private:
-            bool outro;
-            uint32 deathTimer;
-        };
+            if (Creature* bilotron = me->FindNearestCreature(NPC_BILE_O_TRON, 150.0f, true))
+                bilotron->AI()->DoAction(ACTION_BILE_O_TRON_RESET);
 
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_victor_nefarius_chimaeronAI(creature);
+            if (Creature* nefarianHelperheroic = me->FindNearestCreature(NPC_NEFARIAN_HELPER_HEROIC, 150.0f, true))
+            {
+                nefarianHelperheroic->RemoveAllAuras();
+                nefarianHelperheroic->AI()->Talk(31);
+                nefarianHelperheroic->DespawnOrUnsummon(9000);
+            }
+
+            if (Creature* finkle_einhorn = me->FindNearestCreature(NPC_FINKLE_EINHORN, 150.0f, true))
+                DoScriptText(SAY_DEATH, finkle_einhorn);
+
+            _JustDied();
         }
+    };
 };
 
+class mob_finkle_einhorn : public CreatureScript
+{
+public:
+    mob_finkle_einhorn() : CreatureScript("mob_finkle_einhorn") { }
+
+    bool OnGossipHello(Player* pPlayer, Creature* creature)
+    {
+        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I suppose you'll be needing a key for this cage? Wait, don't tell me. The horrific gibbering monster behind me ate it, right?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+        pPlayer->SEND_GOSSIP_MENU(66666,creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 uiSender, uint32 uiAction)
+    {
+        player->PlayerTalkClass->ClearMenus();
+
+        switch (uiAction)
+        {
+            case GOSSIP_ACTION_INFO_DEF+1:
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "You were trapped, as I recall. This situation seems oddly similar.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+                player->SEND_GOSSIP_MENU(66667, creature->GetGUID());
+                break;
+            case GOSSIP_ACTION_INFO_DEF+2:
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Gnomes in Lava Suits, for example.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
+                player->SEND_GOSSIP_MENU(66668, creature->GetGUID());
+                break;
+            case GOSSIP_ACTION_INFO_DEF+3:
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "No, I, uh, haven't seen it. You were saying?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+4);
+                player->SEND_GOSSIP_MENU(66669, creature->GetGUID());
+                break;
+            case GOSSIP_ACTION_INFO_DEF+4:
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Restrictions? What restrictions?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+5);
+                player->SEND_GOSSIP_MENU(66670, creature->GetGUID());
+                break;
+            case GOSSIP_ACTION_INFO_DEF+5:
+                if(InstanceScript* instance = creature->GetInstanceScript())
+                {
+                    if(Creature* bilotron = creature->FindNearestCreature(NPC_BILE_O_TRON, 100.0f, true))
+                    {
+                        bilotron->AI()->DoAction(ACTION_BILE_O_TRON_EVENT_START);
+                        creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    }
+                }
+                player->SEND_GOSSIP_MENU(66671, creature->GetGUID());
+                break;
+        }
+        return true;
+    }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new mob_finkle_einhornAI(creature);
+    }
+
+    struct mob_finkle_einhornAI : public ScriptedAI
+    {
+        mob_finkle_einhornAI(Creature* creature) : ScriptedAI(creature)
+        {
+            canFree = false;
+            timer = 1000;
+            despawnTimer = 500000; // set it initially so does not despawn from start xD
+        }
+
+        uint32 timer;
+        uint32 despawnTimer;
+        bool canFree;
+
+        void UpdateAI(uint32 const diff) 
+        {
+            if (GameObject* cage = me->FindNearestGameObject(204929, 30.0f)) // Cage
+                if (cage && cage->GetGoState() == GO_STATE_ACTIVE)
+                {
+                    canFree = true;
+                    despawnTimer = 1000;
+                }
+
+            if (timer <= diff)
+            {
+                if (Player* target = me->FindNearestPlayer(85.0f, true))
+                {
+                    if (target->GetDistance(me) < 85.0f  && me->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP))
+                    {
+                        DoScriptText(SAY_INTRO, me);
+                        timer = 25000;
+                    } else
+                        timer = 1000;
+                }
+                else
+                    timer = 1000;
+
+            } else timer -= diff;
+
+            if (despawnTimer <= diff && canFree)
+            {
+                if (Creature* bilotron = me->FindNearestCreature(NPC_BILE_O_TRON, 150.0f, true))
+                    bilotron->SetVisible(false);
+
+                DoScriptText(SAY_F_OUTRO, me);
+                me->GetMotionMaster()->MovePoint(1, -110.295f, 41.662f, 72.657f);
+                me->DespawnOrUnsummon(30000);
+                canFree = false;
+            }
+            else despawnTimer -= diff;
+        }
+    };
+};
+
+class mob_bile_o_tron : public CreatureScript
+{
+public:
+    mob_bile_o_tron() : CreatureScript("mob_bile_o_tron") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new mob_bile_o_tronAI (creature);
+    }
+
+    struct mob_bile_o_tronAI : public ScriptedAI
+    {
+        mob_bile_o_tronAI(Creature* creature) : ScriptedAI(creature), waypoint(7), uiSystemFailureTimer(0), activated(false)
+        {
+            instance = creature->GetInstanceScript();
+            creature->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+            me->SetReactState(REACT_PASSIVE);
+            isFailureActive = false;
+            chimaeronWaken = false;
+            timerMove = 10000;
+        }
+
+        InstanceScript* instance;
+        uint8 waypoint;
+        uint32 timerMove;
+        uint32 uiSystemFailureTimer;
+        uint32 wakeChimaeronTimer;
+        bool activated;
+        bool isFailureActive;
+        bool chimaeronWaken;
+
+        void UpdateAI(const uint32 diff)
+        {
+            if(!activated)
+                return;
+
+            if (!me->HasAura(SPELL_SYSTEM_FAILURE) && !me->HasAura(SPELL_FINKLES_MIXTURE))
+                me->AddAura(SPELL_FINKLES_MIXTURE, me);
+
+            if (wakeChimaeronTimer <= diff && !chimaeronWaken)
+            {
+                if(Creature* chimaeron = me->FindNearestCreature(BOSS_CHIMAERON, 200.0f))
+                {
+                    chimaeron->RemoveAurasDueToSpell(SPELL_ASLEEP);
+                    if (Unit*target = chimaeron->FindNearestPlayer(50.0f, true))
+                        chimaeron->AI()->AttackStart(target);
+                    chimaeron->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    chimaeronWaken = true;
+                }
+            }
+            else wakeChimaeronTimer -= diff;
+
+            if (timerMove <= diff && waypoint != 7)
+            {
+                me->GetMotionMaster()->MovePoint(1, BilePositions[waypoint]); 
+
+                if(waypoint >= 5)
+                   waypoint = 0;
+                else
+                   waypoint++;
+
+            } else timerMove -= diff;
+
+            if (uiSystemFailureTimer <= diff && isFailureActive)
+            { // Reroute Power
+                me->RemoveAura(SPELL_SYSTEM_FAILURE);
+                me->GetMotionMaster()->MovePoint(1,BilePositions[waypoint]);
+
+                isFailureActive = false;
+            }
+            else uiSystemFailureTimer -= diff;
+        }
+
+        void DoAction(const int32 action)
+        {
+
+            Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
+
+            switch(action)
+            {
+
+                case ACTION_BILE_O_TRON_EVENT_START:
+                    DoCast(me,SPELL_FINKLES_MIXTURE_VISUAL,true);
+                    waypoint = 8;
+                    me->GetMotionMaster()->MovePoint(1, BilePositions[0]);
+                    activated = true;
+                    wakeChimaeronTimer = 5000;
+                    isFailureActive = false;
+                    break;
+                
+                case ACTION_BILE_O_TRON_SYSTEM_FAILURE:
+                    if (!activated)
+                        return;
+                
+                    if (Creature* finkle_einhorn = me->FindNearestCreature(NPC_FINKLE_EINHORN, 150.0f, true))
+                        DoScriptText(SAY_SYSTEM_FAILURE, finkle_einhorn);
+                
+                    me->RemoveAllAuras();
+                    DoCast(me,SPELL_REROUTE_POWER, true);
+                    DoCast(me,SPELL_SYSTEM_FAILURE, true);
+                    isFailureActive = true;
+                    uiSystemFailureTimer = 26000;
+                    break;
+                
+                case ACTION_BILE_O_TRON_RESET:
+                    chimaeronWaken = false;
+                    me->RemoveAllAuras();
+                    if(Creature* chimaeron = me->FindNearestCreature(BOSS_CHIMAERON, 200.0f))
+                        me->AddAura(SPELL_ASLEEP, chimaeron);
+                    me->GetMotionMaster()->MoveTargetedHome();
+                    waypoint = 7;
+                    uiSystemFailureTimer = 0;
+                    activated = false;
+                    break;
+            }
+        }
+
+        void JustReachedHome()
+        {
+            me->RemoveAllAuras();
+        }
+    };
+};
+
+// Finkle's Mixture
 class spell_finkles_mixture : public SpellScriptLoader
 {
 public:
-    spell_finkles_mixture() : SpellScriptLoader("spell_finkles_mixture") { }
+    spell_finkles_mixture() : SpellScriptLoader("spell_finkles_mixture") {}
 
     class spell_finkles_mixture_AuraScript : public AuraScript
     {
         PrepareAuraScript(spell_finkles_mixture_AuraScript);
 
-        void CalculateAmount(AuraEffect const* /* aurEff*/, int32 &amount, bool & canBeRecalculated)
+        void Absorb(AuraEffect* aurEff, DamageInfo & dmgInfo, uint32 & absorbAmount)
         {
-            amount = -1;
-        }
+            Unit * caster = GetCaster();
 
-        void Absorb(AuraEffect* /* aurEff*/, DamageInfo &dmgInfo, uint32 &absorbAmount)
-        {
-            Unit* target = GetTarget();
-            uint32 damage = dmgInfo.GetDamage();
-            uint32 hp = target->GetHealth();
-            if (damage >= hp && hp > 10000)
-                absorbAmount = ++damage - hp;
-            else
-                absorbAmount = 0;
+            if (!caster)
+                return;
+
+            Unit* target = dmgInfo.GetVictim();
+
+            int32 remainingHealth = target->GetHealth() - dmgInfo.GetDamage();
+
+            if (target->GetHealth() >= 10000 && remainingHealth <= 0)
+            {
+                absorbAmount = dmgInfo.GetDamage() - (target->GetHealth() - 2);
+            }
+            else absorbAmount = 0;
         }
 
         void Register()
         {
-            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_finkles_mixture_AuraScript::CalculateAmount, EFFECT_1, SPELL_AURA_SCHOOL_ABSORB);
             OnEffectAbsorb += AuraEffectAbsorbFn(spell_finkles_mixture_AuraScript::Absorb, EFFECT_1);
         }
     };
@@ -497,7 +596,7 @@ public:
 void AddSC_boss_chimaeron()
 {
     new boss_chimaeron();
-    new npc_finkle_einhorn();
-    new npc_victor_nefarius_chimaeron();
+    new mob_finkle_einhorn();
+    new mob_bile_o_tron();
     new spell_finkles_mixture();
-};
+}

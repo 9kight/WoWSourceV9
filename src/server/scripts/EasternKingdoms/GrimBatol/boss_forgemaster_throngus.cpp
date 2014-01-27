@@ -67,8 +67,8 @@ enum Weapon
 
 enum Equipment
 {
-	EQUIPMENT_ID_SWORD	= 65094,  // Not Blizzlike
-	EQUIPMENT_ID_MACE	= 65090,  // Not Blizzlike
+    EQUIPMENT_ID_SWORD    = 65094,  // Not Blizzlike
+    EQUIPMENT_ID_MACE    = 65090,  // Not Blizzlike
 };
 
 Position const TwilightArcherSummonPos[13] =
@@ -91,37 +91,37 @@ Position const TwilightArcherSummonPos[13] =
 class boss_forgemaster_throngus: public CreatureScript
 {
 public:
-	boss_forgemaster_throngus() : CreatureScript("boss_forgemaster_throngus") { }
+    boss_forgemaster_throngus() : CreatureScript("boss_forgemaster_throngus") { }
 
-	CreatureAI* GetAI(Creature* pCreature) const
-	{
-		return new boss_forgemaster_throngusAI (pCreature);
-	}
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new boss_forgemaster_throngusAI (pCreature);
+    }
 
-	struct boss_forgemaster_throngusAI : public ScriptedAI
-	{
-		boss_forgemaster_throngusAI(Creature *c) : ScriptedAI(c), instance(c->GetInstanceScript()) {}
+    struct boss_forgemaster_throngusAI : public ScriptedAI
+    {
+        boss_forgemaster_throngusAI(Creature *c) : ScriptedAI(c), instance(c->GetInstanceScript()) {}
 
-		void EnterCombat(Unit* /*who*/)
-		{
+        void EnterCombat(Unit* /*who*/)
+        {
             Talk(0);
             phases[0] = 0;
             phases[1] = 0;
             phases[2] = 0;
             events.ScheduleEvent(EVENT_PICK_WEAPON, 1000);
-		}
+        }
 
-		void JustDied(Unit* /*killer*/)
-		{
+        void JustDied(Unit* /*killer*/)
+        {
                   Talk(1);
                   DespawnCreatures(NPC_FIRE_PATCH);
                   DespawnCreatures(NPC_TWILIGHT_ARCHER);
                   instance->SetData(DATA_FORGEMASTER_THRONGUS, DONE);
                   DespawnCreatures(40228);
-		}
+        }
 
-		void Reset()
-		{
+        void Reset()
+        {
                   events.Reset();
                   currentWaepon = WEAPON_NON;
                   DespawnCreatures(NPC_FIRE_PATCH);
@@ -129,27 +129,27 @@ public:
                   SetEquipmentSlots(false, 0, 0,0);
                   instance->SetData(DATA_FORGEMASTER_THRONGUS, NOT_STARTED);
                   DespawnCreatures(40228);
-		}
+        }
 
-		void UpdateAI(const uint32 diff)
-		{
-			if (!UpdateVictim() || (me->HasUnitState(UNIT_STATE_CASTING) && currentWaepon != WEAPON_SHIELD))
-				return;
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim() || (me->HasUnitState(UNIT_STATE_CASTING) && currentWaepon != WEAPON_SHIELD))
+                return;
 
-			if (currentWaepon == WEAPON_CHOOSING)
-			{
-				IntializeWeapon();
-				events.ScheduleEvent(EVENT_PICK_WEAPON, 30000);
-				return;
-			}
+            if (currentWaepon == WEAPON_CHOOSING)
+            {
+                IntializeWeapon();
+                events.ScheduleEvent(EVENT_PICK_WEAPON, 30000);
+                return;
+            }
 
-			events.Update(diff);
+            events.Update(diff);
 
-			while (uint32 eventId = events.ExecuteEvent())
-			{
-				switch (eventId)
-				{
-				    case EVENT_PICK_WEAPON:
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_PICK_WEAPON:
                     {
                         ResetWeapon();
                         DoCast(SPELL_PICK_WEAPON);
@@ -193,19 +193,19 @@ public:
                         events.ScheduleEvent(EVENT_DISORIENTING_ROAR, 11000);
                         break;
                     }
-				    default:
+                    default:
                         break;
-				}
-			}
-			DoMeleeAttackIfReady();
-		}
+                }
+            }
+            DoMeleeAttackIfReady();
+        }
 
-		void JustSummoned(Creature* summon)
-		{
-			summon->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE);
+        void JustSummoned(Creature* summon)
+        {
+            summon->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE);
             switch (summon->GetEntry())
             {
-			    case NPC_FIRE_PATCH:
+                case NPC_FIRE_PATCH:
                     summon->CastSpell(summon, SPELL_LAVA_PATCH_VISUAL, true);
                     break;
                 case NPC_CAVE_IN_STALKER:
@@ -214,16 +214,16 @@ public:
                 default :
                     break;
             }
-		}
+        }
 
-	private:
-		void IntializeWeapon()
-		{
-			currentWaepon = GetNextPhase();
+    private:
+        void IntializeWeapon()
+        {
+            currentWaepon = GetNextPhase();
 
-			switch (currentWaepon)
-			{
-			    case WEAPON_SHIELD:
+            switch (currentWaepon)
+            {
+                case WEAPON_SHIELD:
                     DoCast(me, SPELL_SHIELD_VISUAL, true);
                     DespawnCreatures(NPC_TWILIGHT_ARCHER);
                     for(uint32 i = 0; i <= 12; i++)
@@ -233,7 +233,7 @@ public:
                         DoCast(me, SPELL_FLAMING_SHIELD, true);
                     events.ScheduleEvent(EVENT_PERSONAL_PHALANX, 100);
                     break;
-			    case WEAPON_SWORDS:
+                case WEAPON_SWORDS:
                     DoCast(me, SPELL_DUAL_BLADES_BUFF, true);
                     if (IsHeroic())
                         DoCast(me, SPELL_BURNING_FLAMES, true);
@@ -241,78 +241,78 @@ public:
                     events.ScheduleEvent(EVENT_DISORIENTING_ROAR, 11000);
                     events.ScheduleEvent(EVENT_STOMP, urand(5000, 9000));
                     break;
-			    case WEAPON_MACE:
+                case WEAPON_MACE:
                     DoCast(me, SPELL_ENCUMBERED, true);
                     SetEquipmentSlots(false, EQUIPMENT_ID_MACE, 0,0);
                     events.ScheduleEvent(EVENT_IMPALING_SLAM, 7000);
                     events.ScheduleEvent(EVENT_STOMP, 9000);
                     break;
-			}
-		}
+            }
+        }
 
-		void ResetWeapon()
-		{
-			events.Reset();
+        void ResetWeapon()
+        {
+            events.Reset();
             if (Creature *c = me->FindNearestCreature(40255, 100))
                 c->DespawnOrUnsummon();
-			DespawnCreatures(NPC_TWILIGHT_ARCHER);
-			me->RemoveAura(SPELL_FLAME_ARROW);
-			me->RemoveAura(SPELL_FLAMING_SHIELD);
-			me->RemoveAura(SPELL_PERSONAL_PHALANX);
-			me->RemoveAura(SPELL_PERSONAL_PHALANX_FIX);
-			me->RemoveAura(SPELL_DUAL_BLADES_BUFF);
-			me->RemoveAura(SPELL_LAVA_PATCH);
-			me->RemoveAura(SPELL_ENCUMBERED);
-		}
+            DespawnCreatures(NPC_TWILIGHT_ARCHER);
+            me->RemoveAura(SPELL_FLAME_ARROW);
+            me->RemoveAura(SPELL_FLAMING_SHIELD);
+            me->RemoveAura(SPELL_PERSONAL_PHALANX);
+            me->RemoveAura(SPELL_PERSONAL_PHALANX_FIX);
+            me->RemoveAura(SPELL_DUAL_BLADES_BUFF);
+            me->RemoveAura(SPELL_LAVA_PATCH);
+            me->RemoveAura(SPELL_ENCUMBERED);
+        }
 
-		uint8 GetNextPhase()
-		{
-			uint8 base[3] = {WEAPON_SHIELD, WEAPON_SWORDS, WEAPON_MACE};
-			if (phases[0] == 0 && phases[1] == 0 && phases[2] == 0)
-			{
-				for(uint8 i = 0; i <= 2; i++)
-				{
-					while (phases[i] == 0)
-					{
-						uint8 r = urand(0,2);
-						phases[i] = base[r];
-						base[r] = 0;
-					}
-				}
-				uint8 v = phases[0];
-				phases[0] = 0;
-				return v;
-			}
+        uint8 GetNextPhase()
+        {
+            uint8 base[3] = {WEAPON_SHIELD, WEAPON_SWORDS, WEAPON_MACE};
+            if (phases[0] == 0 && phases[1] == 0 && phases[2] == 0)
+            {
+                for(uint8 i = 0; i <= 2; i++)
+                {
+                    while (phases[i] == 0)
+                    {
+                        uint8 r = urand(0,2);
+                        phases[i] = base[r];
+                        base[r] = 0;
+                    }
+                }
+                uint8 v = phases[0];
+                phases[0] = 0;
+                return v;
+            }
             else
-			{
-				for (uint8 i = 0; i <= 2; i++)
-				{
-					if (phases[i] != 0)
-					{
-						uint8 v = phases[i];
-						phases[i] = 0;
-						return v;
-					}
-				}
-			}
-			return urand(WEAPON_SHIELD,WEAPON_MACE);
-		}
+            {
+                for (uint8 i = 0; i <= 2; i++)
+                {
+                    if (phases[i] != 0)
+                    {
+                        uint8 v = phases[i];
+                        phases[i] = 0;
+                        return v;
+                    }
+                }
+            }
+            return urand(WEAPON_SHIELD,WEAPON_MACE);
+        }
 
-		void DespawnCreatures(uint32 entry)
-		{
-			std::list<Creature*> creatures;
-			GetCreatureListWithEntryInGrid(creatures, me, entry, 1000.0f);
-			if (creatures.empty())
-				return;
-			for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
-				(*iter)->DespawnOrUnsummon();
-		}
+        void DespawnCreatures(uint32 entry)
+        {
+            std::list<Creature*> creatures;
+            GetCreatureListWithEntryInGrid(creatures, me, entry, 1000.0f);
+            if (creatures.empty())
+                return;
+            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                (*iter)->DespawnOrUnsummon();
+        }
 
-		EventMap events;
-		uint32 currentWaepon;
-		uint8 phases [3];
+        EventMap events;
+        uint32 currentWaepon;
+        uint8 phases [3];
         InstanceScript *instance;
-	};
+    };
 };
 
 class spell_effect_fix : public SpellScriptLoader

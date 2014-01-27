@@ -471,8 +471,8 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
                         break;
                     case 761:
                         data->WriteBits(0x00000002, 24);
-                        buff << uint32(((BattlegroundBFGScore*)itr->second)->BasesAssaulted);      // bases assaulted
-                        buff << uint32(((BattlegroundBFGScore*)itr->second)->BasesDefended);       // bases defended
+                        buff << uint32(((BattlegroundBGScore*)itr->second)->BasesAssaulted);      // bases assaulted
+                        buff << uint32(((BattlegroundBGScore*)itr->second)->BasesDefended);       // bases defended
                         break;
                     default:
                         data->WriteBits(0, 24);
@@ -518,8 +518,8 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
                 break;
             case BATTLEGROUND_BFG:
                 data->WriteBits(0x00000002, 24);
-                buff << uint32(((BattlegroundBFGScore*)itr->second)->BasesAssaulted);      // bases assaulted
-                buff << uint32(((BattlegroundBFGScore*)itr->second)->BasesDefended);       // bases defended
+                buff << uint32(((BattlegroundBGScore*)itr->second)->BasesAssaulted);      // bases assaulted
+                buff << uint32(((BattlegroundBGScore*)itr->second)->BasesDefended);       // bases defended
                 break;
             case BATTLEGROUND_NA:
             case BATTLEGROUND_BE:
@@ -871,7 +871,7 @@ Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId original
             bg = new BattlegroundTP(*(BattlegroundTP*)bg_template);
             break;
         case BATTLEGROUND_BFG:
-            bg = new BattlegroundBFG(*(BattlegroundBFG*)bg_template);
+            bg = new BattlegroundBG(*(BattlegroundBG*)bg_template);
             break;
         case BATTLEGROUND_RB:
         case BATTLEGROUND_AA:
@@ -968,7 +968,7 @@ bool BattlegroundMgr::CreateBattleground(CreateBattlegroundData& data)
             bg = new BattlegroundTP;
             break;
         case BATTLEGROUND_BFG:
-            bg = new BattlegroundBFG;
+            bg = new BattlegroundBG;
             break;
         default:
             return false;

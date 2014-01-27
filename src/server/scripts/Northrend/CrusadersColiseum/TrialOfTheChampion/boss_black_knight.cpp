@@ -150,7 +150,7 @@ public:
         void JustSummoned(Creature* summon)
         {
             SummonList.push_back(summon->GetGUID());
-            summon->AI()->AttackStart(me->getVictim());
+            summon->AI()->AttackStart(me->GetVictim());
         }
 
         void UpdateAI(const uint32 uiDiff)

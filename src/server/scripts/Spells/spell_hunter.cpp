@@ -32,10 +32,7 @@
 
 enum HunterSpells
 {
-    SPELL_HUNTER_ASPECT_OF_THE_BEAST_PET            = 61669,
-    SPELL_HUNTER_ASPECT_OF_THE_VIPER_ENERGIZE       = 34075,
     SPELL_HUNTER_BESTIAL_WRATH                      = 19574,
-    SPELL_HUNTER_GLYPH_OF_ASPECT_OF_THE_VIPER       = 56851,
     SPELL_HUNTER_INVIGORATION_TRIGGERED             = 53398,
     SPELL_HUNTER_MASTERS_CALL_TRIGGERED             = 62305,
     SPELL_HUNTER_MISDIRECTION_PROC                  = 35079,
@@ -50,8 +47,6 @@ enum HunterSpells
     SPELL_DRAENEI_GIFT_OF_THE_NAARU                 = 59543,
     SPELL_HUNTER_KILL_COMMAND_CRIT_10               = 60110,
     SPELL_HUNTER_KILL_COMMAND_CRIT_20               = 60113,
-    SPELL_HUNTER_STEADY_SHOT                        = 56641,
-    SPELL_HUNTER_IMPROVED_STEADY_SHOT               = 53220,
     SPELL_HUNTER_FOCUSED_FIRE_1                     = 35029,
     SPELL_HUNTER_FOCUSED_FIRE_2                     = 35030
 };
@@ -75,99 +70,6 @@ enum HunterPetTreeSpecializationMarker
     SPELL_HUNTER_PET_FEROCITY_MARKER    = 87887,
     SPELL_HUNTER_PET_TENACITY_MARKER    = 87891,
     SPELL_HUNTER_PET_CUNNING_MARKER    = 87884
-};
-
-// 13161 - Aspect of the Beast
-class spell_hun_aspect_of_the_beast : public SpellScriptLoader
-{
-    public:
-        spell_hun_aspect_of_the_beast() : SpellScriptLoader("spell_hun_aspect_of_the_beast") { }
-
-        class spell_hun_aspect_of_the_beast_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_hun_aspect_of_the_beast_AuraScript);
-
-            bool Load()
-            {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
-            }
-
-            bool Validate(SpellInfo const* /*spellInfo*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_HUNTER_ASPECT_OF_THE_BEAST_PET))
-                    return false;
-                return true;
-            }
-
-            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-            {
-                if (Player* caster = GetCaster()->ToPlayer())
-                    if (Pet* pet = caster->GetPet())
-                        pet->RemoveAurasDueToSpell(SPELL_HUNTER_ASPECT_OF_THE_BEAST_PET);
-            }
-
-            void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-            {
-                if (Player* caster = GetCaster()->ToPlayer())
-                    if (caster->GetPet())
-                        caster->CastSpell(caster, SPELL_HUNTER_ASPECT_OF_THE_BEAST_PET, true);
-            }
-
-            void Register()
-            {
-                AfterEffectApply += AuraEffectApplyFn(spell_hun_aspect_of_the_beast_AuraScript::OnApply, EFFECT_0, SPELL_AURA_UNTRACKABLE, AURA_EFFECT_HANDLE_REAL);
-                AfterEffectRemove += AuraEffectRemoveFn(spell_hun_aspect_of_the_beast_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_UNTRACKABLE, AURA_EFFECT_HANDLE_REAL);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_hun_aspect_of_the_beast_AuraScript();
-        }
-};
-
-// 34074 - Aspect of the Viper
-class spell_hun_ascpect_of_the_viper : public SpellScriptLoader
-{
-    public:
-        spell_hun_ascpect_of_the_viper() : SpellScriptLoader("spell_hun_ascpect_of_the_viper") { }
-
-        class spell_hun_ascpect_of_the_viper_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_hun_ascpect_of_the_viper_AuraScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_HUNTER_ASPECT_OF_THE_VIPER_ENERGIZE))
-                    return false;
-                if (!sSpellMgr->GetSpellInfo(SPELL_HUNTER_GLYPH_OF_ASPECT_OF_THE_VIPER))
-                    return false;
-                return true;
-            }
-
-            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
-            {
-                PreventDefaultAction();
-
-                uint32 maxMana = GetTarget()->GetMaxPower(POWER_MANA);
-                int32 mana = CalculatePct(maxMana, GetTarget()->GetAttackTime(RANGED_ATTACK) / 1000.0f);
-
-                if (AuraEffect const* glyph = GetTarget()->GetAuraEffect(SPELL_HUNTER_GLYPH_OF_ASPECT_OF_THE_VIPER, EFFECT_0))
-                    AddPct(mana, glyph->GetAmount());
-
-                GetTarget()->CastCustomSpell(SPELL_HUNTER_ASPECT_OF_THE_VIPER_ENERGIZE, SPELLVALUE_BASE_POINT0, mana, GetTarget(), true, NULL, aurEff);
-            }
-
-            void Register()
-            {
-                OnEffectProc += AuraEffectProcFn(spell_hun_ascpect_of_the_viper_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_OBS_MOD_POWER);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_hun_ascpect_of_the_viper_AuraScript();
-        }
 };
 
 // 53209 - Chimera Shot
@@ -852,48 +754,11 @@ class spell_hun_intervene : public SpellScriptLoader
         }
 };
 
-// -82692 - Focus Fire
+// -82692 - Foucus Fire
 class spell_hun_focus_fire : public SpellScriptLoader
 {
     public:
         spell_hun_focus_fire() : SpellScriptLoader("spell_hun_focus_fire") { }
-
-        // SpellScript
-        class spell_hun_focus_fire_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_hun_focus_fire_SpellScript)
-
-            bool Validate(SpellInfo const* /*spellEntry*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(82692))
-                    return false;
-                return true;
-            }
-
-            SpellCastResult CheckPetFrenzy()
-            {
-                Unit * pet = GetCaster()->GetGuardianPet();
-                if (!pet)
-                    return SPELL_FAILED_NO_PET;
-
-                if (pet->HasAura(19615))
-                    return SPELL_CAST_OK;
-                else
-                    return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
-            }
-        
-            void Register()
-            {
-                OnCheckCast += SpellCheckCastFn(spell_hun_focus_fire_SpellScript::CheckPetFrenzy);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-             return new spell_hun_focus_fire_SpellScript();
-        }
-
-        // AuraScript
 
         class spell_hun_focus_fire_AuraScript : public AuraScript
         {
@@ -1878,11 +1743,8 @@ class spell_hun_concussive: public SpellScriptLoader
         }
 };
 
-
 void AddSC_hunter_spell_scripts()
 {
-    new spell_hun_aspect_of_the_beast();
-    new spell_hun_ascpect_of_the_viper();
     new spell_hun_chimera_shot();
     new spell_hun_disengage();
     new spell_hun_invigoration();

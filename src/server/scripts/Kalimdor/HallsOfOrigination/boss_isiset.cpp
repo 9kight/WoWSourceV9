@@ -29,8 +29,14 @@ enum Misc
     DATA_CALL,
     DATA_VEIL,
 
+    // Isiset
     SPELL_SUPERNOVA                     = 74136,
     DISPLAYID_INVISIBLE                 = 11686,
+
+    // Trash
+    SPELL_ENERGY_FLUX_SUMMON            = 74041,
+    SPELL_ENERGY_FLUX_BEAM              = 74043,
+    SPELL_ENERGY_FLUX_SUMMON_2          = 74042
 };
 
 enum Quotes
@@ -143,7 +149,7 @@ class boss_isiset : public CreatureScript
                 me->RestoreDisplayId();
                 me->SetReactState(REACT_AGGRESSIVE);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                if(Unit * victim = me->getVictim())
+                if(Unit * victim = me->GetVictim())
                     DoStartMovement(victim);
             }
         }
@@ -202,22 +208,26 @@ public:
     }
 };
 
+class FacingCheck
+{
+public:
+    FacingCheck(WorldObject* caster) : _caster(caster) { }
+
+    bool operator() (WorldObject* unit)
+    {
+        Position pos;
+        _caster->GetPosition(&pos);
+        return !unit->HasInArc(static_cast<float>(M_PI), &pos);
+    }
+
+private:
+    WorldObject* _caster;
+};
+
 class spell_isiset_supernova : public SpellScriptLoader
 {
-    class FacingCheck : public std::unary_function<Unit*, bool>
-    {
-    public:
-        explicit FacingCheck(Unit* _caster) : caster(_caster) { }
-
-        bool operator() (WorldObject* object)
-        {
-            return !object->isInFront(caster, 100.0f);
-            //return !object->isInFront(caster, 100.0f, 2.5f); // find the right value, but this line is right
-        }
-
-    private:
-        Unit* caster;
-    };
+public:
+    spell_isiset_supernova() : SpellScriptLoader("spell_isiset_supernova") { }
 
     class spell_isiset_supernova_SpellScript : public SpellScript
     {
@@ -225,7 +235,7 @@ class spell_isiset_supernova : public SpellScriptLoader
 
         void FilterTargets(std::list<WorldObject*>& unitList)
         {
-            unitList.remove_if (FacingCheck(GetCaster()));
+            unitList.remove_if(FacingCheck(GetCaster()));
         }
 
         void Register()
@@ -235,9 +245,6 @@ class spell_isiset_supernova : public SpellScriptLoader
         }
     };
 
-public:
-    spell_isiset_supernova() : SpellScriptLoader("spell_isiset_supernova") { }
-
     SpellScript* GetSpellScript() const
     {
         return new spell_isiset_supernova_SpellScript();
@@ -246,13 +253,6 @@ public:
 
 class npc_spatial_flux : public CreatureScript
 {
-    enum
-    {
-        SPELL_ENERGY_FLUX_SUMMON            = 74041,
-        SPELL_ENERGY_FLUX_BEAM              = 74043,
-        SPELL_ENERGY_FLUX_SUMMON_2          = 74042
-    };
-
     struct npc_spatial_fluxAI : public ScriptedAI
     {
         npc_spatial_fluxAI(Creature * creature) : ScriptedAI(creature)

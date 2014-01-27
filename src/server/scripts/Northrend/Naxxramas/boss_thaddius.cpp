@@ -269,7 +269,7 @@ public:
                 }
             }
 
-            if (events.GetTimer() > 15000 && !me->IsWithinMeleeRange(me->getVictim()))
+            if (events.GetTimer() > 15000 && !me->IsWithinMeleeRange(me->GetVictim()))
                 DoCastVictim(SPELL_BALL_LIGHTNING);
             else
                 DoMeleeAttackIfReady();
@@ -340,8 +340,8 @@ public:
             {
                 if (Creature* pFeugen = me->GetCreature(*me, instance->GetData64(DATA_FEUGEN)))
                 {
-                    Unit* pStalaggVictim = me->getVictim();
-                    Unit* pFeugenVictim = pFeugen->getVictim();
+                    Unit* pStalaggVictim = me->GetVictim();
+                    Unit* pFeugenVictim = pFeugen->GetVictim();
 
                     if (pFeugenVictim && pStalaggVictim)
                     {

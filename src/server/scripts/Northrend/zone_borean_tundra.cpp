@@ -221,7 +221,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
         if (player->GetQuestStatus(11957) == QUEST_STATUS_INCOMPLETE)
@@ -267,7 +267,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
         if (player->GetQuestStatus(QUEST_ACES_HIGH) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_ACES_HIGH_DAILY) == QUEST_STATUS_INCOMPLETE) //It's the same dragon for both quests.
@@ -382,6 +382,40 @@ public:
     CreatureAI* GetAI(Creature* creature) const
     {
         return new mob_nerubar_victimAI(creature);
+    }
+};
+
+/*######
+## npc_scourge_prisoner
+######*/
+
+enum eScourgePrisoner
+{
+    GO_SCOURGE_CAGE = 187867
+};
+
+class npc_scourge_prisoner : public CreatureScript
+{
+public:
+    npc_scourge_prisoner() : CreatureScript("npc_scourge_prisoner") { }
+
+    struct npc_scourge_prisonerAI : public ScriptedAI
+    {
+        npc_scourge_prisonerAI(Creature* creature) : ScriptedAI (creature) {}
+
+        void Reset()
+        {
+            me->SetReactState(REACT_PASSIVE);
+
+            if (GameObject* pGO = me->FindNearestGameObject(GO_SCOURGE_CAGE, 5.0f))
+                if (pGO->GetGoState() == GO_STATE_ACTIVE)
+                    pGO->SetGoState(GO_STATE_READY);
+        }
+    };
+
+    CreatureAI *GetAI(Creature* creature) const
+    {
+        return new npc_scourge_prisonerAI(creature);
     }
 };
 
@@ -1213,7 +1247,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
         if (player->GetQuestStatus(QUEST_LAST_RITES) == QUEST_STATUS_INCOMPLETE && creature->GetAreaId() == 4128)
@@ -2477,7 +2511,7 @@ public:
         if (player->HasAura(SPELL_RIGHTEOUS_VISION) && player->GetQuestStatus(QUEST_THE_HUNT_IS_ON) == QUEST_STATUS_INCOMPLETE)
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, charGossipItem, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
 
-        if (creature->isVendor())
+        if (creature->IsVendor())
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
 
         player->SEND_GOSSIP_MENU(uiGossipText, creature->GetGUID());
@@ -2512,6 +2546,7 @@ void AddSC_borean_tundra()
     new npc_corastrasza();
     new npc_iruk();
     new mob_nerubar_victim();
+    new npc_scourge_prisoner;
     new npc_jenny();
     new npc_fezzix_geartwist();
     new npc_nesingwary_trapper();

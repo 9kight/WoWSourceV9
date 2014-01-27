@@ -95,7 +95,7 @@ class CreatureAI : public UnitAI
         virtual void EnterEvadeMode();
 
         // Called for reaction at enter to combat if not in combat yet (enemy can be NULL)
-        virtual void EnterCombat(Unit* /*victim*/) {}
+        virtual void EnterCombat(Unit* /*victim*/);
 
         // Called when the creature is killed
         virtual void JustDied(Unit* /*killer*/) {}
@@ -129,7 +129,7 @@ class CreatureAI : public UnitAI
         void OnCharmed(bool apply);
 
         // Called at reaching home after evade
-        virtual void JustReachedHome() {}
+        virtual void JustReachedHome();
 
         void DoZoneInCombat(Creature* creature = NULL, float maxRangeToNearestTarget = 50.0f);
 
@@ -141,6 +141,12 @@ class CreatureAI : public UnitAI
 
         // Called when owner attacks something
         virtual void OwnerAttacked(Unit* /*target*/) {}
+		
+		void SetMinionInCombat()
+		{
+			DoZoneInCombat(me);
+			me->SetInCombatWithZone();
+		}
 
         /// == Triggered Actions Requested ==================
 

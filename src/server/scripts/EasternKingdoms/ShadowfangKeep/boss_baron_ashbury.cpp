@@ -138,7 +138,7 @@ class boss_baron_ashbury : public CreatureScript
                         }
                         Talk(SAY_ASPHYXIATION);
                         DoCastAOE(SPELL_ASPHYXOATE, true);
-                        me->SetFacingToObject(me->getVictim());
+                        me->SetFacingToObject(me->GetVictim());
                         me->SetReactState(REACT_PASSIVE);
                         me->AttackStop();
                         me->resetAttackTimer();

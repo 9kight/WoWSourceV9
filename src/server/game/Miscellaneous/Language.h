@@ -181,7 +181,10 @@ enum TrinityStrings
     LANG_PHASING_LAST_PHASE             = 180,
     LANG_PHASING_LIST                   = 181,
     LANG_PHASING_PHASEMASK              = 182,
-    // Room for more level 1              183-199 not used
+    LANG_YOU_CHANGE_FOCUS               = 183,
+    LANG_YOURS_FOCUS_CHANGED            = 184,
+    LANG_CURRENT_FOCUS                  = 185,
+    // Room for more level 1              186-199 not used
 
     // level 2 chat
     LANG_NO_SELECTION                   = 200,
@@ -413,7 +416,7 @@ enum TrinityStrings
     LANG_COMMAND_GRAVEYARDALRLINKED     = 450,
     LANG_COMMAND_GRAVEYARDLINKED        = 451,
     LANG_COMMAND_GRAVEYARDWRONGZONE     = 452,
-    //                                  = 453, see LANG_PINFO_BAN
+    //                                  = 453, see LANG_PINFO_PLAYER
     LANG_COMMAND_GRAVEYARDERROR         = 454,
     LANG_COMMAND_GRAVEYARD_NOTEAM       = 455,
     LANG_COMMAND_GRAVEYARD_ANY          = 456,
@@ -530,7 +533,6 @@ enum TrinityStrings
     LANG_PINFO_BAN                      = 453,
     LANG_PINFO_MAP_ONLINE               = 714,
     LANG_PINFO_MAP_OFFLINE              = 716,
-    LANG_PINFO_GUILD_INFO               = 749,
 
     LANG_YOU_SET_EXPLORE_ALL            = 551,
     LANG_YOU_SET_EXPLORE_NOTHING        = 552,
@@ -640,23 +642,6 @@ enum TrinityStrings
     LANG_BG_AB_H_NEAR_VICTORY           = 665,
     LANG_BG_MARK_BY_MAIL                = 666,
 
-    LANG_BG_BFG_ALLY                    = 650,
-    LANG_BG_BFG_HORDE                   = 651,
-    LANG_BG_BFG_NODE_WATERWORKS         = 766,
-    LANG_BG_BFG_NODE_LIGHTHOUSE         = 767,
-    LANG_BG_BFG_NODE_MINE               = 768,
-    LANG_BG_BFG_NODE_TAKEN              = 657,
-    LANG_BG_BFG_NODE_DEFENDED           = 658,
-    LANG_BG_BFG_NODE_ASSAULTED          = 659,
-    LANG_BG_BFG_NODE_CLAIMED            = 660,
-
-    LANG_BG_BFG_START_TWO_MINUTES       = 757,
-    LANG_BG_BFG_START_ONE_MINUTE        = 758,
-    LANG_BG_BFG_START_HALF_MINUTE       = 759,
-    LANG_BG_BFG_HAS_BEGUN               = 760,
-    LANG_BG_BFG_A_NEAR_VICTORY          = 761,
-    LANG_BG_BFG_H_NEAR_VICTORY          = 762,
-
     LANG_BG_EY_HAS_TAKEN_A_M_TOWER      = 667,
     LANG_BG_EY_HAS_TAKEN_H_M_TOWER      = 668,
     LANG_BG_EY_HAS_TAKEN_A_D_RUINS      = 669,
@@ -695,9 +680,9 @@ enum TrinityStrings
     LANG_BG_QUEUE_ANNOUNCE_SELF         = 711,
     LANG_BG_QUEUE_ANNOUNCE_WORLD        = 712,
     LANG_YOUR_ARENA_LEVEL_REQ_ERROR     = 713,
-//                                      = 714, see LANG_PINFO_MAP_ONLINE
+//                                      = 714, see LANG_PINFO_ACC_ACCOUNT
     LANG_YOUR_BG_LEVEL_REQ_ERROR        = 715,
-//                                      = 716, see LANG_PINFO_MAP_OFFLINE
+//                                      = 716, see LANG_PINFO_ACC_LASTLOGIN
     LANG_BG_STARTED_ANNOUNCE_WORLD      = 717,
     LANG_ARENA_QUEUE_ANNOUNCE_WORLD_JOIN= 718,
     LANG_ARENA_QUEUE_ANNOUNCE_WORLD_EXIT= 719,
@@ -732,10 +717,10 @@ enum TrinityStrings
 //  LANG_DIST_ARENA_POINTS_END          = 746,
     LANG_BG_DISABLED                    = 747,
     LANG_ARENA_DISABLED                 = 748,
-//                                      = 749, not used
+	LANG_PINFO_GUILD_INFO               = 749,
     LANG_BATTLEGROUND_PREMATURE_FINISH_WARNING = 750,       // "Not enough players. This game will close in %u mins."
     LANG_BATTLEGROUND_PREMATURE_FINISH_WARNING_SECS = 751,  // "Not enough players. This game will close in %u seconds."
-//                                      = 752, not used
+//                                      = 752, see LANG_PINFO_ACC_IP
 //  LANG_BG_WS_START_TWO_MINUTES        = 753, - defined above
 //  LANG_BG_AB_START_TWO_MINUTES        = 754, - defined above
 //  LANG_BG_EY_START_TWO_MINUTES        = 755, - defined above
@@ -793,7 +778,34 @@ enum TrinityStrings
     LANG_NPCINFO_MAILBOX                = 841,
     LANG_NPCINFO_PLAYER_VEHICLE         = 842,
 
-    // Room for in-game strings           843-999 not used
+    // Pinfo commands
+	LANG_PINFO_PLAYER                   = 453,
+    LANG_PINFO_GM_ACTIVE                = 548,
+    LANG_PINFO_BANNED                   = 549,
+    LANG_PINFO_MUTED                    = 550,
+    LANG_PINFO_ACC_ACCOUNT              = 714,
+    LANG_PINFO_ACC_LASTLOGIN            = 716,
+    LANG_PINFO_ACC_OS                   = 749,
+    LANG_PINFO_ACC_REGMAILS             = 879,
+    LANG_PINFO_ACC_IP                   = 752,
+    LANG_PINFO_CHR_LEVEL_LOW            = 843,
+    LANG_PINFO_CHR_RACE                 = 844,
+    LANG_PINFO_CHR_ALIVE                = 845,
+    LANG_PINFO_CHR_PHASE                = 846,
+    LANG_PINFO_CHR_MONEY                = 847,
+    LANG_PINFO_CHR_MAP                  = 848,
+    LANG_PINFO_CHR_GUILD                = 849,
+    LANG_PINFO_CHR_GUILD_RANK           = 850,
+    LANG_PINFO_CHR_GUILD_NOTE           = 851,
+    LANG_PINFO_CHR_GUILD_ONOTE          = 852,
+    LANG_PINFO_CHR_PLAYEDTIME           = 853,
+    LANG_PINFO_CHR_MAILS                = 854,
+    LANG_PINFO_CHR_LEVEL_HIGH           = 871,
+
+    LANG_CHARACTER_GENDER_MALE          = 855,
+    LANG_CHARACTER_GENDER_FEMALE        = 856,
+
+    // Room for in-game strings           857-999 not used
 
     // Level 4 (CLI only commands)
     LANG_COMMAND_EXIT                   = 1000,
@@ -913,7 +925,43 @@ enum TrinityStrings
     LANG_BG_IC_ALLIANCE                 = 1300,
     LANG_BG_IC_HORDE                    = 1301,
 
-    // FREE IDS                           1228-9999
+    // FREE IDS                         1244-1249
+
+    // Twin Peaks
+    LANG_BG_TP_START_TWO_MINUTES        = 1230,
+    LANG_BG_TP_START_ONE_MINUTE         = 1231,
+    LANG_BG_TP_START_HALF_MINUTE        = 1232,
+    LANG_BG_TP_HAS_BEGUN                = 1233,
+    LANG_BG_TP_CAPTURED_HF              = 1234,
+    LANG_BG_TP_CAPTURED_AF              = 1235,
+    LANG_BG_TP_DROPPED_HF               = 1236,
+    LANG_BG_TP_DROPPED_AF               = 1237,
+    LANG_BG_TP_RETURNED_AF              = 1238,
+    LANG_BG_TP_RETURNED_HF              = 1239,
+    LANG_BG_TP_PICKEDUP_HF              = 1240,
+    LANG_BG_TP_PICKEDUP_AF              = 1241,
+    LANG_BG_TP_F_PLACED                 = 1242,
+    LANG_BG_TP_ALLIANCE_FLAG_RESPAWNED  = 1243,
+    LANG_BG_TP_HORDE_FLAG_RESPAWNED     = 1244,
+
+    // FREE IDS                         1265-1299
+
+    // Battle For Gilneas
+    LANG_BG_BG_START_TWO_MINUTES        = 1250,
+    LANG_BG_BG_START_ONE_MINUTE         = 1251,
+    LANG_BG_BG_START_HALF_MINUTE        = 1252,
+    LANG_BG_BG_HAS_BEGUN                = 1253,
+    LANG_BG_BG_ALLY                     = 1254,
+    LANG_BG_BG_HORDE                    = 1255,
+    LANG_BG_BG_NODE_LIGHTHOUSE          = 1256,
+    LANG_BG_BG_NODE_WATERWORKS          = 1257,
+    LANG_BG_BG_NODE_MINE                = 1258,
+    LANG_BG_BG_NODE_TAKEN               = 1259,
+    LANG_BG_BG_NODE_DEFENDED            = 1260,
+    LANG_BG_BG_NODE_ASSAULTED           = 1261,
+    LANG_BG_BG_NODE_CLAIMED             = 1262,
+    LANG_BG_BG_A_NEAR_VICTORY           = 1263,
+    LANG_BG_BG_H_NEAR_VICTORY           = 1264,
 
     // AV
     LANG_BG_AV_ALLY                     = 1300,
@@ -1025,6 +1073,9 @@ enum TrinityStrings
     LANG_COMMAND_NO_ACHIEVEMENT_CRITERIA_FOUND = 5033,
     LANG_COMMAND_NO_OUTDOOR_PVP_FORUND  = 5034,
     LANG_CALL_FOR_HELP                  = 5035,
+	LANG_NPCINFO_EQUIPMENT              = 5036,
+	LANG_NPCINFO_MECHANIC_IMMUNE        = 5037,
+	LANG_NPCINFO_UNIT_FIELD_FLAGS       = 5038,
     // Room for more Trinity strings      5036-9999
 
     // Level requirement notifications
@@ -1153,27 +1204,9 @@ enum TrinityStrings
     LANG_BG_SA_H_GY_WEST                    = 10072, //The Horde captured the West Graveyard!
     LANG_BG_SA_H_GY_EAST                    = 10073, //The Horde captured the East Graveyard!
 
-    // Twin Peaks 
-    LANG_BG_TP_START_TWO_MINUTES = 10074,
-    LANG_BG_TP_START_ONE_MINUTE = 10075,
-    LANG_BG_TP_START_HALF_MINUTE = 10076,
-    LANG_BG_TP_HAS_BEGUN = 10077,
-
-    LANG_BG_TP_CAPTURED_HF = 10078,
-    LANG_BG_TP_CAPTURED_AF = 10079,
-    LANG_BG_TP_DROPPED_HF = 10080,
-    LANG_BG_TP_DROPPED_AF = 10081,
-    LANG_BG_TP_RETURNED_AF = 10082,
-    LANG_BG_TP_RETURNED_HF = 10083,
-    LANG_BG_TP_PICKEDUP_HF = 10084,
-    LANG_BG_TP_PICKEDUP_AF = 10085,
-    LANG_BG_TP_F_PLACED = 10086,
-    LANG_BG_TP_ALLIANCE_FLAG_RESPAWNED = 10087,
-    LANG_BG_TP_HORDE_FLAG_RESPAWNED = 10088,
-
-    // Use for custom patches             11000-11999
-    LANG_AUTO_BROADCAST                 = 11000,
-    LANG_INVALID_REALMID                = 11001,
+    // Use for custom patches 11000-11999
+    LANG_AUTO_BROADCAST                     = 11000,
+    LANG_INVALID_REALMID                    = 11001,
 
     // NOT RESERVED IDS                   12000-1999999999
     // `db_script_string` table index     2000000000-2000009999 (MIN_DB_SCRIPT_STRING_ID-MAX_DB_SCRIPT_STRING_ID)

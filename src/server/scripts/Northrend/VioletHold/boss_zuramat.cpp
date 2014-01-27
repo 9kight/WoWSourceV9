@@ -193,7 +193,7 @@ public:
 
         void JustSummoned(Creature* summon)
         {
-            summon->AI()->AttackStart(me->getVictim());
+            summon->AI()->AttackStart(me->GetVictim());
             summon->AI()->DoCastAOE(SPELL_ZURAMAT_ADD_2);
             summon->SetPhaseMask(17, true);
         }

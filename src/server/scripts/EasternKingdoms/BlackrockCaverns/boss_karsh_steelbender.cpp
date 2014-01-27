@@ -20,78 +20,42 @@
 
 enum eKarshYells
 {
-    SAY_AGGRO                   = 0,
-    SAY_QUICKSILVER_ARMOR       = 1,
-    SAY_KILL                    = 2,
-    SAY_DEATH                   = 3,
+    SAY_AGGRO                           = 0,
+    SAY_QUICKSILVER_ARMOR               = 1,
+    SAY_KILL                            = 2,
+    SAY_DEATH                           = 3,
+    SAY_QUICKSILVER_HEAT                = 4,
 };
 
-enum eKarshSpells
+enum Spells
 {
-    SPELL_CLEAVE                = 15284,
-    SPELL_QUICKSILVER_ARMOR     = 75842,
-    SPELL_QUICKSILVER_PERIODIC  = 75854,
+    SPELL_QUECKSILVER_ARMOR         = 75842,
+    SPELL_SUPERHEATED_QUECKSILVER_ARMOR     = 75846,
+    SPELL_SUPERHEATED_ARMOR_H               = 93567,
 
     SPELL_HEAT_WAVE             = 75851,
-    SPELL_BURNING_METAL         = 76002,
-    SPELL_TRANSFORM             = 93750, // Used in spell_linked_spell
-    SPELL_SUPERHEATED_ARMOR     = 75846,
-    SPELL_SUPERHEATED_ARMOR_H   = 93567,
+    SPELL_BURNING_METAL             = 76002,
+    SPELL_CLEAVE                 = 15284,
+    SPELL_LAVA_SPOUT             = 76007,
 
-    SPELL_BOUND_FLAMES          = 93499,
-    //18852 - aggro sound (?)
+    SPELL_LAVA_POOL             = 93628,
 };
 
-// 75854 Quicksilver Armor
-class spell_karsh_quicksilver_armor : public SpellScriptLoader
+enum Events
 {
-public:
-    spell_karsh_quicksilver_armor() : SpellScriptLoader("spell_karsh_quicksilver_armor") { }
-
-    class spell_karsh_quicksilver_armor_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_karsh_quicksilver_armor_AuraScript)
-
-        void HandleEffectPeriodicUpdate(AuraEffect* /*aurEff*/)
-        {
-            if (Unit * caster = GetCaster())
-            {
-                // If close to the lava stream, handle armor heaten / removal
-                if (caster->GetDistance(237.528107f, 784.951538f, 95.670837f) < 5.5f)
-                {
-                    caster->RemoveAurasDueToSpell(SPELL_QUICKSILVER_ARMOR);
-                    caster->CastSpell(caster, SPELL_HEAT_WAVE, true);
-                    caster->CastSpell(caster, SPELL_SUPERHEATED_ARMOR, true);
-                }
-            }
-        }
-
-        void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-        {
-            if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
-            {
-                GetTarget()->CastSpell(GetTarget(), SPELL_QUICKSILVER_ARMOR, true);
-
-                if (GetTarget()->GetMap()->IsHeroic())
-                    for(int i = 0; i < 3; ++i)
-                        GetTarget()->CastSpell(GetTarget(), SPELL_BOUND_FLAMES, true);
-            }
-        }
-
-        void Register()
-        {
-            OnEffectUpdatePeriodic += AuraEffectUpdatePeriodicFn(spell_karsh_quicksilver_armor_AuraScript::HandleEffectPeriodicUpdate, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
-            OnEffectRemove         += AuraEffectRemoveFn(spell_karsh_quicksilver_armor_AuraScript::OnRemove, EFFECT_1, SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, AURA_EFFECT_HANDLE_REAL);
-        }
-    };
-
-    AuraScript *GetAuraScript() const
-    {
-        return new spell_karsh_quicksilver_armor_AuraScript();
-    }
+    EVENT_CLEAVE                 = 1,
+    EVENT_CHECK_ARMOR_STATE         = 2,
+    EVENT_LAVA_POOL             = 3,
 };
 
-class boss_karsh_steelbender: public CreatureScript
+Position const summonPositions[3] =
+{
+    {268.717f, 789.984f, 95.3499f, 4.86041f},
+    {226.707f, 754.725f, 95.3501f, 2.75163f},
+    {216.941f, 808.943f, 95.35f, 0.638911f},
+};
+
+class boss_karsh_steelbender : public CreatureScript
 {
 public:
     boss_karsh_steelbender() : CreatureScript("boss_karsh_steelbender") { }
@@ -106,28 +70,107 @@ public:
         boss_karsh_steelbenderAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+
+            std::list<Creature*> creatures;
+            GetCreatureListWithEntryInGrid(creatures, me, NPC_LAVA_SPOUT_TRIGGER, 1000.0f);
+
+            if (creatures.empty())
+                return;
+
+            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                (*iter)->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE);
         }
 
         InstanceScript* instance;
-
-        uint32 CleaveTimer;
-        uint32 DarkCommandTimer;
+        EventMap events;
+        uint8 SpawnCount;
 
         void Reset()
         {
-            CleaveTimer = urand(15000, 25000);
-            me->CastSpell(me, SPELL_QUICKSILVER_PERIODIC, true);
-            me->CastSpell(me, SPELL_QUICKSILVER_ARMOR, true);
+            events.Reset();
+            me->RemoveAllAuras();
+
+            DespawnCreatures(NPC_BOUND_FLAMES);
         }
 
-        void KilledUnit(Unit* /*victim*/)
+        void EnterCombat(Unit* /*who*/)
         {
-            Talk(SAY_KILL);
+            DoCast(me, SPELL_QUECKSILVER_ARMOR);
+            events.ScheduleEvent(EVENT_CLEAVE, urand(20000, 25000));
+            events.ScheduleEvent(EVENT_CHECK_ARMOR_STATE, 1000);
+
+            Talk(SAY_AGGRO);
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if((!me->HasAura(SPELL_QUECKSILVER_ARMOR)) && (!me->HasAura(SPELL_SUPERHEATED_QUECKSILVER_ARMOR)))
+            {    // Summon Adds
+
+                LavaSpoutErrupt();
+
+                Talk(SAY_QUICKSILVER_ARMOR);
+
+                DoCast(me, SPELL_QUECKSILVER_ARMOR);
+
+                if(!me->GetMap()->IsHeroic())
+                    return;
+
+                // Heroic: Summon Adds
+
+                uint8 r = urand(0,2);
+
+                for(uint8 i = 0; i<=2; i++)
+                    me->SummonCreature(NPC_BOUND_FLAMES,summonPositions[r], TEMPSUMMON_CORPSE_DESPAWN);
+
+                SpawnCount = 3;
+
+                return;
+            }
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_CLEAVE:
+                    DoCastVictim(SPELL_CLEAVE);
+                    events.ScheduleEvent(EVENT_CLEAVE, urand(20000, 25000));
+                    break;
+
+                case EVENT_CHECK_ARMOR_STATE:
+                    // Checks weather the Boss is in heat range
+
+                    if(me->GetDistance(237.166f, 785.067f, 95.67f /*Stream of Molten*/) < 4.5f)
+                    {
+                        me->RemoveAura(SPELL_QUECKSILVER_ARMOR);
+
+                        Talk(SAY_QUICKSILVER_HEAT);
+
+                        // We cant do that with CastSpell because with the Spell the Normal Armor is applied too
+                        me->SetAuraStack(SPELL_SUPERHEATED_QUECKSILVER_ARMOR,me,me->GetAuraCount(SPELL_SUPERHEATED_QUECKSILVER_ARMOR)+1);
+                        me->GetAura(SPELL_SUPERHEATED_QUECKSILVER_ARMOR)->RefreshDuration();
+
+                        DoCastAOE(SPELL_HEAT_WAVE);
+
+                    }
+
+                    events.ScheduleEvent(EVENT_CHECK_ARMOR_STATE, 1000);
+                    break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
         }
 
         void DamageDealt(Unit* /*target*/, uint32& damage, DamageEffectType type)
         {
-            uint32 count = me->GetAuraCount(IsHeroic() ? SPELL_SUPERHEATED_ARMOR_H : SPELL_SUPERHEATED_ARMOR);
+        uint32 count = me->GetAuraCount(IsHeroic() ? SPELL_SUPERHEATED_ARMOR_H : SPELL_SUPERHEATED_QUECKSILVER_ARMOR);
+        
 
             if (type == SPELL_DIRECT_DAMAGE && count)
             {
@@ -137,42 +180,53 @@ public:
             {
                 DoCastVictim(SPELL_BURNING_METAL);
             }
+         }    
+
+        void SummonedCreatureDespawn(Creature* summon)
+        {
+            if(summon->GetEntry() == NPC_BOUND_FLAMES)
+            {
+            SpawnCount--;
+
+            if(SpawnCount == 0)
+                DoCastAOE(SPELL_LAVA_POOL,true);            
+            }
         }
 
-        void JustDied(Unit* /*Kill*/)
+        void JustDied(Unit* /*killer*/)
         {
+            DespawnCreatures(NPC_BOUND_FLAMES);
             Talk(SAY_DEATH);
-
-            if (instance)
-                instance->SetData(BOSS_KARSH_STEELBENDER, DONE);
         }
 
-        void EnterCombat(Unit* /*Ent*/)
+        void KilledUnit(Unit* /*victim*/)
         {
-            Talk(SAY_AGGRO);
-
-            if (instance)
-                instance->SetData(BOSS_KARSH_STEELBENDER, IN_PROGRESS);
+            Talk(SAY_KILL);
         }
 
-        void UpdateAI(uint32 Diff)
+    private:
+        void DespawnCreatures(uint32 entry)
         {
-            if (!UpdateVictim())
+            std::list<Creature*> creatures;
+            GetCreatureListWithEntryInGrid(creatures, me, entry, 1000.0f);
+
+            if (creatures.empty())
                 return;
 
-            if (CleaveTimer <= Diff)
-            {
-                if (me->IsNonMeleeSpellCasted(false))
-                    return;
+            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                (*iter)->DespawnOrUnsummon();
+        }
 
-                DoCastVictim(SPELL_CLEAVE);
+        void LavaSpoutErrupt()
+        {
+            std::list<Creature*> creatures;
+            GetCreatureListWithEntryInGrid(creatures, me, NPC_LAVA_SPOUT_TRIGGER, 1000.0f);
 
-                CleaveTimer = urand(20000, 25000);
-            }
-            else
-                CleaveTimer -= Diff;
+            if (creatures.empty())
+                return;
 
-            DoMeleeAttackIfReady();
+            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                (*iter)->CastSpell((*iter),SPELL_LAVA_SPOUT, true);
         }
     };
 };
@@ -180,5 +234,4 @@ public:
 void AddSC_boss_karsh_steelbender()
 {
     new boss_karsh_steelbender();
-    new spell_karsh_quicksilver_armor();
 }

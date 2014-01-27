@@ -1515,7 +1515,25 @@ public:
 
         return true;
     }
-    // show info of player
+
+    /**
+    * @name Player command: .pinfo
+    * @date 05/19/2013
+    *
+    * @brief Prints information about a character and it's linked account to the commander
+    *
+    * Non-applying information, e.g. a character that is not in gm mode right now or
+    * that is not banned/muted, is not printed
+    *
+    * This can be done either by giving a name or by targeting someone, else, it'll use the commander
+    *
+    * @param args name   Prints information according to the given name to the commander
+    *             target Prints information on the target to the commander
+    *             none   No given args results in printing information on the commander
+    *
+    * @return Several pieces of information about the character and the account
+    **/
+
     static bool HandlePInfoCommand(ChatHandler* handler, char const* args)
     {
         Player* target;
@@ -1544,6 +1562,7 @@ public:
         uint32 mapId;
         uint32 areaId;
         uint32 phase            = 0;
+        std::string guildName;
 
         // get additional information from Player object
         if (target)
@@ -1563,6 +1582,7 @@ public:
             mapId             = target->GetMapId();
             areaId            = target->GetAreaId();
             phase             = target->GetPhaseMask();
+            guildName         = target->GetGuild() ? target->GetGuildName() : "<gildenlos>";
         }
         // get additional information from DB
         else
@@ -1579,7 +1599,7 @@ public:
                 return false;
 
             Field* fields     = result->Fetch();
-            totalPlayerTime   = fields[0].GetUInt32();
+            totalPlayerTime = fields[0].GetUInt32();
             level             = fields[1].GetUInt8();
             money             = fields[2].GetUInt32();
             accId             = fields[3].GetUInt32();
@@ -1589,8 +1609,11 @@ public:
             areaId            = fields[7].GetUInt16();
         }
 
+
         std::string userName    = handler->GetTrinityString(LANG_ERROR);
         std::string eMail       = handler->GetTrinityString(LANG_ERROR);
+        std::string muteReason  = "";
+        std::string muteBy      = "";
         std::string lastIp      = handler->GetTrinityString(LANG_ERROR);
         uint32 security         = 0;
         std::string lastLogin   = handler->GetTrinityString(LANG_ERROR);
@@ -1607,6 +1630,8 @@ public:
             security      = fields[1].GetUInt8();
             eMail         = fields[2].GetString();
             muteTime      = fields[5].GetUInt64();
+            muteReason    = fields[6].GetString();
+            muteBy        = fields[7].GetString();
 
             if (eMail.empty())
                 eMail = "-";
@@ -1645,6 +1670,7 @@ public:
         std::string nameLink = handler->playerLink(targetName);
 
         handler->PSendSysMessage(LANG_PINFO_ACCOUNT, (target ? "" : handler->GetTrinityString(LANG_OFFLINE)), nameLink.c_str(), GUID_LOPART(targetGuid), userName.c_str(), accId, eMail.c_str(), security, lastIp.c_str(), lastLogin.c_str(), latency);
+        handler->PSendSysMessage("GuildName: %s", guildName.c_str());
 
         std::string bannedby = "unknown";
         std::string banreason = "";
@@ -1662,13 +1688,13 @@ public:
         if (result2)
         {
             Field* fields = result2->Fetch();
-            banTime       = int64(fields[1].GetUInt64() ? 0 : fields[0].GetUInt32());
+            banTime       = int64(fields[1].GetBool() ? 0 : fields[0].GetUInt32());
             bannedby      = fields[2].GetString();
             banreason     = fields[3].GetString();
         }
 
         if (muteTime > 0)
-            handler->PSendSysMessage(LANG_PINFO_MUTE, secsToTimeString(muteTime - time(NULL), true).c_str());
+            handler->PSendSysMessage(LANG_PINFO_MUTE, secsToTimeString(muteTime - time(NULL), true).c_str(), muteBy.c_str(), muteReason.c_str());
 
         if (banTime >= 0)
             handler->PSendSysMessage(LANG_PINFO_BAN, banTime > 0 ? secsToTimeString(banTime - time(NULL), true).c_str() : "permanently", bannedby.c_str(), banreason.c_str());
@@ -1705,12 +1731,6 @@ public:
                 break;
             case RACE_DRAENEI:
                 raceStr = "Draenei";
-                break;
-            case RACE_GOBLIN:
-                raceStr = "Goblin";
-                break;
-            case RACE_WORGEN:
-                raceStr = "Worgen";
                 break;
         }
 
@@ -1755,6 +1775,7 @@ public:
         handler->PSendSysMessage(LANG_PINFO_LEVEL, raceStr.c_str(), ClassStr.c_str(), timeStr.c_str(), level, gold, silv, copp);
 
         // Add map, zone, subzone and phase to output
+        int locale = handler->GetSessionDbcLocale();
         std::string areaName = "<unknown>";
         std::string zoneName = "";
 
@@ -1780,27 +1801,45 @@ public:
         else
            handler->PSendSysMessage(LANG_PINFO_MAP_OFFLINE, map->name, areaName.c_str());
 
-        stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_GUILD_MEMBER_EXTENDED);
-        stmt->setUInt32(0, GUID_LOPART(targetGuid));
-
-        result = CharacterDatabase.Query(stmt);
-        if (result)
+        QueryResult vipresult = LoginDatabase.PQuery("SELECT type, unsetdate, setdate FROM vip_accounts WHERE id = %u AND active = 1", accId);
+        if (vipresult)
         {
-            uint32 guildId           = 0;
-            std::string guildName   = "";
-            std::string guildRank   = "";
-            std::string note        = "";
-            std::string officeNote  = "";
+            Field* vipfields = vipresult->Fetch();
+            uint8 VIPtypes = vipfields[0].GetUInt8();
 
-            Field* fields      = result->Fetch();
-            guildId            = fields[0].GetUInt32();
-            guildName          = fields[1].GetString();
-            //rankId           = fields[2].GetUInt8();
-            guildRank          = fields[3].GetString();
-            note               = fields[4].GetString();
-            officeNote         = fields[5].GetString();
+            time_t unsetdate = time_t(vipfields[1].GetUInt32());
+            time_t setdate = time_t(vipfields[2].GetUInt32());
+            tm* tmunsetdate = localtime(&unsetdate);
 
-            handler->PSendSysMessage(LANG_PINFO_GUILD_INFO, guildName.c_str(), guildId, guildRank.c_str(), note.c_str(), officeNote.c_str());
+            std::string VIPStr;
+
+            switch (VIPtypes)
+            {
+                case 1:
+                    VIPStr = "Is Bronze-VIP account";
+                    break;
+                case 2:
+                    VIPStr = "Is Gold-VIP account";
+                    break;
+                case 3:
+                    VIPStr = "Is Platinum-VIP account";
+                    break;
+                default:
+                    VIPStr = "Is NO-VIP account";
+                    break;
+            }
+
+            if (unsetdate == setdate)
+                handler->PSendSysMessage("|cff00ff00%s and it is permanent!|r", VIPStr.c_str());
+            else
+                handler->PSendSysMessage("|cff00ff00%-15.15s till %02d-%02d-%02d %02d:%02d |r", VIPStr.c_str(),
+                tmunsetdate->tm_year%100, tmunsetdate->tm_mon+1, tmunsetdate->tm_mday, tmunsetdate->tm_hour, tmunsetdate->tm_min);
+
+            QueryResult result = LoginDatabase.PQuery("SELECT reason FROM account_tempban WHERE accountId = %u", accId);
+            if (result)
+                handler->PSendSysMessage("TempBan-Grund: %s", result->Fetch()[0].GetCString());
+            else
+                handler->PSendSysMessage("Kein TempBan aktiv");
         }
 
         return true;
@@ -1872,6 +1911,11 @@ public:
             return false;
 
         PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME);
+        std::string muteBy = "";
+        if (handler->GetSession())
+            muteBy = handler->GetSession()->GetPlayerName();
+        else
+            muteBy = "Console";
 
         if (target)
         {
@@ -1888,6 +1932,8 @@ public:
             stmt->setInt64(0, muteTime);
         }
 
+        stmt->setString(1, muteReasonStr.c_str());
+        stmt->setString(2, muteBy.c_str());
         stmt->setUInt32(1, accountId);
         LoginDatabase.Execute(stmt);
         std::string nameLink = handler->playerLink(targetName);
@@ -1931,7 +1977,9 @@ public:
 
         PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME);
         stmt->setInt64(0, 0);
-        stmt->setUInt32(1, accountId);
+        stmt->setString(1, "");
+        stmt->setString(2, "");
+        stmt->setUInt32(3, accountId);
         LoginDatabase.Execute(stmt);
 
         if (target)
@@ -2919,8 +2967,8 @@ public:
                 Player* p = ObjectAccessor::FindPlayer((*itr).guid);
                 const char* onlineState = (p && p->IsInWorld()) ? "online" : "offline";
 
-                handler->PSendSysMessage(LANG_GROUP_PLAYER_NAME_GUID, slot.name.c_str(), onlineState,
-                    GUID_LOPART(slot.guid), flags.c_str(), lfg::GetRolesString(slot.roles).c_str());
+                //handler->PSendSysMessage(LANG_GROUP_PLAYER_NAME_GUID, slot.name.c_str(), onlineState,
+                //    GUID_LOPART(slot.guid), flags.c_str(), lfg::GetRolesString(slot.roles).c_str());
             }
         }
         else

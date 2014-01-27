@@ -465,7 +465,7 @@ WorldPacket Battlefield::BuildWarningAnnPacket(std::string const& msg)
     return data;
 }
 
-void Battlefield::SendWarningToAllInZone(uint32 entry)
+void Battlefield::SendWarningToAllInZone(int32 entry,...)
 {
     if (Creature* stalker = GetCreature(StalkerGuid))
         // FIXME: replaced CHAT_TYPE_END with CHAT_MSG_BG_SYSTEM_NEUTRAL to fix compile, it's a guessed change :/
@@ -989,6 +989,42 @@ bool BfCapturePoint::SetCapturePointData(GameObject* capturePoint)
     }
 
     return true;
+}
+
+bool BfCapturePoint::SetCapturePointData(uint32 entry, uint32 /*map */, float x, float y, float z, float o)
+{
+    sLog->outDebug(LOG_FILTER_BATTLEFIELD, "Creating capture point %u", entry);
+
+    // check info existence
+    GameObjectTemplate const* goinfo = sObjectMgr->GetGameObjectTemplate(entry);
+    if (!goinfo || goinfo->type != GAMEOBJECT_TYPE_CAPTURE_POINT)
+    {
+        sLog->outError(LOG_FILTER_GENERAL, "OutdoorPvP: GO %u is not capture point!", m_capturePoint->GetEntry());
+        return false;
+    }
+    m_capturePoint = m_Bf->SpawnGameObject(entry, x, y, z, o);
+    if (m_capturePoint)
+    {
+        // get the needed values from goinfo
+        m_maxValue = goinfo->capturePoint.maxTime;
+        m_maxSpeed = m_maxValue / (goinfo->capturePoint.minTime ? goinfo->capturePoint.minTime : 60);
+        m_neutralValuePct = goinfo->capturePoint.neutralPercent;
+        m_minValue = m_maxValue * goinfo->capturePoint.neutralPercent / 100;
+        m_capturePointEntry = entry;
+        if (m_team == TEAM_ALLIANCE)
+        {
+            m_value = m_maxValue;
+            m_State = BF_CAPTUREPOINT_OBJECTIVESTATE_ALLIANCE;
+        }
+        else
+        {
+            m_value = -m_maxValue;
+            m_State = BF_CAPTUREPOINT_OBJECTIVESTATE_HORDE;
+        }
+        return true;
+    }
+
+    return false;
 }
 
 GameObject* BfCapturePoint::GetCapturePointGo()

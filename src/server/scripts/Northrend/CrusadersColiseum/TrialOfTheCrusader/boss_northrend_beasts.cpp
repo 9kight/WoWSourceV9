@@ -663,7 +663,7 @@ struct boss_jormungarAI : public BossAI
         {
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             SetCombatMovement(true);
-            me->GetMotionMaster()->MoveChase(me->getVictim());
+            me->GetMotionMaster()->MoveChase(me->GetVictim());
             me->SetDisplayId(ModelMobile);
             events.SetPhase(PHASE_MOBILE);
             events.ScheduleEvent(EVENT_SUBMERGE, 45*IN_MILLISECONDS, 0, PHASE_MOBILE);
@@ -1117,8 +1117,8 @@ class boss_icehowl : public CreatureScript
                         SetCombatMovement(true);
                         me->GetMotionMaster()->MovementExpired();
                         me->GetMotionMaster()->Clear();
-                        me->GetMotionMaster()->MoveChase(me->getVictim());
-                        AttackStart(me->getVictim());
+                        me->GetMotionMaster()->MoveChase(me->GetVictim());
+                        AttackStart(me->GetVictim());
                         events.ScheduleEvent(EVENT_MASSIVE_CRASH, 40*IN_MILLISECONDS);
                         events.ScheduleEvent(EVENT_ARCTIC_BREATH, urand(15*IN_MILLISECONDS, 25*IN_MILLISECONDS));
                         _stage = 0;

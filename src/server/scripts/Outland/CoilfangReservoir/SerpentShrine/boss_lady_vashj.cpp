@@ -272,7 +272,7 @@ public:
             }
             if (!CanAttack)
                 return;
-            if (!who || me->getVictim())
+            if (!who || me->GetVictim())
                 return;
 
             if (me->canCreatureAttack(who))
@@ -327,7 +327,7 @@ public:
                 }
             }
             // to prevent abuses during phase 2
-            if (Phase == 2 && !me->getVictim() && me->isInCombat())
+            if (Phase == 2 && !me->GetVictim() && me->isInCombat())
             {
                 EnterEvadeMode();
                 return;
@@ -344,7 +344,7 @@ public:
                     // Shock Burst
                     // Randomly used in Phases 1 and 3 on Vashj's target, it's a Shock spell doing 8325-9675 nature damage and stunning the target for 5 seconds, during which she will not attack her target but switch to the next person on the aggro list.
                     DoCastVictim(SPELL_SHOCK_BLAST);
-                    me->TauntApply(me->getVictim());
+                    me->TauntApply(me->GetVictim());
 
                     ShockBlastTimer = 1000+rand()%14000;       // random cooldown
                 } else ShockBlastTimer -= diff;
@@ -457,7 +457,7 @@ public:
                     Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0);
 
                     if (!target)
-                        target = me->getVictim();
+                        target = me->GetVictim();
 
                     DoCast(target, SPELL_FORKED_LIGHTNING);
 
@@ -495,8 +495,8 @@ public:
                     {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                             coilfangElite->AI()->AttackStart(target);
-                        else if (me->getVictim())
-                            coilfangElite->AI()->AttackStart(me->getVictim());
+                        else if (me->GetVictim())
+                            coilfangElite->AI()->AttackStart(me->GetVictim());
                     }
                     CoilfangEliteTimer = 45000+rand()%5000;
                 } else CoilfangEliteTimer -= diff;
@@ -509,8 +509,8 @@ public:
                     {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                             CoilfangStrider->AI()->AttackStart(target);
-                        else if (me->getVictim())
-                            CoilfangStrider->AI()->AttackStart(me->getVictim());
+                        else if (me->GetVictim())
+                            CoilfangStrider->AI()->AttackStart(me->GetVictim());
                     }
                     CoilfangStriderTimer = 60000+rand()%10000;
                 } else CoilfangStriderTimer -= diff;
@@ -531,7 +531,7 @@ public:
                         Phase = 3;
 
                         // return to the tank
-                        me->GetMotionMaster()->MoveChase(me->getVictim());
+                        me->GetMotionMaster()->MoveChase(me->GetVictim());
                     }
                     CheckTimer = 1000;
                 } else CheckTimer -= diff;

@@ -31,6 +31,8 @@
 #include "Opcodes.h"
 #include "Guild.h"
 
+class Guild;
+
 void InstanceScript::SaveToDB()
 {
     std::string data = GetSaveData();
@@ -100,7 +102,7 @@ void InstanceScript::UpdateMinionState(Creature* minion, EncounterState state)
         case IN_PROGRESS:
             if (!minion->isAlive())
                 minion->Respawn();
-            else if (!minion->getVictim())
+            else if (!minion->GetVictim())
                 minion->AI()->DoZoneInCombat();
             break;
         default:
@@ -110,24 +112,24 @@ void InstanceScript::UpdateMinionState(Creature* minion, EncounterState state)
 
 void InstanceScript::UpdateDoorState(GameObject* door)
 {
-    DoorInfoMapBounds range = doors.equal_range(door->GetEntry());
-    if (range.first == range.second)
+    DoorInfoMap::iterator lower = doors.lower_bound(door->GetEntry());
+    DoorInfoMap::iterator upper = doors.upper_bound(door->GetEntry());
+    if (lower == upper)
         return;
 
     bool open = true;
-    for (; range.first != range.second && open; ++range.first)
+    for (DoorInfoMap::iterator itr = lower; itr != upper && open; ++itr)
     {
-        DoorInfo const& info = range.first->second;
-        switch (info.type)
+        switch (itr->second.type)
         {
             case DOOR_TYPE_ROOM:
-                open = (info.bossInfo->state != IN_PROGRESS);
+                open = (itr->second.bossInfo->state != IN_PROGRESS);
                 break;
             case DOOR_TYPE_PASSAGE:
-                open = (info.bossInfo->state == DONE);
+                open = (itr->second.bossInfo->state == DONE);
                 break;
             case DOOR_TYPE_SPAWN_HOLE:
-                open = (info.bossInfo->state == IN_PROGRESS);
+                open = (itr->second.bossInfo->state == IN_PROGRESS);
                 break;
             default:
                 break;
@@ -139,13 +141,14 @@ void InstanceScript::UpdateDoorState(GameObject* door)
 
 void InstanceScript::AddDoor(GameObject* door, bool add)
 {
-    DoorInfoMapBounds range = doors.equal_range(door->GetEntry());
-    if (range.first == range.second)
+    DoorInfoMap::iterator lower = doors.lower_bound(door->GetEntry());
+    DoorInfoMap::iterator upper = doors.upper_bound(door->GetEntry());
+    if (lower == upper)
         return;
 
-    for (; range.first != range.second; ++range.first)
+    for (DoorInfoMap::iterator itr = lower; itr != upper; ++itr)
     {
-        DoorInfo const& data = range.first->second;
+        DoorInfo const& data = itr->second;
 
         if (add)
         {
@@ -179,6 +182,26 @@ void InstanceScript::AddDoor(GameObject* door, bool add)
 
     if (add)
         UpdateDoorState(door);
+}
+
+void InstanceScript::NormaliseAltPower()
+{
+    Map::PlayerList const &PlayerList = instance->GetPlayers();
+
+    if (!PlayerList.isEmpty())
+        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+            if (Player* player = i->getSource())
+                player->SetAltPower(player->GetPower(POWER_ALTERNATE_POWER));
+}
+
+void InstanceScript::DoAddAuraOnPlayers(uint32 spell)
+{
+    Map::PlayerList const &PlayerList = instance->GetPlayers();
+
+    if (!PlayerList.isEmpty())
+        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+            if (Player* player = i->getSource())
+                player->AddAura(spell, player);
 }
 
 void InstanceScript::AddMinion(Creature* minion, bool add)
@@ -224,6 +247,21 @@ bool InstanceScript::SetBossState(uint32 id, EncounterState state)
 
         for (MinionSet::iterator i = bossInfo->minion.begin(); i != bossInfo->minion.end(); ++i)
             UpdateMinionState(*i, state);
+
+        // call method to check wether a guild challenge can be completed
+        if (bossInfo == &bosses.back() && state == DONE)
+        {
+            Guild* pGuild = NULL;
+
+            for(Map::PlayerList::const_iterator itr = instance->GetPlayers().begin(); itr != instance->GetPlayers().end();++itr)
+            {
+                if(pGuild != itr->getSource()->GetGuild())
+                    pGuild = itr->getSource()->GetGuild();
+
+                if(pGuild)
+                    pGuild->GetChallengesMgr()->CheckInstanceChallenge(this, itr->getSource()->GetGroup());
+            }
+        }
 
         return true;
     }
@@ -449,73 +487,28 @@ void InstanceScript::SendEncounterUnit(uint32 type, Unit* unit /*= NULL*/, uint8
     instance->SendToPlayers(&data);
 }
 
-void InstanceScript::UpdateEncounterState(EncounterCreditType type, uint32 creditEntry, Unit* /*source*/)
+void InstanceScript::UpdateEncounterState(EncounterCreditType type, uint32 creditEntry, Unit* source)
 {
     DungeonEncounterList const* encounters = sObjectMgr->GetDungeonEncounterList(instance->GetId(), instance->GetDifficulty());
     if (!encounters)
         return;
 
-    uint32 dungeonId = 0;
-    uint32 encounterId = 0;
     for (DungeonEncounterList::const_iterator itr = encounters->begin(); itr != encounters->end(); ++itr)
     {
-        DungeonEncounter const* encounter = *itr;
-        if (encounter->creditType == type && encounter->creditEntry == creditEntry)
+        if ((*itr)->creditType == type && (*itr)->creditEntry == creditEntry)
         {
-            completedEncounters |= 1 << encounter->dbcEntry->encounterIndex;
-            encounterId = encounter->dbcEntry->id;
-            if (encounter->lastEncounterDungeon)
+            completedEncounters |= 1 << (*itr)->dbcEntry->encounterIndex;
+            sLog->outDebug(LOG_FILTER_TSCR, "Instance %s (instanceId %u) completed encounter %s", instance->GetMapName(), instance->GetInstanceId(), (*itr)->dbcEntry->encounterName);
+            if (uint32 dungeonId = (*itr)->lastEncounterDungeon)
             {
-                dungeonId = encounter->lastEncounterDungeon;
-                sLog->outDebug(LOG_FILTER_LFG, "UpdateEncounterState: Instance %s (instanceId %u) completed encounter %s. Credit Dungeon: %u", instance->GetMapName(), instance->GetInstanceId(), encounter->dbcEntry->encounterName, dungeonId);
-                break;
+                Map::PlayerList const& players = instance->GetPlayers();
+                if (!players.isEmpty())
+                    for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
+                        if (Player* player = i->getSource())
+                            if (!source || player->IsAtGroupRewardDistance(source))
+                                sLFGMgr->RewardDungeonDoneFor(dungeonId, player);
             }
-        }
-    }
-
-    bool LFGRewarded = false;
-    std::vector<uint32> guildList;
-    Map::PlayerList const& players = instance->GetPlayers();
-    for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
-    {
-        if (Player* player = i->getSource())
-        {
-            if (Group* grp = player->GetGroup())
-            {
-                bool guildAlreadyUpdate = false;
-                for (std::vector<uint32>::const_iterator guildItr = guildList.begin(); guildItr != guildList.end(); guildItr++)
-                    if (*guildItr == player->GetGuildId())
-                        guildAlreadyUpdate = true;
-
-                if (!guildAlreadyUpdate)
-                {
-                    if (Guild *guild = player->GetGuild())
-                    {
-                        if (grp->IsGuildGroupFor(player))
-                        {
-                            if (lfg::LFGDungeonData const* dungeon = sLFGMgr->GetLFGDungeon(dungeonId))
-                            {
-                                if (grp->MemberLevelIsInRange(dungeon->minlevel, dungeon->maxlevel))
-                                {
-                                    if (dungeonId)
-                                        guild->CompleteChallenge(instance->IsNonRaidDungeon() ? GUILD_CHALLENGE_DUNGEON : GUILD_CHALLENGE_RAID, player);
-                                    else if (instance->IsRaid())
-                                        guild->CompleteChallenge(GUILD_CHALLENGE_RAID, player);
-                                }
-                            }
-
-                            guild->AddGuildNews(GUILD_NEWS_DUNGEON_ENCOUNTER, player->GetGUID(), 0, encounterId);
-                            guildList.push_back(player->GetGuildId());
-                        }
-                    }
-                }
-
-                if (grp->isLFGGroup() && !LFGRewarded && dungeonId)
-                {
-                    sLFGMgr->FinishDungeon(grp->GetGUID(), dungeonId);
-                    LFGRewarded = true;
-                }
-            }
+            return;
         }
     }
 }

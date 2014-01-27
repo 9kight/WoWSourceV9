@@ -34,7 +34,8 @@ enum BattlefieldTypes
 
 enum BattlefieldIDs
 {
-    BATTLEFIELD_BATTLEID_WG                      = 1        // Wintergrasp battle
+    BATTLEFIELD_BATTLEID_WG                      = 1,        // Wintergrasp battle
+    BATTLEFIELD_BATTLEID_TB                      = 21       //Tol Barad battle
 };
 
 enum BattlefieldObjectiveStates
@@ -89,6 +90,7 @@ class BfCapturePoint
         // Send kill notify to players in the controlling faction
         void SendObjectiveComplete(uint32 id, uint64 guid);
 
+
         // Used when player is activated/inactivated in the area
         virtual bool HandlePlayerEnter(Player* player);
         virtual GuidSet::iterator HandlePlayerLeave(Player* player);
@@ -103,6 +105,7 @@ class BfCapturePoint
         virtual void SendChangePhase();
 
         bool SetCapturePointData(GameObject* capturePoint);
+        bool SetCapturePointData(uint32 entry, uint32 map, float x, float y, float z, float o);
         GameObject* GetCapturePointGo();
         uint32 GetCapturePointEntry(){ return m_capturePointEntry; }
 
@@ -139,6 +142,9 @@ class BfCapturePoint
 
         // Gameobject related to that capture point
         uint64 m_capturePointGUID;
+
+        // pointer to the Battlefield this objective belongs to
+        GameObject *m_capturePoint;
 };
 
 class BfGraveyard
@@ -155,6 +161,7 @@ class BfGraveyard
 
         // Initialize the graveyard
         void Initialize(TeamId startcontrol, uint32 gy);
+        void Init(uint32 horde_entry, uint32 alliance_entry, float x, float y, float z, float o, TeamId startcontrol, uint32 gy);
 
         // Set spirit service for the graveyard
         void SetSpirit(Creature* spirit, TeamId team);
@@ -312,7 +319,7 @@ class Battlefield : public ZoneScript
         virtual void OnPlayerEnterZone(Player* /*player*/) { }
 
         WorldPacket BuildWarningAnnPacket(std::string const& msg);
-        void SendWarningToAllInZone(uint32 entry);
+        void SendWarningToAllInZone(int32 entry, ...);
         //void SendWarningToAllInWar(int32 entry, ...); -- UNUSED
         void SendWarningToPlayer(Player* player, uint32 entry);
 
@@ -356,6 +363,7 @@ class Battlefield : public ZoneScript
         uint64 StalkerGuid;
         uint32 m_Timer;                                         // Global timer for event
         bool m_IsEnabled;
+        bool m_WarTime;
         bool m_isActive;
         TeamId m_DefenderTeam;
 
@@ -384,6 +392,8 @@ class Battlefield : public ZoneScript
         uint32 m_TimeForAcceptInvite;
         uint32 m_uiKickDontAcceptTimer;
         WorldLocation KickPosition;                             // Position where players are teleported if they switch to afk during the battle or if they don't accept invitation
+        WorldLocation KickPositionA;
+        WorldLocation KickPositionH;
 
         uint32 m_uiKickAfkPlayersTimer;                         // Timer for check Afk in war
 

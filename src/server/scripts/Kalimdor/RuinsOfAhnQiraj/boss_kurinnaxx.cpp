@@ -44,6 +44,20 @@ enum Texts
     SAY_KURINAXX_DEATH      = 5, // Yelled by Ossirian the Unscarred
 };
 
+enum Special
+{
+    NPC_GENERAL_ANDOROV     = 15471,
+    NPC_ELITE_KALDOREI      = 15473,
+};
+
+Position const PosVendorGuards[4] =
+{
+    { -8884.51f, 1653.19f, 21.45f, 6.09f }, // Kaldorei Elites
+    { -8885.86f, 1650.48f, 21.43f, 6.09f },
+    { -8888.03f, 1645.74f, 21.44f, 6.09f },
+    { -8888.84f, 1643.06f, 21.43f, 6.09f },
+};
+
 class boss_kurinnaxx : public CreatureScript
 {
     public:
@@ -79,6 +93,11 @@ class boss_kurinnaxx : public CreatureScript
                 _JustDied();
                 if (Creature* Ossirian = me->GetMap()->GetCreature(instance->GetData64(DATA_OSSIRIAN)))
                     sCreatureTextMgr->SendChat(Ossirian, SAY_KURINAXX_DEATH, 0, CHAT_MSG_ADDON, LANG_ADDON, TEXT_RANGE_ZONE);
+
+                for (uint8 i = 0; i < 4; ++i)
+                    me->SummonCreature(NPC_ELITE_KALDOREI, PosVendorGuards[i], TEMPSUMMON_DEAD_DESPAWN, 0);
+
+               me->SummonCreature(NPC_GENERAL_ANDOROV, -8886.75f, 1648.11f, 21.41f, 6.09f, TEMPSUMMON_DEAD_DESPAWN, 0);
             }
 
             void UpdateAI(const uint32 diff)
@@ -102,7 +121,7 @@ class boss_kurinnaxx : public CreatureScript
                         case EVENT_SANDTRAP:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                                 target->CastSpell(target, SPELL_SANDTRAP, true);
-                            else if (Unit* victim = me->getVictim())
+                            else if (Unit* victim = me->GetVictim())
                                 victim->CastSpell(victim, SPELL_SANDTRAP, true);
                             events.ScheduleEvent(EVENT_SANDTRAP, urand(5000, 15000));
                             break;

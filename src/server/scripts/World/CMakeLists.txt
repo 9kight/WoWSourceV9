@@ -14,6 +14,10 @@ source_group(World FILES ${scripts_World})
 set(scripts_STAT_SRCS
   ${scripts_STAT_SRCS}
   ${scripts_World}
+   World/boss_garr_hyjal.cpp
+   World/boss_akmahat.cpp
+   World/boss_mobus.cpp
+   World/boss_julak_doom.cpp
 )
 
 message("  -> Prepared: World")

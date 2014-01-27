@@ -1214,7 +1214,7 @@ public:
             }
 
             //Battling skills
-            if (!me->getVictim())
+            if (!me->GetVictim())
                 return;
 
             if (exorcismTimer < diff)

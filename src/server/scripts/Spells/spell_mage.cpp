@@ -77,13 +77,7 @@ enum MageSpells
     SPELL_MAGE_RITUAL_OF_REFRESHMENT_R2          = 92824,
     SPELL_MAGE_RITUAL_OF_REFRESHMENT_R3          = 92827,
 
-    SPELL_MAGE_FINGERS_OF_FROST                  = 44544,
-
-    SPELL_MAGE_GLYPH_OF_MIRROR_IMAGE             = 63093,
-    SPELL_MAGE_SUMMON_IMAGES_FROST               = 58832,
-    SPELL_MAGE_SUMMON_IMAGES_FIRE                = 88092,
-    SPELL_MAGE_SUMMON_IMAGES_ARCANE              = 88091,
-    SPELL_MAGE_SLOW                              = 31589,
+    SPELL_MAGE_FINGERS_OF_FROST                  = 44544
 };
 
 enum MageIcons
@@ -379,19 +373,6 @@ class spell_mage_orb_filter : public SpellScriptLoader
                         else
                             caster->CastSpell(target, 95969, true, NULL, NULL, caster->GetOwnerGUID());
                     }
-                    
-                    // (Stealth Check) Removing Stealth if at range.
-                    if (target->HasAura(1784)) 
-						target->RemoveAura(1784);
-						
-					if (target->HasAura(5215))
-						target->RemoveAura(5215);
-						
-					if(target->HasAura(32612))
-					    target->RemoveAura(32612);
-
-
-                    
                     caster->AddSpellCooldown(GetSpellInfo()->Id, 0, time(NULL) + GetSpellInfo()->Effects[EFFECT_0].BasePoints / 1000);
                     caster->CastSpell(target, 86719, true);
                     if (!caster->HasAura(82736))
@@ -1722,122 +1703,6 @@ public:
     }
 };
 
-// 55342 - Mirror Image
-class spell_mage_mirror_image : public SpellScriptLoader
-{
-    public:
-        spell_mage_mirror_image() : SpellScriptLoader("spell_mage_mirror_image") { }
-
-        class spell_mage_mirror_image_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_mage_mirror_image_SpellScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_GLYPH_OF_MIRROR_IMAGE) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_MAGE_SUMMON_IMAGES_ARCANE) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_MAGE_SUMMON_IMAGES_FIRE) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_MAGE_SUMMON_IMAGES_FROST))
-                    return false;
-                return true;
-            }
-
-            void HandleDummy(SpellEffIndex /*effIndex*/)
-            {
-                Unit* caster = GetCaster();
-
-                uint32 spellId = SPELL_MAGE_SUMMON_IMAGES_FROST;
-
-                if (Player* player = caster->ToPlayer())
-                {
-                    bool hasGlyph = false;
-
-                    for (uint32 i = 0; i < MAX_GLYPH_SLOT_INDEX; ++i)
-                        if (uint32 glyphId = player->GetGlyph(player->GetActiveSpec(), i))
-                            if (GlyphPropertiesEntry const* glyph = sGlyphPropertiesStore.LookupEntry(glyphId))
-                                if (glyph->SpellId == SPELL_MAGE_GLYPH_OF_MIRROR_IMAGE)
-                                {
-                                    hasGlyph = true;
-                                    break;
-                                }
-
-                    if (hasGlyph)
-                    {
-                        switch (player->GetPrimaryTalentTree(player->GetActiveSpec()))
-                        {
-
-                            case TALENT_TREE_MAGE_ARCANE:
-                                spellId = SPELL_MAGE_SUMMON_IMAGES_ARCANE;
-                                break;
-                            case TALENT_TREE_MAGE_FIRE:
-                                spellId = SPELL_MAGE_SUMMON_IMAGES_FIRE;
-                                break;
-                            case TALENT_TREE_MAGE_FROST:
-                                spellId = SPELL_MAGE_SUMMON_IMAGES_FROST;
-                                break;
-                        }
-                    }
-                }
-
-                caster->CastSpell(caster, spellId, true);
-            }
-
-            void Register()
-            {
-                OnEffectHit += SpellEffectFn(spell_mage_mirror_image_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_mage_mirror_image_SpellScript();
-        }
-};
-// 86181 - Nether Vortex
-class spell_mage_nether_vortex : public SpellScriptLoader
-{
-    public:
-        spell_mage_nether_vortex() : SpellScriptLoader("spell_mage_nether_vortex") { }
-
-        class spell_mage_nether_vortex_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_mage_nether_vortex_AuraScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_SLOW))
-                    return false;
-               return true;
-            }
-
-            bool DoCheck(ProcEventInfo& eventInfo)
-            {
-                if (Aura* aura = eventInfo.GetProcTarget()->GetAura(SPELL_MAGE_SLOW))
-                    if (aura->GetCasterGUID() != GetTarget()->GetGUID())
-                        return false;
-
-                return true;
-            }
-
-            void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
-            {
-                PreventDefaultAction();
-                GetTarget()->CastSpell(eventInfo.GetProcTarget(), SPELL_MAGE_SLOW, true, NULL, aurEff);
-            }
-
-            void Register()
-            {
-                DoCheckProc += AuraCheckProcFn(spell_mage_nether_vortex_AuraScript::DoCheck);
-                OnEffectProc += AuraEffectProcFn(spell_mage_nether_vortex_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_mage_nether_vortex_AuraScript();
-        }
-};
- 
 
 void AddSC_mage_spell_scripts()
 {
@@ -1871,6 +1736,4 @@ void AddSC_mage_spell_scripts()
     new spell_mage_ritual_of_refreshment();
     new spell_mage_pet_scaling_05();
     new spell_mage_icy_veins();
-    new spell_mage_mirror_image();
-    new spell_mage_nether_vortex();
 }

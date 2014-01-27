@@ -28,6 +28,8 @@
 #include "ScriptedCreature.h"
 #include "GameEventMgr.h"
 #include "CreatureTextMgr.h"
+#include "SpellMgr.h"
+#include "SpellInfo.h"
 
 #include "SmartScriptMgr.h"
 
@@ -302,6 +304,8 @@ bool SmartAIMgr::IsTargetValid(SmartScriptHolder const& e)
         case SMART_TARGET_THREAT_LIST:
         case SMART_TARGET_CLOSEST_GAMEOBJECT:
         case SMART_TARGET_CLOSEST_CREATURE:
+        case SMART_TARGET_CLOSEST_ENEMY:
+        case SMART_TARGET_CLOSEST_FRIENDLY:		
         case SMART_TARGET_STORED:
             break;
         default:
@@ -437,6 +441,15 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
                     return false;
                 break;
             case SMART_EVENT_TARGET_CASTING:
+                if (e.event.targetCasting.spellId > 0 && !sSpellMgr->GetSpellInfo(e.event.targetCasting.spellId))
+                {
+                    sLog->outError(LOG_FILTER_SQL, "SmartAIMgr: Entry %d SourceType %u Event %u Action %u uses non-existent Spell entry %u, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.event.spellHit.spell);
+                    return false;
+                }
+
+                if (!IsMinMaxValid(e, e.event.targetCasting.repeatMin, e.event.targetCasting.repeatMax))
+                    return false;
+                break;
             case SMART_EVENT_PASSENGER_BOARDED:
             case SMART_EVENT_PASSENGER_REMOVED:
                 if (!IsMinMaxValid(e, e.event.minMax.repeatMin, e.event.minMax.repeatMax))
@@ -545,6 +558,31 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
                 }
                 break;
             }
+            case SMART_EVENT_FRIENDLY_HEALTH_PCT:
+                if (!IsMinMaxValid(e, e.event.friendlyHealtPct.repeatMin, e.event.friendlyHealtPct.repeatMax))
+                    return false;
+
+                if (e.event.friendlyHealtPct.maxHpPct > 100 || e.event.friendlyHealtPct.minHpPct > 100)
+                {
+                    sLog->outError(LOG_FILTER_SQL, "SmartAIMgr: Entry %d SourceType %u Event %u Action %u has pct value above 100, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType());
+                    return false;
+                }
+
+                switch (e.GetTargetType())
+                {
+                    case SMART_TARGET_CREATURE_RANGE:
+                    case SMART_TARGET_CREATURE_GUID:
+                    case SMART_TARGET_CREATURE_DISTANCE:
+                    case SMART_TARGET_CLOSEST_CREATURE:
+                    case SMART_TARGET_CLOSEST_PLAYER:
+                    case SMART_TARGET_PLAYER_RANGE:
+                    case SMART_TARGET_PLAYER_DISTANCE:
+                        break;
+                    default:
+                        sLog->outError(LOG_FILTER_SQL, "SmartAIMgr: Entry %d SourceType %u Event %u Action %u uses invalid target_type %u, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.GetTargetType());
+                        return false;
+                }
+                break;			
             case SMART_EVENT_GO_STATE_CHANGED:
             case SMART_EVENT_GO_EVENT_INFORM:
             case SMART_EVENT_TIMED_EVENT_TRIGGERED:
@@ -763,6 +801,30 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
         case SMART_ACTION_CALL_KILLEDMONSTER:
             if (!IsCreatureValid(e, e.action.killedMonster.creature))
                 return false;
+
+            for (uint32 i = 0; i < sSpellMgr->GetSpellInfoStoreSize(); ++i)
+            {
+                SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(i);
+                if (!spellInfo)
+                    continue;
+
+                for (uint32 j = 0; j < MAX_SPELL_EFFECTS; ++j)
+                {
+                    if (spellInfo->Effects[j].Effect == SPELL_EFFECT_KILL_CREDIT || spellInfo->Effects[j].Effect == SPELL_EFFECT_KILL_CREDIT2)
+                    {
+                        uint32 killCredit = spellInfo->Effects[j].MiscValue;
+
+                        if (e.action.killedMonster.creature == killCredit)
+                            sLog->outError(LOG_FILTER_SQL, "SmartAIMgr: Entry %d SourceType %u Event %u Action %u Kill Credit: %u has already spell kill credit (SpellId: %u effect: %u)", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.action.killedMonster.creature, spellInfo->Id, j);
+                    }
+                }
+            }
+				
+            if (e.GetTargetType() == SMART_TARGET_POSITION)
+            {
+                sLog->outError(LOG_FILTER_SQL, "SmartAIMgr: Entry %d SourceType %u Event %u Action %u uses incorrect TargetType %u, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.GetTargetType());
+                return false;
+            }				
             break;
         case SMART_ACTION_UPDATE_TEMPLATE:
             if (e.action.updateTemplate.creature && !IsCreatureValid(e, e.action.updateTemplate.creature))
@@ -839,6 +901,53 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
                 return false;
             break;
         }
+        case SMART_ACTION_SET_POWER:
+        case SMART_ACTION_ADD_POWER:
+        case SMART_ACTION_REMOVE_POWER:
+            if (e.action.power.powerType > MAX_POWERS)
+            {
+                sLog->outError(LOG_FILTER_SQL, "SmartAIMgr: Entry %d SourceType %u Event %u Action %u uses non-existent Power %u, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.action.power.powerType);
+                return false;
+            }
+            break;
+        case SMART_ACTION_GAME_EVENT_STOP:
+        {
+            uint32 eventId = e.action.gameEventStop.id;
+
+            GameEventMgr::GameEventDataMap const& events = sGameEventMgr->GetEventMap();
+            if (eventId < 1 || eventId >= events.size())
+            {
+                sLog->outError(LOG_FILTER_SQL, "SmartAIMgr: Entry %u SourceType %u Event %u Action %u uses non-existent event, eventId %u, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.action.gameEventStop.id);
+                return false;
+            }
+
+            GameEventData const& eventData = events[eventId];
+            if (!eventData.isValid())
+            {
+                sLog->outError(LOG_FILTER_SQL, "SmartAIMgr: Entry %u SourceType %u Event %u Action %u uses non-existent event, eventId %u, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.action.gameEventStop.id);
+                return false;
+            }
+            break;
+        }
+        case SMART_ACTION_GAME_EVENT_START:
+        {
+            uint32 eventId = e.action.gameEventStart.id;
+
+            GameEventMgr::GameEventDataMap const& events = sGameEventMgr->GetEventMap();
+            if (eventId < 1 || eventId >= events.size())
+            {
+                sLog->outError(LOG_FILTER_SQL, "SmartAIMgr: Entry %u SourceType %u Event %u Action %u uses non-existent event, eventId %u, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.action.gameEventStart.id);
+                return false;
+            }
+
+            GameEventData const& eventData = events[eventId];
+            if (!eventData.isValid())
+            {
+                sLog->outError(LOG_FILTER_SQL, "SmartAIMgr: Entry %u SourceType %u Event %u Action %u uses non-existent event, eventId %u, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.action.gameEventStart.id);
+                return false;
+            }
+            break;
+        }
         case SMART_ACTION_FOLLOW:
         case SMART_ACTION_SET_ORIENTATION:
         case SMART_ACTION_STORE_TARGET_LIST:
@@ -906,6 +1015,11 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
         case SMART_ACTION_SEND_TARGET_TO_TARGET:
         case SMART_ACTION_SET_HOME_POS:
         case SMART_ACTION_SET_HEALTH_REGEN:
+        case SMART_ACTION_SET_ROOT:
+        case SMART_ACTION_SET_GO_FLAG:
+        case SMART_ACTION_ADD_GO_FLAG:
+        case SMART_ACTION_REMOVE_GO_FLAG:
+        case SMART_ACTION_SUMMON_CREATURE_GROUP:
             break;
         default:
             sLog->outError(LOG_FILTER_SQL, "SmartAIMgr: Not handled action_type(%u), event_type(%u), Entry %d SourceType %u Event %u, skipped.", e.GetActionType(), e.GetEventType(), e.entryOrGuid, e.GetScriptType(), e.event_id);

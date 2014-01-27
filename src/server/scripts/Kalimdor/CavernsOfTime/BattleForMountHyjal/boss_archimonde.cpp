@@ -355,7 +355,7 @@ public:
         bool CanUseFingerOfDeath()
         {
             // First we check if our current victim is in melee range or not.
-            Unit* victim = me->getVictim();
+            Unit* victim = me->GetVictim();
             if (victim && me->IsWithinDistInMap(victim, me->GetAttackDistance(victim)))
                 return false;
 
@@ -382,7 +382,7 @@ public:
                 if (!me->IsWithinDistInMap(target, me->GetAttackDistance(target)))
                     return true;                                // Cast Finger of Death
                 else                                            // This target is closest, he is our new tank
-                    me->AddThreat(target, me->getThreatManager().getThreat(me->getVictim()));
+                    me->AddThreat(target, me->getThreatManager().getThreat(me->GetVictim()));
             }
 
             return false;
@@ -614,7 +614,7 @@ public:
                 Talk(SAY_DOOMFIRE);
                 Unit* temp = SelectTarget(SELECT_TARGET_RANDOM, 1);
                 if (!temp)
-                    temp = me->getVictim();
+                    temp = me->GetVictim();
 
                 //replace with spell cast 31903 once implicitTarget 73 implemented
                 SummonDoomfire(temp);

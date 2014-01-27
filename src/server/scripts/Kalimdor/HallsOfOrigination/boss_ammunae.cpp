@@ -11,7 +11,10 @@ enum Spells
     SPELL_CONSUME_MANA              = 75718,
     SPELL_CONSUME_FOCUS             = 80968,
     SPELL_SUMMON_SPORE              = 75866,
-    SPELL_RAMPANT_GROWTH            = 75790
+    SPELL_RAMPANT_GROWTH            = 75790,
+
+    SPELL_SPORE_BLAST               = 75153,
+    SPELL_SPORE_CLOUD               = 75701,
 };
 
 enum Events
@@ -20,6 +23,9 @@ enum Events
     EVENT_CONSUME_LIFE,
     EVENT_SUMMON_POD,
     EVENT_SUMMON_SPORE,
+
+    EVENT_SPORE_BLAST,
+    EVENT_SPORE_CLOUD,
 };
 
 enum Misc
@@ -40,11 +46,15 @@ class boss_ammunae : public CreatureScript
 {
     struct boss_ammunaeAI : public BossAI
     {
-        boss_ammunaeAI(Creature * creature) : BossAI(creature, DATA_AMMUNAE) {}
+        boss_ammunaeAI(Creature * creature) : BossAI(creature, DATA_AMMUNAE)
+        {
+            me->ApplySpellImmune(0, IMMUNITY_ID, 89889, true); // Noxious Spores
+        }
 
         void Reset()
         {
             _Reset();
+            me->SetPower(POWER_ENERGY, 0);
         }
 
         void EnterCombat(Unit * /*who*/)
@@ -290,9 +300,129 @@ public:
     }
 };
 
+class npc_living_vine : public CreatureScript
+{
+public:
+    npc_living_vine() : CreatureScript("npc_living_vine") { }
+
+    struct npc_living_vineAI : public ScriptedAI
+    {
+        npc_living_vineAI(Creature* creature) : ScriptedAI(creature)
+        {
+            SetCombatMovement(false);
+            me->ApplySpellImmune(0, IMMUNITY_ID, 75701, true); // Noxious Spores
+        }
+
+        void Reset()
+        {
+            events.Reset();
+
+            if(Unit* passenger = me->GetVehicleKit()->GetPassenger(1))
+               passenger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            events.ScheduleEvent(EVENT_SPORE_BLAST, 2000);
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            if(Unit* passenger = me->GetVehicleKit()->GetPassenger(1))
+               passenger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            me->DespawnOrUnsummon(100);
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if(!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            if(me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            if(uint32 eventId = events.ExecuteEvent())
+            {
+                switch(eventId)
+                {
+                case EVENT_SPORE_BLAST:
+                    DoCastRandom(SPELL_SPORE_BLAST, 40.0f);
+                    events.ScheduleEvent(EVENT_SPORE_BLAST, 5000);
+                    break;
+                }
+            }
+            DoMeleeAttackIfReady();
+        }
+    private:
+        EventMap events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_living_vineAI (creature);
+    }
+};
+
+class mob_spore : public CreatureScript
+{
+public:
+    mob_spore() : CreatureScript("mob_spore") { }
+
+    struct mob_sporeAI : public ScriptedAI
+    {
+        mob_sporeAI(Creature* creature) : ScriptedAI(creature)
+        {
+            me->ApplySpellImmune(0, IMMUNITY_ID, 75701, true); // Noxious Spores
+        }
+
+        void Reset()
+        {
+            events.Reset();
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            events.ScheduleEvent(EVENT_SPORE_CLOUD, 2000);
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if(!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            if(me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            if(uint32 eventId = events.ExecuteEvent())
+            {
+                switch(eventId)
+                {
+                case EVENT_SPORE_CLOUD:
+                    DoCastAOE(SPELL_SPORE_CLOUD);
+                    events.ScheduleEvent(EVENT_SPORE_CLOUD, 10000);
+                    break;
+                }
+            }
+        }
+    private:
+        EventMap events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new mob_sporeAI (creature);
+    }
+};
+
 void AddSC_boss_ammunae()
 {
     new boss_ammunae();
     new npc_bloodpetal_blossom();
     new npc_ammunae_spore();
+    new npc_living_vine();
+    new mob_spore();
 };

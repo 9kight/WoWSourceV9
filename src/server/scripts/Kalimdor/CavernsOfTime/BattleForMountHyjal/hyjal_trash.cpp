@@ -1240,17 +1240,17 @@ public:
             }
             if (!UpdateVictim())
                 return;
-            if (!me->IsWithinDist(me->getVictim(), 25)){
+            if (!me->IsWithinDist(me->GetVictim(), 25)){
                 if (MoveTimer <= diff)
                 {
-                    me->GetMotionMaster()->MoveChase(me->getVictim());
+                    me->GetMotionMaster()->MoveChase(me->GetVictim());
                     MoveTimer = 2000;
                 } else MoveTimer-=diff;
             }
 
             if (FrostBreathTimer <= diff)
             {
-                if (!me->IsWithinDist(me->getVictim(), 25))
+                if (!me->IsWithinDist(me->GetVictim(), 25))
                 {
                     DoCastVictim(SPELL_FROST_BREATH);
                     me->StopMoving();
@@ -1364,7 +1364,7 @@ public:
             }
             if (!UpdateVictim())
                 return;
-            if (!me->IsWithinDist(me->getVictim(), 20) || forcemove)
+            if (!me->IsWithinDist(me->GetVictim(), 20) || forcemove)
             {
                 forcemove = false;
                 if (forcemove)
@@ -1376,7 +1376,7 @@ public:
                 if (MoveTimer <= diff)
                 {
                     float x, y, z;
-                    me->getVictim()->GetPosition(x, y, z);
+                    me->GetVictim()->GetPosition(x, y, z);
                     me->GetMotionMaster()->MovePoint(0, x, y, z+Zpos);
                     Zpos -= 1.0f;
                     if (Zpos <= 0)
@@ -1386,7 +1386,7 @@ public:
             }
             if (StrikeTimer <= diff)
             {
-                if (me->IsWithinDist(me->getVictim(), 20))
+                if (me->IsWithinDist(me->GetVictim(), 20))
                 {
                     DoCastVictim(SPELL_GARGOYLE_STRIKE);
                     me->StopMoving();
@@ -1429,7 +1429,7 @@ public:
 
         void MoveInLineOfSight(Unit* who)
         {
-            if (!who || me->getVictim())
+            if (!who || me->GetVictim())
                 return;
 
             if (me->IsValidAttackTarget(who))
@@ -1451,13 +1451,13 @@ public:
                 return;
             if (ExplodeTimer <= diff)
             {
-                if (!me->IsWithinDistInMap(me->getVictim(), 30))
+                if (!me->IsWithinDistInMap(me->GetVictim(), 30))
                 {
                     EnterEvadeMode();
                     return;
                 }
                 int dmg = 500+rand()%700;
-                me->CastCustomSpell(me->getVictim(), SPELL_EXPLODING_SHOT, &dmg, 0, 0, false);
+                me->CastCustomSpell(me->GetVictim(), SPELL_EXPLODING_SHOT, &dmg, 0, 0, false);
                 ExplodeTimer = 5000+rand()%5000;
             } else ExplodeTimer -= diff;
             DoMeleeAttackIfReady();

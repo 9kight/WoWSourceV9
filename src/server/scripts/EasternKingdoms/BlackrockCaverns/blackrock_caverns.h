@@ -71,7 +71,12 @@ enum CreatureIds
     NPC_TWILIGHT_ZEALOT          = 39990,
     NPC_TWILIGHT_ZEALOT_BOSS     = 50284,
     NPC_SHADOW_OF_OBSIDIUS       = 40817,
+    
 
+  // Karsh Steelbender
+  NPC_BOUND_FLAMES             = 50417,
+  NPC_LAVA_SPOUT_TRIGGER       = 39842,
+    
     // Various NPCs
 
     NPC_RAZ_THE_CRAZED           = 39670,

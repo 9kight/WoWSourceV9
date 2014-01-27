@@ -105,8 +105,8 @@ void SummonCroneIfReady(InstanceScript* instance, Creature* creature)
     {
         if (Creature* pCrone = creature->SummonCreature(CREATURE_CRONE, -10891.96f, -1755.95f, creature->GetPositionZ(), 4.64f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, HOUR*2*IN_MILLISECONDS))
         {
-            if (creature->getVictim())
-                pCrone->AI()->AttackStart(creature->getVictim());
+            if (creature->GetVictim())
+                pCrone->AI()->AttackStart(creature->GetVictim());
         }
     }
 };
@@ -285,7 +285,7 @@ void boss_dorothee::boss_dorotheeAI::SummonTito()
     {
         Talk(SAY_DOROTHEE_SUMMON);
         CAST_AI(mob_tito::mob_titoAI, pTito->AI())->DorotheeGUID = me->GetGUID();
-        pTito->AI()->AttackStart(me->getVictim());
+        pTito->AI()->AttackStart(me->GetVictim());
         SummonedTito = true;
         TitoDied = false;
     }
@@ -994,10 +994,10 @@ void Resurrect(Creature* target)
     target->SetFullHealth();
     target->SetStandState(UNIT_STAND_STATE_STAND);
     target->CastSpell(target, SPELL_RES_VISUAL, true);
-    if (target->getVictim())
+    if (target->GetVictim())
     {
-        target->GetMotionMaster()->MoveChase(target->getVictim());
-        target->AI()->AttackStart(target->getVictim());
+        target->GetMotionMaster()->MoveChase(target->GetVictim());
+        target->AI()->AttackStart(target->GetVictim());
     }
         else
             target->GetMotionMaster()->Initialize();
@@ -1240,10 +1240,10 @@ public:
             if (JulianneGUID)
             {
                 Creature* Julianne = (Unit::GetCreature((*me), JulianneGUID));
-                if (Julianne && Julianne->getVictim())
+                if (Julianne && Julianne->GetVictim())
                 {
-                    me->AddThreat(Julianne->getVictim(), 1.0f);
-                    AttackStart(Julianne->getVictim());
+                    me->AddThreat(Julianne->GetVictim(), 1.0f);
+                    AttackStart(Julianne->GetVictim());
                 }
             }
         }
@@ -1390,8 +1390,8 @@ void boss_julianne::boss_julianneAI::UpdateAI(const uint32 diff)
             Phase = PHASE_BOTH;
             IsFakingDeath = false;
 
-            if (me->getVictim())
-                AttackStart(me->getVictim());
+            if (me->GetVictim())
+                AttackStart(me->GetVictim());
 
             ResurrectSelfTimer = 0;
             ResurrectTimer = 1000;

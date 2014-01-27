@@ -43,7 +43,7 @@ public:
         void UpdateAI(uint32 diff)
         {
             //Out of combat
-            if (!me->getVictim())
+            if (!me->GetVictim())
             {
                 //Timed say
                 if (tSay <= diff)
@@ -177,8 +177,8 @@ public:
                 //Attack
                 if (dmgCount < 2)
                     DoMeleeAttackIfReady();
-                else if (me->getVictim()->GetTypeId() == TYPEID_PLAYER) dmgCount = 0;
-                else if (me->getVictim()->isPet()) dmgCount = 0;
+                else if (me->GetVictim()->GetTypeId() == TYPEID_PLAYER) dmgCount = 0;
+                else if (me->GetVictim()->isPet()) dmgCount = 0;
                 else
                 {
                     if (tAnimate <= diff)
@@ -277,9 +277,9 @@ public:
             if (dmgCount < 2)
                 DoMeleeAttackIfReady();
             else
-                if (me->getVictim()->GetTypeId() == TYPEID_PLAYER) dmgCount = 0;
+                if (me->GetVictim()->GetTypeId() == TYPEID_PLAYER) dmgCount = 0;
             else
-                if (me->getVictim()->isPet()) dmgCount = 0;
+                if (me->GetVictim()->isPet()) dmgCount = 0;
             else
             {
                 if (tAnimate <= diff)
@@ -314,7 +314,7 @@ public:
     {
         if (quest->GetQuestId() == QUEST_ROYAL_ORDERS)
         {
-            if (creature->isQuestGiver())
+            if (creature->IsQuestGiver())
             {
                 player->TalkedToCreature(creature->GetEntry(), creature->GetGUID());
                 player->PrepareGossipMenu(creature, 0 ,true);
@@ -412,10 +412,10 @@ public:
             if (dmgCount < 2)
                 DoMeleeAttackIfReady();
             else
-                if (me->getVictim()->GetTypeId() == TYPEID_PLAYER)
+                if (me->GetVictim()->GetTypeId() == TYPEID_PLAYER)
                     dmgCount = 0;
             else
-                if (me->getVictim()->isPet())
+                if (me->GetVictim()->isPet())
                     dmgCount = 0;
             else
             {
@@ -744,10 +744,10 @@ public:
             if (dmgCount < 2)
                 DoMeleeAttackIfReady();
             else
-                if (me->getVictim()->GetTypeId() == TYPEID_PLAYER)
+                if (me->GetVictim()->GetTypeId() == TYPEID_PLAYER)
                     dmgCount = 0;
             else
-                if (me->getVictim()->isPet())
+                if (me->GetVictim()->isPet())
                     dmgCount = 0;
             else
             {
@@ -933,9 +933,9 @@ public:
             if (dmgCount < 2)
                 DoMeleeAttackIfReady();
             else
-                if (me->getVictim()->GetTypeId() == TYPEID_PLAYER) dmgCount = 0;
+                if (me->GetVictim()->GetTypeId() == TYPEID_PLAYER) dmgCount = 0;
             else
-                if (me->getVictim()->isPet()) dmgCount = 0;
+                if (me->GetVictim()->isPet()) dmgCount = 0;
             else
             {
                 if (tAnimate <= diff)
@@ -1003,7 +1003,7 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (me->getVictim()->GetEntry() == NPC_BLOODFANG_WORGEN)
+            if (me->GetVictim()->GetEntry() == NPC_BLOODFANG_WORGEN)
                 DoSpellAttackIfReady(SPELL_FROSTBOLT_VISUAL_ONLY); //Dummy spell, visual only to prevent getting agro (Blizz-like)
             else
                 DoMeleeAttackIfReady();
@@ -1105,7 +1105,7 @@ class npc_lord_darius_crowley_c1 : public CreatureScript
 
         void CastVictim(uint32 spellId)
         {
-            if (me->getVictim())
+            if (me->GetVictim())
                 DoCastVictim(spellId);
         }
 
@@ -1868,7 +1868,7 @@ public:
         void UpdateAI(uint32 diff)
         {
             //Out of combat
-            if (!me->getVictim())
+            if (!me->GetVictim())
             {
                 //Timed say
                 if (tSay <= diff)
@@ -2724,12 +2724,12 @@ public:
             }
             else tEnrage -= diff;
 
-            if (me->getVictim()->GetTypeId() == TYPEID_PLAYER)
+            if (me->GetVictim()->GetTypeId() == TYPEID_PLAYER)
                 Miss = false;
-            else if (me->getVictim()->isPet())
+            else if (me->GetVictim()->isPet())
                 Miss = false;
-            else if (me->getVictim()->GetEntry() == NPC_NORTHGATE_REBEL_1)
-                if (me->getVictim()->GetHealthPct() < 90)
+            else if (me->GetVictim()->GetEntry() == NPC_NORTHGATE_REBEL_1)
+                if (me->GetVictim()->GetHealthPct() < 90)
                     Miss = true;
 
             if (Miss && tAnimate <= diff)
@@ -3226,7 +3226,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
         if (player->GetQuestStatus(QUEST_THE_BATTLE_FOR_GILNEAS_CITY) == QUEST_STATUS_INCOMPLETE)
@@ -3755,7 +3755,7 @@ public:
             else
                 mui_spell2 -= diff;
 
-            victim = me->getVictim();
+            victim = me->GetVictim();
             if (victim && me->GetDistance2d(victim->GetPositionX(), victim->GetPositionY()) > 7)
                 DoSpellAttackIfReady(6660);
             else

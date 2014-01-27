@@ -24,7 +24,7 @@ SDCategory: Eastern Plaguelands
 EndScriptData */
 
 /* ContentData
-mobs_ghoul_flayer
+mob_ghoul_flayer
 npc_augustus_the_touched
 npc_darrowshire_spirit
 npc_tirion_fordring
@@ -36,14 +36,14 @@ EndContentData */
 #include "Player.h"
 #include "WorldSession.h"
 
-class mobs_ghoul_flayer : public CreatureScript
+class mob_ghoul_flayer : public CreatureScript
 {
 public:
-    mobs_ghoul_flayer() : CreatureScript("mobs_ghoul_flayer") { }
+    mob_ghoul_flayer() : CreatureScript("mob_ghoul_flayer") { }
 
-    struct mobs_ghoul_flayerAI : public ScriptedAI
+    struct mob_ghoul_flayerAI : public ScriptedAI
     {
-        mobs_ghoul_flayerAI(Creature* creature) : ScriptedAI(creature) { }
+        mob_ghoul_flayerAI(Creature* creature) : ScriptedAI(creature) { }
 
         void Reset() {}
 
@@ -58,7 +58,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new mobs_ghoul_flayerAI (creature);
+        return new mob_ghoul_flayerAI (creature);
     }
 };
 
@@ -81,10 +81,10 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
-        if (creature->isVendor() && player->GetQuestRewardStatus(6164))
+        if (creature->IsVendor() && player->GetQuestRewardStatus(6164))
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
 
         player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
@@ -171,7 +171,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
         if (player->GetQuestStatus(5742) == QUEST_STATUS_INCOMPLETE && player->getStandState() == UNIT_STAND_STATE_SIT)
@@ -185,7 +185,7 @@ public:
 
 void AddSC_eastern_plaguelands()
 {
-    new mobs_ghoul_flayer();
+    new mob_ghoul_flayer();
     new npc_augustus_the_touched();
     new npc_darrowshire_spirit();
     new npc_tirion_fordring();

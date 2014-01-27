@@ -1260,6 +1260,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 }
                 break;
             }
+            case SPELLFAMILY_DEATHKNIGHT:
+                if (GetSpellInfo()->Id == 51124) //Killing Machine
+                {
+                    if (!caster || !caster->HasAura(90459)) // T11 4 Piece
+                        break;
+
+                    caster->CastSpell(caster, 90507, true);
+                }
+            break;
             case SPELLFAMILY_MAGE:
                 if (!caster)
                     break;
@@ -1447,7 +1456,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 // Blood of the North
                 // Reaping
                 // Death Rune Mastery
-                if (GetSpellInfo()->SpellIconID == 3041 || GetSpellInfo()->SpellIconID == 22 || GetSpellInfo()->SpellIconID == 2622)
+                if (GetSpellInfo()->SpellIconID == 3041 || GetSpellInfo()->SpellIconID == 22 || GetSpellInfo()->SpellIconID == 2622 || GetSpellInfo()->SpellIconID == 2724)
                 {
                     if (!GetEffect(0) || GetEffect(0)->GetAuraType() != SPELL_AURA_PERIODIC_DUMMY)
                         break;

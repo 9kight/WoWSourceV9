@@ -294,7 +294,7 @@ struct boss_twinemperorsAI : public ScriptedAI
 
     void MoveInLineOfSight(Unit* who)
     {
-        if (!who || me->getVictim())
+        if (!who || me->GetVictim())
             return;
 
         if (me->canCreatureAttack(who))
@@ -535,8 +535,8 @@ public:
             //ShadowBolt_Timer
             if (ShadowBolt_Timer <= diff)
             {
-                if (!me->IsWithinDist(me->getVictim(), 45.0f))
-                    me->GetMotionMaster()->MoveChase(me->getVictim(), VEKLOR_DIST, 0);
+                if (!me->IsWithinDist(me->GetVictim(), 45.0f))
+                    me->GetMotionMaster()->MoveChase(me->GetVictim(), VEKLOR_DIST, 0);
                 else
                     DoCastVictim(SPELL_SHADOWBOLT);
                 ShadowBolt_Timer = 2000;

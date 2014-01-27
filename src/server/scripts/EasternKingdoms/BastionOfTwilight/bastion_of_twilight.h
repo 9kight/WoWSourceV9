@@ -1,120 +1,54 @@
-/*
-* Copyright (C) 2010-2011 Project Trinity <http://www.projecttrinity.org/>
-*
-* This program is free software; you can redistribute it and/or modify it
-* under the terms of the GNU General Public License as published by the
-* Free Software Foundation; either version 2 of the License, or (at your
-* option) any later version.
-*
-* This program is distributed in the hope that it will be useful, but WITHOUT
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-* more details.
-*
-* You should have received a copy of the GNU General Public License along
-* with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+#ifndef DEF_BASTION_OF_TWILIGHT_H
+#define DEF_BASTION_OF_TWILIGHT_H
 
-#ifndef DEF_BASTION_TWILIGHT_H
-#define DEF_BASTION_TWILIGHT_H
+#define BOTScriptName "instance_bastion_of_twilight"
+#define MAX_ENCOUNTER 5
 
-static const int maxEncounter = 5;
-
-#define BastionOfTwilightScriptName "instance_bastion_of_twilight"
-
-enum sharedSpells
+enum DataTypes
 {
-    SPELL_BERSERK           = 26662
+    // Encounters
+    DATA_HALFUS                     = 1,
+    DATA_VALIONA_THERALION          = 2,
+    DATA_ASCENDANT_COUNCIL          = 3,
+    DATA_CHOGALL                    = 4,
+    DATA_SINESTRA                   = 5,
+
+    // NPC GUIDs
+    DATA_AC_PHASE                   = 6,
+    DATA_FELUDIUS                   = 7,
+    DATA_IGNACIOUS                  = 8,
+    DATA_ARION                      = 9,
+    DATA_TERRASTRA                  = 10,
+    DATA_ELEMENTIUM_MONSTROSITY     = 11,
 };
 
-enum eData
+enum CreaturesIds
 {
-    BOSS_HALFUS             = 0,
-    BOSS_VALIONA            = 1,
-    BOSS_THERALION          = 2,
-    BOSS_ASCENDANT_COUNCIL  = 3,
-    BOSS_FELUDIUS           = 4,
-    BOSS_IGNACIOUS          = 5,
-    BOSS_ARION              = 6,
-    BOSS_TERRASTRA          = 7,
-    BOSS_CHOGALL            = 8,
-    BOSS_SINESTRA           = 9,
+    // Halfus
+    NPC_HALFUS_WORMBREAKER                      = 44600,
+    // Valiona and Theralion
+    NPC_VALIONA_BOT                             = 45992,
+    NPC_THERALION_BOT                           = 45993,
+    // Ascendant Lord Council
+    NPC_ASCENDANT_COUNCIL                       = 45420,
+    NPC_FELUDIUS                                = 43687,
+    NPC_IGNACIOUS                               = 43686,
+    NPC_ARION                                   = 43688,
+    NPC_TERRASTRA                               = 43689,
+    NPC_ELEMENTIUM_MONSTROSITY                  = 43735,
+    // Cho'gall
+    NPC_CHOGALL                                 = 43324,
+    // Sinestra
+    NPC_SINESTRA                                = 45213,
+
+   // Intro's and cutscenes - Misc
+    NPC_CHOGALL_HALFUS                          = 46965,
+    NPC_CHOGALL_DRAGONS                         = 48142,
+    NPC_CHOGALL_COUNCIL                         = 46900
 };
 
-enum Data64
+enum Gameobjects
 {
-    DATA_THERALION,
-    DATA_FELUDIUS,
-    DATA_IGNACIOUS,
-    DATA_ARION,
-    DATA_TERRASTRA,
-    DATA_MONSTROSITY,
-    DATA_RESET,
-    DATA_ACCUMULATE,
-    DATA_COUNCIL_EVENT,
-    DATA_CHOGALL,
-
-    DATA_DOUBLE_DRAGON      = 0,
 };
 
-enum eCreatures
-{
-    NPC_VALIONA                 = 45992,
-    NPC_THERALION               = 45993,
-    NPC_SINESTRA                = 45213,
-    NPC_CHOGAL                  = 51494,
-    NPC_FIRE_ELEMENTAL          = 43406,
-    NPC_SHADOW_LORD             = 43592,
-
-    // Council Bosses
-    BOSS_MONSTROSITY            = 43735,
-
-    //Misc
-    NPC_COUNCIL_PLUME_STALKER   = 45420,
-};
-
-enum eGameObjects
-{
-    GO_HALFUS_ENTRANCE      = 205222,
-    GO_HALFUS_EXIT          = 205223,
-    GO_COUNCIL_ENTRANCE     = 205226,
-    GO_COUNCIL_EXIT         = 205227,
-    GO_VALIONA_ENTRANCE     = 205224,
-    GO_VALIONA_EXIT         = 205225,
-    GO_CHOGALL_ENTRANCE     = 205228
-};
-
-enum eAchievementCriterias
-{
-    ACH_DOUBLE_DRAGON       = 16015,
-    ACH_DOUBLE_DRAGON_2     = 15672
-};
-
-enum MovePoints
-{
-    POINT_FINAL             = 1,
-    POINT_SHADOW_CHOGAL     = 2,
-};
-
-enum Waypoints
-{
-    WALK_FELUDIUS           = 14,
-};
-
-enum Talks
-{
-    SAY_PHASE3_FELUDIUS     = 4,
-};
-
-template<class AI>
-CreatureAI* GetBastionOfTwilightAI(Creature* creature)
-{
-    if (InstanceMap* const instance = creature->GetMap()->ToInstanceMap())
-        if (instance->GetInstanceScript())
-            if (instance->GetScriptId() == sObjectMgr->GetScriptId(BastionOfTwilightScriptName))
-                return new AI(creature);
-
-    return NULL;
-}
-
-#endif
+#endif // DEF_BASTION_OF_TWILIGHT_H

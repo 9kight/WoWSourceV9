@@ -259,7 +259,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
         if (player->GetQuestStatus(QUEST_JAINAS_AUTOGRAPH) == QUEST_STATUS_INCOMPLETE)
@@ -297,10 +297,10 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
-        if (creature->isVendor() && player->GetQuestRewardStatus(QUEST_NATS_MEASURING_TAPE))
+        if (creature->IsVendor() && player->GetQuestRewardStatus(QUEST_NATS_MEASURING_TAPE))
         {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
             player->SEND_GOSSIP_MENU(7640, creature->GetGUID());
@@ -363,7 +363,7 @@ public:
 
         void AttackedBy(Unit* pAttacker)
         {
-            if (me->getVictim())
+            if (me->GetVictim())
                 return;
 
             if (me->IsFriendlyTo(pAttacker))
@@ -443,7 +443,7 @@ public:
             SetCombatMovement(true);
 
             if (me->isInCombat())
-                if (Unit* unit = me->getVictim())
+                if (Unit* unit = me->GetVictim())
                     me->GetMotionMaster()->MoveChase(unit);
         }
 
@@ -763,6 +763,12 @@ public:
 
 void AddSC_dustwallow_marsh()
 {
+    new mobs_risen_husk_spirit();
+    new npc_theramore_guard();
+    new npc_lady_jaina_proudmoore();
+    new npc_nat_pagle();
+    new npc_private_hendel();
+    new npc_zelfrax();
     new npc_stinky();
     new spell_ooze_zap();
     new spell_ooze_zap_channel_end();

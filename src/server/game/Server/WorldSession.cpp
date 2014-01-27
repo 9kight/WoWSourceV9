@@ -129,7 +129,6 @@ WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8
     }
 
     InitializeQueryCallbackParameters();
-
     _compressionStream = new z_stream();
     _compressionStream->zalloc = (alloc_func)NULL;
     _compressionStream->zfree = (free_func)NULL;
@@ -328,8 +327,6 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
     //! delayed packets that were re-enqueued due to improper timing. To prevent an infinite
     //! loop caused by re-enqueueing the same packets over and over again, we stop updating this session
     //! and continue updating others. The re-enqueued packets will be handled in the next Update call for this session.
-	uint32 processedPackets = 0;
-	
     while (m_Socket && !m_Socket->IsClosed() &&
             !_recvQueue.empty() && _recvQueue.peek(true) != firstDelayedPacket &&
             _recvQueue.next(packet, updater))
@@ -437,16 +434,6 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
 
         if (deletePacket)
             delete packet;
-
-        deletePacket = true;
-
-#define MAX_PROCESSED_PACKETS_IN_SAME_WORLDSESSION_UPDATE 100
-        processedPackets++;
-
-        //process only a max amout of packets in 1 Update() call.
-        //Any leftover will be processed in next update
-        if (processedPackets > MAX_PROCESSED_PACKETS_IN_SAME_WORLDSESSION_UPDATE)
-            break;
     }
 
     if (m_Socket && !m_Socket->IsClosed() && _warden)
@@ -1105,6 +1092,15 @@ void WorldSession::ProcessQueryCallbacks()
         HandleAddIgnoreOpcodeCallBack(result);
         _addIgnoreCallback.cancel();
     }
+
+    //- HandleRenameGuild
+    if(_guildRenameCallback.IsReady())
+    {
+        std::string param = _guildRenameCallback.GetParam();
+        _guildRenameCallback.GetResult(result);
+        HandleGuildRenameCallback(param);
+        _guildRenameCallback.FreeResult();
+    }
 }
 
 void WorldSession::InitWarden(BigNumber* k, std::string const& os)
@@ -1173,3 +1169,4 @@ PacketThrottler::~PacketThrottler()
 {
     delete[] m_opcodes;
 }
+

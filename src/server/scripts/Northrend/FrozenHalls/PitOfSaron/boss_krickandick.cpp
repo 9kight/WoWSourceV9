@@ -208,7 +208,7 @@ class boss_ick : public CreatureScript
                 if (!me->isInCombat())
                     return;
 
-                if (!me->getVictim() && me->getThreatManager().isThreatListEmpty())
+                if (!me->GetVictim() && me->getThreatManager().isThreatListEmpty())
                 {
                     EnterEvadeMode();
                     return;
@@ -570,7 +570,7 @@ class spell_ick_explosive_barrage : public SpellScriptLoader
                     if (caster->GetTypeId() == TYPEID_UNIT)
                     {
                         caster->GetMotionMaster()->Clear();
-                        caster->GetMotionMaster()->MoveChase(caster->getVictim());
+                        caster->GetMotionMaster()->MoveChase(caster->GetVictim());
                     }
             }
 

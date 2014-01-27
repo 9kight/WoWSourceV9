@@ -56,7 +56,7 @@ public:
         InstanceScript* instance = creature->GetInstanceScript();
 
         //if (instance && instance->GetData(DATA_GRAND_VIZIER_ERTAN)==DONE)
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport me to next platform", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport me to the first platform", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
 
         player->SEND_GOSSIP_MENU(2475, creature->GetGUID());
         return true;
@@ -94,7 +94,7 @@ public:
         InstanceScript* instance = creature->GetInstanceScript();
 
         //if (instance && instance->GetData(DATA_ALTAIRUS)==DONE)
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport me to next platform", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport me to the second platform", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
 
         player->SEND_GOSSIP_MENU(2475, creature->GetGUID());
         return true;
@@ -134,7 +134,6 @@ public:
             }
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
             start = false;
-            me->AddAura(85719, me);
         }
 
         void JustDied(Unit* /*who*/)
@@ -222,47 +221,6 @@ public:
         float orient;
 
         bool start;
-    };
-};
-
-class mob_skyfall_star : public CreatureScript
-{
-public:
-    mob_skyfall_star() : CreatureScript("mob_skyfall_star") { }
-
-    CreatureAI* GetAI(Creature* pCreature) const
-    {
-        return new mob_skyfall_starAI(pCreature);
-    }
-
-    struct mob_skyfall_starAI : public ScriptedAI
-    {
-       mob_skyfall_starAI(Creature* pCreature) : ScriptedAI(pCreature)
-        {
-            instance = pCreature->GetInstanceScript();
-        }
-
-        void Reset()
-        {
-            m_timer = 0;
-        }
-
-        void UpdateAI(const uint32 uiDiff)
-        {
-            if (!UpdateVictim())
-                return;
-
-            if (m_timer <= uiDiff)
-            {
-                DoCastRandom(87854, 0.0f);
-                m_timer = urand(3000, 10000);
-            }
-            else m_timer -= uiDiff;
-        }
-
-    private :
-        InstanceScript* instance;
-        uint32 m_timer;
     };
 };
 
@@ -377,7 +335,6 @@ void AddSC_vortex_pinnacle()
     new npc_slipstream();
     new npc_slipstream_two();
     new mob_vortex_wind_rotation_manager();
-    new mob_skyfall_star();
     new mob_wild_vortex();
     new mob_golden_orb();
 }

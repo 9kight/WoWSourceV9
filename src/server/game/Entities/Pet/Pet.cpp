@@ -851,26 +851,6 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, maxdamage);
                     break;
                 }
-				// Todo, (Blizzlike Code needed here).
-				case 57220:
-				case 58077:
-				{
-					SetCreateHealth(m_owner->GetMaxHealth() / 3.5);
-					float mindamage, maxdamage;
-                    m_owner->ToPlayer()->CalculateMinMaxDamage(BASE_ATTACK, false, false, mindamage, maxdamage);
-                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, GetWeaponDamageRange(BASE_ATTACK, MINDAMAGE) + (m_owner->GetTotalAttackPowerValue(BASE_ATTACK) / 1.5));
-                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, GetWeaponDamageRange(BASE_ATTACK, MAXDAMAGE) + (m_owner->GetTotalAttackPowerValue(BASE_ATTACK) / 1.5));
-				}
-				break;
-				case 58078: 
-				{
-					SetCreateHealth(m_owner->GetMaxHealth() / 2.8);
-					float mindamage, maxdamage;
-                    m_owner->ToPlayer()->CalculateMinMaxDamage(BASE_ATTACK, false, false, mindamage, maxdamage);
-                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, GetWeaponDamageRange(BASE_ATTACK, MINDAMAGE) + (m_owner->GetTotalAttackPowerValue(BASE_ATTACK)));
-                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, GetWeaponDamageRange(BASE_ATTACK, MAXDAMAGE) + (m_owner->GetTotalAttackPowerValue(BASE_ATTACK)));
-				}
-				break;
                 case 1964: //force of nature
                 {
                     if (!pInfo)
@@ -898,10 +878,10 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                 }
                 case 19668: // Shadowfiend
                 {
-                    if (pInfo)
+                    if (!pInfo)
                     {
-                        SetCreateHealth(m_owner->GetMaxHealth());
-                        SetCreateMana(m_owner->GetMaxPower(POWER_MANA) / 1.5);
+                        SetCreateMana(28 + 10*petlevel);
+                        SetCreateHealth(28 + 30*petlevel);
                     }
                     int32 bonusDmg = (int32(m_owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW)* 0.375f));
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, GetWeaponDamageRange(BASE_ATTACK, MINDAMAGE) + bonusDmg);
@@ -944,12 +924,8 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     break;
                 }
                 case 31216: // Mirror Image
-                case 47243: // Mirror Image
-                case 47244: // Mirror Image
                 {
                     SetSpellBonusDamage(int32(m_owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FROST) * 0.33f));
-                    SetSpellBonusDamage(int32(m_owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE) * 0.33f));
-                    SetSpellBonusDamage(int32(m_owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_ARCANE) * 0.33f));
                     SetDisplayId(m_owner->GetDisplayId());
                     if (!pInfo)
                     {

@@ -60,6 +60,7 @@ enum Creatures
     // Lockmaw
     BOSS_LOCKMAW                 = 43614,
     BOSS_AUGH                    = 49045,
+    BOSS_AUGH_FAKE               = 45378,
     NPC_FRENZIED_CROCOLISK       = 43658,
     NPC_ADD_STALKER              = 45124,
     // Siamat

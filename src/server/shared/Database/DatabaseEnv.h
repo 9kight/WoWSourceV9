@@ -38,9 +38,11 @@
 #include "Implementation/CharacterDatabase.h"
 #include "Implementation/WorldDatabase.h"
 
+
 extern WorldDatabaseWorkerPool WorldDatabase;
 extern CharacterDatabaseWorkerPool CharacterDatabase;
 extern LoginDatabaseWorkerPool LoginDatabase;
+
 
 #endif
 

@@ -1,1 +1,0 @@
-UPDATE `creature_template` SET questItem1='66927' WHERE entry='40319';

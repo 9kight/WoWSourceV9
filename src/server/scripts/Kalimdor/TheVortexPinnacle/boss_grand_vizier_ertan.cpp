@@ -92,7 +92,7 @@ class boss_grand_vizier_ertan : public CreatureScript
                         {
                             vortex->RemoveAllAuras();
                             RelocateVortex(vortex);
-//                            vortex->GetMotionMaster()->ResetMovement(false);
+                            vortex->GetMotionMaster()->ResetMovement(false);
                         }
                         if (instance)
                          {
@@ -105,7 +105,7 @@ class boss_grand_vizier_ertan : public CreatureScript
             void EnterCombat(Unit* /*who*/)
             {
                 _EnterCombat();
-//                me->CastSpell(me, SPELL_STORMS_EDGE, true);
+                me->CastSpell(me, SPELL_STORMS_EDGE, true);
                 Talk(SAY_AGGRO);
                 instance->SetData(DATA_GRAND_VIZIER_ERTAN, IN_PROGRESS);
                 GetCreatureListWithEntryInGrid(vortexList, me, NPC_CYCLONE, 200.0f);
@@ -131,7 +131,7 @@ class boss_grand_vizier_ertan : public CreatureScript
                 Position homePos = vortex->GetHomePosition();
                 vortex->Relocate(homePos);
 //                vortex->SendMonsterMove(homePos.GetPositionX(), homePos.GetPositionY(), homePos.GetPositionZ(), 0);
-//                vortex->NearTeleportTo(homePos);
+                vortex->NearTeleportTo(homePos);
             }
 
             void KilledUnit(Unit* who)
@@ -153,7 +153,7 @@ class boss_grand_vizier_ertan : public CreatureScript
                         {
                             vortex->RemoveAllAuras();
                             RelocateVortex(vortex);
-//                            vortex->GetMotionMaster()->ResetMovement(false);
+                            vortex->GetMotionMaster()->ResetMovement(false);
                         }
                  if (instance)
                   {
@@ -227,56 +227,60 @@ class boss_grand_vizier_ertan : public CreatureScript
 
 class spell_ertan_storms_edge : public SpellScriptLoader
 {
+public:
+    spell_ertan_storms_edge() : SpellScriptLoader("spell_ertan_storms_edge")
+    {
+    }
+
+    class StormsEdgeCheck
+    {
+        Unit const* _caster;
+
     public:
-        spell_ertan_storms_edge() : SpellScriptLoader("spell_ertan_storms_edge")
+        StormsEdgeCheck(Unit* caster) : _caster(caster)
         {
         }
 
-        class StormsEdgeCheck
+        bool operator() (WorldObject* target)
         {
-            Unit const* _caster;
+            if (target->IsInRange(_caster, 0.0f, 23.0f, true))
+                return true;
 
-            public:
-                StormsEdgeCheck(Unit* caster) : _caster(caster)
-                {
-                }
-
-                bool operator() (WorldObject* target)
-                {
-                    // 23.0f is distance of vortexes to boss
-                    if (target->IsInRange(_caster, 0.0f, 23.0f, true))
-                        return true;
-
-                    return false;
-                }
-        };
-
-        class spell_ertan_storms_edge_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_ertan_storms_edge_SpellScript);
-
-            void FilterTargets(std::list<WorldObject*>& unitList)
-            {
-                if (Unit* caster = GetCaster())
-                    unitList.remove_if(StormsEdgeCheck(caster));
-            }
-
-            void HandleScript(SpellEffIndex /*effIndex*/)
-            {
-                GetCaster()->CastSpell(GetHitUnit(), SPELL_STORMS_EDGE_DAMAGE, true);
-            }
-
-            void Register()
-            {
-                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ertan_storms_edge_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
-                OnEffectHitTarget += SpellEffectFn(spell_ertan_storms_edge_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT); 
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_ertan_storms_edge_SpellScript();
+            return false;
         }
+    };
+
+    class spell_ertan_storms_edge_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ertan_storms_edge_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& unitList)
+        {
+            if (Unit* caster = GetCaster())
+                unitList.remove_if(StormsEdgeCheck(caster));
+        }
+
+        void HandleScript(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit *target = GetHitUnit())
+            {
+                if (target->GetTypeId() == TYPEID_PLAYER || target->isPet() || target->isTotem())
+                    if (Creature *c =  GetHitUnit()->FindNearestCreature(NPC_CYCLONE, 100, true))
+                        c->CastSpell(GetHitUnit(), SPELL_STORMS_EDGE_DAMAGE, true);
+            }
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ertan_storms_edge_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnEffectHitTarget += SpellEffectFn(spell_ertan_storms_edge_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ertan_storms_edge_SpellScript();
+    }
 };
 
 class spell_ertan_storms_edge_triggered : public SpellScriptLoader

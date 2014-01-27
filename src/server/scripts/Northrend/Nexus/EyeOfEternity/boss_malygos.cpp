@@ -727,7 +727,7 @@ class spell_malygos_vortex_visual : public SpellScriptLoader
                         malygos->SetDisableGravity(false);
                         malygos->SetCanFly(false);
 
-                        malygos->GetMotionMaster()->MoveChase(caster->getVictim());
+                        malygos->GetMotionMaster()->MoveChase(caster->GetVictim());
                         malygos->RemoveAura(SPELL_VORTEX_1);
                     }
                 }

@@ -82,7 +82,11 @@ typedef ACE_INT64 int64;
 typedef ACE_INT32 int32;
 typedef ACE_INT16 int16;
 typedef ACE_INT8 int8;
+#if defined(__clang__) && PLATFORM == PLATFORM_APPLE
+typedef uint64_t uint64;
+#else
 typedef ACE_UINT64 uint64;
+#endif
 typedef ACE_UINT32 uint32;
 typedef ACE_UINT16 uint16;
 typedef ACE_UINT8 uint8;

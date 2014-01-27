@@ -874,7 +874,7 @@ void hyjalAI::UpdateAI(const uint32 diff)
                         break;
 
                     case TARGETTYPE_VICTIM:
-                        target = me->getVictim();
+                        target = me->GetVictim();
                         break;
                 }
 

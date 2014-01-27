@@ -432,50 +432,59 @@ class spell_dk_anti_magic_zone : public SpellScriptLoader
         }
 };
 
-// 48721 - Blood Boil
 class spell_dk_blood_boil : public SpellScriptLoader
 {
-    public:
-        spell_dk_blood_boil() : SpellScriptLoader("spell_dk_blood_boil") { }
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl);
 
-        class spell_dk_blood_boil_SpellScript : public SpellScript
+        enum
         {
-            PrepareSpellScript(spell_dk_blood_boil_SpellScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_DK_BLOOD_BOIL_TRIGGERED))
-                    return false;
-                return true;
-            }
-
-            bool Load()
-            {
-                _executed = false;
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER && GetCaster()->getClass() == CLASS_DEATH_KNIGHT;
-            }
-
-            void HandleAfterHit()
-            {
-                if (_executed || !GetHitUnit())
-                    return;
-
-                _executed = true;
-                GetCaster()->CastSpell(GetCaster(), SPELL_DK_BLOOD_BOIL_TRIGGERED, true);
-            }
-
-            void Register()
-            {
-                AfterHit += SpellHitFn(spell_dk_blood_boil_SpellScript::HandleAfterHit);
-            }
-
-            bool _executed;
+            SPELL_BLOOD_BOIL    = 65658,
+            SPELL_BLOOD_PLAGUE  = 55078,
+            SPELL_FROST_FEVER   = 55095,
         };
 
-        SpellScript* GetSpellScript() const
+        bool Load()
         {
-            return new spell_dk_blood_boil_SpellScript();
+            Unit const* const caster = GetCaster();
+            return caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_DEATH_KNIGHT;
         }
+
+        void HandleHit()
+        {
+            Unit const* const target = GetHitUnit();
+            if (target && (target->HasAura(SPELL_FROST_FEVER) || target->HasAura(SPELL_BLOOD_PLAGUE)))
+            {
+                int32 value = GetHitDamage();
+                value += value * 0.5f + GetCaster()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.035f;
+                SetHitDamage(value);
+            }
+        }
+
+        void HandleAfterHit()
+        {
+            Unit* const caster = GetCaster();
+            caster->CastSpell(caster, SPELL_BLOOD_BOIL, true);
+        }
+
+        void Register()
+        {
+            OnHit += SpellHitFn(script_impl::HandleHit);
+            AfterHit += SpellHitFn(script_impl::HandleAfterHit);
+        }
+    };
+
+public:
+    spell_dk_blood_boil()
+        : SpellScriptLoader("spell_dk_blood_boil")
+    {
+    }
+
+    SpellScript* GetSpellScript() const
+    {
+        return new script_impl();
+    }
 };
 
 // Improved Unholy presence
@@ -613,56 +622,71 @@ class spell_dk_pet_spells : public SpellScriptLoader
         }
 };
 
-// Pestilence
 class spell_dk_pestilence : public SpellScriptLoader
 {
-    public:
-        spell_dk_pestilence() : SpellScriptLoader("spell_dk_pestilence") { }
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl);
 
-        class spell_dk_pestilence_SpellScript : public SpellScript
+        enum
         {
-            PrepareSpellScript(spell_dk_pestilence_SpellScript);
-
-            void HandleBeforeHit()
-            {
-                GetCaster()->AddAura(76243, GetCaster());
-            }
-
-            void HandleAfterHit()
-            {
-                GetCaster()->RemoveAurasDueToSpell(76243);
-            }
-
-            void HandleScript(SpellEffIndex effIndex)
-            {
-                if (Unit* target = GetHitUnit())
-                {
-                    if (target != GetExplTargetUnit())
-                    {
-                        Unit* expl = GetExplTargetUnit();
-                        if (expl->HasAura(55078))
-                            GetCaster()->CastSpell(target, 55078, true);
-                        if (expl->HasAura(55095))
-                            GetCaster()->CastSpell(target, 55095, true);
-                        if (expl->HasAura(65142))
-                            GetCaster()->CastSpell(target, 65142, true);
-                        expl->CastSpell(target, 91939, true);
-                    }
-                }
-            }
-
-            void Register()
-            {
-                BeforeHit += SpellHitFn(spell_dk_pestilence_SpellScript::HandleBeforeHit);
-                AfterHit += SpellHitFn(spell_dk_pestilence_SpellScript::HandleAfterHit);
-                OnEffectHitTarget += SpellEffectFn(spell_dk_pestilence_SpellScript::HandleScript, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
-            }
+            SPELL_DOT_REDUCTION         = 76243,
+            SPELL_GLYPH_OF_PESTILENCE   = 63334,
+            SPELL_PESTILENCE_ANIMATION  = 91939,
+            SPELL_BLOOD_PLAGUE          = 55078,
+            SPELL_FROST_FEVER           = 55095,
         };
 
-        SpellScript* GetSpellScript() const
+        Unit* m_explTarget;
+
+        bool Load()
         {
-            return new spell_dk_pestilence_SpellScript();
+            m_explTarget = GetExplTargetUnit();
+            return m_explTarget;
         }
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            targets.remove(m_explTarget);
+        }
+
+        void HandleScript(SpellEffIndex)
+        {
+            Unit* const caster = GetCaster();
+            Unit* const target = GetHitUnit();
+            if (!target)
+                return;
+
+            caster->CastSpell(caster, SPELL_DOT_REDUCTION, true);
+
+            // Blood Plague
+            if (m_explTarget->HasAura(SPELL_BLOOD_PLAGUE, caster->GetGUID()))
+                caster->CastSpell(target, SPELL_BLOOD_PLAGUE, true);
+
+            // Frost Fever
+            if (m_explTarget->HasAura(SPELL_FROST_FEVER, caster->GetGUID()))
+                caster->CastSpell(target, SPELL_FROST_FEVER, true);
+
+            caster->CastSpell(target, SPELL_PESTILENCE_ANIMATION, true);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(script_impl::FilterTargets, EFFECT_2, TARGET_UNIT_DEST_AREA_ENEMY);
+            OnEffectHitTarget += SpellEffectFn(script_impl::HandleScript, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+public:
+    spell_dk_pestilence()
+        : SpellScriptLoader("spell_dk_pestilence")
+    {
+    }
+
+    SpellScript* GetSpellScript() const
+    {
+        return new script_impl();
+    }
 };
 
 // Death's advance
@@ -792,59 +816,6 @@ class spell_sha_resilient_infection : public SpellScriptLoader
         AuraScript* GetAuraScript() const
         {
             return new spell_sha_resilient_infection_AuraScript();
-        }
-};
-
-// 49158 - Corpse Explosion (51325, 51326, 51327, 51328)
-class spell_dk_corpse_explosion : public SpellScriptLoader
-{
-    public:
-        spell_dk_corpse_explosion() : SpellScriptLoader("spell_dk_corpse_explosion") { }
-
-        class spell_dk_corpse_explosion_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_dk_corpse_explosion_SpellScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_DK_CORPSE_EXPLOSION_TRIGGERED) || !sSpellMgr->GetSpellInfo(SPELL_DK_GHOUL_EXPLODE))
-                    return false;
-                if (!sSpellMgr->GetSpellInfo(SPELL_DK_CORPSE_EXPLOSION_VISUAL))
-                    return false;
-                return true;
-            }
-
-            void HandleDummy(SpellEffIndex /*effIndex*/)
-            {
-                if (Unit* unitTarget = GetHitUnit())
-                {
-                    int32 bp = 0;
-                    if (unitTarget->isAlive())  // Living ghoul as a target
-                    {
-                        bp = int32(unitTarget->CountPctFromMaxHealth(25));
-                        unitTarget->CastCustomSpell(unitTarget, SPELL_DK_GHOUL_EXPLODE, &bp, NULL, NULL, false);
-                    }
-                    else                        // Some corpse
-                    {
-                        bp = GetEffectValue();
-                        GetCaster()->CastCustomSpell(unitTarget, GetSpellInfo()->Effects[EFFECT_1].CalcValue(), &bp, NULL, NULL, true);
-                        // Corpse Explosion (Suicide)
-                        unitTarget->CastSpell(unitTarget, SPELL_DK_CORPSE_EXPLOSION_TRIGGERED, true);
-                    }
-                    // Set corpse look
-                    GetCaster()->CastSpell(unitTarget, SPELL_DK_CORPSE_EXPLOSION_VISUAL, true);
-                }
-            }
-
-            void Register()
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_dk_corpse_explosion_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_dk_corpse_explosion_SpellScript();
         }
 };
 
@@ -1290,50 +1261,6 @@ class spell_dk_scourge_strike : public SpellScriptLoader
         }
 };
 
-// 49145 - Spell Deflection
-class spell_dk_spell_deflection : public SpellScriptLoader
-{
-    public:
-        spell_dk_spell_deflection() : SpellScriptLoader("spell_dk_spell_deflection") { }
-
-        class spell_dk_spell_deflection_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_dk_spell_deflection_AuraScript);
-
-            uint32 absorbPct;
-
-            bool Load()
-            {
-                absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue(GetCaster());
-                return true;
-            }
-
-            void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
-            {
-                // Set absorbtion amount to unlimited
-                amount = -1;
-            }
-
-            void Absorb(AuraEffect* /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
-            {
-                // You have a chance equal to your Parry chance
-                if ((dmgInfo.GetDamageType() == SPELL_DIRECT_DAMAGE) && roll_chance_f(GetTarget()->GetUnitParryChance()))
-                    absorbAmount = CalculatePct(dmgInfo.GetDamage(), absorbPct);
-            }
-
-            void Register()
-            {
-                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_spell_deflection_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
-                OnEffectAbsorb += AuraEffectAbsorbFn(spell_dk_spell_deflection_AuraScript::Absorb, EFFECT_0);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_dk_spell_deflection_AuraScript();
-        }
-};
-
 // 55233 - Vampiric Blood
 class spell_dk_vampiric_blood : public SpellScriptLoader
 {
@@ -1681,7 +1608,6 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_anti_magic_zone();
     new spell_dk_blood_boil();
     new spell_dk_blood_gorged();
-    new spell_dk_corpse_explosion();
     new spell_dk_death_coil();
     new spell_dk_death_gate();
     new spell_dk_death_grip();
@@ -1690,7 +1616,6 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_ghoul_explode();
     new spell_dk_rune_tap_party();
     new spell_dk_scourge_strike();
-    new spell_dk_spell_deflection();
     new spell_dk_vampiric_blood();
     new spell_sha_resilient_infection();
     new spell_dk_pestilence();
@@ -1702,7 +1627,6 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_festering();
     new spell_dk_chilblains();
     new spell_dk_strangulate();
-
     new spell_dk_avoidance_passive();
     new spell_dk_pet_scaling_01();
     new spell_dk_pet_scaling_02();

@@ -240,7 +240,7 @@ public:
                     case EVENT_VOLCANO:
                     {
                         Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 999, true);
-                        if (!target) target = me->getVictim();
+                        if (!target) target = me->GetVictim();
                         if (target)
                         {
                             //DoCast(target, SPELL_VOLCANIC_SUMMON);//movement bugged

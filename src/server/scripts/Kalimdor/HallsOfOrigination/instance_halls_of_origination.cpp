@@ -36,7 +36,7 @@
 static const DoorData doorData[] =
 {
     {GO_ULDUM_DOOR_14,                      DATA_TEMPLE_GUARDIAN_ANHUUR_EVENT,      DOOR_TYPE_ROOM,     BOUNDARY_E      },
-    {GO_ULDUM_DOOR_15,                      DATA_TEMPLE_GUARDIAN_ANHUUR_EVENT,      DOOR_TYPE_PASSAGE,  BOUNDARY_W      },
+    {GO_ANHUURS_DOOR,                       DATA_TEMPLE_GUARDIAN_ANHUUR_EVENT,      DOOR_TYPE_PASSAGE,  BOUNDARY_W      },
     {GO_ANHUURS_BRIDGE,                     DATA_TEMPLE_GUARDIAN_ANHUUR_EVENT,      DOOR_TYPE_PASSAGE,  BOUNDARY_NONE   },
     {0,                                     0,                                      DOOR_TYPE_ROOM,     BOUNDARY_NONE} // END
 };
@@ -87,7 +87,7 @@ class instance_halls_of_origination : public InstanceMapScript
                         go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     break;
                 case GO_ULDUM_DOOR_14:
-                case GO_ULDUM_DOOR_15:
+                case GO_ANHUURS_DOOR:
                 case GO_ANHUURS_BRIDGE:
                     AddDoor(go, true);
                     break;

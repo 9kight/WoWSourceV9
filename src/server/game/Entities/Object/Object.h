@@ -57,7 +57,7 @@ enum TypeMask
     TYPEMASK_DYNAMICOBJECT  = 0x0040,
     TYPEMASK_CORPSE         = 0x0080,
     TYPEMASK_AREATRIGGER    = 0x0100,
-    TYPEMASK_SEER           = TYPEMASK_UNIT | TYPEMASK_DYNAMICOBJECT | TYPEMASK_PLAYER
+    TYPEMASK_SEER           = TYPEMASK_PLAYER | TYPEMASK_UNIT | TYPEMASK_DYNAMICOBJECT
 };
 
 enum TypeID
@@ -565,6 +565,7 @@ ByteBuffer& operator<<(ByteBuffer& buf, Position::PositionXYZOStreamer const& st
 
 #include "MovementInfo.h"
 
+
 #define MAPID_INVALID 0xFFFFFFFF
 
 class WorldLocation : public Position
@@ -853,8 +854,23 @@ class WorldObject : public Object, public WorldLocation
             pos.Relocate(x, y, z, ang);
             return SummonCreature(id, pos, spwtype, despwtime, 0);
         }
+
+        TempSummon* SummonCreature_OP(uint32 id, const Position &pos, TempSummonType spwtype = TEMPSUMMON_MANUAL_DESPAWN, uint32 despwtime = 0, uint32 vehId = 0) const;
+        TempSummon* SummonCreature_OP(uint32 id, float x, float y, float z, float ang = 0, TempSummonType spwtype = TEMPSUMMON_MANUAL_DESPAWN, uint32 despwtime = 0)
+        {
+            if (!x && !y && !z)
+            {
+                GetClosePoint(x, y, z, GetObjectSize());
+                ang = GetOrientation();
+            }
+            Position pos;
+            pos.Relocate(x, y, z, ang);
+            return SummonCreature(id, pos, spwtype, despwtime, 0);
+        }
+
         GameObject* SummonGameObject(uint32 entry, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 respawnTime);
         Creature*   SummonTrigger(float x, float y, float z, float ang, uint32 dur, CreatureAI* (*GetAI)(Creature*) = NULL);
+		void SummonCreatureGroup(uint8 group, std::list<TempSummon*>* list = NULL);
 
         Creature*   FindNearestCreature(uint32 entry, float range, bool alive = true) const;
         GameObject* FindNearestGameObject(uint32 entry, float range) const;

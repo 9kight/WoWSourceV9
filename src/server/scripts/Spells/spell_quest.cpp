@@ -1561,6 +1561,268 @@ class spell_q12527_zuldrak_rat : public SpellScriptLoader
         }
 };
 
+// 13291 - Borrowed Technology/13292 - The Solution Solution /Daily//13239 - Volatility/13261 - Volatiliy /Daily//
+enum Quest13291_13292_13239_13261Data
+{
+    // NPCs
+    NPC_SKYTALON       = 31583,
+    NPC_DECOY          = 31578,
+    // Spells
+    SPELL_RIDE         = 56687
+};
+
+class spell_q13291_q13292_q13239_q13261_frostbrood_skytalon_grab_decoy : public SpellScriptLoader
+{
+    public:
+        spell_q13291_q13292_q13239_q13261_frostbrood_skytalon_grab_decoy() : SpellScriptLoader("spell_q13291_q13292_q13239_q13261_frostbrood_skytalon_grab_decoy") { }
+
+        class spell_q13291_q13292_q13239_q13261_frostbrood_skytalon_grab_decoy_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_q13291_q13292_q13239_q13261_frostbrood_skytalon_grab_decoy_SpellScript);
+
+            bool Validate(SpellInfo const* /*spell*/) 
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_RIDE))
+                    return false;
+
+                return true;
+            }
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                if (!GetHitCreature())
+                    return;
+                // TO DO: Being triggered is hack, but in checkcast it doesn't pass aurastate requirements.
+                // Beside that the decoy won't keep it's freeze animation state when enter.
+                GetHitCreature()->CastSpell(GetCaster(), SPELL_RIDE, true);
+            }
+
+            void Register() 
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_q13291_q13292_q13239_q13261_frostbrood_skytalon_grab_decoy_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const 
+        {
+            return new spell_q13291_q13292_q13239_q13261_frostbrood_skytalon_grab_decoy_SpellScript();
+        }
+};
+
+class spell_q13291_q13292_q13239_q13261_armored_decoy_summon_skytalon : public SpellScriptLoader
+{
+    public:
+        spell_q13291_q13292_q13239_q13261_armored_decoy_summon_skytalon() : SpellScriptLoader("spell_q13291_q13292_q13239_q13261_armored_decoy_summon_skytalon") { }
+
+        class spell_q13291_q13292_q13239_q13261_armored_decoy_summon_skytalon_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_q13291_q13292_q13239_q13261_armored_decoy_summon_skytalon_SpellScript);
+
+            void ChangeSummonPos(SpellEffIndex /*effIndex*/)
+            {
+                // Adjust effect summon position
+                WorldLocation summonPos = *GetExplTargetDest();
+                Position offset = { 0.0f, 0.0f, 20.0f, 0.0f };
+                summonPos.RelocateOffset(offset);
+                SetExplTargetDest(summonPos);
+                GetHitDest()->RelocateOffset(offset);
+            }
+
+            void Register() 
+            {
+                OnEffectHit += SpellEffectFn(spell_q13291_q13292_q13239_q13261_armored_decoy_summon_skytalon_SpellScript::ChangeSummonPos, EFFECT_0, SPELL_EFFECT_SUMMON);
+            }
+        };
+
+        SpellScript* GetSpellScript() const 
+        {
+            return new spell_q13291_q13292_q13239_q13261_armored_decoy_summon_skytalon_SpellScript();
+        }
+};
+
+class spell_q12847_summon_soul_moveto_bunny : public SpellScriptLoader
+{
+    public:
+        spell_q12847_summon_soul_moveto_bunny() : SpellScriptLoader("spell_q12847_summon_soul_moveto_bunny") { }
+
+        class spell_q12847_summon_soul_moveto_bunny_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_q12847_summon_soul_moveto_bunny_SpellScript);
+
+            void ChangeSummonPos(SpellEffIndex /*effIndex*/)
+            {
+                // Adjust effect summon position
+                WorldLocation summonPos = *GetExplTargetDest();
+                Position offset = { 0.0f, 0.0f, 2.5f, 0.0f };
+                summonPos.RelocateOffset(offset);
+                SetExplTargetDest(summonPos);
+                GetHitDest()->RelocateOffset(offset);
+            }
+
+            void Register() 
+            {
+                OnEffectHit += SpellEffectFn(spell_q12847_summon_soul_moveto_bunny_SpellScript::ChangeSummonPos, EFFECT_0, SPELL_EFFECT_SUMMON);
+            }
+        };
+
+        SpellScript *GetSpellScript() const
+        {
+            return new spell_q12847_summon_soul_moveto_bunny_SpellScript();
+        }
+};
+
+enum EscapeFromSilverbrook
+{
+    SPELL_SUMMON_WORGEN = 48681
+};
+ 
+// 48682 - Escape from Silverbrook - Periodic Dummy
+class spell_q12308_escape_from_silverbrook : public SpellScriptLoader
+{
+    public:
+        spell_q12308_escape_from_silverbrook() : SpellScriptLoader("spell_q12308_escape_from_silverbrook") { }
+ 
+        class spell_q12308_escape_from_silverbrook_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_q12308_escape_from_silverbrook_SpellScript);
+ 
+            bool Validate(SpellInfo const* /*spellInfo*/) 
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_SUMMON_WORGEN))
+                    return false;
+                return true;
+            }
+ 
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                GetCaster()->CastSpell(GetCaster(), SPELL_SUMMON_WORGEN, true);
+            }
+ 
+            void Register() 
+            {
+                OnEffectHit += SpellEffectFn(spell_q12308_escape_from_silverbrook_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+ 
+        SpellScript* GetSpellScript() const 
+        {
+            return new spell_q12308_escape_from_silverbrook_SpellScript();
+        }
+};
+ 
+// 48681 - Summon Silverbrook Worgen
+class spell_q12308_escape_from_silverbrook_summon_worgen : public SpellScriptLoader
+{
+    public:
+        spell_q12308_escape_from_silverbrook_summon_worgen() : SpellScriptLoader("spell_q12308_escape_from_silverbrook_summon_worgen") { }
+ 
+        class spell_q12308_escape_from_silverbrook_summon_worgen_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_q12308_escape_from_silverbrook_summon_worgen_SpellScript);
+ 
+            void ModDest(SpellEffIndex effIndex)
+            {
+                float dist = GetSpellInfo()->Effects[effIndex].CalcRadius(GetCaster());
+                float angle = (urand(0, 1) ? -1 : 1) * (frand(0.75f, 1.0f) * M_PI);
+ 
+                Position pos;
+                GetCaster()->GetNearPosition(pos, dist, angle);
+                GetHitDest()->Relocate(&pos);
+            }
+ 
+            void Register() 
+            {
+                OnEffectHit += SpellEffectFn(spell_q12308_escape_from_silverbrook_summon_worgen_SpellScript::ModDest, EFFECT_0, SPELL_EFFECT_SUMMON);
+            }
+        };
+ 
+        SpellScript* GetSpellScript() const 
+        {
+            return new spell_q12308_escape_from_silverbrook_summon_worgen_SpellScript();
+        }
+};
+
+enum Quest_The_Storm_King
+{
+    SPELL_RIDE_GYMER            = 43671,
+    SPELL_GRABBED               = 55424
+};
+
+class spell_q12919_gymers_grab : public SpellScriptLoader
+{
+    public:
+        spell_q12919_gymers_grab() : SpellScriptLoader("spell_q12919_gymers_grab") { }
+
+        class spell_q12919_gymers_grab_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_q12919_gymers_grab_SpellScript);
+
+            bool Validate(SpellInfo const* /*spell*/) 
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_RIDE_GYMER))
+                    return false;
+                return true;
+            }
+
+            void HandleScript(SpellEffIndex /*effIndex*/)
+            {
+                int8 seatId = 2;
+                if (!GetHitCreature())
+                    return;
+                GetHitCreature()->CastCustomSpell(SPELL_RIDE_GYMER, SPELLVALUE_BASE_POINT0, seatId, GetCaster(), true);
+                GetHitCreature()->CastSpell(GetHitCreature(), SPELL_GRABBED, true);
+            }
+
+            void Register() 
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_q12919_gymers_grab_SpellScript::HandleScript, EFFECT_0,  SPELL_EFFECT_SCRIPT_EFFECT);
+            }
+        };
+
+        SpellScript* GetSpellScript() const 
+        {
+            return new spell_q12919_gymers_grab_SpellScript();
+        }
+};
+
+enum Quest_The_Storm_King_Throw
+{
+    SPELL_VARGUL_EXPLOSION      = 55569
+};
+
+class spell_q12919_gymers_throw : public SpellScriptLoader
+{
+    public:
+        spell_q12919_gymers_throw() : SpellScriptLoader("spell_q12919_gymers_throw") { }
+
+        class spell_q12919_gymers_throw_SpellScript : public SpellScript
+        {
+           PrepareSpellScript(spell_q12919_gymers_throw_SpellScript);
+
+            void HandleScript(SpellEffIndex /*effIndex*/)
+            {
+                Unit* caster = GetCaster();
+                if (caster->IsVehicle())
+                    if (Unit* passenger = caster->GetVehicleKit()->GetPassenger(1))
+                    {
+                         passenger->ExitVehicle();
+                         caster->CastSpell(passenger, SPELL_VARGUL_EXPLOSION, true);
+                    }
+            }
+
+            void Register() 
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_q12919_gymers_throw_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            }
+        };
+
+        SpellScript* GetSpellScript() const 
+        {
+            return new spell_q12919_gymers_throw_SpellScript();
+        }
+};
+
+
 void AddSC_quest_spell_scripts()
 {
     new spell_q55_sacred_cleansing();
@@ -1599,4 +1861,11 @@ void AddSC_quest_spell_scripts()
     new spell_q11010_q11102_q11023_q11008_check_fly_mount();
     new spell_q12372_azure_on_death_force_whisper();
     new spell_q12527_zuldrak_rat();
+    new spell_q13291_q13292_q13239_q13261_frostbrood_skytalon_grab_decoy();
+    new spell_q13291_q13292_q13239_q13261_armored_decoy_summon_skytalon();
+    new spell_q12847_summon_soul_moveto_bunny();
+    new spell_q12308_escape_from_silverbrook_summon_worgen();
+    new spell_q12308_escape_from_silverbrook();    
+    new spell_q12919_gymers_grab();
+    new spell_q12919_gymers_throw();    
 }

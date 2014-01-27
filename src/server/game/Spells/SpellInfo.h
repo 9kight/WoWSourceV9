@@ -517,10 +517,14 @@ public:
     bool IsHighRankOf(SpellInfo const* spellInfo) const;
 
     // loading helpers
-    uint32 _GetExplicitTargetMask() const;
+    void _InitializeExplicitTargetMask();
     bool _IsPositiveEffect(uint8 effIndex, bool deep) const;
     bool _IsPositiveSpell() const;
     static bool _IsPositiveTarget(uint32 targetA, uint32 targetB);
+
+    void SetDurationIndex(uint32 index);
+    void SetRangeIndex(uint32 index);
+    void SetCastTimeIndex(uint32 index);
 
     // unloading helpers
     void _UnloadImplicitTargetConditionLists();

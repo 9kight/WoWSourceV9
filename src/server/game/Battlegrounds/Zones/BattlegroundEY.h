@@ -82,7 +82,7 @@ enum BG_EY_Sounds
 enum BG_EY_Spells
 {
     BG_EY_NETHERSTORM_FLAG_SPELL        = 34976,
-    BG_EY_PLAYER_DROPPED_FLAG_SPELL     = 34991
+    BG_EY_PLAYER_DROPPED_FLAG_SPELL     = 34991 // Summon Object EffectMuscValueA = 184142
 };
 
 enum EYBattlegroundObjectEntry

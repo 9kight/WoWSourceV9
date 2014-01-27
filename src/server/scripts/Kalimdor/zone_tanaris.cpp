@@ -118,8 +118,8 @@ public:
             {
                 if (SendItemTimer <= diff)
                 {
-                    if (me->getVictim()->GetTypeId() == TYPEID_PLAYER)
-                        SendItem(me->getVictim());
+                    if (me->GetVictim()->GetTypeId() == TYPEID_PLAYER)
+                        SendItem(me->GetVictim());
                     SendItemTimer = 5000;
                 } else SendItemTimer -= diff;
             }
@@ -304,7 +304,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
         if (player->GetQuestStatus(10279) == QUEST_STATUS_INCOMPLETE || player->GetQuestRewardStatus(10279))
@@ -314,6 +314,70 @@ public:
         }
         else
             player->SEND_GOSSIP_MENU(9977, creature->GetGUID());
+
+        return true;
+    }
+
+};
+
+/*######
+## npc_stone_watcher_of_norgannon
+######*/
+
+#define GOSSIP_ITEM_NORGANNON_1     "What function do you serve?"
+#define GOSSIP_ITEM_NORGANNON_2     "What are the Plates of Uldum?"
+#define GOSSIP_ITEM_NORGANNON_3     "Where are the Plates of Uldum?"
+#define GOSSIP_ITEM_NORGANNON_4     "Excuse me? We've been \"reschedueled for visitations\"? What does that mean?!"
+#define GOSSIP_ITEM_NORGANNON_5     "So, what's inside Uldum?"
+#define GOSSIP_ITEM_NORGANNON_6     "I will return when i have the Plates of Uldum."
+
+class npc_stone_watcher_of_norgannon : public CreatureScript
+{
+public:
+    npc_stone_watcher_of_norgannon() : CreatureScript("npc_stone_watcher_of_norgannon") { }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+    {
+        player->PlayerTalkClass->ClearMenus();
+        switch (uiAction)
+        {
+            case GOSSIP_ACTION_INFO_DEF:
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NORGANNON_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+                player->SEND_GOSSIP_MENU(1675, creature->GetGUID());
+                break;
+            case GOSSIP_ACTION_INFO_DEF+1:
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NORGANNON_3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+                player->SEND_GOSSIP_MENU(1676, creature->GetGUID());
+                break;
+            case GOSSIP_ACTION_INFO_DEF+2:
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NORGANNON_4, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
+                player->SEND_GOSSIP_MENU(1677, creature->GetGUID());
+                break;
+            case GOSSIP_ACTION_INFO_DEF+3:
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NORGANNON_5, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+4);
+                player->SEND_GOSSIP_MENU(1678, creature->GetGUID());
+                break;
+            case GOSSIP_ACTION_INFO_DEF+4:
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NORGANNON_6, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+5);
+                player->SEND_GOSSIP_MENU(1679, creature->GetGUID());
+                break;
+            case GOSSIP_ACTION_INFO_DEF+5:
+                player->CLOSE_GOSSIP_MENU();
+                player->AreaExploredOrEventHappens(2954);
+                break;
+        }
+        return true;
+    }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (creature->IsQuestGiver())
+            player->PrepareQuestMenu(creature->GetGUID());
+
+        if (player->GetQuestStatus(2954) == QUEST_STATUS_INCOMPLETE)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NORGANNON_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+
+        player->SEND_GOSSIP_MENU(1674, creature->GetGUID());
 
         return true;
     }
@@ -477,7 +541,7 @@ public:
         {
             FollowerAI::MoveInLineOfSight(who);
 
-            if (!me->getVictim() && !HasFollowState(STATE_FOLLOW_COMPLETE | STATE_FOLLOW_POSTEVENT) && who->GetEntry() == NPC_TORTA)
+            if (!me->GetVictim() && !HasFollowState(STATE_FOLLOW_COMPLETE | STATE_FOLLOW_POSTEVENT) && who->GetEntry() == NPC_TORTA)
             {
                 if (me->IsWithinDistInMap(who, INTERACTION_DISTANCE))
                 {
@@ -574,7 +638,9 @@ public:
 
 void AddSC_tanaris()
 {
+    new mob_aquementas();
     new npc_custodian_of_time();
     new npc_steward_of_time();
+    new npc_stone_watcher_of_norgannon();
     new npc_OOX17();
 }

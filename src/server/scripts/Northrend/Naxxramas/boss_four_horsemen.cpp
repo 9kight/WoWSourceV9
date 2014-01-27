@@ -256,9 +256,9 @@ public:
         // switch to "who" if nearer than current target.
         void SelectNearestTarget(Unit* who)
         {
-            if (me->getVictim() && me->GetDistanceOrder(who, me->getVictim()) && me->IsValidAttackTarget(who))
+            if (me->GetVictim() && me->GetDistanceOrder(who, me->GetVictim()) && me->IsValidAttackTarget(who))
             {
-                me->getThreatManager().modifyThreatPercent(me->getVictim(), -100);
+                me->getThreatManager().modifyThreatPercent(me->GetVictim(), -100);
                 me->AddThreat(who, 1000000.0f);
             }
         }
@@ -385,7 +385,7 @@ public:
 
             if (!caster)
                 DoMeleeAttackIfReady();
-            else if ((!DoSpellAttackIfReady(SPELL_SECONDARY(id)) || !me->IsWithinLOSInMap(me->getVictim())) && movementCompleted && !doDelayPunish)
+            else if ((!DoSpellAttackIfReady(SPELL_SECONDARY(id)) || !me->IsWithinLOSInMap(me->GetVictim())) && movementCompleted && !doDelayPunish)
                 doDelayPunish = true;
         }
     };

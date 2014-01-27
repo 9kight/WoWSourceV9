@@ -168,7 +168,7 @@ public:
  **************************/
 
 #define spell_arcanes_distordues 90844 // Arcanes_Distordues
-#define spell_crepuscule_deforme 90300 // Crépuscule_Déformé
+#define spell_crepuscule_deforme 90300 // Crépuscule_Déform?
 #define spell_eclair_crepusculaire 90303 // Eclair_Crépusculaire
 
 class mob_prophete_de_la_nuee_azur: public CreatureScript
@@ -176,8 +176,8 @@ class mob_prophete_de_la_nuee_azur: public CreatureScript
 public:
     mob_prophete_de_la_nuee_azur() : CreatureScript("mob_prophete_de_la_nuee_azur") {}
 
-	struct mob_prophete_de_la_nuee_azurAI : public ScriptedAI
-	{
+    struct mob_prophete_de_la_nuee_azurAI : public ScriptedAI
+    {
         mob_prophete_de_la_nuee_azurAI(Creature *c) : ScriptedAI(c) {}
 
         uint32 arcanes_distordues;
@@ -218,12 +218,12 @@ public:
             DoMeleeAttackIfReady();
         }
 
-	};
+    };
 
-	CreatureAI* GetAI(Creature* pCreature) const
-	{
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
         return new mob_prophete_de_la_nuee_azurAI(pCreature);
-	}
+    }
 
 };
 
@@ -451,21 +451,21 @@ public:
 
     struct mob_sculpte_terre_du_crepusculeAI : public ScriptedAI
     {
-		mob_sculpte_terre_du_crepusculeAI(Creature *c) : ScriptedAI(c) {}
+        mob_sculpte_terre_du_crepusculeAI(Creature *c) : ScriptedAI(c) {}
 
-		uint32 invocation_dun_elementaire_de_roche;
-		uint32 peau_de_pierre;
-		uint32 pointe_de_terre;
+        uint32 invocation_dun_elementaire_de_roche;
+        uint32 peau_de_pierre;
+        uint32 pointe_de_terre;
 
-		void Reset()
-		{
+        void Reset()
+        {
             invocation_dun_elementaire_de_roche = 40000;
             peau_de_pierre = 60000;
             pointe_de_terre = 25000;
-	    }
+        }
 
-		void UpdateAI(const uint32 diff)
-		{
+        void UpdateAI(const uint32 diff)
+        {
             if (!UpdateVictim())
                 return;
 
@@ -494,7 +494,7 @@ public:
 
     CreatureAI* GetAI(Creature* pCreature) const
     {
-		return new mob_sculpte_terre_du_crepusculeAI(pCreature);
+        return new mob_sculpte_terre_du_crepusculeAI(pCreature);
     }
 
 };
@@ -548,8 +548,7 @@ public:
 };
 
 /***********************
- **Chercheflamme Rehaussé
- ************************/
+ **Chercheflamme Rehauss? ************************/
 
 #define spell_feu_eruptif 90693 // Feu_Eruptif
 #define spell_flammes_deconcertantes 76514 // Flammes_Déconcertantes
@@ -603,8 +602,7 @@ public:
 };
 
 /*********************
-**Marche-Vent Rehaussé
-**********************/
+**Marche-Vent Rehauss?**********************/
 
 #define spell_marche_vent 76557 // Marche_Vent
 
@@ -821,7 +819,7 @@ public:
  *************************/
 
 #define spell_duperie 90719 // Duperie
-#define spell_esprit_enchaine 90715 // Esprit_Enchainé
+#define spell_esprit_enchaine 90715 // Esprit_Enchain?
 #define spell_explosion_trompeuse 90712 // Explosion_Trompeuse
 
 class mob_imposteur_du_crepuscule: public CreatureScript
@@ -1140,10 +1138,9 @@ public:
 };
 
 /******************************
- **Flagellant Aquatique Rehaussé
- *******************************/
+ **Flagellant Aquatique Rehauss? *******************************/
 
-#define spell_geyser_focalise 90870 // Geyser_Focalisé
+#define spell_geyser_focalise 90870 // Geyser_Focalis?
 #define spell_jet_deau 90868 // Jet_d'Eau
 #define spell_nuage_declairs 76097 // Nuage_d'Eclairs
 
@@ -1203,8 +1200,7 @@ public:
 };
 
 /*********************
- **Brise-Roche Rehaussé
- **********************/
+ **Brise-Roche Rehauss? **********************/
 
 #define spell_blessure_brulante 76093 // Blessure_Brulante
 #define spell_choc_de_pierre 90866 // Choc_de_Pierre
@@ -1418,50 +1414,6 @@ public:
 
 };
 
-/***************
- **Habitant Trogg
- ****************/
-
-#define spell_griffes_transpercantes 90212 // Griffes_Transpercantes
-
-class mob_habitant_trogg: public CreatureScript
-{
-public:
-    mob_habitant_trogg() : CreatureScript("mob_habitant_trogg") {}
-
-    struct mob_habitant_troggAI : public ScriptedAI
-    {
-        mob_habitant_troggAI(Creature *c) : ScriptedAI(c) {}
-
-        uint32 griffes_transpercantes;
-
-        void Reset()
-        {
-            griffes_transpercantes = 5000;
-        }
-
-        void UpdateAI(const uint32 diff)
-        {
-            if (!UpdateVictim())
-                return;
-
-            if (griffes_transpercantes<= diff)
-            {
-                DoCastVictim(spell_griffes_transpercantes);
-                griffes_transpercantes = 5000;
-            } else griffes_transpercantes-= diff;
-
-            DoMeleeAttackIfReady();
-        }
-    };
-
-    CreatureAI* GetAI(Creature* pCreature) const
-    {
-        return new mob_habitant_troggAI(pCreature);
-    }
-
-};
-
 void AddSC_mob_trash_grim_batol()
 {
     new mob_gardien_de_la_nuee_azur();
@@ -1489,5 +1441,4 @@ void AddSC_mob_trash_grim_batol()
     new mob_mande_wyrm_du_crepuscule();
     new mob_drake_du_crepuscule();
     new mob_corrupteur_sans_visage();
-    new mob_habitant_trogg();
 }

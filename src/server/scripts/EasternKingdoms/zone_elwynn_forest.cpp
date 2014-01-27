@@ -226,9 +226,36 @@ public:
     }
 };
 
+enum Marshal
+{
+    QUEST_REPORT_TO_GOLDSHIRE           = 54,
+    SAY_DISMISSED                       = 0
+};
+
+/*######
+## npc_marshal_mcbride
+######*/
+
+class npc_marshal_mcbride : public CreatureScript
+{
+public:
+    npc_marshal_mcbride() : CreatureScript("npc_marshal_mcbride") { }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_REPORT_TO_GOLDSHIRE)
+        {
+          creature->AI()->Talk(SAY_DISMISSED, player->GetGUID());
+        }
+        return true;
+    }
+
+};
+
 void AddSC_elwynn_forest()
 {
     new npc_injured_soldier();
     new npc_blackrock_battle_worg();
     new npc_stormwind_infantry();
+    new npc_marshal_mcbride();
 }

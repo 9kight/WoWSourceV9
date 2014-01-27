@@ -578,7 +578,7 @@ class mob_pummeller : public CreatureScript
                 if (!UpdateVictim())
                     return;
 
-                if (me->IsWithinMeleeRange(me->getVictim()))
+                if (me->IsWithinMeleeRange(me->GetVictim()))
                 {
                     if (_arcingSmashTimer <= diff)
                     {
@@ -752,7 +752,7 @@ class mob_life_spark : public CreatureScript
 
                 if (_shockTimer <= diff)
                 {
-                    if (me->IsWithinMeleeRange(me->getVictim()))
+                    if (me->IsWithinMeleeRange(me->GetVictim()))
                     {
                         DoCastVictim(SPELL_SHOCK);
                         _shockTimer = TIMER_SHOCK;

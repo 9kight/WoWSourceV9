@@ -109,7 +109,7 @@ public:
 
             if (rockboreTimer <= diff)
             {
-                if (Unit* victim = me->getVictim())
+                if (Unit* victim = me->GetVictim())
                 {
                     if (Aura* aur = victim->GetAura(IsHeroic() ? SPELL_ROCK_BORE_HC : SPELL_ROCK_BORE))
                     {

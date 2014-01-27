@@ -109,13 +109,13 @@ public:
                 if (Creature* pGuard1 = Unit::GetCreature(*me, instance ? instance->GetData64(DATA_EREKEM_GUARD_1) : 0))
                 {
                     pGuard1->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_NON_ATTACKABLE);
-                    if (!pGuard1->getVictim() && pGuard1->AI())
+                    if (!pGuard1->GetVictim() && pGuard1->AI())
                         pGuard1->AI()->AttackStart(who);
                 }
                 if (Creature* pGuard2 = Unit::GetCreature(*me, instance ? instance->GetData64(DATA_EREKEM_GUARD_2) : 0))
                 {
                     pGuard2->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_NON_ATTACKABLE);
-                    if (!pGuard2->getVictim() && pGuard2->AI())
+                    if (!pGuard2->GetVictim() && pGuard2->AI())
                         pGuard2->AI()->AttackStart(who);
                 }
             }

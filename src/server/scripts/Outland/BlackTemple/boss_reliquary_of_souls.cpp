@@ -673,17 +673,17 @@ public:
 
             if (!CheckedAggro)
             {
-                AggroTargetGUID = me->getVictim()->GetGUID();
+                AggroTargetGUID = me->GetVictim()->GetGUID();
                 CheckedAggro = true;
             }
 
             if (CheckTankTimer <= diff)
             {
-                if (me->getVictim()->GetGUID() != AggroTargetGUID)
+                if (me->GetVictim()->GetGUID() != AggroTargetGUID)
                 {
                     Talk(ANGER_SAY_BEFORE);
                     DoCast(me, SPELL_SELF_SEETHE, true);
-                    AggroTargetGUID = me->getVictim()->GetGUID();
+                    AggroTargetGUID = me->GetVictim()->GetGUID();
                 }
                 CheckTankTimer = 2000;
             } else CheckTankTimer -= diff;

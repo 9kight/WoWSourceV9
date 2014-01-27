@@ -214,7 +214,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
         if (InstanceScript* instance = creature->GetInstanceScript())
@@ -328,6 +328,11 @@ public:
 
         void IsSummonedBy(Unit* summoner)
         {
+            if (!instance)
+            {
+                me->DespawnOrUnsummon();
+                return;
+            }
             if (instance->GetBossState(DATA_EREGOS_EVENT) == IN_PROGRESS)
                 if (Creature* eregos = me->FindNearestCreature(NPC_EREGOS, 450.0f, true))
                 {

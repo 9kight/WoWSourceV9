@@ -525,7 +525,7 @@ public:
 
             if (uiFireBallTimer <= uiDiff)
             {
-                if (me->getVictim())
+                if (me->GetVictim())
                     DoCastVictim(SPELL_FIREBALL);
                 uiFireBallTimer = 5000;
             } else uiFireBallTimer -= uiDiff;

@@ -86,8 +86,14 @@ struct AchievementCriteriaEntry
             uint32  winCount;                               // 4
         } win_bg;
 
+        // ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_ARCHAEOLOGY_PROJECTS = 3
+        struct
+        {
+            uint32 unused;                                 // 3
+            uint32 count;                                  // 4
+        } archaeology;
+
         // ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL            = 5
-        // ACHIEVEMENT_CRITERIA_TYPE_REACH_GUILD_LEVEL      = 125
         struct
         {
             uint32  unused;                                 // 3
@@ -501,6 +507,75 @@ struct AchievementCriteriaEntry
         // ACHIEVEMENT_CRITERIA_TYPE_SPENT_GOLD_GUILD_REPAIRS = 124
         struct
         {
+            uint32 unused;
+            uint32 goldCount;
+        } spent_gold_guild_repairs;
+
+        // ACHIEVEMENT_CRITERIA_TYPE_REACH_GUILD_LEVEL    = 125
+        struct
+        {
+            uint32 unused;
+            uint32  level;
+        } reach_guild_level;
+
+        // ACHIEVEMENT_CRITERIA_TYPE_CRAFT_ITEMS_GUILD = 126
+        struct
+        {
+            uint32 unused;
+            uint32 itemsCount;
+        } craft_items_guild;
+
+        // ACHIEVEMENT_CRITERIA_TYPE_CATCH_FROM_POOL = 127
+        struct
+        {
+            uint32 unused;
+            uint32 catchCount;
+        } catch_from_pool;
+
+        // ACHIEVEMENT_CRITERIA_TYPE_BUY_GUILD_BANK_SLOTS = 128
+        struct
+        {
+            uint32 unused;
+            uint32 slotsCount;
+        } buy_guild_bank_slots;
+
+        // ACHIEVEMENT_CRITERIA_TYPE_EARN_GUILD_ACHIEVEMENT_POINTS = 129
+        struct
+        {
+            uint32 unused;
+            uint32  pointsCount;
+        } earn_guild_achievement_points;
+
+        // ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_BATTLEGROUND = 130
+        struct
+        {
+            uint32 unused;
+            uint32 winCount;
+        } win_rated_battleground;
+
+        // ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUESTS_GUILD = 134
+        struct
+        {
+            uint32 unused;
+            uint32 questCount;
+        } complete_quests_guild;
+
+        // ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILLS_GUILD = 135
+        struct
+        {
+            uint32 unused;
+            uint32 killCount;
+        } honorable_kills_guild;
+
+        // ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE_GUILD = 136
+        struct
+        {
+            uint32 unused;
+            uint32 count;
+        } kill_creature_type_guild;
+
+        struct
+        {
             uint32 unused;       // 3
             uint32 goldInCopper; // 4
         } guild_gold_repairs;
@@ -660,10 +735,10 @@ struct BattlemasterListEntry
     uint32 HolidayWorldStateId;                             // 13 new 3.1
     uint32 minLevel;                                        // 14, min level (sync with PvPDifficulty.dbc content)
     uint32 maxLevel;                                        // 15, max level (sync with PvPDifficulty.dbc content)
-    //uint32 maxGroupSizeRated;                             // 16 4.0.1
-    //uint32 unk;                                           // 17 - 4.0.6.13596
-    //uint32 maxPlayers;                                    // 18 4.0.1
-    //uint32 unk1;                                          // 19 4.0.3, value 2 for Rated Battlegrounds
+    uint32 maxGroupSizeRated;                               // 16       4.0.1
+    uint32 minPlayers;                                      // 17       4.0.6.13596
+    uint32 maxPlayers;                                      // 18       4.0.1
+    uint32 rated;                                           // 19       4.0.3, value 2 for Rated Battlegrounds
 };
 
 #define MAX_OUTFIT_ITEMS 24
@@ -900,7 +975,7 @@ struct DungeonEncounterEntry
 {
     uint32 id;                                              // 0        unique id
     uint32 mapId;                                           // 1        map id
-    int32 difficulty;                                      // 2        instance mode
+    uint32 difficulty;                                      // 2        instance mode
     //uint32 unk0;                                          // 3
     uint32 encounterIndex;                                  // 4        encounter index for creating completed mask
     char* encounterName;                                    // 5        encounter name
@@ -2198,6 +2273,17 @@ struct UnitPowerBarEntry
     //float   EndInset;
 };
 
+struct TransportAnimationEntry
+{
+    //uint32    id;                                         // 0
+    uint32    transportEntry;                               // 1
+    uint32    timeFrame;                                    // 2
+    //float     xOffs;                                      // 3
+    //float     yOffs;                                      // 4
+    //float     zOffs;                                      // 5
+    //uint32    unk;                                        // 6
+};
+
 #define MAX_VEHICLE_SEATS 8
 
 struct VehicleEntry
@@ -2453,6 +2539,9 @@ struct TaxiPathNodePtr
 
 typedef Path<TaxiPathNodePtr, TaxiPathNodeEntry const> TaxiPathNodeList;
 typedef std::vector<TaxiPathNodeList> TaxiPathNodesByPath;
+
+typedef UNORDERED_MAP<uint32 /*frame*/, TransportAnimationEntry const*> TransportAnimationEntryMap;
+typedef UNORDERED_MAP<uint32, TransportAnimationEntryMap> TransportAnimationsByEntry;
 
 #define TaxiMaskSize 114
 typedef uint8 TaxiMask[TaxiMaskSize];

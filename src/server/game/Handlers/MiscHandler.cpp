@@ -1199,7 +1199,7 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recvData)
     {
         data << uint64(guild->GetGUID());
         data << uint32(guild->GetLevel());
-        data << uint64(0/*guild->GetXP()*/);
+        data << uint64(guild->GetExperience());
         data << uint32(guild->GetMembersCount());
     }
     SendPacket(&data);
@@ -1260,19 +1260,38 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recvData)
 {
-    uint32 time;
+    //uint32 time;
     uint32 mapid;
     float PositionX;
     float PositionY;
     float PositionZ;
     float Orientation;
+    ObjectGuid guid;
 
-    recvData >> time;                                      // time in m.sec.
+    //recvData >> time;                                      // time in m.sec.
     recvData >> mapid;
     recvData >> PositionX;
     recvData >> PositionY;
     recvData >> PositionZ;
     recvData >> Orientation;                               // o (3.141593 = 180 degrees)
+
+    guid[6] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    guid[1] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[3]);
 
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Received CMSG_WORLD_TELEPORT");
 
@@ -1962,27 +1981,34 @@ void WorldSession::HandleViolenceLevel(WorldPacket& recvPacket)
 
 void WorldSession::HandleObjectUpdateFailedOpcode(WorldPacket& recvPacket)
 {
-    ObjectGuid guid;
-    guid[6] = recvPacket.ReadBit();
-    guid[7] = recvPacket.ReadBit();
-    guid[4] = recvPacket.ReadBit();
-    guid[0] = recvPacket.ReadBit();
-    guid[1] = recvPacket.ReadBit();
-    guid[5] = recvPacket.ReadBit();
-    guid[3] = recvPacket.ReadBit();
-    guid[2] = recvPacket.ReadBit();
+     ObjectGuid guid;
+     guid[6] = recvPacket.ReadBit();
+     guid[7] = recvPacket.ReadBit();
+     guid[4] = recvPacket.ReadBit();
+     guid[0] = recvPacket.ReadBit();
+     guid[1] = recvPacket.ReadBit();
+     guid[5] = recvPacket.ReadBit();
+     guid[3] = recvPacket.ReadBit();
+     guid[2] = recvPacket.ReadBit();
 
-    recvPacket.ReadByteSeq(guid[6]);
-    recvPacket.ReadByteSeq(guid[7]);
-    recvPacket.ReadByteSeq(guid[2]);
-    recvPacket.ReadByteSeq(guid[3]);
-    recvPacket.ReadByteSeq(guid[1]);
-    recvPacket.ReadByteSeq(guid[4]);
-    recvPacket.ReadByteSeq(guid[0]);
-    recvPacket.ReadByteSeq(guid[5]);
+     recvPacket.ReadByteSeq(guid[6]);
+     recvPacket.ReadByteSeq(guid[7]);
+     recvPacket.ReadByteSeq(guid[2]);
+     recvPacket.ReadByteSeq(guid[3]);
+     recvPacket.ReadByteSeq(guid[1]);
+     recvPacket.ReadByteSeq(guid[4]);
+     recvPacket.ReadByteSeq(guid[0]);
+     recvPacket.ReadByteSeq(guid[5]);
 
-    WorldObject* obj = ObjectAccessor::GetWorldObject(*GetPlayer(), guid);
-    sLog->outError(LOG_FILTER_NETWORKIO, "Object update failed for object " UI64FMTD " (%s) for player %s (%u)", uint64(guid), obj ? obj->GetName().c_str() : "object-not-found", GetPlayerName().c_str(), GetGuidLow());
+     WorldObject* obj = ObjectAccessor::GetWorldObject(*GetPlayer(), guid);
+
+     // this not hack, this can help unstuck chars, when they can't login after client crash. I think it's helpful.
+     if (!obj)
+         return;
+     
+     if (uint64(guid)==GetGuidLow() && GetPlayer())
+        GetPlayer()->TeleportTo(GetPlayer()->m_homebindMapId, GetPlayer()->m_homebindX, GetPlayer()->m_homebindY, GetPlayer()->m_homebindZ, GetPlayer()->GetOrientation());
+
 }
 
 void WorldSession::HandleSaveCUFProfiles(WorldPacket& recvPacket)
@@ -2030,6 +2056,32 @@ void WorldSession::HandleSaveCUFProfiles(WorldPacket& recvPacket)
         profiles[i]->BoolOptions.set(CUF_DISPLAY_HORIZONTAL_GROUPS       , recvPacket.ReadBit());
         profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_25_PLAYERS        , recvPacket.ReadBit());
         profiles[i]->BoolOptions.set(CUF_KEEP_GROUPS_TOGETHER            , recvPacket.ReadBit());
+
+        std::cout << "CUF_AUTO_ACTIVATE_SPEC_2 :" << CUF_AUTO_ACTIVATE_SPEC_2 << std::endl;
+        std::cout << "CUF_AUTO_ACTIVATE_10_PLAYERS :" << CUF_AUTO_ACTIVATE_10_PLAYERS << std::endl;
+        std::cout << "CUF_UNK_157 :" << CUF_UNK_157 << std::endl;
+        std::cout << "CUF_DISPLAY_HEAL_PREDICTION :" << CUF_DISPLAY_HEAL_PREDICTION << std::endl;
+        std::cout << "CUF_AUTO_ACTIVATE_SPEC_1 :" << CUF_AUTO_ACTIVATE_SPEC_1 << std::endl;
+        std::cout << "CUF_AUTO_ACTIVATE_PVP :" << CUF_AUTO_ACTIVATE_PVP << std::endl;
+        std::cout << "CUF_DISPLAY_POWER_BAR :" << CUF_DISPLAY_POWER_BAR << std::endl;
+        std::cout << "CUF_AUTO_ACTIVATE_15_PLAYERS :" << CUF_AUTO_ACTIVATE_15_PLAYERS << std::endl;
+        std::cout << "CUF_AUTO_ACTIVATE_40_PLAYERS :" << CUF_AUTO_ACTIVATE_40_PLAYERS << std::endl;
+        std::cout << "CUF_DISPLAY_PETS :" << CUF_DISPLAY_PETS << std::endl;
+        std::cout << "CUF_AUTO_ACTIVATE_5_PLAYERS :" << CUF_AUTO_ACTIVATE_5_PLAYERS << std::endl;
+        std::cout << "CUF_DISPLAY_ONLY_DISPELLABLE_DEBUFFS :" << CUF_DISPLAY_ONLY_DISPELLABLE_DEBUFFS << std::endl;
+        std::cout << "CUF_AUTO_ACTIVATE_2_PLAYERS :" << CUF_AUTO_ACTIVATE_2_PLAYERS << std::endl;
+        std::cout << "CUF_UNK_156 :" << CUF_UNK_156 << std::endl;
+        std::cout << "CUF_DISPLAY_NON_BOSS_DEBUFFS :" << CUF_DISPLAY_NON_BOSS_DEBUFFS << std::endl;
+        std::cout << "CUF_DISPLAY_MAIN_TANK_AND_ASSIST :" << CUF_DISPLAY_MAIN_TANK_AND_ASSIST << std::endl;
+        std::cout << "CUF_DISPLAY_AGGRO_HIGHLIGHT :" << CUF_DISPLAY_AGGRO_HIGHLIGHT << std::endl;
+        std::cout << "CUF_AUTO_ACTIVATE_3_PLAYERS :" << CUF_AUTO_ACTIVATE_3_PLAYERS << std::endl;
+        std::cout << "CUF_DISPLAY_BORDER :" << CUF_DISPLAY_BORDER << std::endl;
+        std::cout << "CUF_USE_CLASS_COLORS :" << CUF_USE_CLASS_COLORS << std::endl;
+        std::cout << "CUF_UNK_145 :" << CUF_UNK_145 << std::endl;
+        std::cout << "CUF_AUTO_ACTIVATE_PVE :" << CUF_AUTO_ACTIVATE_PVE << std::endl;
+        std::cout << "CUF_DISPLAY_HORIZONTAL_GROUPS :" << CUF_DISPLAY_HORIZONTAL_GROUPS << std::endl;
+        std::cout << "CUF_AUTO_ACTIVATE_25_PLAYERS :" << CUF_AUTO_ACTIVATE_25_PLAYERS << std::endl;
+        std::cout << "CUF_KEEP_GROUPS_TOGETHER :" << CUF_KEEP_GROUPS_TOGETHER << std::endl;
     }
 
     for (uint8 i = 0; i < count; ++i)
@@ -2045,6 +2097,17 @@ void WorldSession::HandleSaveCUFProfiles(WorldPacket& recvPacket)
         recvPacket >> profiles[i]->SortBy;
         recvPacket >> profiles[i]->Unk154;
         recvPacket >> profiles[i]->Unk148;
+
+        std::cout << "Unk146 :" << profiles[i]->Unk146 << std::endl;
+        std::cout << "Unk152 :" << profiles[i]->Unk152 << std::endl;
+        std::cout << "FrameHeight :" << profiles[i]->FrameHeight << std::endl;
+        std::cout << "FrameWidth :" << profiles[i]->FrameWidth << std::endl;
+        std::cout << "Unk150 :" << profiles[i]->Unk150 << std::endl;
+        std::cout << "HealthText :" << profiles[i]->HealthText << std::endl;
+        std::cout << "Unk147 :" << profiles[i]->Unk147 << std::endl;
+        std::cout << "SortBy :" << profiles[i]->SortBy << std::endl;
+        std::cout << "Unk154 :" << profiles[i]->Unk154 << std::endl;
+        std::cout << "Unk148 :" << profiles[i]->Unk148 << std::endl;
 
         GetPlayer()->SaveCUFProfile(i, profiles[i]);
     }

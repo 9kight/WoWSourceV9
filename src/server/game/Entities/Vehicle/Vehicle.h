@@ -79,6 +79,8 @@ class Vehicle : public TransportBase
         void RemovePassenger(Unit* passenger);
         void RelocatePassengers();
         void RemoveAllPassengers();
+        void Dismiss();
+        void TeleportVehicle(float x, float y, float z, float o);
         bool IsVehicleInUse() const;
 
         void SetLastShootPos(Position const& pos) { _lastShootPos.Relocate(pos); }
@@ -100,6 +102,12 @@ class Vehicle : public TransportBase
             STATUS_NONE,
             STATUS_INSTALLED,
             STATUS_UNINSTALLING,
+        };
+
+        struct PlayerSeatSave
+        {
+            Player* player;
+            int8 seatId;
         };
 
         SeatMap::iterator GetSeatIteratorForPassenger(Unit* passenger);

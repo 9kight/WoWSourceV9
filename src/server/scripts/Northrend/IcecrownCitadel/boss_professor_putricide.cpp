@@ -624,7 +624,7 @@ class boss_professor_putricide : public CreatureScript
                             break;
                         case EVENT_RESUME_ATTACK:
                             me->SetReactState(REACT_DEFENSIVE);
-                            AttackStart(me->getVictim());
+                            AttackStart(me->GetVictim());
                             // remove Tear Gas
                             me->RemoveAurasDueToSpell(SPELL_TEAR_GAS_PERIODIC_TRIGGER);
                             instance->DoRemoveAurasDueToSpellOnPlayers(71615);

@@ -17,71 +17,71 @@ enum Yells
 enum Spells
 {
     // Drahgas Spells
-    SPELL_BURNING_SHADOWBOLT	= 75245,
-    SPELL_BURNING_SHADOWBOLT_H	= 90915,
+    SPELL_BURNING_SHADOWBOLT    = 75245,
+    SPELL_BURNING_SHADOWBOLT_H    = 90915,
 
-    SPELL_INVOCATION_OF_FLAME	= 75218, // Summons Trigger at Random Location
-    SPELL_INVOCATION_TRIGGER	= 75222, // Summons & Visual is casted by the Trigger
+    SPELL_INVOCATION_OF_FLAME    = 75218, // Summons Trigger at Random Location
+    SPELL_INVOCATION_TRIGGER    = 75222, // Summons & Visual is casted by the Trigger
 
-    SPELL_TWILIGHT_PROTECTION	= 76303,
+    SPELL_TWILIGHT_PROTECTION    = 76303,
 
     // Valionas Spells
-    SPELL_VALIONAS_FLAME		= 75321,
-    SPELL_SHREDDING_SWIPE		= 75271,
-    SPELL_SEEPING_TWILIGHT		= 75318, // wowhead says 75317 but this spell gives the visual aura
-    SPELL_DEVOURING_FLAMES_H	= 90950,
-    SPELL_TWILIGHT_SHIFT		= 75328,
+    SPELL_VALIONAS_FLAME        = 75321,
+    SPELL_SHREDDING_SWIPE        = 75271,
+    SPELL_SEEPING_TWILIGHT        = 75318, // wowhead says 75317 but this spell gives the visual aura
+    SPELL_DEVOURING_FLAMES_H    = 90950,
+    SPELL_TWILIGHT_SHIFT        = 75328,
 
     // Invoked Flame Spirits Spells
-    SPELL_AURA_NOVA = 75235,
-    SPELL_CONCENTRATE_FIRE_AURA = 82850,
+    SPELL_AURA_NOVA                = 75235,
+    SPELL_CONCENTRATE_FIRE_AURA    = 82850,
 
-    SPELL_SUPERNOVA				= 75238,
-    SPELL_SUPERNOVA_H			= 90972,
+    SPELL_SUPERNOVA                = 75238,
+    SPELL_SUPERNOVA_H              = 90972,
 };
 
 enum Phase
 {
-    PHASE_CASTER_PHASE	= 1,
-    PHASE_DRAGON_PHASE	= 2,
-    PHASE_FINAL_PHASE	= 3,
-    PHASE_NON			= 4,
+    PHASE_CASTER_PHASE             = 1,
+    PHASE_DRAGON_PHASE             = 2,
+    PHASE_FINAL_PHASE              = 3,
+    PHASE_NON                      = 4,
 };
 
 enum Events
 {
-    EVENT_BURNING_SHADOWBOLT			= 1,
-    EVENT_SUMMON_INVOKED_FLAME_SPIRIT	= 2,
-    EVENT_VALIONAS_FLAME				= 3,
-    EVENT_SHREDDING_SWIPE				= 4,
-    EVENT_SEEPING_TWILIGHT				= 5,
-    EVENT_DEVOURING_FLAMES				= 6,
-    EVENT_DRAGAH_ENTER_VEHICLE			= 7,
+    EVENT_BURNING_SHADOWBOLT          = 1,
+    EVENT_SUMMON_INVOKED_FLAME_SPIRIT = 2,
+    EVENT_VALIONAS_FLAME              = 3,
+    EVENT_SHREDDING_SWIPE             = 4,
+    EVENT_SEEPING_TWILIGHT            = 5,
+    EVENT_DEVOURING_FLAMES            = 6,
+    EVENT_DRAGAH_ENTER_VEHICLE        = 7,
 };
 
 enum Actions
 {
-    ACTION_DRAGAH_CALLS_VALIONA_FOR_HELP	= 1,
-    ACTION_VALIONA_SHOULD_FLY_AWAY			= 2,
-    ACTION_DRAGAH_IS_ON_THE_GROUND			= 3,
+    ACTION_DRAGAH_CALLS_VALIONA_FOR_HELP  = 1,
+    ACTION_VALIONA_SHOULD_FLY_AWAY        = 2,
+    ACTION_DRAGAH_IS_ON_THE_GROUND           = 3,
 };
 
 enum Points
 {
-    POINT_VALIONA_FLY_IN_THE_AIR	= 1,
-    POINT_VALIONA_LAND				= 2,
-    POINT_VALIONA_FLY_AWAY			= 3,
-    POINT_VALIONA_IS_AWAY			= 4,
-    POINT_DRAHGA_GO_TO_THE_LAVA		= 5,
+    POINT_VALIONA_FLY_IN_THE_AIR          = 1,
+    POINT_VALIONA_LAND                    = 2,
+    POINT_VALIONA_FLY_AWAY                = 3,
+    POINT_VALIONA_IS_AWAY                 = 4,
+    POINT_DRAHGA_GO_TO_THE_LAVA           = 5,
 };
 
 Position const position[5] =
 {
-    {-400.613f, -671.578f, 265.896f, 0.102f},	// Drahga Point from who he jump down
-    {-388.189f, -668.078f, 280.316f, 3.470f},	// Valionas Way to the Platform
+    {-400.613f, -671.578f, 265.896f, 0.102f},    // Drahga Point from who he jump down
+    {-388.189f, -668.078f, 280.316f, 3.470f},    // Valionas Way to the Platform
     {-435.54f, -695.072f, 280.316f, 3.4010f},
-    {-435.54f, -695.072f, 268.687f, 3.4010f},	// Valiona first land Position
-    {-375.742f, -519.749f, 300.663f, 0.0f}		// Valionas End Position
+    {-435.54f, -695.072f, 268.687f, 3.4010f},    // Valiona first land Position
+    {-375.742f, -519.749f, 300.663f, 0.0f}        // Valionas End Position
 };
 
 class boss_drahga_shadowburner : public CreatureScript
@@ -104,8 +104,9 @@ public:
         void Reset()
         {
             valionaGUID = 0;
-            SaveDespawnCreatures();
             phase = PHASE_NON;
+            summons.DespawnAll();
+            DespawnFlameSpirit();
             if (pInstance)
                 pInstance->SetData(DATA_DRAHGA_SHADOWBURNER_EVENT, NOT_STARTED);
         }
@@ -116,9 +117,18 @@ public:
             me->SetReactState(REACT_AGGRESSIVE);
             Talk(0);
             me->GetMotionMaster()->Clear();
-            me->GetMotionMaster()->MoveChase(me->getVictim());
+            me->GetMotionMaster()->MoveChase(me->GetVictim());
             events.ScheduleEvent(EVENT_BURNING_SHADOWBOLT, 4000);
             events.ScheduleEvent(EVENT_SUMMON_INVOKED_FLAME_SPIRIT, 10000);
+        }
+
+        void DespawnFlameSpirit()
+        {
+            std::list<Creature*> cList;
+            me->GetCreatureListWithEntryInGrid(cList, NPC_INVOKED_FLAMING_SPIRIT, 200.0f);
+            if(!cList.empty())
+                for(std::list<Creature*>::const_iterator itr = cList.begin(); itr != cList.end(); ++itr)
+                    (*itr)->DespawnOrUnsummon();
         }
 
         void JustSummoned(Creature* summon)
@@ -134,8 +144,9 @@ public:
         void JustDied(Unit * /*victim*/)
         {
             events.Reset();
+            summons.DespawnAll();
+            DespawnFlameSpirit();
             Talk(2);
-            SaveDespawnCreatures();
             if (pInstance)
                 pInstance->SetData(DATA_DRAHGA_SHADOWBURNER_EVENT, DONE);
         }
@@ -227,27 +238,6 @@ public:
         }
 
     private:
-
-        void DespawnCreatures(uint32 entry, float distance)
-        {
-            std::list<Creature*> creatures;
-            GetCreatureListWithEntryInGrid(creatures, me, entry, distance);
-
-            if (creatures.empty())
-                return;
-
-            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
-                (*iter)->DespawnOrUnsummon();
-        }
-
-        void SaveDespawnCreatures()
-        {
-            DespawnCreatures(NPC_INVOCATION_OF_THE_FLAME_STALKER,500.0f); // Maybe the Core crashes on unload the Trigger
-            DespawnCreatures(NPC_INVOKED_FLAMING_SPIRIT,500.0f);
-            DespawnCreatures(NPC_SEEPING_TWILIGHT_TRIGGER,500.0f);
-            DespawnCreatures(NPC_VALIONA,500.0f);
-        }
-
         InstanceScript* pInstance;
         Phase phase;
         EventMap events;
@@ -331,7 +321,7 @@ public:
                         events.RepeatEvent(urand(15000,25000));
                         break;
                     case EVENT_SHREDDING_SWIPE:
-                        if(me->getVictim())
+                        if(me->GetVictim())
                             DoCastVictim(SPELL_SHREDDING_SWIPE);
                         events.RepeatEvent(urand(21000,30000));
                         break;
@@ -396,7 +386,7 @@ public:
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     me->SetReactState(REACT_AGGRESSIVE);
                     me->GetMotionMaster()->Clear();
-                    me->GetMotionMaster()->MoveChase(me->getVictim());
+                    me->GetMotionMaster()->MoveChase(me->GetVictim());
                     events.ScheduleEvent(EVENT_VALIONAS_FLAME, urand(4000,7000));
                     events.ScheduleEvent(EVENT_SHREDDING_SWIPE, urand(10000,13000));
                     if (IsHeroic())
@@ -479,7 +469,7 @@ public:
                     if (me->GetDistance(player) < 1.0f)
                     {
                         me->RemoveAura(SPELL_CONCENTRATE_FIRE_AURA);
-                        DoCastVictim(RAID_MODE(SPELL_SUPERNOVA,	SPELL_SUPERNOVA_H));
+                        DoCastVictim(RAID_MODE(SPELL_SUPERNOVA,    SPELL_SUPERNOVA_H));
                         me->DespawnOrUnsummon();
                     }
                 checkTargetTimer = 1000;

@@ -32,4 +32,20 @@ enum eEnums
 
     DATA_VORREL                     = 7
 };
+
+enum Gameobjects
+{
+    GOB_KEL_DOOR        = 207619, // Kelestres Door
+    GOB_ASM_DOOR        = 208953, // Asmodina Door
+};
+
+enum Creatures
+{
+    NPC_STORM           = 91001,
+    NPC_JINARA          = 91002,
+    NPC_JINARA_BEAM     = 91003,
+    NPC_POISON          = 30207,
+    NPC_KELESTRES       = 91010,
+    NPC_ASMODINA        = 91009
+};
 #endif

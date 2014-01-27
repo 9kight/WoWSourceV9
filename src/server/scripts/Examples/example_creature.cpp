@@ -168,7 +168,7 @@ class example_creature : public CreatureScript
             void UpdateAI(const uint32 uiDiff)
             {
                 //Out of combat timers
-                if (!me->getVictim())
+                if (!me->GetVictim())
                 {
                     //Random Say timer
                     if (m_uiSayTimer <= uiDiff)
@@ -201,7 +201,7 @@ class example_creature : public CreatureScript
                     //Cast spell one on our current target.
                     if (rand()%50 > 10)
                         DoCastVictim(SPELL_ONE_ALT);
-                    else if (me->IsWithinDist(me->getVictim(), 25.0f))
+                    else if (me->IsWithinDist(me->GetVictim(), 25.0f))
                         DoCastVictim(SPELL_ONE);
 
                     m_uiSpell1Timer = 5000;
@@ -236,7 +236,7 @@ class example_creature : public CreatureScript
                     if (m_uiBeserkTimer <= uiDiff)
                     {
                         //Say our line then cast uber death spell
-                        Talk(SAY_BERSERK, me->getVictim() ? me->getVictim()->GetGUID() : 0);
+                        Talk(SAY_BERSERK, me->GetVictim() ? me->GetVictim()->GetGUID() : 0);
                         DoCastVictim(SPELL_BERSERK);
 
                         //Cast our beserk spell agian in 12 seconds if we didn't kill everyone

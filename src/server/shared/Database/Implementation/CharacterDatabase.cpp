@@ -38,6 +38,10 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_SEL_GUID_BY_NAME_FILTER, "SELECT guid, name FROM characters WHERE name LIKE CONCAT('%%', ?, '%%')", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_BANINFO_LIST, "SELECT bandate, unbandate, bannedby, banreason FROM character_banned WHERE guid = ? ORDER BY unbandate", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_BANNED_NAME, "SELECT characters.name FROM characters, character_banned WHERE character_banned.guid = ? AND character_banned.guid = characters.guid", CONNECTION_SYNCH);
+
+
+
+
     PrepareStatement(CHAR_SEL_ENUM, "SELECT c.guid, c.name, c.race, c.class, c.gender, c.playerBytes, c.playerBytes2, c.level, c.zone, c.map, c.position_x, c.position_y, c.position_z, "
                      "gm.guildid, c.playerFlags, c.at_login, cp.entry, cp.modelid, cp.level, c.equipmentCache, cb.guid, c.slot "
                      "FROM characters AS c LEFT JOIN character_pet AS cp ON c.guid = cp.owner AND cp.slot = ? LEFT JOIN guild_member AS gm ON c.guid = gm.guid "
@@ -101,7 +105,9 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_SEL_CHARACTER_SPELLCOOLDOWNS, "SELECT spell, item, time FROM character_spell_cooldown WHERE guid = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_CHARACTER_DECLINEDNAMES, "SELECT genitive, dative, accusative, instrumental, prepositional FROM character_declinedname WHERE guid = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_GUILD_MEMBER, "SELECT guildid, rank FROM guild_member WHERE guid = ?", CONNECTION_BOTH);
-    PrepareStatement(CHAR_SEL_GUILD_MEMBER_EXTENDED, "SELECT g.guildid, g.name, gm.rank, gr.rname, gm.pnote, gm.offnote FROM guild g JOIN guild_member gm ON g.guildid = gm.guildid JOIN guild_rank gr ON g.guildid = gr.guildid WHERE gm.guid = ?", CONNECTION_BOTH);
+    PrepareStatement(CHAR_SEL_GUILD_MEMBER_EXTENDED, "SELECT g.guildid, g.name, gr.rname, gr.rid, gm.pnote, gm.offnote "
+                     "FROM guild g JOIN guild_member gm ON g.guildid = gm.guildid "
+                     "JOIN guild_rank gr ON g.guildid = gr.guildid AND gm.rank = gr.rid WHERE gm.guid = ?", CONNECTION_BOTH);
     PrepareStatement(CHAR_SEL_CHARACTER_ACHIEVEMENTS, "SELECT achievement, date FROM character_achievement WHERE guid = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_CHARACTER_CRITERIAPROGRESS, "SELECT criteria, counter, date FROM character_achievement_progress WHERE guid = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_CHARACTER_EQUIPMENTSETS, "SELECT setguid, setindex, name, iconname, ignore_mask, item0, item1, item2, item3, item4, item5, item6, item7, item8, "
@@ -166,6 +172,10 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     // 0: uint32, 1: string, 2: uint32, 3: string, 4: string, 5: uint64, 6-10: uint32, 11: uint64
     PrepareStatement(CHAR_INS_GUILD, "INSERT INTO guild (guildid, name, leaderguid, info, motd, createdate, EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor, BankMoney) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
     PrepareStatement(CHAR_DEL_GUILD, "DELETE FROM guild WHERE guildid = ?", CONNECTION_ASYNC); // 0: uint32
+
+
+
+
     // 0: uint32, 1: uint32, 2: uint8, 4: string, 5: string
     PrepareStatement(CHAR_INS_GUILD_MEMBER, "INSERT INTO guild_member (guildid, guid, rank, pnote, offnote, activity, weekActivity, weekReputation) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
     PrepareStatement(CHAR_DEL_GUILD_MEMBER, "DELETE FROM guild_member WHERE guid = ?", CONNECTION_ASYNC); // 0: uint32
@@ -223,6 +233,23 @@ void CharacterDatabaseConnection::DoPrepareStatements()
                      "INSERT INTO guild_member_withdraw (guid, tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, money) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
                      "ON DUPLICATE KEY UPDATE tab0 = VALUES (tab0), tab1 = VALUES (tab1), tab2 = VALUES (tab2), tab3 = VALUES (tab3), tab4 = VALUES (tab4), tab5 = VALUES (tab5), tab6 = VALUES (tab6), tab7 = VALUES (tab7), money = VALUES (money)", CONNECTION_ASYNC);
     PrepareStatement(CHAR_DEL_GUILD_MEMBER_WITHDRAW, "TRUNCATE guild_member_withdraw", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_UPD_GUILD_NAME, "UPDATE guild SET name = ? WHERE guildid = ?", CONNECTION_ASYNC); // 0: string, 1: uint32
+    PrepareStatement(CHAR_SEL_GUILD_CHALLENGES_COMPLETED, "SELECT challengeId FROM guild_challenges_completed WHERE guildId = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_FIRST_GUILD_CHALLENGE_COMPLETED_DATE, "SELECT dateCompleted FROM guild_challenges_completed WHERE guildId = ? ORDER BY dateCompleted ASC", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_INS_GUILD_CHALLENGE_DONE, "INSERT INTO guild_challenges_completed (guildId, challengeId, dateCompleted) VALUES (?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_GUILD_CHALLENGE_EXPIERED, "DELETE FROM guild_challenges_completed WHERE guildId = ?", CONNECTION_ASYNC);
+    
+    // Guild Reputation
+    PrepareStatement(CHAR_ADD_GUILD_REP, "INSERT INTO character_guild_reputation (guid, guildid) VALUES (?, ?)", CONNECTION_ASYNC); // 0,1: uint32
+    PrepareStatement(CHAR_GET_GUILD_REP, "SELECT guildid FROM character_guild_reputation WHERE guid = ?", CONNECTION_SYNCH); // 0: uint32
+    PrepareStatement(CHAR_SET_GUILD_REP, "UPDATE character_guild_reputation SET guildid = ? WHERE guid = ?", CONNECTION_ASYNC); // 0,1: uint32
+    PrepareStatement(CHAR_SET_GUILD_REP_TIME, "UPDATE character_guild_reputation SET disband_time = UNIX_TIMESTAMP(NOW()) WHERE guid = ?", CONNECTION_ASYNC); // 0: uint32
+    PrepareStatement(CHAR_SET_GUILD_REP_RESET_TIME, "UPDATE character_guild_reputation SET disband_time = '0' WHERE guid = ?", CONNECTION_ASYNC); // 0: uint32
+    PrepareStatement(CHAR_GET_GUILD_REP_TIME, "SELECT disband_time FROM character_guild_reputation WHERE guid = ?", CONNECTION_SYNCH); // 0: uint32
+    PrepareStatement(CHAR_GET_GUILD_REP_VAL, "SELECT weekly_rep FROM character_guild_reputation WHERE guid = ?", CONNECTION_SYNCH); // 0: uint32
+    PrepareStatement(CHAR_SET_GUILD_REP_VAL, "UPDATE character_guild_reputation SET weekly_rep = ? WHERE guid = ?", CONNECTION_ASYNC); // 0,1: uint32
+    PrepareStatement(CHAR_GET_GUILD_TOTAL_REP_VAL, "SELECT total_rep FROM character_guild_reputation WHERE guid = ?", CONNECTION_SYNCH); // 0: uint32
+    PrepareStatement(CHAR_SET_GUILD_TOTAL_REP_VAL, "UPDATE character_guild_reputation SET total_rep = ? WHERE guid = ?", CONNECTION_ASYNC); // 0,1: uint32
 
     // 0: uint32, 1: uint32, 2: uint32
     PrepareStatement(CHAR_SEL_CHAR_DATA_FOR_GUILD, "SELECT c.name, c.level, c.class, c.zone, c.account, c.achievementPoint, r.standing FROM characters c LEFT JOIN character_reputation r ON c.guid = r.guid AND r.faction = 1168 WHERE c.guid = ?", CONNECTION_SYNCH);
@@ -447,6 +474,11 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_SEL_CHARS_BY_ACCOUNT_ID, "SELECT guid FROM characters WHERE account = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_CHAR_PINFO, "SELECT totaltime, level, money, account, race, class, map, zone FROM characters WHERE guid = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_PINFO_BANS, "SELECT unbandate, bandate = unbandate, bannedby, banreason FROM character_banned WHERE guid = ? AND active ORDER BY bandate ASC LIMIT 1", CONNECTION_SYNCH);
+    //0: lowGUID
+    PrepareStatement(CHAR_SEL_PINFO_MAILS, "SELECT SUM(CASE WHEN (checked & 1) THEN 1 ELSE 0 END) AS 'readmail', COUNT(*) AS 'totalmail' FROM mail WHERE `receiver` = ?", CONNECTION_SYNCH);
+    //0: lowGUID
+    PrepareStatement(CHAR_SEL_PINFO_XP, "SELECT a.xp, b.guid FROM characters a LEFT JOIN guild_member b ON a.guid = b.guid WHERE a.guid = ?", CONNECTION_SYNCH);
+
     PrepareStatement(CHAR_SEL_CHAR_HOMEBIND, "SELECT mapId, zoneId, posX, posY, posZ FROM character_homebind WHERE guid = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_CHAR_GUID_NAME_BY_ACC, "SELECT guid, name FROM characters WHERE account = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_POOL_QUEST_SAVE, "SELECT quest_id FROM pool_quest_save WHERE pool_id = ?", CONNECTION_SYNCH);

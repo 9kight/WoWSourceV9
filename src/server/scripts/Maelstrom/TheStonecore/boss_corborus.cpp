@@ -58,7 +58,7 @@ class boss_corborus : public CreatureScript
             _Reset();
         }
 
-        void DoAction(int32 const action)
+        void DoAction(int32 action)
         {
             switch (action)
             {
@@ -88,7 +88,7 @@ class boss_corborus : public CreatureScript
                 ported = false;
                 me->SetUInt64Value(UNIT_FIELD_TARGET, summon->GetGUID());
                 me->SetFacingToObject(summon);
-//                me->SendMovementFlagUpdate();
+                me->SendMovementFlagUpdate();
                 events.ScheduleEvent(EVENT_THRASHING_CHARGE_CAST, 500, 0, PHASE_SUBMERGED);
             }
             else if (summon->GetEntry() == NPC_ROCK_BORER)
@@ -97,7 +97,7 @@ class boss_corborus : public CreatureScript
             BossAI::JustSummoned(summon);
         }
 
-        void UpdateAI(uint32 const diff)
+        void UpdateAI(uint32 diff)
         {
             if(!UpdateVictim())
                 return;
@@ -145,7 +145,7 @@ class boss_corborus : public CreatureScript
                     me->SetReactState(REACT_AGGRESSIVE);
                     me->SetFloatValue(UNIT_FIELD_COMBATREACH, 12.0f);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                    if(Unit * victim = me->getVictim())
+                    if(Unit * victim = me->GetVictim())
                         DoStartMovement(victim);
                     events.ScheduleEvent(EVENT_SUBMERGE, 60000, 0, PHASE_NORMAL);
                     break;
@@ -268,7 +268,7 @@ class npc_crystal_shard : public CreatureScript
             }
         }
 
-        void UpdateAI(uint32 const diff)
+        void UpdateAI(uint32 diff)
         {
             if(!spawned)
             {

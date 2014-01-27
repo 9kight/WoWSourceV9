@@ -229,7 +229,7 @@ public:
                 if (BewilderingStrikeTimer <= diff)
                 {
                     DoCastVictim(SPELL_BEWILDERING_STRIKE);
-                    float mt_threat = DoGetThreat(me->getVictim());
+                    float mt_threat = DoGetThreat(me->GetVictim());
                     if (Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 1))
                         me->AddThreat(target, mt_threat);
                     BewilderingStrikeTimer = 20000;
@@ -238,7 +238,7 @@ public:
                 if (EjectTimer <= diff)
                 {
                     DoCastVictim(SPELL_EJECT1);
-                    DoModifyThreatPercent(me->getVictim(), -40);
+                    DoModifyThreatPercent(me->GetVictim(), -40);
                     EjectTimer = 15000;
                 } else EjectTimer -= diff;
 

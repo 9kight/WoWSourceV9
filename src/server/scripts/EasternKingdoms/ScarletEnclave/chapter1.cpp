@@ -26,6 +26,7 @@
 #include "Player.h"
 #include "SpellInfo.h"
 #include "CreatureTextMgr.h"
+#include "ScriptPCH.h"
 
 /*######
 ##Quest 12848
@@ -43,6 +44,9 @@ enum UnworthyInitiate
     SPELL_PLAGUE_STRIKE             = 52373,
     SPELL_BLOOD_STRIKE              = 52374,
     SPELL_DEATH_COIL                = 52375,
+
+
+
 
     SAY_EVENT_START                 = 0,
     SAY_EVENT_ATTACK                = 1,
@@ -181,6 +185,8 @@ public:
                         anchor->CastSpell(me, SPELL_SOUL_PRISON_CHAIN, true);
                         anchorGUID = anchor->GetGUID();
                     }
+
+
 
                     GameObject* prison = NULL;
                     for (uint8 i = 0; i < 12; ++i)
@@ -443,6 +449,7 @@ enum Spells_DKI
 
 enum Says_VBM
 {
+
     SAY_DUEL                    = 0,
 };
 
@@ -476,7 +483,7 @@ public:
             creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
             creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_15);
 
-            sCreatureTextMgr->SendChat(creature, SAY_EVENT_ATTACK, 0, CHAT_MSG_ADDON, LANG_ADDON, TEXT_RANGE_NORMAL, 0, TEAM_OTHER, false, player);
+            sCreatureTextMgr->SendChat(creature, SAY_DUEL, 0, CHAT_MSG_ADDON, LANG_ADDON, TEXT_RANGE_NORMAL, 0, TEAM_OTHER, false, player);
 
             player->CastSpell(creature, SPELL_DUEL, false);
             player->CastSpell(player, SPELL_DUEL_FLAG, true);
@@ -589,10 +596,10 @@ public:
                         EnterEvadeMode();
                     return;
                 }
-                else if (me->getVictim()->GetTypeId() == TYPEID_PLAYER && me->getVictim()->HealthBelowPct(10))
+                else if (me->GetVictim()->GetTypeId() == TYPEID_PLAYER && me->GetVictim()->HealthBelowPct(10))
                 {
-                    me->getVictim()->CastSpell(me->getVictim(), 7267, true); // beg
-                    me->getVictim()->RemoveGameObject(SPELL_DUEL_FLAG, true);
+                    me->GetVictim()->CastSpell(me->GetVictim(), 7267, true); // beg
+                    me->GetVictim()->RemoveGameObject(SPELL_DUEL_FLAG, true);
                     EnterEvadeMode();
                     return;
                 }
@@ -703,13 +710,16 @@ public:
 ## npc_salanar_the_horseman
 ######*/
 
-enum Spells_Salanar
+enum SalanarTheHorseman
 {
     SPELL_REALM_OF_SHADOWS            = 52693,
-    SPELL_EFFECT_STOLEN_HORSE         = 52263,
-    SPELL_DELIVER_STOLEN_HORSE        = 52264,
-    SPELL_CALL_DARK_RIDER             = 52266,
-    SPELL_EFFECT_OVERTAKE             = 52349
+    EFFECT_STOLEN_HORSE               = 52263,
+    DELIVER_STOLEN_HORSE              = 52264,
+    CALL_DARK_RIDER                   = 52266,
+    SPELL_EFFECT_OVERTAKE             = 52349,
+    QUEST_REALM_OF_SHADOWS            = 12687,
+    NPC_DARK_RIDER_OF_ACHERUS         = 28654,
+    NPC_SALANAR_THE_HORSEMAN          = 28788    
 };
 
 class npc_salanar_the_horseman : public CreatureScript
@@ -722,39 +732,25 @@ public:
         return new npc_salanar_the_horsemanAI(creature);
     }
 
-	bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 opt)
-	{
-		if(quest->GetQuestId() == 12687)
-		{
-			if(!player->HasSpell(48778))
-			{
-				player->learnSpell(33391,false);
-				player->learnSpell(48778,false);
-			}
-			
-		}
-		return true;
-	}
-
     struct npc_salanar_the_horsemanAI : public ScriptedAI
     {
         npc_salanar_the_horsemanAI(Creature* creature) : ScriptedAI(creature) {}
 
         void SpellHit(Unit* caster, const SpellInfo* spell)
         {
-            if (spell->Id == SPELL_DELIVER_STOLEN_HORSE)
+            if (spell->Id == DELIVER_STOLEN_HORSE)
             {
                 if (caster->GetTypeId() == TYPEID_UNIT && caster->IsVehicle())
                 {
                     if (Unit* charmer = caster->GetCharmer())
                     {
-                        if (charmer->HasAura(SPELL_EFFECT_STOLEN_HORSE))
+                        if (charmer->HasAura(EFFECT_STOLEN_HORSE))
                         {
-                            charmer->RemoveAurasDueToSpell(SPELL_EFFECT_STOLEN_HORSE);
+                            charmer->RemoveAurasDueToSpell(EFFECT_STOLEN_HORSE);
                             caster->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
                             caster->setFaction(35);
-                            DoCast(caster, SPELL_CALL_DARK_RIDER, true);
-                            if (Creature* Dark_Rider = me->FindNearestCreature(28654, 15))
+                            DoCast(caster, CALL_DARK_RIDER, true);
+                            if (Creature* Dark_Rider = me->FindNearestCreature(NPC_DARK_RIDER_OF_ACHERUS, 15))
                                 CAST_AI(npc_dark_rider_of_acherus::npc_dark_rider_of_acherusAI, Dark_Rider->AI())->InitDespawnHorse(caster);
                         }
                     }
@@ -773,9 +769,9 @@ public:
                     if (charmer->GetTypeId() == TYPEID_PLAYER)
                     {
                         // for quest Into the Realm of Shadows(12687)
-                        if (me->GetEntry() == 28788 && CAST_PLR(charmer)->GetQuestStatus(12687) == QUEST_STATUS_INCOMPLETE)
+                        if (me->GetEntry() == NPC_SALANAR_THE_HORSEMAN && CAST_PLR(charmer)->GetQuestStatus(QUEST_REALM_OF_SHADOWS) == QUEST_STATUS_INCOMPLETE)
                         {
-                            CAST_PLR(charmer)->GroupEventHappens(12687, me);
+                            CAST_PLR(charmer)->GroupEventHappens(QUEST_REALM_OF_SHADOWS, me);
                             charmer->RemoveAurasDueToSpell(SPELL_EFFECT_OVERTAKE);
                             CAST_CRE(who)->DespawnOrUnsummon();
                             //CAST_CRE(who)->Respawn(true);
@@ -795,6 +791,10 @@ public:
 ## npc_ros_dark_rider
 ######*/
 
+enum RosDarkRider
+{
+    NPC_DEATHCHARGER     = 28782
+};
 class npc_ros_dark_rider : public CreatureScript
 {
 public:
@@ -816,7 +816,7 @@ public:
 
         void Reset()
         {
-            Creature* deathcharger = me->FindNearestCreature(28782, 30);
+            Creature* deathcharger = me->FindNearestCreature(NPC_DEATHCHARGER, 30);
             if (!deathcharger)
                 return;
 
@@ -829,9 +829,8 @@ public:
 
         void JustDied(Unit* killer)
         {
-            Creature* deathcharger = me->FindNearestCreature(28782, 30);
-            if (!deathcharger)
-                return;
+            Creature* deathcharger = me->FindNearestCreature(NPC_DEATHCHARGER, 30);
+            if (!deathcharger) return;
 
             if (killer->GetTypeId() == TYPEID_PLAYER && deathcharger->GetTypeId() == TYPEID_UNIT && deathcharger->IsVehicle())
             {
@@ -958,14 +957,14 @@ public:
 
         //    //ScriptedAI::UpdateAI(diff);
         //    //Check if we have a current target
-        //    if (me->getVictim()->GetEntry() == NPC_GHOSTS)
+        //    if (me->GetVictim()->GetEntry() == NPC_GHOSTS)
         //    {
         //        if (me->isAttackReady())
         //        {
         //            //If we are within range melee the target
-        //            if (me->IsWithinMeleeRange(me->getVictim()))
+        //            if (me->IsWithinMeleeRange(me->GetVictim()))
         //            {
-        //                me->AttackerStateUpdate(me->getVictim());
+        //                me->AttackerStateUpdate(me->GetVictim());
         //                me->resetAttackTimer();
         //            }
         //        }
@@ -999,6 +998,7 @@ public:
     {
         npc_scarlet_miner_cartAI(Creature* creature) : PassiveAI(creature), minerGUID(0)
         {
+            me->setFaction(35);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
             me->SetDisplayId(me->GetCreatureTemplate()->Modelid1); // Modelid2 is a horse.
         }
@@ -1070,6 +1070,7 @@ public:
             carGUID = 0;
             IntroTimer = 0;
             IntroPhase = 0;
+            me->RestoreFaction();
         }
 
         void InitWaypoint()
@@ -1120,6 +1121,7 @@ public:
                 case 1:
                     if (Unit* car = Unit::GetCreature(*me, carGUID))
                     {
+                        me->SetInFront(car);
                         me->SetFacingToObject(car);
                     }
                     Talk(SAY_SCARLET_MINER_0);
@@ -1130,6 +1132,7 @@ public:
                 case 17:
                     if (Unit* car = Unit::GetCreature(*me, carGUID))
                     {
+                        me->SetInFront(car);
                         me->SetFacingToObject(car);
                         car->Relocate(car->GetPositionX(), car->GetPositionY(), me->GetPositionZ() + 1);
                         car->StopMoving();
@@ -1173,9 +1176,14 @@ public:
 ## go_inconspicuous_mine_car
 ######*/
 
-enum Spells_Cart
+enum MineCar
+
 {
-    SPELL_CART_SUMM        = 52463
+    SPELL_HIDE_IN_MINE_CAR          = 52463,
+    NPC_SCARLET_MINER               = 28841,
+    NPC_MINE_CAR                    = 28817,
+    QUEST_MASSACRE_AT_LIGHTS_POINT  = 12701
+
 };
 
 class go_inconspicuous_mine_car : public GameObjectScript
@@ -1185,25 +1193,58 @@ public:
 
     bool OnGossipHello(Player* player, GameObject* /*go*/)
     {
-        if (player->GetQuestStatus(12701) == QUEST_STATUS_INCOMPLETE)
+        if (player->GetQuestStatus(QUEST_MASSACRE_AT_LIGHTS_POINT) == QUEST_STATUS_INCOMPLETE)
         {
-            // Hack Why Trinity Dont Support Custom Summon Location
-            if (Creature* miner = player->SummonCreature(28841, 2383.869629f, -5900.312500f, 107.996086f, player->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 1))
+            // Hack Why SkyFire Dont Support Custom Summon Location
+            if (Creature* miner = player->SummonCreature(NPC_SCARLET_MINER, 2383.869629f, -5900.312500f, 107.996086f, player->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 1))
             {
-                player->CastSpell(player, SPELL_CART_SUMM, true);
+                player->CastSpell(player, SPELL_HIDE_IN_MINE_CAR, true);
                 if (Creature* car = player->GetVehicleCreatureBase())
                 {
-                    if (car->GetEntry() == 28817)
+                    if (car->GetEntry() == NPC_MINE_CAR)
                     {
                         car->AI()->SetGUID(miner->GetGUID());
                         CAST_AI(npc_scarlet_miner::npc_scarlet_minerAI, miner->AI())->InitCartQuest(player);
-                    } else sLog->outError(LOG_FILTER_TSCR, "OnGossipHello vehicle entry is not correct.");
-                } else sLog->outError(LOG_FILTER_TSCR, "OnGossipHello player is not on the vehicle.");
-            } else sLog->outError(LOG_FILTER_TSCR, "OnGossipHello Scarlet Miner cant be found by script.");
+                    } else sLog->outError(LOG_FILTER_TSCR, "TSCR: OnGossipHello vehicle entry is not correct.");
+                } else sLog->outError(LOG_FILTER_TSCR, "TSCR: OnGossipHello player is not on the vehicle.");
+            } else sLog->outError(LOG_FILTER_TSCR, "TSCR: OnGossipHello Scarlet Miner cant be found by script.");
         }
         return true;
     }
 
+};
+
+class npc_frostbrood_vanquisher : public CreatureScript
+{
+public:
+    npc_frostbrood_vanquisher() : CreatureScript("npc_frostbrood_vanquisher") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_frostbrood_vanquisherAI(creature);
+    }
+
+    struct npc_frostbrood_vanquisherAI : public ScriptedAI
+    {
+        npc_frostbrood_vanquisherAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Reset();
+        }
+
+        void Reset()
+        {
+            me->SetSpeed(MOVE_FLIGHT, 2.5f, true);
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            if (type != POINT_MOTION_TYPE)
+               return;
+
+            ((Player*)(me->GetCharmer()))->SetClientControl(me, 1);
+            me->SetSpeed(MOVE_FLIGHT, 2.5f, true);
+        }
+    };
 };
 
 // npc 28912 quest 17217 boss 29001 mob 29007 go 191092
@@ -1212,7 +1253,7 @@ void AddSC_the_scarlet_enclave_c1()
 {
     new npc_unworthy_initiate();
     new npc_unworthy_initiate_anchor();
-	new npc_eye_of_acherus();
+    new npc_eye_of_acherus();
     new go_acherus_soul_prison();
     new npc_death_knight_initiate();
     new npc_salanar_the_horseman();
@@ -1223,4 +1264,5 @@ void AddSC_the_scarlet_enclave_c1()
     new npc_scarlet_miner();
     new npc_scarlet_miner_cart();
     new go_inconspicuous_mine_car();
+    new npc_frostbrood_vanquisher();
 }

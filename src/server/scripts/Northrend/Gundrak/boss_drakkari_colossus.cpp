@@ -165,8 +165,8 @@ class boss_drakkari_colossus : public CreatureScript
 
                         me->SetInCombatWithZone();
 
-                        if (me->getVictim())
-                            me->GetMotionMaster()->MoveChase(me->getVictim(), 0, 0);
+                        if (me->GetVictim())
+                            me->GetMotionMaster()->MoveChase(me->GetVictim(), 0, 0);
 
                         break;
                 }

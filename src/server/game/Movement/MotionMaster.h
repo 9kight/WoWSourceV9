@@ -85,6 +85,23 @@ class MotionMaster //: private std::stack<MovementGenerator *>
         //typedef std::stack<MovementGenerator *> Impl;
         typedef MovementGenerator* _Ty;
 
+        class MoveHomeEvent : public BasicEvent
+        {
+        public:
+            MoveHomeEvent(MotionMaster* master) : _master(master)
+            {
+            }
+
+            bool Execute(uint64 /*time*/, uint32 /*diff*/)
+            {
+                _master->MoveTargetedHome(false);
+                return true;
+            }
+
+        private:
+            MotionMaster* _master;
+        };
+
         void pop()
         {
             Impl[_top] = NULL;
@@ -109,6 +126,7 @@ class MotionMaster //: private std::stack<MovementGenerator *>
 
         void Initialize();
         void InitDefault();
+        void ResetMovement(bool moveHome = true);
 
         bool empty() const { return (_top < 0); }
         int size() const { return _top + 1; }
@@ -147,16 +165,15 @@ class MotionMaster //: private std::stack<MovementGenerator *>
         }
 
         void MoveIdle();
-        void MoveTargetedHome();
+        void MoveTargetedHome(bool withdelay = true);
         void MoveRandom(float spawndist = 0.0f);
         void MoveFollow(Unit* target, float dist, float angle, MovementSlot slot = MOTION_SLOT_ACTIVE, uint32 spellId = 0);
         void MoveChase(Unit* target, float dist = 0.0f, float angle = 0.0f, uint32 spellId = 0);
         void MoveConfused();
         void MoveFleeing(Unit* enemy, uint32 time = 0);
-        void MovePoint(uint32 id, const Position &pos)
-            { MovePoint(id, pos.m_positionX, pos.m_positionY, pos.m_positionZ); }
+        void MovePoint(uint32 id, Position const& pos, bool generatePath = true)
+            { MovePoint(id, pos.m_positionX, pos.m_positionY, pos.m_positionZ, generatePath); }
         void MovePoint(uint32 id, float x, float y, float z, bool generatePath = true);
-
         // These two movement types should only be used with creatures having landing/takeoff animations
         void MoveLand(uint32 id, Position const& pos);
         void MoveTakeoff(uint32 id, Position const& pos);

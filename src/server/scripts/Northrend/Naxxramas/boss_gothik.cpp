@@ -576,7 +576,7 @@ class mob_gothik_minion : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-                if (gateClose && (!isOnSameSide(me) || (me->getVictim() && !isOnSameSide(me->getVictim()))))
+                if (gateClose && (!isOnSameSide(me) || (me->GetVictim() && !isOnSameSide(me->GetVictim()))))
                 {
                     EnterEvadeMode();
                     return;

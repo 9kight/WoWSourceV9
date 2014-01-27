@@ -19,6 +19,8 @@
 #ifndef TRINITYCORE_PET_DEFINES_H
 #define TRINITYCORE_PET_DEFINES_H
 
+#include "Unit.h"
+
 enum PetType
 {
     SUMMON_PET              = 0,

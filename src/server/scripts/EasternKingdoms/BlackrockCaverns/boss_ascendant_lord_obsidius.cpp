@@ -111,7 +111,7 @@ public:
                 instance->SetData(BOSS_ASCENDANT_LORD_OBSIDIUS, IN_PROGRESS);
         }
 
-        void UpdateAI(uint32 Diff)
+        void UpdateAI(uint32 const Diff)
         {
             if (!UpdateVictim())
                 return;
@@ -145,8 +145,8 @@ public:
                 me->CastSpell(toTransform, SPELL_TRANSFORMATION_2, true);
 
                 // Return to chase movement
-                me->GetMotionMaster()->MoveChase(me->getVictim());
-                toTransform->GetMotionMaster()->MoveChase(me->getVictim());
+                me->GetMotionMaster()->MoveChase(me->GetVictim());
+                toTransform->GetMotionMaster()->MoveChase(me->GetVictim());
 
                 Talk(SAY_TRANSFORM);
             }

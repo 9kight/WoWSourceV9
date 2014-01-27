@@ -151,7 +151,7 @@ class boss_nazan : public CreatureScript
                         me->GetMotionMaster()->Clear();
                         if (Unit* victim = SelectTarget(SELECT_TARGET_NEAREST, 0))
                             me->AI()->AttackStart(victim);
-                        DoStartMovement(me->getVictim());
+                        DoStartMovement(me->GetVictim());
                         Talk(EMOTE);
                         return;
                     }
@@ -263,7 +263,7 @@ class boss_vazruden : public CreatureScript
 
                 if (Revenge_Timer <= diff)
                 {
-                    if (Unit* victim = me->getVictim())
+                    if (Unit* victim = me->GetVictim())
                         DoCast(victim, DUNGEON_MODE(SPELL_REVENGE, SPELL_REVENGE_H));
                     Revenge_Timer = 5000;
                 }
@@ -371,7 +371,7 @@ class boss_vazruden_the_herald : public CreatureScript
             {
                 if (!summoned)
                     return;
-                Unit* victim = me->getVictim();
+                Unit* victim = me->GetVictim();
                 if (summoned->GetEntry() == ENTRY_NAZAN)
                 {
                     CAST_AI(boss_nazan::boss_nazanAI, summoned->AI())->VazrudenGUID = VazrudenGUID;
@@ -429,7 +429,7 @@ class boss_vazruden_the_herald : public CreatureScript
                         Creature* Vazruden = Unit::GetCreature(*me, VazrudenGUID);
                         if ((Nazan && Nazan->isAlive()) || (Vazruden && Vazruden->isAlive()))
                         {
-                            if ((Nazan && Nazan->getVictim()) || (Vazruden && Vazruden->getVictim()))
+                            if ((Nazan && Nazan->GetVictim()) || (Vazruden && Vazruden->GetVictim()))
                                 return;
                             else
                             {
@@ -494,7 +494,7 @@ class mob_hellfire_sentry : public CreatureScript
 
                 if (KidneyShot_Timer <= diff)
                 {
-                    if (Unit* victim = me->getVictim())
+                    if (Unit* victim = me->GetVictim())
                         DoCast(victim, SPELL_KIDNEY_SHOT);
                     KidneyShot_Timer = 20000;
                 }

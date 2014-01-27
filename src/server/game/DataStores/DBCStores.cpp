@@ -239,6 +239,9 @@ DBCStorage <TaxiPathEntry> sTaxiPathStore(TaxiPathEntryfmt);
 TaxiPathNodesByPath sTaxiPathNodesByPath;
 static DBCStorage <TaxiPathNodeEntry> sTaxiPathNodeStore(TaxiPathNodeEntryfmt);
 
+TransportAnimationsByEntry sTransportAnimationsByEntry;
+DBCStorage <TransportAnimationEntry> sTransportAnimationStore(TransportAnimationEntryfmt);
+
 DBCStorage <TotemCategoryEntry> sTotemCategoryStore(TotemCategoryEntryfmt);
 DBCStorage <UnitPowerBarEntry> sUnitPowerBarStore(UnitPowerBarfmt); 
 DBCStorage <VehicleEntry> sVehicleStore(VehicleEntryfmt);
@@ -331,6 +334,8 @@ void LoadDBCStores(const std::string& dataPath)
                 sAreaFlagByMapID.insert(AreaFlagByMapID::value_type(area->mapid, area->exploreFlag));
         }
     }
+
+
 
     LoadDBC(availableDbcLocales, bad_dbc_files, sAchievementStore,            dbcPath, "Achievement.dbc", &CustomAchievementfmt, &CustomAchievementIndex);//14545
     LoadDBC(availableDbcLocales, bad_dbc_files, sAchievementCriteriaStore,    dbcPath, "Achievement_Criteria.dbc");//14545
@@ -742,6 +747,11 @@ void LoadDBCStores(const std::string& dataPath)
     //LoadDBC(availableDbcLocales, bad_dbc_files, sTeamContributionPointsStore, dbcPath, "TeamContributionPoints.dbc");
     LoadDBC(availableDbcLocales, bad_dbc_files, sTotemCategoryStore,          dbcPath, "TotemCategory.dbc");//14545
 
+    LoadDBC(availableDbcLocales, bad_dbc_files,sTransportAnimationStore,  dbcPath,"TransportAnimation.dbc");
+    for (uint32 i = 0; i < sTransportAnimationStore.GetNumRows(); ++i)
+        if (TransportAnimationEntry const* entry = sTransportAnimationStore.LookupEntry(i))
+            sTransportAnimationsByEntry[entry->transportEntry][entry->timeFrame] = entry;
+
     LoadDBC(availableDbcLocales, bad_dbc_files, sUnitPowerBarStore,           dbcPath, "UnitPowerBar.dbc");//15595 
 
     LoadDBC(availableDbcLocales, bad_dbc_files, sVehicleStore,                dbcPath, "Vehicle.dbc");//14545
@@ -864,6 +874,18 @@ AreaTableEntry const* GetAreaEntryByAreaFlagAndMap(uint32 area_flag, uint32 map_
         return GetAreaEntryByAreaID(mapEntry->linked_zone);
 
     return NULL;
+}
+
+char const* GetRaceName(uint8 race, uint8 /*locale*/)
+{
+    ChrRacesEntry const* raceEntry = sChrRacesStore.LookupEntry(race);
+    return raceEntry ? raceEntry->name : NULL;
+}
+
+char const* GetClassName(uint8 class_, uint8 /*locale*/)
+{
+    ChrClassesEntry const* classEntry = sChrClassesStore.LookupEntry(class_);
+    return classEntry ? classEntry->name : NULL;
 }
 
 uint32 GetAreaFlagByMapId(uint32 mapid)

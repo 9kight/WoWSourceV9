@@ -312,7 +312,7 @@ void SmartAI::UpdatePath(const uint32 diff)
             mWPReached = false;
         }
     }
-    if (me->isInCombat() || HasEscortState(SMART_ESCORT_PAUSED | SMART_ESCORT_RETURNING))
+    if ((!me->HasReactState(REACT_PASSIVE) && me->isInCombat()) || HasEscortState(SMART_ESCORT_PAUSED | SMART_ESCORT_RETURNING))
         return;
     // handle next wp
     if (mWPReached)//reached WP
@@ -433,13 +433,15 @@ void SmartAI::MovementInform(uint32 MovementType, uint32 Data)
 
 void SmartAI::RemoveAuras()
 {
-    // Only loop throught the applied auras, because here is where all auras on the current unit are stored
-    Unit::AuraApplicationMap appliedAuras = me->GetAppliedAuras();
-    for (Unit::AuraApplicationMap::iterator iter = appliedAuras.begin(); iter != appliedAuras.end(); ++iter)
+    /// @fixme: duplicated logic in CreatureAI::_EnterEvadeMode (could use RemoveAllAurasExceptType)
+    Unit::AuraApplicationMap& appliedAuras = me->GetAppliedAuras();
+    for (Unit::AuraApplicationMap::iterator iter = appliedAuras.begin(); iter != appliedAuras.end();)
     {
         Aura const* aura = iter->second->GetBase();
-        if (!aura->GetSpellInfo()->IsPassive() && !aura->GetSpellInfo()->HasAura(SPELL_AURA_CONTROL_VEHICLE) && aura->GetCaster() != me)
-            me->RemoveAurasDueToSpell(aura->GetId());
+        if (!aura->IsPassive() && !aura->HasEffectType(SPELL_AURA_CONTROL_VEHICLE) && !aura->HasEffectType(SPELL_AURA_CLONE_CASTER) && aura->GetCasterGUID() != me->GetGUID())
+            me->RemoveAura(iter);
+        else
+            ++iter;
     }
 }
 
@@ -497,7 +499,7 @@ void SmartAI::MoveInLineOfSight(Unit* who)
         float fAttackRadius = me->GetAttackDistance(who);
         if (me->IsWithinDistInMap(who, fAttackRadius) && me->IsWithinLOSInMap(who))
         {
-            if (!me->getVictim())
+            if (!me->GetVictim())
             {
                 who->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
                 AttackStart(who);
@@ -513,14 +515,14 @@ void SmartAI::MoveInLineOfSight(Unit* who)
 
 bool SmartAI::CanAIAttack(const Unit* /*who*/) const
 {
-    if (me->GetReactState() == REACT_PASSIVE || me->HasAuraType(SPELL_AURA_CONTROL_VEHICLE))
+    if (me->GetReactState() == REACT_PASSIVE || me->HasAuraType(SPELL_AURA_CONTROL_VEHICLE) || me->IsInEvadeMode())
         return false;
     return true;
 }
 
 bool SmartAI::AssistPlayerInCombat(Unit* who)
 {
-    if (!who || !who->getVictim())
+    if (!who || !who->GetVictim())
         return false;
 
     //experimental (unknown) flag not present
@@ -528,7 +530,7 @@ bool SmartAI::AssistPlayerInCombat(Unit* who)
         return false;
 
     //not a player
-    if (!who->getVictim()->GetCharmerOrOwnerPlayerOrPlayerItself())
+    if (!who->GetVictim()->GetCharmerOrOwnerPlayerOrPlayerItself())
         return false;
 
     //never attack friendly
@@ -539,7 +541,7 @@ bool SmartAI::AssistPlayerInCombat(Unit* who)
     if (me->IsWithinDistInMap(who, SMART_MAX_AID_DIST) && me->IsWithinLOSInMap(who))
     {
         //already fighting someone?
-        if (!me->getVictim())
+        if (!me->GetVictim())
         {
             AttackStart(who);
             return true;
@@ -584,10 +586,12 @@ int SmartAI::Permissible(const Creature* creature)
 void SmartAI::JustReachedHome()
 {
     GetScript()->ProcessEventsFor(SMART_EVENT_REACHED_HOME);
+    me->setActive(false);
 }
 
 void SmartAI::EnterCombat(Unit* enemy)
 {
+    me->setActive(true);
     me->InterruptNonMeleeSpells(false); // must be before ProcessEvents
     GetScript()->ProcessEventsFor(SMART_EVENT_AGGRO, enemy);
     me->GetPosition(&mLastOOCPos);
@@ -695,6 +699,10 @@ void SmartAI::InitializeAI()
 void SmartAI::OnCharmed(bool apply)
 {
     GetScript()->ProcessEventsFor(SMART_EVENT_CHARMED, NULL, 0, 0, apply);
+
+    if (!apply && !me->IsInEvadeMode() && me->GetUInt64Value(UNIT_FIELD_CHARMEDBY))
+        if (Unit* charmer = ObjectAccessor::GetUnit(*me, me->GetUInt64Value(UNIT_FIELD_CHARMEDBY)))
+            AttackStart(charmer);	
 }
 
 void SmartAI::DoAction(const int32 param)
@@ -783,12 +791,12 @@ void SmartAI::SetCombatMove(bool on)
     mCanCombatMove = on;
     if (!HasEscortState(SMART_ESCORT_ESCORTING))
     {
-        if (on && me->getVictim())
+        if (on && me->GetVictim())
         {
             if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE)
             {
                 SetRun(mRun);
-                me->GetMotionMaster()->MoveChase(me->getVictim());
+                me->GetMotionMaster()->MoveChase(me->GetVictim());
                 me->CastStop();
             }
         }

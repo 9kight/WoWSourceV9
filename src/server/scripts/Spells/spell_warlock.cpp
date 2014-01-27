@@ -88,7 +88,9 @@ enum WarlockSpells
     SPELL_WARLOCK_SHADOW_WARD                       = 6229,
     SPELL_WARLOCK_NETHER_WARD                       = 91711,
     SPELL_WARLOCK_METHAMORPHOSIS_FORM               = 47241,
-    SPELL_WARLOCK_NETHER_WARD_TALENT                = 91713
+    SPELL_WARLOCK_NETHER_WARD_TALENT                = 91713,
+    SPELL_WARLOCK_BANE_OF_HAVOC_CASTER_AURA         = 85466,
+    SPELL_WARLOCK_BANE_OF_HAVOC_TRIGGERED           = 85455,
 };
 
 enum WarlockSpellIcons
@@ -605,6 +607,35 @@ class spell_warl_demonic_circle_teleport : public SpellScriptLoader
         }
 };
 
+class spell_warl_bane_of_havoc : public SpellScriptLoader
+{
+public:
+    spell_warl_bane_of_havoc() : SpellScriptLoader("spell_warl_bane_of_havoc") { }
+    
+    class spell_warl_bane_of_havoc_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_warl_bane_of_havoc_AuraScript);
+        
+        void HandleApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                caster->CastSpell(caster, SPELL_WARLOCK_BANE_OF_HAVOC_CASTER_AURA, true);
+            }
+        }
+        
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_warl_bane_of_havoc_AuraScript::HandleApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+    
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_warl_bane_of_havoc_AuraScript();
+    }
+};
+
 // 77801 - Demon Soul - Updated to 4.3.4
 class spell_warl_demon_soul : public SpellScriptLoader
 {
@@ -1078,34 +1109,6 @@ class spell_warl_life_tap : public SpellScriptLoader
         SpellScript* GetSpellScript() const
         {
             return new spell_warl_life_tap_SpellScript();
-        }
-};
-
-// 18541 - Ritual of Doom Effect
-class spell_warl_ritual_of_doom_effect : public SpellScriptLoader
-{
-    public:
-        spell_warl_ritual_of_doom_effect() : SpellScriptLoader("spell_warl_ritual_of_doom_effect") { }
-
-        class spell_warl_ritual_of_doom_effect_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_warl_ritual_of_doom_effect_SpellScript);
-
-            void HandleDummy(SpellEffIndex /*effIndex*/)
-            {
-                Unit* caster = GetCaster();
-                caster->CastSpell(caster, GetEffectValue(), true);
-            }
-
-            void Register()
-            {
-                OnEffectHit += SpellEffectFn(spell_warl_ritual_of_doom_effect_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_warl_ritual_of_doom_effect_SpellScript();
         }
 };
 
@@ -2932,7 +2935,6 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_haunt();
     new spell_warl_health_funnel();
     new spell_warl_life_tap();
-    new spell_warl_ritual_of_doom_effect();
     new spell_warl_seed_of_corruption();
     new spell_warl_soulshatter();
     new spell_warl_unstable_affliction();
@@ -2951,6 +2953,7 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_soul_harvest();
     new spell_warl_fel_armor();
     new spell_warl_mana_feed();
+    new spell_warl_bane_of_havoc();
     new spell_warl_impending_doom();
     new spell_warl_cremation();
     new spell_warl_pet_scaling_01();

@@ -51,6 +51,7 @@
 #include "Group.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
+#include "MMapFactory.h"
 
 uint32 GuidHigh2TypeId(uint32 guid_hi)
 {
@@ -243,7 +244,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
         }
     }
 
-    if (ToUnit() && ToUnit()->getVictim())
+    if (ToUnit() && ToUnit()->GetVictim())
         flags |= UPDATEFLAG_HAS_TARGET;
 
     ByteBuffer buf(500);
@@ -418,7 +419,7 @@ void Object::_BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
 
     if (flags & UPDATEFLAG_HAS_TARGET)
     {
-        ObjectGuid victimGuid = ToUnit()->getVictim()->GetGUID();   // checked in BuildCreateUpdateBlockForPlayer
+        ObjectGuid victimGuid = ToUnit()->GetVictim()->GetGUID();   // checked in BuildCreateUpdateBlockForPlayer
         data->WriteBit(victimGuid[2]);
         data->WriteBit(victimGuid[7]);
         data->WriteBit(victimGuid[0]);
@@ -601,7 +602,7 @@ void Object::_BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
 
     if (flags & UPDATEFLAG_HAS_TARGET)
     {
-        ObjectGuid victimGuid = ToUnit()->getVictim()->GetGUID();   // checked in BuildCreateUpdateBlockForPlayer
+        ObjectGuid victimGuid = ToUnit()->GetVictim()->GetGUID();   // checked in BuildCreateUpdateBlockForPlayer
         data->WriteByteSeq(victimGuid[4]);
         data->WriteByteSeq(victimGuid[0]);
         data->WriteByteSeq(victimGuid[3]);
@@ -904,6 +905,13 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                             flags |= GO_FLAG_LOCKED | GO_FLAG_NOT_SELECTABLE;
 
                     *data << flags;
+                }
+                else if (index == GAMEOBJECT_BYTES_1)
+                {
+                    if (((GameObject*)this)->GetGOInfo()->type == GAMEOBJECT_TYPE_TRANSPORT)
+                        *data << uint32(m_uint32Values[index] | GO_STATE_TRANSPORT_SPEC);
+                    else
+                        *data << uint32(m_uint32Values[index]);
                 }
                 else
                     *data << m_uint32Values[index];                // other cases
@@ -1863,6 +1871,10 @@ void WorldObject::UpdateGroundPositionZ(float x, float y, float &z) const
 
 void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
 {
+    uint32 mapId = GetMapId();
+    if (!MMAP::MMapFactory::IsPathfindingEnabled(mapId))
+        return;
+
     switch (GetTypeId())
     {
         case TYPEID_UNIT:
@@ -2367,6 +2379,13 @@ void WorldObject::BuildMonsterChat(WorldPacket* data, uint8 msgtype, char const*
     }
 }
 
+void Unit::BuildHeartBeatMsg(WorldPacket* data) const
+{
+    data->Initialize(MSG_MOVE_HEARTBEAT, 32);
+    data->append(GetPackGUID());
+    BuildMovementPacket(data);
+}
+
 void WorldObject::SendMessageToSet(WorldPacket* data, bool self)
 {
     if (IsInWorld())
@@ -2542,6 +2561,24 @@ TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropert
     return summon;
 }
 
+/**
+* Summons group of creatures.
+*
+* @param group Id of group to summon.
+* @param list  List to store pointers to summoned creatures.
+*/
+
+void Map::SummonCreatureGroup(uint8 group, std::list<TempSummon*>* list /*= NULL*/)
+{
+    std::vector<TempSummonData> const* data = sObjectMgr->GetSummonGroup(GetId(), SUMMONER_TYPE_MAP, group);
+    if (!data)
+        return;
+
+    for (std::vector<TempSummonData>::const_iterator itr = data->begin(); itr != data->end(); ++itr)
+        if (TempSummon* summon = SummonCreature(itr->entry, itr->pos, NULL, itr->time))
+            if (list)
+                list->push_back(summon);
+}
 void WorldObject::SetZoneScript()
 {
     if (Map* map = FindMap())
@@ -2556,6 +2593,20 @@ void WorldObject::SetZoneScript()
                 m_zoneScript = sOutdoorPvPMgr->GetZoneScript(GetZoneId());
         }
     }
+}
+
+TempSummon* WorldObject::SummonCreature_OP(uint32 entry, const Position &pos, TempSummonType spwtype, uint32 duration, uint32 /*vehId*/) const
+{
+    if (Map* map = FindMap())
+    {
+        if (TempSummon* summon = map->SummonCreature(entry, pos, NULL, duration, isType(TYPEMASK_UNIT) ? (Unit*)this : NULL))
+        {
+            summon->SetTempSummonType(spwtype);
+            return summon;
+        }
+    }
+
+    return NULL;
 }
 
 TempSummon* WorldObject::SummonCreature(uint32 entry, const Position &pos, TempSummonType spwtype, uint32 duration, uint32 /*vehId*/) const
@@ -2621,6 +2672,25 @@ Creature* WorldObject::SummonTrigger(float x, float y, float z, float ang, uint3
     return summon;
 }
 
+/**
+* Summons group of creatures. Should be called only by instances of Creature and GameObject classes.
+*
+* @param group Id of group to summon.
+* @param list  List to store pointers to summoned creatures.
+*/
+void WorldObject::SummonCreatureGroup(uint8 group, std::list<TempSummon*>* list /*= NULL*/)
+{
+    ASSERT((GetTypeId() == TYPEID_GAMEOBJECT || GetTypeId() == TYPEID_UNIT) && "Only GOs and creatures can summon npc groups!");
+
+    std::vector<TempSummonData> const* data = sObjectMgr->GetSummonGroup(GetEntry(), GetTypeId() == TYPEID_GAMEOBJECT ? SUMMONER_TYPE_GAMEOBJECT : SUMMONER_TYPE_CREATURE, group);
+    if (!data)
+        return;
+
+    for (std::vector<TempSummonData>::const_iterator itr = data->begin(); itr != data->end(); ++itr)
+        if (TempSummon* summon = SummonCreature(itr->entry, itr->pos, itr->type, itr->time))
+            if (list)
+                list->push_back(summon);
+}
 Creature* WorldObject::FindNearestCreature(uint32 entry, float range, bool alive) const
 {
     Creature* creature = NULL;
@@ -2783,7 +2853,9 @@ void WorldObject::GetNearPoint(WorldObject const* /*searcher*/, float &x, float 
 {
     GetNearPoint2D(x, y, distance2d+searcher_size, absAngle);
     z = GetPositionZ();
+//    sLog->outError(LOG_FILTER_GENERAL, "PORCCCDDDLL %f %f %f", x, y, z);
     UpdateAllowedPositionZ(x, y, z);
+//    sLog->outError(LOG_FILTER_GENERAL, "DIOCANEE %f %f %f", x, y, z);
 
     /*
     // if detection disabled, return first point

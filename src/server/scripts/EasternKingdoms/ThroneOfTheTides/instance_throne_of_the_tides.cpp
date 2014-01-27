@@ -16,17 +16,11 @@
  */
 
 #include "ScriptMgr.h"
+#include "ScriptedGossip.h"
+#include "InstanceScript.h"
 #include "throne_of_the_tides.h"
 
 #define ENCOUNTERS 5
-
-/*Boss Encounters
------------------
-  Lady Naz'jar
-  Commander Ulthok
-  Erunak Stoneshaper & Mindbender Ghur'sha - TODO: These two will be treated like a single DATA_EVENT
-  Ozumat
-*/
 
 class instance_throne_of_the_tides : public InstanceMapScript
 {
@@ -48,7 +42,10 @@ public:
         uint64 uiCommanderUlthok;
         uint64 uiErunakStonespeaker;
         uint64 uiMindbenderGhrusha;
+        uint64 uiNeptulon;
         uint64 uiOzumat;
+
+        uint64 uiTeleporter;
 
         uint64 doorOzumat;
         uint64 doorErunak;
@@ -71,6 +68,10 @@ public:
             uiErunakStonespeaker = 0;
             uiMindbenderGhrusha = 0;
             uiOzumat = 0;
+            uiNeptulon = 0;
+
+            uiTeleporter = 0;
+
             uiUlthokDoorCounter = 0;
             uiMindbenderDoorCounter = 0;
 
@@ -119,6 +120,16 @@ public:
                     break;
                 case BOSS_OZUMAT:
                     uiOzumat = creature->GetGUID();
+                    break;
+                case BOSS_NEPTULON:
+                    uiNeptulon = creature->GetGUID();
+                    break;
+                case NPC_TELEPORTER:
+                    uiTeleporter = creature->GetGUID();
+                    if (GetData(DATA_COMMANDER_ULTHOK_EVENT) == DONE)
+                    {
+                        creature->SetVisible(true);
+                    }
                     break;
                 case NPC_NAZJAR_INVADER:
                 case NPC_NAZJAR_SPIRITMENDER:
@@ -209,6 +220,8 @@ public:
                     return uiMindbenderGhrusha;
                 case DATA_OZUMAT:
                     return uiOzumat;
+                case DATA_NEPTULON:
+                    return uiNeptulon;
                 case GO_LADY_NAZJAR_DOOR:
                     return doorNazjar;
                 case GO_ERUNAK_STONESPEAKER_DOOR:
@@ -239,6 +252,12 @@ public:
                     break;
                 case DATA_OZUMAT_EVENT:
                     uiEncounter[4] = data;
+                    if (data == DONE)
+                        if (Creature* neptulon =  instance->GetCreature(uiNeptulon))
+                        {
+                            if (GameObject* Chest = neptulon->SummonGameObject(instance->IsHeroic() ? GO_OZUMAT_CHEST_HEROIC : GO_OZUMAT_CHEST_NORMAL, -145.697f, 985.088f, 230.406f, 6.137f, 0, 0, 0, 0, 90000000))
+                                Chest->SetRespawnTime(Chest->GetRespawnDelay());
+                        }
                     break;
                 case DATA_FIRST_TUNNEL:
                     firstTunnel = true;
@@ -507,7 +526,7 @@ public:
                 }
         }
 
-        void UpdateAI(uint32 Diff)
+        void UpdateAI(uint32 const Diff) 
         {
             if (!m_phaseCounter)
             {
@@ -560,10 +579,47 @@ public:
     };
 };
 
+class npc_tot_teleporter : public CreatureScript
+{
+public:
+    npc_tot_teleporter() : CreatureScript("npc_tot_teleporter") { }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 Sender, uint32 action)
+    {
+        player->PlayerTalkClass->ClearMenus();
+
+        if (Sender != GOSSIP_SENDER_MAIN)
+            return true;
+        if (!player->getAttackers().empty())
+            return true;
+
+        switch (action)
+        {
+            case GOSSIP_ACTION_INFO_DEF+1:
+                player->TeleportTo(643, -566.13f, 813.483f, 244.924f, 6.18f);
+                player->CLOSE_GOSSIP_MENU();
+            break;
+        }
+        return true;
+    }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        InstanceScript* instance = creature->GetInstanceScript();
+
+        if (instance && instance->GetData(DATA_COMMANDER_ULTHOK_EVENT)==DONE)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport me to on top", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+
+        player->SEND_GOSSIP_MENU(2475, creature->GetGUID());
+        return true;
+    }
+};
+
 void AddSC_instance_throne_of_the_tides()
 {
     new instance_throne_of_the_tides();
     new at_tott_first_tunnel();
     new lady_nazjar_gauntlet();
     new GoHelloThroneDefenseSystem();
+    new npc_tot_teleporter();
 }

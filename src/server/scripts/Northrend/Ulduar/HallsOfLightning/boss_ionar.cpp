@@ -244,8 +244,8 @@ public:
                         uiSplitTimer = 25*IN_MILLISECONDS;
                         bIsSplitPhase = true;
 
-                        if (me->getVictim())
-                            me->GetMotionMaster()->MoveChase(me->getVictim());
+                        if (me->GetVictim())
+                            me->GetMotionMaster()->MoveChase(me->GetVictim());
                     }
                 }
                 else

@@ -92,7 +92,7 @@ class boss_emalon : public CreatureScript
 
                 // AttackStart has NULL-check for victim
                 if (summoned->AI())
-                    summoned->AI()->AttackStart(me->getVictim());
+                    summoned->AI()->AttackStart(me->GetVictim());
             }
 
             void EnterCombat(Unit* who)
@@ -102,7 +102,7 @@ class boss_emalon : public CreatureScript
                     for (std::list<uint64>::const_iterator itr = summons.begin(); itr != summons.end(); ++itr)
                     {
                         Creature* minion = Unit::GetCreature(*me, *itr);
-                        if (minion && minion->isAlive() && !minion->getVictim() && minion->AI())
+                        if (minion && minion->isAlive() && !minion->GetVictim() && minion->AI())
                             minion->AI()->AttackStart(who);
                     }
                 }
@@ -210,7 +210,7 @@ class mob_tempest_minion : public CreatureScript
 
                 if (Creature* pEmalon = Unit::GetCreature(*me, instance ? instance->GetData64(DATA_EMALON) : 0))
                 {
-                    if (!pEmalon->getVictim() && pEmalon->AI())
+                    if (!pEmalon->GetVictim() && pEmalon->AI())
                         pEmalon->AI()->AttackStart(who);
                 }
             }

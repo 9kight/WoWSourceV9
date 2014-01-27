@@ -320,7 +320,7 @@ public:
                 DoCast(me, SPELL_HEAD, false);
                 SaySound(SAY_LOST_HEAD);
                 me->GetMotionMaster()->Clear(false);
-                me->GetMotionMaster()->MoveFleeing(caster->getVictim());
+                me->GetMotionMaster()->MoveFleeing(caster->GetVictim());
             }
         }
 
@@ -332,10 +332,10 @@ public:
                 if (wait <= diff)
                 {
                     wait = 1000;
-                    if (!me->getVictim())
+                    if (!me->GetVictim())
                         return;
                     me->GetMotionMaster()->Clear(false);
-                    me->GetMotionMaster()->MoveFleeing(me->getVictim());
+                    me->GetMotionMaster()->MoveFleeing(me->GetVictim());
                 }
                 else wait -= diff;
 
@@ -434,7 +434,7 @@ public:
 
                 headGUID = 0;
             }
-
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
             //if (instance)
             //    instance->SetData(DATA_HORSEMAN_EVENT, NOT_STARTED);
         }
@@ -444,6 +444,7 @@ public:
             me->SetVisible(false);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->AddUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY);
+            me->SetCanFly(true);
             me->SetSpeed(MOVE_WALK, 5.0f, true);
             wp_reached = false;
             count = 0;
@@ -467,7 +468,10 @@ public:
                 case 1:
                 {
                     if (Creature* smoke = me->SummonCreature(HELPER, Spawn[1].x, Spawn[1].y, Spawn[1].z, 0, TEMPSUMMON_TIMED_DESPAWN, 20000))
-                        CAST_AI(mob_wisp_invis::mob_wisp_invisAI, smoke->AI())->SetType(3);
+                    {
+                    if (Creature* wisp = me->FindNearestCreature(WISP_INVIS, 200.0f, true))
+                        CAST_AI(mob_wisp_invis::mob_wisp_invisAI, wisp->AI())->SetType(3);
+                    }
                     DoCast(me, SPELL_RHYME_BIG);
                     break;
                 }
@@ -477,6 +481,7 @@ public:
                     break;
                 case 19:
                     me->RemoveUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY);
+                    me->SetCanFly(false);
                     break;
                 case 20:
                 {
@@ -544,7 +549,7 @@ public:
 
             std::list<Player*> temp;
             for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                if ((me->IsWithinLOSInMap(i->getSource()) || !checkLoS) && me->getVictim() != i->getSource() &&
+                if ((me->IsWithinLOSInMap(i->getSource()) || !checkLoS) && me->GetVictim() != i->getSource() &&
                     me->IsWithinDistInMap(i->getSource(), range) && i->getSource()->isAlive())
                     temp.push_back(i->getSource());
 
@@ -570,14 +575,19 @@ public:
             SaySound(SAY_DEATH);
             if (Creature* flame = DoSpawnCreature(HELPER, 0, 0, 0, 0, TEMPSUMMON_TIMED_DESPAWN, 60000))
                 flame->CastSpell(flame, SPELL_BODY_FLAME, false);
-            if (Creature* wisp = DoSpawnCreature(WISP_INVIS, 0, 0, 0, 0, TEMPSUMMON_TIMED_DESPAWN, 60000))
-                CAST_AI(mob_wisp_invis::mob_wisp_invisAI, wisp->AI())->SetType(4);
             if (instance)
                 instance->SetData(DATA_HORSEMAN_EVENT, DONE);
 
-            Map::PlayerList const& players = me->GetMap()->GetPlayers();
-            if (!players.isEmpty())
-                sLFGMgr->FinishDungeon(players.begin()->getSource()->GetGroup()->GetGUID(), 285);
+                Map* map = me->GetMap();
+                if (map && map->IsDungeon())
+                {
+                    Map::PlayerList const& players = map->GetPlayers();
+                    if (!players.isEmpty())
+                        for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
+                            if (Player* player = i->getSource())
+                                if (player->GetDistance(me) < 120.0f)
+                                    sLFGMgr->RewardDungeonDoneFor(285, player);
+            }
         }
 
         void SpellHit(Unit* caster, const SpellInfo* spell)
@@ -692,7 +702,10 @@ public:
                         if (burn <= diff)
                         {
                             if (Creature* flame = me->SummonCreature(HELPER, Spawn[0].x, Spawn[0].y, Spawn[0].z, 0, TEMPSUMMON_TIMED_DESPAWN, 17000))
-                                CAST_AI(mob_wisp_invis::mob_wisp_invisAI, flame->AI())->SetType(2);
+                            {
+                                if (Creature* wisp = me->FindNearestCreature(WISP_INVIS, 200.0f, true))
+                                    CAST_AI(mob_wisp_invis::mob_wisp_invisAI, wisp->AI())->SetType(2);
+                            }
                             burned = true;
                         }
                         else burn -= diff;
@@ -805,7 +818,6 @@ public:
             {
                 debuff->SetDisplayId(me->GetDisplayId());
                 debuff->CastSpell(debuff, SPELL_PUMPKIN_AURA_GREEN, false);
-                CAST_AI(mob_wisp_invis::mob_wisp_invisAI, debuff->AI())->SetType(1);
                 debuffGUID = debuff->GetGUID();
             }
             sprouted = false;
@@ -825,7 +837,7 @@ public:
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
                 DoCast(me, SPELL_SPROUT_BODY, true);
                 me->UpdateEntry(PUMPKIN_FIEND);
-                DoStartMovement(me->getVictim());
+                DoStartMovement(me->GetVictim());
             }
         }
 
@@ -850,7 +862,7 @@ public:
 
         void MoveInLineOfSight(Unit* who)
         {
-            if (!who || !me->IsValidAttackTarget(who) || me->getVictim())
+            if (!who || !me->IsValidAttackTarget(who) || me->GetVictim())
                 return;
 
             me->AddThreat(who, 0.0f);

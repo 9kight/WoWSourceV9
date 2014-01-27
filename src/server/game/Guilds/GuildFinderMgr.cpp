@@ -183,8 +183,6 @@ void GuildFinderMgr::RemoveMembershipRequest(uint32 playerId, uint32 guildId)
 
     CharacterDatabase.CommitTransaction(trans);
 
-    _membershipRequests[guildId].erase(itr);
-
     // Notify the applicant his submittion has been removed
     if (Player* player = ObjectAccessor::FindPlayer(MAKE_NEW_GUID(playerId, 0, HIGHGUID_PLAYER)))
         SendMembershipRequestListUpdate(*player);
@@ -192,6 +190,8 @@ void GuildFinderMgr::RemoveMembershipRequest(uint32 playerId, uint32 guildId)
     // Notify the guild master and officers the list changed
     if (Guild* guild = sGuildMgr->GetGuildById(guildId))
         SendApplicantListUpdate(*guild);
+
+    ++itr;
 }
 
 std::list<MembershipRequest> GuildFinderMgr::GetAllMembershipRequestsForPlayer(uint32 playerGuid)
@@ -301,12 +301,11 @@ void GuildFinderMgr::DeleteGuild(uint32 guildId)
         trans->Append(stmt);
 
         CharacterDatabase.CommitTransaction(trans);
+        _membershipRequests[guildId].erase(itr);
 
         // Notify the applicant his submition has been removed
         if (Player* player = ObjectAccessor::FindPlayer(MAKE_NEW_GUID(applicant, 0, HIGHGUID_PLAYER)))
             SendMembershipRequestListUpdate(*player);
-
-        ++itr;
     }
 
     SQLTransaction trans = CharacterDatabase.BeginTransaction();

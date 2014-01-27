@@ -641,6 +641,16 @@ void Vehicle::RelocatePassengers()
     }
 }
 
+void Vehicle::Dismiss()
+{
+    if (GetBase()->GetTypeId() != TYPEID_UNIT)
+        return;
+
+    sLog->outDebug(LOG_FILTER_VEHICLES, "Vehicle::Dismiss Entry: %u, GuidLow %u", _creatureEntry, _me->GetGUIDLow());
+    Uninstall();
+    GetBase()->ToCreature()->DespawnOrUnsummon();
+}
+
 /**
  * @fn bool Vehicle::IsVehicleInUse() const
  *
@@ -760,6 +770,42 @@ void Vehicle::CalculatePassengerPosition(float& x, float& y, float& z, float& o)
     x = GetBase()->GetPositionX() + inx * std::cos(GetBase()->GetOrientation()) - iny * std::sin(GetBase()->GetOrientation());
     y = GetBase()->GetPositionY() + iny * std::cos(GetBase()->GetOrientation()) + inx * std::sin(GetBase()->GetOrientation());
     z = GetBase()->GetPositionZ() + inz;
+}
+
+void Vehicle::TeleportVehicle(float x, float y, float z, float o)
+{
+    if (!IsVehicleInUse() || !GetBase()->isAlive())
+        return;
+
+    std::list<PlayerSeatSave> players;
+
+    for (SeatMap::const_iterator itr = Seats.begin(); itr != Seats.end(); ++itr)
+    {
+        uint64 guid = itr->second.Passenger;
+        Player* player = GetBase()->GetPlayer(guid);
+
+        if (player && player->IsInWorld() && player->isAlive())
+        {
+            PlayerSeatSave pss;
+            pss.player = player;
+            pss.seatId = itr->first;
+            player->ExitVehicle();
+        }
+    }
+
+    if (players.empty())
+        return;
+
+    GetBase()->NearTeleportTo(x, y, z, o, false);
+
+    for (std::list<PlayerSeatSave>::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+    {
+        if (!itr->player->IsInWorld() || !itr->player->isAlive())
+            continue;
+
+        itr->player->TeleportTo(GetBase()->GetMapId(), x, y, z, o, 0);
+        itr->player->EnterVehicle(GetBase(), itr->seatId);
+    }
 }
 
 void Vehicle::CalculatePassengerOffset(float& x, float& y, float& z, float& o)

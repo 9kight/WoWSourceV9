@@ -95,7 +95,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
         if (player->GetQuestStatus(7785) == QUEST_STATUS_NONE &&
@@ -205,7 +205,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
         if (player->GetQuestStatus(8304) == QUEST_STATUS_INCOMPLETE &&
@@ -1505,6 +1505,10 @@ class go_wind_stone : public GameObjectScript
 
 void AddSC_silithus()
 {
+    new go_crystalline_tear();
+    new npc_anachronos_quest_trigger();
+    new npc_anachronos_the_ancient();
+    new mob_qiraj_war_spawn();
     new npc_highlord_demitrian();
     new npcs_rutgar_and_frankal();
     new go_wind_stone();

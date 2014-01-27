@@ -96,11 +96,11 @@ public:
                 }
                 else Reset_Timer -= diff;
 
-                if (me->isInCombat() && me->getVictim())
+                if (me->isInCombat() && me->GetVictim())
                 {
-                    if (me->getVictim()->GetTypeId() == TYPEID_PLAYER)
+                    if (me->GetVictim()->GetTypeId() == TYPEID_PLAYER)
                     {
-                        Unit* victim = me->getVictim();
+                        Unit* victim = me->GetVictim();
                         if (CAST_PLR(victim)->GetTeam() == HORDE)
                         {
                             me->CombatStop();

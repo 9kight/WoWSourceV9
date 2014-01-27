@@ -102,9 +102,9 @@ public:
                 if (Adds_Timer <= diff)
                 {
                     // summon 3 Adds every 25s
-                    SummonAdds(me->getVictim());
-                    SummonAdds(me->getVictim());
-                    SummonAdds(me->getVictim());
+                    SummonAdds(me->GetVictim());
+                    SummonAdds(me->GetVictim());
+                    SummonAdds(me->GetVictim());
 
                     Adds_Timer = 25000;
                 } else Adds_Timer -= diff;
@@ -113,8 +113,8 @@ public:
             //Summon Medics
             if (!Medics && HealthBelowPct(21))
             {
-                SummonMedics(me->getVictim());
-                SummonMedics(me->getVictim());
+                SummonMedics(me->GetVictim());
+                SummonMedics(me->GetVictim());
                 Medics = true;
             }
 

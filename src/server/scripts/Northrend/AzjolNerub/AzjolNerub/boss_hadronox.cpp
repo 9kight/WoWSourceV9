@@ -128,7 +128,7 @@ public:
                 uiCheckDistanceTimer -= uiDiff;
                 return;
             }
-            if (me->IsInEvadeMode() || !me->getVictim())
+            if (me->IsInEvadeMode() || !me->GetVictim())
                 return;
             if (me->GetDistance(x, y, z) > dist)
                 EnterEvadeMode();

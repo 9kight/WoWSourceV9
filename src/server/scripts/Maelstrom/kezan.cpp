@@ -1221,7 +1221,7 @@ public:
     {
         if (player->GetQuestStatus(14126) != QUEST_STATUS_NONE)
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Yes, I want to go there!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-        else if (creature->isQuestGiver())
+        else if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
         player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
         return true;

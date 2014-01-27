@@ -508,6 +508,8 @@ enum UnitState
     UNIT_STATE_CHASE_MOVE      = 0x04000000,
     UNIT_STATE_FOLLOW_MOVE     = 0x08000000,
     UNIT_STATE_IGNORE_PATHFINDING = 0x10000000,                 // do not use pathfinding in any MovementGenerator
+    UNIT_STATE_IGNORE_UNATTACKABLE = 0x20000000,                // Force allow attack target with flag: UNIT_STATE_UNATTACKABLE
+    UNIT_STATE_IGNORE_LOS      = 0x40000000,
     UNIT_STATE_UNATTACKABLE    = (UNIT_STATE_IN_FLIGHT | UNIT_STATE_ONVEHICLE),
     // for real move using movegen check and stop (except unstoppable flight)
     UNIT_STATE_MOVING          = UNIT_STATE_ROAMING_MOVE | UNIT_STATE_CONFUSED_MOVE | UNIT_STATE_FLEEING_MOVE | UNIT_STATE_CHASE_MOVE | UNIT_STATE_FOLLOW_MOVE,
@@ -903,6 +905,7 @@ private:
     Unit* const _actor;
     Unit* const _actionTarget;
     Unit* const _procTarget;
+    SpellInfo const* const _spellInfo;
     uint32 _typeMask;
     uint32 _spellTypeMask;
     uint32 _spellPhaseMask;
@@ -911,7 +914,7 @@ private:
     DamageInfo* _damageInfo;
     HealInfo* _healInfo;
 public:
-    explicit ProcEventInfo(Unit* actor, Unit* actionTarget, Unit* procTarget, uint32 typeMask, uint32 spellTypeMask, uint32 spellPhaseMask, uint32 hitMask, Spell* spell, DamageInfo* damageInfo, HealInfo* healInfo);
+    explicit ProcEventInfo(Unit* actor, Unit* actionTarget, Unit* procTarget, uint32 typeMask, uint32 spellTypeMask, uint32 spellPhaseMask, uint32 hitMask, Spell* spell, DamageInfo* damageInfo, HealInfo* healInfo, SpellInfo const* spellInfo = NULL);
     Unit* GetActor() { return _actor; };
     Unit* GetActionTarget() const { return _actionTarget; }
     Unit* GetProcTarget() const { return _procTarget; }
@@ -919,8 +922,8 @@ public:
     uint32 GetSpellTypeMask() const { return _spellTypeMask; }
     uint32 GetSpellPhaseMask() const { return _spellPhaseMask; }
     uint32 GetHitMask() const { return _hitMask; }
-    SpellInfo const* GetSpellInfo() const { return NULL; }
-    SpellSchoolMask GetSchoolMask() const { return SPELL_SCHOOL_MASK_NONE; }
+    SpellInfo const* GetSpellInfo() const { return _spellInfo; }
+    SpellSchoolMask GetSchoolMask() const;
     DamageInfo* GetDamageInfo() const { return _damageInfo; }
     HealInfo* GetHealInfo() const { return _healInfo; }
 };
@@ -1325,8 +1328,8 @@ class Unit : public WorldObject
         }
         Unit* getAttackerForHelper() const                 // If someone wants to help, who to give them
         {
-            if (getVictim() != NULL)
-                return getVictim();
+            if (GetVictim() != NULL)
+                return GetVictim();
 
             if (!m_attackers.empty())
                 return *(m_attackers.begin());
@@ -1339,7 +1342,7 @@ class Unit : public WorldObject
         void RemoveAllAttackers();
         AttackerSet const& getAttackers() const { return m_attackers; }
         bool isAttackingPlayer() const;
-        Unit* getVictim() const { return m_attacking; }
+        Unit* GetVictim() const { return m_attacking; }
 
         void CombatStop(bool includingCast = false);
         void CombatStopWithPets(bool includingCast = false);
@@ -1412,6 +1415,8 @@ class Unit : public WorldObject
         // returns the change in power
         int32 ModifyPower(Powers power, int32 val);
         int32 ModifyPowerPct(Powers power, float pct, bool apply = true);
+
+        int32 GetHolyPoints() const;
 
         void ResetAllPowers();
 
@@ -1497,6 +1502,8 @@ class Unit : public WorldObject
         void TriggerAurasProcOnEvent(ProcEventInfo& eventInfo, std::list<AuraApplication*>& procAuras);
 
         void HandleEmoteCommand(uint32 anim_id);
+		void HandleEmote(uint32 emote_id);
+		void HandleEmoteState(uint32 emote_id);
         void AttackerStateUpdate (Unit* victim, WeaponAttackType attType = BASE_ATTACK, bool extra = false);
 
         void CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* damageInfo, WeaponAttackType attackType = BASE_ATTACK);
@@ -1542,21 +1549,21 @@ class Unit : public WorldObject
         MeleeHitOutcome RollMeleeOutcomeAgainst (const Unit* victim, WeaponAttackType attType) const;
         MeleeHitOutcome RollMeleeOutcomeAgainst (const Unit* victim, WeaponAttackType attType, int32 crit_chance, int32 miss_chance, int32 dodge_chance, int32 parry_chance, int32 block_chance) const;
 
-        bool isVendor()       const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR); }
-        bool isTrainer()      const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER); }
-        bool isQuestGiver()   const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER); }
-        bool isGossip()       const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP); }
-        bool isTaxi()         const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_FLIGHTMASTER); }
-        bool isGuildMaster()  const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PETITIONER); }
-        bool isBattleMaster() const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BATTLEMASTER); }
-        bool isBanker()       const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BANKER); }
-        bool isInnkeeper()    const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_INNKEEPER); }
-        bool isSpiritHealer() const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER); }
-        bool isSpiritGuide()  const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITGUIDE); }
-        bool isTabardDesigner()const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TABARDDESIGNER); }
-        bool isAuctioner()    const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_AUCTIONEER); }
-        bool isArmorer()      const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_REPAIR); }
-        bool isServiceProvider() const
+        bool IsVendor()       const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR); }
+        bool IsTrainer()      const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER); }
+        bool IsQuestGiver()   const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER); }
+        bool IsGossip()       const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP); }
+        bool IsTaxi()         const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_FLIGHTMASTER); }
+        bool IsGuildMaster()  const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PETITIONER); }
+        bool IsBattleMaster() const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BATTLEMASTER); }
+        bool IsBanker()       const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BANKER); }
+        bool IsInnkeeper()    const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_INNKEEPER); }
+        bool IsSpiritHealer() const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER); }
+        bool IsSpiritGuide()  const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITGUIDE); }
+        bool IsTabardDesigner()const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TABARDDESIGNER); }
+        bool IsAuctioner()    const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_AUCTIONEER); }
+        bool IsArmorer()      const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_REPAIR); }
+        bool IsServiceProvider() const
         {
             return HasFlag(UNIT_NPC_FLAGS,
                 UNIT_NPC_FLAG_VENDOR | UNIT_NPC_FLAG_TRAINER | UNIT_NPC_FLAG_FLIGHTMASTER |
@@ -1569,6 +1576,7 @@ class Unit : public WorldObject
         bool isInFlight()  const { return HasUnitState(UNIT_STATE_IN_FLIGHT); }
 
         bool isInCombat()  const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT); }
+        bool IsInCombat(Unit* target) const;
         void CombatStart(Unit* target, bool initialAggro = true);
         void SetInCombatState(bool PvP, Unit* enemy = NULL);
         void SetInCombatWith(Unit* enemy);
@@ -1638,6 +1646,7 @@ class Unit : public WorldObject
         void SendSpellDamageImmune(Unit* target, uint32 spellId);
 
         void NearTeleportTo(float x, float y, float z, float orientation, bool casting = false);
+        void NearTeleportTo(Position position, bool casting = false);
         void SendTeleportPacket(Position& pos);
         virtual bool UpdatePosition(float x, float y, float z, float ang, bool teleport = false);
         // returns true if unit's position really changed
@@ -1653,6 +1662,7 @@ class Unit : public WorldObject
         void MonsterMoveWithSpeed(float x, float y, float z, float speed, bool generatePath = false, bool forceDestination = false);
         //void SetFacing(float ori, WorldObject* obj = NULL);
         //void SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, uint32 MovementFlags, uint32 Time, Player* player = NULL);
+        void SendMovementFlagUpdate(bool self = false);
 
         /*! These methods send the same packet to the client in apply and unapply case.
             The client-side interpretation of this packet depends on the presence of relevant movementflags
@@ -1681,6 +1691,8 @@ class Unit : public WorldObject
         void SendClearThreatListOpcode();
         void SendRemoveFromThreatListOpcode(HostileReference* pHostileReference);
         void SendThreatListUpdate();
+
+        void BuildHeartBeatMsg(WorldPacket* data) const;
 
         void SendClearTarget();
 
@@ -2104,6 +2116,7 @@ class Unit : public WorldObject
 
         uint32 GetRemainingPeriodicAmount(uint64 caster, uint32 spellId, AuraType auraType, uint8 effectIndex = 0) const;
 
+        void ApplyUberImmune(uint32 spellid, bool apply);
         void ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply);
         void ApplySpellDispelImmunity(const SpellInfo* spellProto, DispelType type, bool apply);
         virtual bool IsImmunedToSpell(SpellInfo const* spellInfo, Unit* caster = NULL);
@@ -2136,6 +2149,7 @@ class Unit : public WorldObject
         void removeFollower(FollowerReference* /*pRef*/) { /* nothing to do yet */ }
         static Unit* GetUnit(WorldObject& object, uint64 guid);
         static Player* GetPlayer(WorldObject& object, uint64 guid);
+        static Player* GetPlayer(uint64 guid);
         static Creature* GetCreature(WorldObject& object, uint64 guid);
 
         MotionMaster* GetMotionMaster() { return &i_motionMaster; }
@@ -2248,6 +2262,7 @@ class Unit : public WorldObject
         // Should only be called by AuraEffect::HandleAuraControlVehicle(AuraApplication const* auraApp, uint8 mode, bool apply) const;
         void _ExitVehicle(Position const* exitPosition = NULL);
         void _EnterVehicle(Vehicle* vehicle, int8 seatId, AuraApplication const* aurApp = NULL);
+        void Rio_EnterVehicle(Vehicle* vehicle, int8 seatId);
 
         void BuildMovementPacket(ByteBuffer *data) const;
 
@@ -2308,6 +2323,11 @@ class Unit : public WorldObject
         typedef std::map<uint32, uint8> rowCastsMap;
         rowCastsMap _spellsCastedInRow;
         SpellInfo const* lastSpell;
+
+		//alt power 10
+        int32 alt;
+        int32 GetAltPower() {return alt;};
+        void SetAltPower(int32 power);
 
         inline Map const* GetBaseSwapMap() const { return _baseSwapMap; }
 

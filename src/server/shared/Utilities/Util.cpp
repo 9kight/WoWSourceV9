@@ -34,7 +34,7 @@ int32 irand(int32 min, int32 max)
 
 uint32 urand(uint32 min, uint32 max)
 {
-    ASSERT(max >= min);
+    //ASSERT(max >= min);
     return sfmtRand->URandom(min, max);
 }
 
@@ -136,7 +136,7 @@ std::string secsToTimeString(uint64 timeInSecs, bool shortText, bool hoursOnly)
 
     std::ostringstream ss;
     if (days)
-        ss << days << (shortText ? "d" : " Day(e) ");
+        ss << days << (shortText ? "d" : " Day(s) ");
     if (hours || hoursOnly)
         ss << hours << (shortText ? "h" : " Hour(s) ");
     if (!hoursOnly)

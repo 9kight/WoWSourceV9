@@ -239,7 +239,7 @@ public:
 
                         // the player wasn't able to move out of our range within 25 seconds
                         if (player->IsWithinDistInMap(me, RANGE_GUARDS_MARK))
-                            if (!lastSpawnedGuard->getVictim())
+                            if (!lastSpawnedGuard->GetVictim())
                             {
                                 lastSpawnedGuard->AI()->AttackStart(player);
                                 continue;
@@ -293,7 +293,7 @@ public:
                                 return;
 
                             // ROOFTOP only triggers if the player is on the ground
-                            if (!playerTarget->IsFlying() && !lastSpawnedGuard->getVictim())
+                            if (!playerTarget->IsFlying() && !lastSpawnedGuard->GetVictim())
                                 lastSpawnedGuard->AI()->AttackStart(playerTarget);
 
                             break;
@@ -1195,7 +1195,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
         bool canBuy = false;
@@ -1261,7 +1261,7 @@ public:
 
         if (canBuy)
         {
-            if (creature->isVendor())
+            if (creature->IsVendor())
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
             player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
         }
@@ -1293,10 +1293,10 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
-        if (creature->isTrainer())
+        if (creature->IsTrainer())
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, GOSSIP_TEXT_TRAIN, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRAIN);
 
         if (creature->isCanTrainingAndResetTalentsOf(player))
@@ -1399,7 +1399,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
         if (player->HasSpellCooldown(SPELL_INT) ||
@@ -1666,7 +1666,7 @@ public:
             me->SetStatFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER, float(Info->attackpower));
 
             // Start attacking attacker of owner on first ai update after spawn - move in line of sight may choose better target
-            if (!me->getVictim() && me->isSummon())
+            if (!me->GetVictim() && me->isSummon())
                 if (Unit* Owner = me->ToTempSummon()->GetSummoner())
                     if (Owner->getAttackerForHelper())
                         AttackStart(Owner->getAttackerForHelper());
@@ -1675,7 +1675,7 @@ public:
         //Redefined for random target selection:
         void MoveInLineOfSight(Unit* who)
         {
-            if (!me->getVictim() && me->canCreatureAttack(who))
+            if (!me->GetVictim() && me->canCreatureAttack(who))
             {
                 if (me->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
                     return;
@@ -1698,7 +1698,7 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (me->getVictim()->HasBreakableByDamageCrowdControlAura(me))
+            if (me->GetVictim()->HasBreakableByDamageCrowdControlAura(me))
             {
                 me->InterruptNonMeleeSpells(false);
                 return;
@@ -2404,52 +2404,36 @@ public:
 /*######
 # npc_shadowfiend
 ######*/
-enum Shadowfiend
+#define GLYPH_OF_SHADOWFIEND_MANA         58227
+#define GLYPH_OF_SHADOWFIEND              58228
+#define SHADOW_LEECH                      28305
+
+class npc_shadowfiend : public CreatureScript
 {
-    MANA_LEECH                       = 28305,
-    GLYPH_OF_SHADOWFIEND_MANA        = 58227,
-    GLYPH_OF_SHADOWFIEND             = 58228
-};
+    public:
+        npc_shadowfiend() : CreatureScript("npc_shadowfiend") { }
 
- class npc_shadowfiend : public CreatureScript
- {
-public:
-    npc_shadowfiend() : CreatureScript("npc_shadowfiend") { }
-
-    struct npc_shadowfiendAI : public ScriptedAI
-    {
-        npc_shadowfiendAI(Creature* creature) : ScriptedAI(creature) {}
-
-        void Reset()
-         {
-            if (me->isSummon())
-                if (Unit* owner = me->ToTempSummon()->GetSummoner())
-                    if (Unit* pet = owner->GetGuardianPet())
-                        pet->CastSpell(pet, MANA_LEECH, true);
-		}
-		
-        void DamageTaken(Unit* /*killer*/, uint32& damage)
+        struct npc_shadowfiendAI : public PetAI
         {
-            if (me->isSummon())
-                if (Unit* owner = me->ToTempSummon()->GetSummoner())
-                    if (owner->HasAura(GLYPH_OF_SHADOWFIEND) && damage >= me->GetHealth())
-                        owner->CastSpell(owner, GLYPH_OF_SHADOWFIEND_MANA, true);
+            npc_shadowfiendAI(Creature* creature) : PetAI(creature)
+            {
+                DoCast(me, SHADOW_LEECH, true);
+            }
+
+            void JustDied(Unit* /*killer*/)
+            {
+                if (me->isSummon())
+                    if (Unit* owner = me->ToTempSummon()->GetSummoner())
+                        if (owner->HasAura(GLYPH_OF_SHADOWFIEND))
+                            owner->CastSpell(owner, GLYPH_OF_SHADOWFIEND_MANA, true);
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_shadowfiendAI(creature);
         }
-
-        void UpdateAI_MANA_LEECH(uint32 const /*diff*/)
-         {
-            if (!UpdateVictim())
-                return;
-
-            DoMeleeAttackIfReady();
-        }
-    };
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_shadowfiendAI(creature);
-    }
- };
+};
 
 /*######
 # npc_fire_elemental
@@ -2700,7 +2684,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
         if (player->getClass() == CLASS_HUNTER)
@@ -3366,6 +3350,8 @@ public:
 
            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
            me->SetReactState(REACT_PASSIVE);
+           me->AddUnitState(UNIT_STATE_ROOT);
+           me->StopMoving();
 
            me->CastSpell(me, 85526, true);
 

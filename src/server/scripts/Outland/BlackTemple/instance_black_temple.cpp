@@ -28,7 +28,6 @@ EndScriptData */
 #include "black_temple.h"
 #include "Player.h"
 
-#define MAX_ENCOUNTER      9
 
 /* Black Temple encounters:
 0 - High Warlord Naj'entus event
@@ -56,7 +55,7 @@ public:
     {
         instance_black_temple_InstanceMapScript(Map* map) : InstanceScript(map) {}
 
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
+        uint32 m_auiEncounter[EncounterCount];
         std::string str_data;
 
         uint64 Najentus;
@@ -89,37 +88,37 @@ public:
         {
             memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 
-            Najentus = 0;
-            Akama = 0;
-            Akama_Shade = 0;
-            ShadeOfAkama = 0;
-            Supremus = 0;
-            LadyMalande = 0;
-            GathiosTheShatterer = 0;
-            HighNethermancerZerevor = 0;
-            VerasDarkshadow = 0;
-            IllidariCouncil = 0;
-            BloodElfCouncilVoice = 0;
-            IllidanStormrage = 0;
+            Najentus                     = 0;
+            Akama                         = 0;
+            Akama_Shade                 = 0;
+            ShadeOfAkama                 = 0;
+            Supremus                     = 0;
+            LadyMalande                 = 0;
+            GathiosTheShatterer         = 0;
+            HighNethermancerZerevor     = 0;
+            VerasDarkshadow             = 0;
+            IllidariCouncil             = 0;
+            BloodElfCouncilVoice         = 0;
+            IllidanStormrage             = 0;
 
-            NajentusGate    = 0;
-            MainTempleDoors = 0;
-            ShadeOfAkamaDoor= 0;
-            CommonDoor              = 0;//teron
-            TeronDoor               = 0;
-            GuurtogDoor             = 0;
-            MotherDoor              = 0;
-            TempleDoor              = 0;
-            SimpleDoor              = 0;//Bycouncil
-            CouncilDoor             = 0;
-            IllidanGate     = 0;
-            IllidanDoor[0]  = 0;
-            IllidanDoor[1]  = 0;
+            NajentusGate                = 0;
+            MainTempleDoors             = 0;
+            ShadeOfAkamaDoor            = 0;
+            CommonDoor                  = 0;//teron
+            TeronDoor                   = 0;
+            GuurtogDoor                 = 0;
+            MotherDoor                  = 0;
+            TempleDoor                  = 0;
+            SimpleDoor                  = 0;//Bycouncil
+            CouncilDoor                 = 0;
+            IllidanGate                 = 0;
+            IllidanDoor[0]              = 0;
+            IllidanDoor[1]              = 0;
         }
 
         bool IsEncounterInProgress() const
         {
-            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+            for (uint8 i = 0; i < EncounterCount; ++i)
                 if (m_auiEncounter[i] == IN_PROGRESS)
                     return true;
 
@@ -386,7 +385,7 @@ public:
             >> m_auiEncounter[3] >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6]
             >> m_auiEncounter[7] >> m_auiEncounter[8];
 
-            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+            for (uint8 i = 0; i < EncounterCount; ++i)
                 if (m_auiEncounter[i] == IN_PROGRESS)
                     m_auiEncounter[i] = NOT_STARTED;
 

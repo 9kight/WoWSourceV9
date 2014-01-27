@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /** \file
     \ingroup Trinityd
 */
@@ -109,8 +127,9 @@ int Master::Run()
     sLog->outInfo(LOG_FILTER_WORLDSERVER, "%s (worldserver-daemon)", _FULLVERSION);
     sLog->outInfo(LOG_FILTER_WORLDSERVER, "<Ctrl-C> to stop.\n");
 
-    sLog->outInfo(LOG_FILTER_WORLDSERVER, "New Core rev.7");
-    sLog->outInfo(LOG_FILTER_WORLDSERVER, "http://wowsource.info/ ");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "WoWSource 2013-2014");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "Visit our forum www.wowsource.info");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "Oficial WoWSource v8 patch 4.3.4");
 
     /// worldserver PID file creation
     std::string pidfile = ConfigMgr::GetStringDefault("PidFile", "");

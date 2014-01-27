@@ -135,6 +135,22 @@ void MotionMaster::DirectClean(bool reset)
         top()->Reset(_owner);
 }
 
+void MotionMaster::ResetMovement(bool moveHome /*= true*/)
+{
+    if (Creature* me = _owner->ToCreature())
+    {
+        me->StopMoving();
+        me->UpdateWaypointID(0);
+        me->LoadPath(0);
+        me->SetDefaultMovementType(IDLE_MOTION_TYPE);
+        if (moveHome && !_owner->IsVehicle())
+        {
+            me->GetMotionMaster()->MoveTargetedHome();
+            me->GetMotionMaster()->Initialize();
+        }
+    }
+}
+
 void MotionMaster::DelayedClean()
 {
     while (size() > 1)
@@ -195,9 +211,16 @@ void MotionMaster::MoveRandom(float spawndist)
     }
 }
 
-void MotionMaster::MoveTargetedHome()
+void MotionMaster::MoveTargetedHome(bool withdelay)
 {
     Clear(false);
+    if (withdelay)
+    {
+        _owner->ClearUnitState(uint32(UNIT_STATE_ALL_STATE & ~UNIT_STATE_EVADE));
+        _owner->StopMoving();
+        _owner->m_Events.AddEvent(new MoveHomeEvent(this),_owner->m_Events.CalculateTime(1000));
+        return;
+    }
 
     if (_owner->GetTypeId() == TYPEID_UNIT && !_owner->ToCreature()->GetCharmerOrOwnerGUID())
     {
@@ -283,6 +306,7 @@ void MotionMaster::MoveFollow(Unit* target, float dist, float angle, MovementSlo
         Mutate(new FollowMovementGenerator<Creature>(target, dist, angle, spellId), slot);
     }
 }
+
 
 void MotionMaster::MovePoint(uint32 id, float x, float y, float z, bool generatePath)
 {

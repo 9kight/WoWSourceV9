@@ -589,7 +589,7 @@ enum SpecialSurprise
     SAY_EXEC_WAITING            = 52,
     EMOTE_DIES                  = 53,
 
-	//Cataclysm
+    //Cataclysm
     SAY_EXEC_START_4            = 54, //-1609079, // Cataclysm: Goblin
     SAY_EXEC_PROG_8             = 55, //-1609180, // Cataclysm: Goblin
     SAY_EXEC_NOREM_10           = 56, //-1609181, // Cataclysm: Goblin
@@ -673,14 +673,14 @@ public:
                     if (player->GetQuestStatus(12746) == QUEST_STATUS_INCOMPLETE)
                         return true;
                     break;
-			    case 49355:
-					if (player->GetQuestStatus(28649) == QUEST_STATUS_INCOMPLETE)
-						return true;
-					break;
-				case 49356:
-					if (player->GetQuestStatus(28650) == QUEST_STATUS_INCOMPLETE)
-						return true;
-					break;
+                case 49355:
+                    if (player->GetQuestStatus(28649) == QUEST_STATUS_INCOMPLETE)
+                        return true;
+                    break;
+                case 49356:
+                    if (player->GetQuestStatus(28650) == QUEST_STATUS_INCOMPLETE)
+                        return true;
+                    break;
             }
 
             return false;
@@ -697,7 +697,7 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if (PlayerGUID && !me->getVictim() && me->isAlive())
+            if (PlayerGUID && !me->GetVictim() && me->isAlive())
             {
                 if (ExecuteSpeech_Timer <= diff)
                 {
@@ -1013,7 +1013,7 @@ public:
                                     return;
                             }
                             break;
-						case RACE_WORGEN:
+                        case RACE_WORGEN:
                             switch (ExecuteSpeech_Counter)
                             {
                                 case 0: Talk(SAY_EXEC_START_1, player->GetGUID()); break;
@@ -1043,7 +1043,7 @@ public:
                                     return;
                             }
                             break;
-						case RACE_GOBLIN:
+                        case RACE_GOBLIN:
                             switch (ExecuteSpeech_Counter)
                             {
                                 case 0: Talk(SAY_EXEC_START_1, player->GetGUID()); break;

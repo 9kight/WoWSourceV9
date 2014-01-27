@@ -199,13 +199,13 @@ public:
         return true;
     }
 
-    static bool HandleServerShutDownCommand(ChatHandler* /*handler*/, char const* args)
+    static bool HandleServerShutDownCommand(ChatHandler* handler, char const* args)
     {
         if (!*args)
             return false;
 
         char* timeStr = strtok((char*) args, " ");
-        char* exitCodeStr = strtok(NULL, "");
+        char* reason = strtok(NULL, "\r");
 
         int32 time = atoi(timeStr);
 
@@ -213,8 +213,9 @@ public:
         if ((time == 0 && (timeStr[0] != '0' || timeStr[1] != '\0')) || time < 0)
             return false;
 
-        if (exitCodeStr)
+        if (!handler->GetSession())
         {
+            char* exitCodeStr = strtok(NULL, "");
             int32 exitCode = atoi(exitCodeStr);
 
             // Handle atoi() errors
@@ -230,9 +231,18 @@ public:
             sWorld->ShutdownServ(time, 0, exitCode);
         }
         else
-            sWorld->ShutdownServ(time, 0, SHUTDOWN_EXIT_CODE);
+        {
+            if (reason != NULL)
+            {
+                std::string reasonStr = reason;
+                reasonStr = "[|cffff0000" + reasonStr + "|r]"; // PWS uses here RED
 
-        return true;
+                sWorld->SetShutdownMessage(reasonStr);
+            }
+            sWorld->ShutdownServ(time, 0, SHUTDOWN_EXIT_CODE);
+         }
+
+         return true;
     }
 
     static bool HandleServerRestartCommand(ChatHandler* /*handler*/, char const* args)

@@ -29,10 +29,12 @@ private:
     ~GuildMgr();
 
 public:
+    typedef UNORDERED_MAP<uint32, Guild*> GuildContainer;
+
     Guild* GetGuildByLeader(uint64 guid) const;
     Guild* GetGuildById(uint32 guildId) const;
     Guild* GetGuildByGuid(uint64 guid) const;
-    Guild* GetGuildByName(std::string const& guildName) const;
+    Guild* GetGuildByName(const std::string& guildName) const;
     std::string GetGuildNameById(uint32 guildId) const;
 
     void LoadGuildXpForLevel();
@@ -54,7 +56,6 @@ public:
 
     void ResetTimes(bool week);
 protected:
-    typedef UNORDERED_MAP<uint32, Guild*> GuildContainer;
     uint32 NextGuildId;
     GuildContainer GuildStore;
     std::vector<uint64> GuildXPperLevel;

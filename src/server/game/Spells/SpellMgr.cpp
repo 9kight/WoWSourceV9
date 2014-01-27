@@ -73,6 +73,8 @@ std::list<DiminishingGroup> GetDiminishingReturnsGroupForSpell(SpellInfo const* 
     {
         case SPELLFAMILY_GENERIC:
         {
+            if (spellproto->Mechanic == MECHANIC_TURN || spellproto->Id == 90479)
+                temp.push_back(DIMINISHING_NONE);
             // Pet charge effects (Infernal Awakening, Demon Charge)
             if (spellproto->SpellVisual[0] == 2816 && spellproto->SpellIconID == 15)
                 temp.push_back(DIMINISHING_CONTROLLED_STUN);
@@ -1593,17 +1595,6 @@ void SpellMgr::LoadSpellTargetPositions()
         {
             if (spellInfo->Effects[i].TargetA.GetTarget() == TARGET_DEST_DB || spellInfo->Effects[i].TargetB.GetTarget() == TARGET_DEST_DB)
             {
-                // additional requirements
-                if (spellInfo->Effects[i].Effect == SPELL_EFFECT_BIND && spellInfo->Effects[i].MiscValue)
-                {
-                    uint32 area_id = sMapMgr->GetAreaId(st.target_mapId, st.target_X, st.target_Y, st.target_Z);
-                    if (area_id != uint32(spellInfo->Effects[i].MiscValue))
-                    {
-                        sLog->outError(LOG_FILTER_SQL, "Spell (Id: %u) listed in `spell_target_position` expected point to zone %u bit point to zone %u.", Spell_ID, spellInfo->Effects[i].MiscValue, area_id);
-                        break;
-                    }
-                }
-
                 found = true;
                 break;
             }
@@ -2683,20 +2674,16 @@ void SpellMgr::LoadSpellInfoStore()
 void SpellMgr::UnloadSpellInfoStore()
 {
     for (uint32 i = 0; i < mSpellInfoMap.size(); ++i)
-    {
-        if (mSpellInfoMap[i])
-            delete mSpellInfoMap[i];
-    }
+        delete mSpellInfoMap[i];
+
     mSpellInfoMap.clear();
 }
 
 void SpellMgr::UnloadSpellInfoImplicitTargetConditionLists()
 {
     for (uint32 i = 0; i < mSpellInfoMap.size(); ++i)
-    {
         if (mSpellInfoMap[i])
             mSpellInfoMap[i]->_UnloadImplicitTargetConditionLists();
-    }
 }
 
 void SpellMgr::LoadSpellCustomAttr()
@@ -2980,12 +2967,13 @@ void SpellMgr::LoadSpellCustomAttr()
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
                 break;
             case 72293: // Mark of the Fallen Champion (Deathbringer Saurfang)
+            case 92685: // Atramedes - Pestered
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE_EFF0;
                 break;
             case 88667: // Holy Word: Sanctuary 3yd Dummy
                 spellInfo->SpellFamilyName = SPELLFAMILY_PRIEST;
                 spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(15);
-                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(85);
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(85); // 18 seconds @DBC
                 break;
             case 88668: // Holy Word: Sanctuary 3yd Heal
                 spellInfo->SpellFamilyName = SPELLFAMILY_PRIEST;
@@ -3005,14 +2993,126 @@ void SpellMgr::LoadSpellCustomAttr()
                 break;
             case 80243: // Transmute: Truegold
             case 61177: // Northrend Inscription Research
-            case 61288:  // Minor Inscription Research
+            case 61288: // Minor Inscription Research
+            case 80244: // Transmute: Pyrium Bar
+            case 66663: // Majestic Zircon
+            case 66660: // kings Amber
+            case 66664: // Eye of Zul
+            case 66658: // Ametrine
+            case 66662: // Dreadstone
+            case 78866: // Living Elements
+            case 53777: // Eternal Air to Earth
+            case 73478: // Fire Prism
+            case 62242: // Icy Prism
                 spellInfo->RecoveryTime = (1*24) * 60 * 60 * 1000; // 24 Hours Cooldown
                 break;
-            case 1856: // Vanish - Rogue
-                spellInfo->Effects[0].Effect = SPELL_EFFECT_SANCTUARY;
+            case 60893: // Northrend Alchemy Research
+                spellInfo->RecoveryTime = (3*24) * 60 * 60 * 1000; // 3 Days Cooldown
+                break;
+            case 87604: // Fortune Card - Food
+                spellInfo->Effects[EFFECT_2].ItemType = 60838;
+                break;
+            case 75851: // Heat Wave
+                spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(0); // 0 for loading MaxRadius
+                break;
+            case 93539: // Karsh - Bound Flames
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(5); // 5 minutes @DBC
+                break;
+            case 80643: // Slabhide - Stalactite
+            case 80654:
+            case 92653:
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+                break;
+            case 80647: // Stalactite
+            case 92309:
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DEST;
+                spellInfo->Effects[EFFECT_1].TargetA = TARGET_DEST_DEST;
+                spellInfo->Effects[EFFECT_1].TargetB = TARGET_UNIT_DEST_AREA_ENEMY;
+                break;
+            case 79251: // Azil - Gravity Well
+            case 79332:
+                spellInfo->Effects[EFFECT_0].TargetB = TARGET_UNIT_SRC_AREA_ENTRY;
+                spellInfo->Effects[EFFECT_2].TargetB = TARGET_UNIT_SRC_AREA_ENTRY;
+                break;
+            case 86862: // Azil - Seismic Shard
+                spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(28); // 50000 Yrds
+                break;
+            case 92665: // Azil - Seismic Shard Triggered
+                spellInfo->Effects[EFFECT_2].Effect = 0;
+                break;
+            case 73872: // Rajh - Sun Strike
+            case 89887:
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_DEST_AREA_ENEMY;
+               break;
+            case 73874: // Rajh - Sun Strike
+            case 90009:
+                spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(12); // 100 Yrds
+                break;
+            case 96434: // Zanzil - Graveyard Gas 
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(1); // 10 seconds @DBC
+                break;
+            case 98374:
+            case 98379:
+            case 97238:
+                spellInfo->Effects[1].BasePoints = 0;
+                break;
+            case 98474: // Flame Scyte
+            case 100212: // Flame Scyte
+            case 100213: // Flame Scyte
+            case 100214: // Flame Scyte
+                // ONLY SPELLS WITH SPELLFAMILY_GENERIC and EFFECT_SCHOOL_DAMAGE
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
+                break;
+            case 99262:
+                spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_DUMMY;
+                spellInfo->ProcFlags = 0x00004000;
+                spellInfo->ProcChance = 100;
+                break;
+            case 99919:
+                spellInfo->Effects[0].MiscValue = 3;
+                spellInfo->Effects[0].TargetA = TARGET_UNIT_CHANNEL_TARGET;
+                break;
+            case 99921:
+            case 99922:
+                spellInfo->Effects[0].MiscValue = 3;
+                break;
+            case 99464:
+            case 100698:
+                spellInfo->Effects[0].TriggerSpell = 0;
+                break;
+            case 82935: // Caustic Slime
+            case 88915: // Caustic Slime
+            case 88916: // Caustic Slime
+            case 88917: // Caustic Slime
+            case 86825: // Blackout
+            case 92879: // Blackout
+            case 92880: // Blackout
+            case 92881: // Blackout
+            case 86013: // Twilight Meteorite - Valiona
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
+                break;
+            case 97499: // Halazzi Water Totem
+            case 97500:
+            case 43302: // Halazzi Lightning Totem
+            case 97492:
+                spellInfo->Effects[0].BasePoints = 0;
+                break;
+            case 97648: // Wailing Winds - Daakara
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21); // -1 forever @ DBC
+                break;
+            case 79501: // Acquiring Target - Magmatron
+                spellInfo->ChannelInterruptFlags = 0;
+                break;
+            case 79889: // Lightning Conductor - Electron
+                spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(14); // 8yd
+                break;
+            case 99197:
+                spellInfo->Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_PROC_TRIGGER_SPELL_COPY;
                 break;
             // Immolation Trap
             case 13795:
+                spellInfo->Effects[0].Effect = SPELL_EFFECT_SUMMON_OBJECT_SLOT3;
+                break;
             // Explosive Trap
             case 13813:
                 spellInfo->Effects[0].Effect = SPELL_EFFECT_SUMMON_OBJECT_SLOT3;
@@ -3021,9 +3121,21 @@ void SpellMgr::LoadSpellCustomAttr()
             case 34600:
                 spellInfo->Effects[0].Effect = SPELL_EFFECT_SUMMON_OBJECT_SLOT4;
                 break;
+            // Camouflage
+            case 51755:
+                spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_TAKE_DAMAGE | AURA_INTERRUPT_FLAG_CAST | AURA_INTERRUPT_FLAG_TALK | AURA_INTERRUPT_FLAG_MELEE_ATTACK |AURA_INTERRUPT_FLAG_MOUNT;
+                spellInfo->Effects[0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_PET);
+                spellInfo->Effects[1].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_PET);
+                spellInfo->Effects[2].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_PET);
+                break;
+            case 1856: // Vanish - Rogue
+                spellInfo->Effects[0].Effect = SPELL_EFFECT_SANCTUARY;
+                break;
             default:
                 break;
         }
+
+        spellInfo->_InitializeExplicitTargetMask();
     }
 
     CreatureAI::FillAISpellInfo();
@@ -3062,10 +3174,43 @@ void SpellMgr::LoadSpellInfoCorrections()
 
         switch (spellInfo->Id)
         {
+            // War Academy
+            case 84570:
+            case 84571:
+            case 84572:
+                // Victory Rush
+                spellInfo->Effects[EFFECT_0].SpellClassMask[1] |= 0x8000100;
+                break;
+            case 100048:
+                spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_200_YARDS);
+                //spellInfo->Effects[0].TargetB =
+                break;
             case 14179: // Relentless Strikes
             case 58422:
             case 58423:
                 spellInfo->Effects[EFFECT_0].SpellClassMask[1] |= 0x00000008;
+                break;
+            case 96438: // Tears of Blood
+                spellInfo->AttributesEx4 = 0;
+                break;
+            case 54278:
+                spellInfo->Effects[EFFECT_0].SpellClassMask[0] = 0x000001000; // Proc from Fireball.
+                break;
+            case 93099: // Vengeance (Death Knight)
+                spellInfo->SpellFamilyName = SPELLFAMILY_DEATHKNIGHT;
+                break;
+            case 96461: // Wave of Agony
+                spellInfo->Effects[0].MaxRadiusEntry = 0;
+                break;
+            case 81208: // Chakra: Serenity
+                spellInfo->Effects[EFFECT_1].TriggerSpell = 81585;
+                break;
+            case 85421: // Burning Embers
+            case 85455: // Bane of Havoc
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS;
+                break;
+            case 50034: // Blood Rites
+                spellInfo->SpellCooldownsId = 1;
                 break;
             case 34490: // Silencing Shot
                 spellInfo->Speed = 0.0f;
@@ -3096,7 +3241,10 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->ProcCharges = 0;
                 break;
             case 53096: // Quetz'lun's Judgment
-            case 76676: // Chaos Blast Missile - Setesh
+            case 79589: // Magmaw Trash - Constricting Chains
+            case 77335: // (Hoo) Water Warden - Water Bubble
+            case 74041: // Isiset - Energy Flux
+            case 76674: // Setesh - Chaos Blast
                 spellInfo->MaxAffectedTargets = 1;
                 break;
             case 42730:
@@ -3167,8 +3315,6 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 20335: // Heart of the Crusader
             case 20336:
             case 20337:
-            case 53228: // Rapid Killing (Rank 1)
-            case 53232: // Rapid Killing (Rank 2)
             case 63320: // Glyph of Life Tap
             // Entries were not updated after spell effect change, we have to do that manually :/
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_CAN_PROC_WITH_TRIGGERED;
@@ -3267,6 +3413,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 88819: // Daybreak
             case 90174: // Divine Purpose
             case 81093: // Fury of stormrage
+            case 92681: // Atramedes - Phase Shift
                 spellInfo->ProcCharges = 1;
                 break;
             case 53257: // Cobra strikes
@@ -3403,6 +3550,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 59414: // Pulsing Shockwave Aura (Loken)
                 // this flag breaks movement, remove it
+            case 96942:  // Gaze of Occu'thar
+            case 101009: // Gaze of Occu'thar 
+            case 43501: // Siphon Soul - Malacrass
                 spellInfo->AttributesEx &= ~SPELL_ATTR1_CHANNELED_1;
                 break;
             case 61719: // Easter Lay Noblegarden Egg Aura - Interrupt flags copied from aura which this aura is linked with
@@ -3463,6 +3613,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->AttributesEx |= SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY;
                 break;
             case 62301: // Cosmic Smash (Algalon the Observer)
+            case 82188: // Corborus - Emerge
                 spellInfo->MaxAffectedTargets = 1;
                 break;
             case 64598: // Cosmic Smash (Algalon the Observer)
@@ -3483,7 +3634,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 67901: // Infernal Eruption (25N)
                 // increase duration from 15 to 18 seconds because caster is already
                 // unsummoned when spell missile hits the ground so nothing happen in result
-                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(85);
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(85); // 18 seconds
                 break;
             // ENDOF TRIAL OF THE CRUSADER SPELLS
             //
@@ -3534,6 +3685,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_2].Effect = 0;
                 break;
             case 70460: // Coldflame Jets (Traps after Saurfang)
+            case 84934: // Earth Shards - Erunak Stonespeaker
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(1); // 10 seconds
                 break;
             case 71412: // Green Ooze Summon (Professor Putricide)
@@ -3541,7 +3693,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
                 break;
             case 71159: // Awaken Plagued Zombies
-                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21);
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21); // default DBC value?
                 break;
             case 70530: // Volatile Ooze Beam Protection (Professor Putricide)
                 spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_APPLY_AURA; // for an unknown reason this was SPELL_EFFECT_APPLY_AREA_AURA_RAID
@@ -3829,6 +3981,10 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_NEARBY_ENTRY;
                 spellInfo->Effects[EFFECT_0].TargetB = 0;
                 break;
+            case 75702: // Ammunae - Noxious Spores
+            case 89889:
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(13);
+                break;
                 // Setesh
             case 76681: // Setesh Chaos Blast Aura Radius
             case 89875:
@@ -3848,9 +4004,6 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_4_YARDS);
                 spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(26);
                 spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_KNOCK_BACK_DEST;
-                break;
-            case 89133:
-                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_2_YARDS);
                 break;
             case 83607: // Blight of Ozumat
                 spellInfo->Effects[EFFECT_0].Amplitude = 1100;
@@ -3928,6 +4081,100 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 74976: // Disorented roar
             case 90737:
                 spellInfo->ProcCharges = 1;
+                break;
+            case 94946: // Akmahat - Fury of the Sands
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(66); // 100 yards
+                break;
+            case 93575: // Akmahat - Fury of the Sands Triggered
+                spellInfo->AttributesEx8 |= SPELL_ATTR8_CANT_MISS;
+                spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(26);
+                spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_KNOCK_BACK_DEST;
+                break;
+            case 93574: // Akmahat - Fury of the Sands Summons
+                spellInfo->Effects[EFFECT_0].BasePoints = 8;
+                break;
+            case 88977:
+                spellInfo->Effects[EFFECT_0].MiscValue = 2;
+                break;
+            case 82190: // Corborus - Summon Beetle
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_10_YARDS);
+                spellInfo->MaxAffectedTargets = 1;
+                break;
+            case 86510: // Epic Swimming Mount 2x Speed
+                spellInfo->Effects[EFFECT_0].BasePoints = 900;
+                break;
+            case 88177:
+            case 91274:
+            case 91302:
+            case 88173:
+            case 91275:
+            case 91301:
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+                spellInfo->Effects[EFFECT_1].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+                spellInfo->Effects[EFFECT_2].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+                break;
+            case 75676: // Corla - Nether Beam
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_BACK;
+                break;
+            case 77782: // Sonic Flames
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_SRC_CASTER);
+                spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENTRY);
+                break;
+            case 78100: // Sonic Breath
+            case 92407:
+            case 92408:
+            case 92409:
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_SRC_CASTER);
+                spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENEMY);
+                spellInfo->Effects[EFFECT_1].TargetA = SpellImplicitTargetInfo(TARGET_SRC_CASTER);
+                spellInfo->Effects[EFFECT_1].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENEMY);
+                break;
+            case 93453: // Rom'ogg - Skullcraker Heroic
+                spellInfo->CastTimeMin = 8000;
+                spellInfo->CastTimeMax = 8000;
+                spellInfo->CastTimeMaxLevel = 8000;
+                break;
+            case 83487: // Halfus - Chain
+                spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(7); // 10 yards
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+                break;
+            case 86380: // Valiona & Theralion - Dazzling Destruction
+            case 92924:
+                spellInfo->MaxAffectedTargets = 2;
+                break;
+            case 92923: // Valiona & Theralion - Dazzling Destruction
+            case 92925:
+                spellInfo->MaxAffectedTargets = 3;
+                break;
+            case 96422: // Kilnara - Tears of Blood
+            case 96957:
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(32);
+                break;
+            case 96559: // Kilnara - Primal Blessing (deactivate effect 1)
+                spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_NONE;
+                break;
+            case 96658: // Hazzarah - Awaken Nightmares
+                spellInfo->Effects[EFFECT_0].TriggerSpell = 96670;
+                spellInfo->Effects[EFFECT_1].TriggerSpell = 96670;
+                break;
+            case 98476:
+                spellInfo->Effects[EFFECT_0].MiscValue = 25;
+                break;
+            case 92090:
+                spellInfo->ProcCharges = 10; // Item Tia's Grace - Proc Stacking Agility
+                break;
+            case 74723: // Quest: Flamebreaker - Summon correct Flamesparks
+                spellInfo->Effects[EFFECT_0].MiscValue = 40065;
+                spellInfo->Effects[EFFECT_0].BasePoints = 5;
+                break;
+            case 99705:
+                spellInfo->AttributesEx8 |= SPELL_ATTR8_CANT_MISS;
+                break;
+            case 100244: // Legendary Teleport into Nexus
+                spellInfo->AttributesEx10 |= SPELL_ATTR10_UNK6;
+                break;
+            case 99488:
+                spellInfo->Effects[0].MiscValue |= 16;
                 break;
             default:
                 break;

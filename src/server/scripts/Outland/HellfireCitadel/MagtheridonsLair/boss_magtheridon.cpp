@@ -32,19 +32,25 @@ EndScriptData */
 enum eSays
 {
     SAY_TAUNT                  = 0,
-    SAY_FREED                  = 1,
-    SAY_AGGRO                  = 2,
-    SAY_BANISH                 = 3,
-    SAY_CHAMBER_DESTROY        = 4,
-    SAY_PLAYER_KILLED          = 5,
-    SAY_DEATH                  = 6
+    SAY_TAUNT_1                = 1,
+    SAY_TAUNT_2                = 2,
+    SAY_TAUNT_3                = 3,
+    SAY_TAUNT_4                = 4,
+    SAY_TAUNT_5                = 5,
+
+    SAY_FREED                  = 6,
+    SAY_AGGRO                  = 7,
+    SAY_BANISH                 = 8,
+    SAY_CHAMBER_DESTROY        = 9,
+    SAY_PLAYER_KILLED          = 10,
+    SAY_DEATH                  = 11
 };
 
 enum eEmotes
 {
-    EMOTE_BERSERK              = 7,
-    EMOTE_BLASTNOVA            = 8,
-    EMOTE_BEGIN                = 9
+    EMOTE_BERSERK              = 12,
+    EMOTE_BLASTNOVA            = 13,
+    EMOTE_BEGIN                = 14
 };
 
 enum eCreatures
@@ -61,6 +67,8 @@ enum eSpells
     SPELL_CLEAVE               = 30619,
     SPELL_QUAKE_TRIGGER        = 30657, //must be cast with 30561 as the proc spell
     SPELL_QUAKE_KNOCKBACK      = 30571,
+    SPELL_BLAZE_TARGET         = 30541,
+    SPELL_BLAZE_TRAP           = 30542,
     SPELL_DEBRIS_KNOCKDOWN     = 36449,
     SPELL_DEBRIS_VISUAL        = 30632,
     SPELL_DEBRIS_DAMAGE        = 30631, //core bug, does not support target 8
@@ -109,6 +117,16 @@ class mob_abyssal : public CreatureScript
             void Reset()
             {
                 FireBlast_Timer = 6000;
+            }
+
+            void SpellHit(Unit*, const SpellInfo* spell)
+            {
+                if (trigger == 2 && spell->Id == SPELL_BLAZE_TARGET)
+                {
+                    DoCast(me, SPELL_BLAZE_TRAP, true);
+                    me->SetVisible(false);
+                    Despawn_Timer = 130000;
+                }
             }
 
             void SetTrigger(uint32 _trigger)
@@ -333,7 +351,7 @@ class boss_magtheridon : public CreatureScript
                 {
                     if (RandChat_Timer <= diff)
                     {
-                        Talk(SAY_TAUNT);
+                        Talk(RAND(SAY_TAUNT, SAY_TAUNT_1, SAY_TAUNT_2, SAY_TAUNT_3, SAY_TAUNT_4, SAY_TAUNT_5));
                         RandChat_Timer = 90000;
                     }
                     else
@@ -386,6 +404,25 @@ class boss_magtheridon : public CreatureScript
                 }
                 else
                     Quake_Timer -= diff;
+
+                if (Blaze_Timer <= diff)
+                {
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                    {
+                        float x, y, z;
+                        target->GetPosition(x, y, z);
+                        Creature* summon = me->SummonCreature(MOB_ABYSSAL, x, y, z, 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                        if (summon)
+                        {
+                            CAST_AI(mob_abyssal::mob_abyssalAI, summon->AI())->SetTrigger(2);
+                            DoCast(summon, SPELL_BLAZE_TARGET, true);
+                            summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        }
+                    }
+                    Blaze_Timer = urand(20000, 40000);
+                }
+                else
+                    Blaze_Timer -= diff;
 
                 if (!Phase3 && HealthBelowPct(30)
                     && !me->IsNonMeleeSpellCasted(false) // blast nova
@@ -442,6 +479,7 @@ class mob_hellfire_channeler : public CreatureScript
             mob_hellfire_channelerAI(Creature* creature) : ScriptedAI(creature)
             {
                 instance = creature->GetInstanceScript();
+                me->SetReactState(REACT_DEFENSIVE);
             }
 
             InstanceScript* instance;
@@ -482,7 +520,7 @@ class mob_hellfire_channeler : public CreatureScript
 
             void JustSummoned(Creature* summon)
             {
-                summon->AI()->AttackStart(me->getVictim());
+                summon->AI()->AttackStart(me->GetVictim());
             }
 
             void DamageTaken(Unit*, uint32 &damage)

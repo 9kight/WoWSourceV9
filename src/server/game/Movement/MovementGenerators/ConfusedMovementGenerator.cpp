@@ -117,8 +117,8 @@ void ConfusedMovementGenerator<Creature>::DoFinalize(Creature* unit)
 {
     unit->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
     unit->ClearUnitState(UNIT_STATE_CONFUSED | UNIT_STATE_CONFUSED_MOVE);
-    if (unit->getVictim())
-        unit->SetTarget(unit->getVictim()->GetGUID());
+    if (unit->GetVictim())
+        unit->SetTarget(unit->GetVictim()->GetGUID());
 }
 
 template void ConfusedMovementGenerator<Player>::DoInitialize(Player*);

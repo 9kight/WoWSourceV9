@@ -220,7 +220,7 @@ public:
                     Creature* temp = Creature::GetCreature((*me), AddGUID[i]);
                     if (temp && temp->isAlive())
                     {
-                        temp->AI()->AttackStart(me->getVictim());
+                        temp->AI()->AttackStart(me->GetVictim());
                         DoZoneInCombat(temp);
                     } else
                         EnterEvadeMode();
@@ -253,8 +253,8 @@ public:
                     {
                         Creature* temp = Unit::GetCreature((*me), AddGUID[i]);
                         if (temp && temp->isAlive())
-                            if (!temp->getVictim())
-                                temp->AI()->AttackStart(me->getVictim());
+                            if (!temp->GetVictim())
+                                temp->AI()->AttackStart(me->GetVictim());
                     }
                 }
                 CheckAdds_Timer = 5000;

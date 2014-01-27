@@ -237,7 +237,7 @@ public:
 
         void JustSummoned(Creature* summoned)
         {
-            summoned->AI()->AttackStart(me->getVictim());
+            summoned->AI()->AttackStart(me->GetVictim());
         }
 
         void TakeOff()
@@ -309,7 +309,7 @@ public:
             {
                 if (Movement)
                 {
-                    DoStartMovement(me->getVictim());
+                    DoStartMovement(me->GetVictim());
                     Movement = false;
                 }
 

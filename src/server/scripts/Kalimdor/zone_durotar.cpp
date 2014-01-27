@@ -151,8 +151,143 @@ class spell_voodoo : public SpellScriptLoader
         }
 };
 
+
+/*####
+# npc_darkspear_jailor
+####*/
+
+enum SayDarkspear
+{
+    SAY_DARKSPERAR_1   = 0, 
+    SAY_SPITESCALE_1   = 1, 
+
+};
+
+#define GOSSIP_ITEM_1 "I'm ready to face my challange."
+
+class npc_darkspear_jailor : public CreatureScript
+{
+public:
+    npc_darkspear_jailor() : CreatureScript("npc_darkspear_jailor") { }
+
+    bool OnGossipHello(Player* Player, Creature* Creature)
+    {
+        if (Player)
+        {
+            Player->PrepareGossipMenu(Creature);
+            if (Player->GetQuestStatus(24786) == QUEST_STATUS_INCOMPLETE || Player->GetQuestStatus(24754) == QUEST_STATUS_INCOMPLETE ||
+                Player->GetQuestStatus(24762) == QUEST_STATUS_INCOMPLETE || Player->GetQuestStatus(24774) == QUEST_STATUS_INCOMPLETE ||
+                Player->GetQuestStatus(26276) == QUEST_STATUS_INCOMPLETE || Player->GetQuestStatus(24642) == QUEST_STATUS_INCOMPLETE ||
+                Player->GetQuestStatus(24768) == QUEST_STATUS_INCOMPLETE || Player->GetQuestStatus(24780) == QUEST_STATUS_INCOMPLETE)
+                    Player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+            
+            Player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, Creature->GetGUID());
+        }
+        return true;
+    }
+
+    bool OnGossipSelect(Player* Player, Creature* Creature, uint32 /*uiSender*/, uint32 uiAction)
+    {
+        Player->PlayerTalkClass->ClearMenus();
+                
+        switch(uiAction)
+        {
+            case GOSSIP_ACTION_INFO_DEF:
+                if (Creature->GetGUIDLow() == 306002)
+                    Creature->GetMotionMaster()->MovePath(0, false);
+                else if (Creature->GetGUIDLow() == 127668)
+                    Creature->GetMotionMaster()->MovePath(1, false);
+                   
+                npc_darkspear_jailorAI* AI = CAST_AI(npc_darkspear_jailorAI,Creature->AI());
+                if (AI)
+                    AI->StartMovingToCage();
+                
+                Player->KilledMonsterCredit(39062, Creature->GetGUID());
+
+                Player->CLOSE_GOSSIP_MENU();
+                break;
+        }
+        Player->CLOSE_GOSSIP_MENU();
+        return true;
+    }
+
+    CreatureAI* GetAI(Creature* Creature) const
+    {
+        return new npc_darkspear_jailorAI (Creature);
+    }
+
+    struct npc_darkspear_jailorAI : public ScriptedAI
+    {
+        npc_darkspear_jailorAI(Creature* Creature) : ScriptedAI(Creature)
+        { }
+
+        uint8 uiPhase;
+        uint32 uiTimer;
+        
+        void Reset()
+        {
+            uiPhase = 0;
+            uiTimer = 2000;
+        }
+        
+        void StartMovingToCage()
+        {
+            uiPhase = 1;
+            uiTimer = 8000;
+            Talk(SAY_DARKSPERAR_1);
+        }
+
+        void UpdateAI(const uint32 uiDiff)
+        {
+            if (uiTimer <= uiDiff)
+            {
+                switch(uiPhase)
+                {
+                    case 0:
+                        break;
+                    case 1:
+                        uiPhase = 2;
+                        uiTimer = 8000;
+                    case 2:
+                        if (GameObject* Cage = me->FindNearestGameObject(201968, 5.0f))
+                                Cage->SetGoState(GO_STATE_ACTIVE);
+
+                        if (Creature* Spitescale = me->FindNearestCreature(38142, 30.0f, true))
+                        {
+                            Talk(SAY_SPITESCALE_1);
+                            if (me->GetGUIDLow() == 306002)
+                                Spitescale->GetMotionMaster()->MovePoint(0, -1144.48f, -5414.22f, 10.59f);
+                            else if (me->GetGUIDLow() == 127668)
+                                Spitescale->GetMotionMaster()->MovePoint(0, -1149.88f, -5527.07f, 8.10f);
+
+                            Spitescale->setFaction(16);
+                            Spitescale->SetReactState(REACT_AGGRESSIVE);
+                            Spitescale->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                            Spitescale->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                        }
+                        uiPhase = 3;
+                        uiTimer = 2000;
+                        break;
+                    case 3:
+                        if (GameObject* Cage = me->FindNearestGameObject(201968, 5.0f))
+                            Cage->SetGoState(GO_STATE_READY);
+
+                        me->DealDamage(me, 10000);
+                        me->RemoveCorpse();
+                        uiPhase = 0;
+                        uiTimer = 1000;
+                        break;
+                }
+            } else
+                uiTimer -= uiDiff;
+        }
+    };
+
+};
+
 void AddSC_durotar()
 {
     new npc_lazy_peon();
     new spell_voodoo();
+    new npc_darkspear_jailor();
 }

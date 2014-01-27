@@ -151,8 +151,8 @@ public:
                     //and correct movement, if not already
                     if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != CHASE_MOTION_TYPE)
                     {
-                        if (me->getVictim())
-                            me->GetMotionMaster()->MoveChase(me->getVictim());
+                        if (me->GetVictim())
+                            me->GetMotionMaster()->MoveChase(me->GetVictim());
                     }
                 }
             }
@@ -197,7 +197,7 @@ public:
                 {
                     Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 1);
 
-                    if (target && me->IsWithinMeleeRange(me->getVictim()))
+                    if (target && me->IsWithinMeleeRange(me->GetVictim()))
                         DoCast(target, SPELL_HURTFUL_STRIKE);
                     else
                         DoCastVictim(SPELL_HURTFUL_STRIKE);

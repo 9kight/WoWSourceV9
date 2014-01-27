@@ -103,11 +103,7 @@ class boss_general_umbriss : public CreatureScript
 
             void KilledUnit(Unit* /*victim*/)
             {
-                switch(urand(0,1))
-                {
-                    case 0: Talk(SAY_KILL_1); break;
-                    case 1: Talk(SAY_KILL_2); break;
-                }
+                Talk(RAND(SAY_KILL_1, SAY_KILL_2));
             }
 
             void UpdateAI(const uint32 uiDiff)
@@ -387,7 +383,6 @@ public:
         return new spell_ground_siege_SpellScript();
     }
 };
-
 
 void AddSC_boss_general_umbriss()
 {

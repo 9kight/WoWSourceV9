@@ -87,7 +87,19 @@ enum WorldTimers
     WUPDATE_DELETECHARS,
     WUPDATE_PINGDB,
     WUPDATE_GUILDSAVE,
+    WUPDATE_HPGOLD,
+    WUPDATE_CRONJOBS,
     WUPDATE_COUNT
+};
+
+enum CronjobType
+{
+    CRONJOB_TELEPORT      = 1,
+    CRONJOB_REVIVE        = 2,
+    CRONJOB_LEVEL         = 3,
+    CRONJOB_FACTIONCHANGE = 4,
+    CRONJOB_RACECHANGE    = 5,
+    CRONJOB_CUSTOMIZE     = 6
 };
 
 /// Configuration elements
@@ -172,11 +184,14 @@ enum WorldBoolConfigs
     CONFIG_WARDEN_ENABLED,
     CONFIG_ENABLE_MMAPS,
     CONFIG_WINTERGRASP_ENABLE,
+    CONFIG_TOL_BARAD_ENABLE,
     CONFIG_GUILD_LEVELING_ENABLED,
     CONFIG_UI_QUESTLEVELS_IN_DIALOGS,     // Should we add quest levels to the title in the NPC dialogs?
     CONFIG_RATED_BATTLEGROUND_ENABLED,
     CONFIG_ALLOW_ZONE_AND_AREA_VALUES_CORRECTION_AT_STARTUP,
     CONFIG_ARENA_READYMARK_ENABLED,
+    CONFIG_HPGOLD_REFRESH_ENABLED,
+    CONFIG_CRONJOBS_ENABLED,
     BOOL_CONFIG_VALUE_COUNT
 };
 
@@ -271,6 +286,7 @@ enum WorldIntConfigs
     CONFIG_CHATFLOOD_MESSAGE_DELAY,
     CONFIG_CHATFLOOD_MUTE_TIME,
     CONFIG_EVENT_ANNOUNCE,
+    CONFIG_DUNGEON_FINDER_ENABLE,
     CONFIG_CREATURE_FAMILY_ASSISTANCE_DELAY,
     CONFIG_CREATURE_FAMILY_FLEE_DELAY,
     CONFIG_WORLD_BOSS_LEVEL_DIFF,
@@ -346,6 +362,11 @@ enum WorldIntConfigs
     CONFIG_WINTERGRASP_BATTLETIME,
     CONFIG_WINTERGRASP_NOBATTLETIME,
     CONFIG_WINTERGRASP_RESTART_AFTER_CRASH,
+    CONFIG_TOL_BARAD_PLR_MAX,
+    CONFIG_TOL_BARAD_PLR_MIN,
+    CONFIG_TOL_BARAD_PLR_MIN_LVL,
+    CONFIG_TOL_BARAD_BATTLETIME,
+    CONFIG_TOL_BARAD_NOBATTLETIME,
     CONFIG_GUILD_SAVE_INTERVAL,
     CONFIG_GUILD_MAX_LEVEL,
     CONFIG_GUILD_UNDELETABLE_LEVEL,
@@ -364,6 +385,8 @@ enum WorldIntConfigs
     CONFIG_GUILD_CHALLENGE_RATEDBG_NEEDED,
     CONFIG_DYN_ITEM_GUID_SIZE,
     CONFIG_DYN_ITEM_SQL_REQUEST_SIZE,
+    CONFIG_HPGOLD_REFRESH_INTERVAL,
+    CONFIG_CRONJOBS_INTERVAL,
     INT_CONFIG_VALUE_COUNT
 };
 
@@ -669,6 +692,9 @@ class World
         static void StopNow(uint8 exitcode) { m_stopEvent = true; m_ExitCode = exitcode; }
         static bool IsStopped() { return m_stopEvent.value(); }
 
+        std::string ShutdownReason; 
+        void SetShutdownMessage(std::string reason) { ShutdownReason = reason; }
+
         void Update(uint32 diff);
 
         void UpdateSessions(uint32 diff);
@@ -770,6 +796,8 @@ class World
         void   ResetEventSeasonalQuests(uint16 event_id);
 
         void UpdatePhaseDefinitions();
+        void ExecuteCronjobs();
+
     protected:
         void _UpdateGameTime();
         // callback for UpdateRealmCharacters

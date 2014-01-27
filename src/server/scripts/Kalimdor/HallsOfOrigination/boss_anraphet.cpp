@@ -189,7 +189,7 @@ class boss_anraphet : public CreatureScript
                 case EVENT_ALPHA_BEAMS_END:
                     events.SetPhase(PHASE_NORMAL);
                     me->SetReactState(REACT_AGGRESSIVE);
-                    if(Unit * victim = me->getVictim())
+                    if(Unit * victim = me->GetVictim())
                     {
                         me->SetUInt64Value(UNIT_FIELD_TARGET, victim->GetGUID());
                         DoStartMovement(victim);
@@ -428,7 +428,7 @@ class npc_earth_warden_hoo : public CreatureScript
                 {
                     rockWave = false;
                     me->SetReactState(REACT_AGGRESSIVE);
-                    if(Unit * victim = me->getVictim())
+                    if(Unit * victim = me->GetVictim())
                     {
                         me->SetUInt64Value(UNIT_FIELD_TARGET, victim->GetGUID());
                         DoStartMovement(victim);

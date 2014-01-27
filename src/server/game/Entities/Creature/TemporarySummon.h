@@ -21,6 +21,21 @@
 
 #include "Creature.h"
 
+enum SummonerType
+{
+    SUMMONER_TYPE_CREATURE      = 0,
+    SUMMONER_TYPE_GAMEOBJECT    = 1,
+    SUMMONER_TYPE_MAP           = 2
+};
+
+/// Stores data for temp summons
+struct TempSummonData
+{
+    uint32 entry;        ///< Entry of summoned creature
+    Position pos;        ///< Position, where should be creature spawned
+    TempSummonType type; ///< Summon type, see TempSummonType for available types
+    uint32 time;         ///< Despawn time, usable only with certain temp summon types
+};
 class TempSummon : public Creature
 {
     public:
@@ -34,6 +49,7 @@ class TempSummon : public Creature
         void SetTempSummonType(TempSummonType type);
         void SaveToDB(uint32 /*mapid*/, uint8 /*spawnMask*/, uint32 /*phaseMask*/) {}
         Unit* GetSummoner() const;
+        Creature* GetSummonerCreatureBase() const;
         uint64 GetSummonerGUID() const { return m_summonerGUID; }
         TempSummonType const& GetSummonType() { return m_type; }
         uint32 GetTimer() { return m_timer; }

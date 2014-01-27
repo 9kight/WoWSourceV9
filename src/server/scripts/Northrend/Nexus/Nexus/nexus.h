@@ -33,4 +33,11 @@ enum eTypes
     TELESTRAS_CONTAINMET_SPHERE
 };
 
+enum LegendaryCreatures
+{
+    NPC_TARECGOSA         = 53439,
+    NPC_ICEBOUND_SENTINEL = 53484,
+    NPC_NEXUS_WARDEN      = 53383,
+};
+
 #endif

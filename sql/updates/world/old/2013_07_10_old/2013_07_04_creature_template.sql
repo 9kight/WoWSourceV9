@@ -1,1 +1,0 @@
-UPDATE `creature_template` SET `Mana_mod_extra` = '1' WHERE `Mana_mod_extra` = '0'; 

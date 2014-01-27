@@ -75,7 +75,7 @@ public:
         std::list<Creature*> stalker;
         _lockmaw->GetCreatureListWithEntryInGrid(stalker, NPC_ADD_STALKER, 200.0f);
         if (Unit* trigger = Trinity::Containers::SelectRandomContainerElement(stalker))
-            trigger->CastSpell(trigger, SPELL_SUMMON_AUGH);
+              trigger->CastSpell(trigger, roll_chance_i(50) ? SPELL_SUMMON_AUGH : SPELL_SUMMON_AUGH_2);
         return false;
     }
 
@@ -207,7 +207,7 @@ public:
                         me->GetCreatureListWithEntryInGrid(stalker, NPC_ADD_STALKER, 200.0f);
                         if (!stalker.empty())
                             if (Unit* trigger = Trinity::Containers::SelectRandomContainerElement(stalker))
-                                trigger->CastSpell(trigger, SPELL_SUMMON_AUGH);
+                                trigger->CastSpell(trigger, roll_chance_i(50) ? SPELL_SUMMON_AUGH : SPELL_SUMMON_AUGH_2);
                         break;
                     }
                     default:
@@ -446,11 +446,14 @@ public:
     {
         npc_augh_fakeAI(Creature *creature) : ScriptedAI(creature)
         {
+            instance = me->GetInstanceScript();
         }
 
+        void Reset() { }
 
-        void Reset()
+        void EnterCombat(Unit* /*who*/)
         {
+            events.ScheduleEvent(EVENT_WHIRLWIND, 1000);
         }
 
         void DamageTaken(Unit* /*target*/, uint32& damage)
@@ -468,20 +471,124 @@ public:
             me->DespawnOrUnsummon(5000);
         }
 
+        void IsSummonedBy(Unit* /*who*/)
+        {
+            if (Creature* lockmaw = Creature::GetCreature(*me, instance->GetData64(DATA_LOCKMAW)))
+                lockmaw->AI()->JustSummoned(me);
+        }
 
         void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim())
                 return;
 
+            events.Update(diff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_WHIRLWIND:
+                        DoCastAOE(SPELL_RANDOM_AGGRO);
+                        me->AddAura(SPELL_WHIRLWIND, me);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
             DoMeleeAttackIfReady();
         }
+    private:
+        InstanceScript* instance;
+        EventMap events;
     };
-
 
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_augh_fakeAI (creature);
+    }
+};
+
+class npc_augh_fake2: public CreatureScript
+{
+public:
+ npc_augh_fake2() : CreatureScript("npc_augh_fake2") { }
+
+    struct npc_augh_fake2AI : public ScriptedAI
+    {
+        npc_augh_fake2AI(Creature *creature) : ScriptedAI(creature)
+        {
+            instance = me->GetInstanceScript();
+        }
+
+        void Reset() { }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            events.ScheduleEvent(EVENT_CLOUD, 1500);
+            events.ScheduleEvent(EVENT_PARALYTIC_BLOW_DART, 1000);
+        }
+
+        void DamageTaken(Unit* /*target*/, uint32& damage)
+        {
+            if (me->HasReactState(REACT_PASSIVE))
+                return;
+            if (HealthBelowPct(50))
+            {
+                me->SetReactState(REACT_PASSIVE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_SELECTABLE);
+                Talk(0);
+                if (Creature *c = me->FindNearestCreature(43614, 1000))
+                    me->GetMotionMaster()->MoveChase(c);
+            }
+            me->DespawnOrUnsummon(5000);
+        }
+
+        void IsSummonedBy(Unit* /*who*/)
+        {
+            if (Creature* lockmaw = Creature::GetCreature(*me, instance->GetData64(DATA_LOCKMAW)))
+                lockmaw->AI()->JustSummoned(me);
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CLOUD:
+                        DoCastVictim(SPELL_CLOUD);
+                        break;
+                    case EVENT_PARALYTIC_BLOW_DART:
+                        DoCastRandom(SPELL_PARALYTIC_BLOW_DART, 40.0f);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    private:
+        InstanceScript* instance;
+        EventMap events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_augh_fake2AI (creature);
     }
 };
 
@@ -491,4 +598,5 @@ void AddSC_boss_lockmaw()
     new npc_augh();
     new npc_crosilik();
     new npc_augh_fake();
+    new npc_augh_fake2();
 }

@@ -1,269 +1,328 @@
 /*
-* Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
-*
-* This program is free software; you can redistribute it and/or modify it
-* under the terms of the GNU General Public License as published by the
-* Free Software Foundation; either version 2 of the License, or (at your
-* option) any later version.
-*
-* This program is distributed in the hope that it will be useful, but WITHOUT
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-* more details.
-*
-* You should have received a copy of the GNU General Public License along
-* with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ * Copyright (C) 2005 - 2013 MaNGOS <http://www.getmangos.com/>
+ *
+ * Copyright (C) 2008 - 2013 Trinity <http://www.trinitycore.org/>
+ *
+ * Copyright (C) 2010 - 2013 ProjectSkyfire <http://www.projectskyfire.org/>
+ *
+ * Copyright (C) 2011 - 2013 ArkCORE <http://www.arkania.net/>
+ *
+ * Copyright (C) 2013 - 2014 SteathCORE <http://www.wowsource.info/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ */
 
-#ifndef __BATTLEGROUNDBG_H
-#define __BATTLEGROUNDBG_H
+#ifndef __BattlegroundBG_H
+#define __BattlegroundBG_H
 
 #include "Battleground.h"
 
-enum BG_BFG_Rewards
+enum GilneasNodeIds
 {
-    BG_BFG_MAP_COMPLETE,
-    BG_BFG_REWARD_NUM
+    LIGHTHOUSE_BANNER       = 208779,
+    MINE_BANNER             = 208780,
+    WATERWORKS_BANNER       = 208781,
+
+    OBJECTID_BANNER_A       = 180058,
+    OBJECTID_BANNER_CONT_A  = 180059,
+    OBJECTID_BANNER_H       = 180060,
+    OBJECTID_BANNER_CONT_H  = 180061,
+
+    OBJECTID_AURA_A         = 180100,
+    OBJECTID_AURA_H         = 180101,
+    OBJECTID_AURA_C         = 180102,
+
+    OBJECTID_GATE_A_1       = 207177,
+    OBJECTID_GATE_A_2       = 180322,
+    OBJECTID_GATE_H_1       = 207178,
+    OBJECTID_GATE_H_2       = 180322,
 };
 
-enum BG_BFG_WorldStates
+enum GilneasObjectType
 {
-    BG_BFG_OP_OCCUPIED_BASES_HORDE  = 1778,
-    BG_BFG_OP_OCCUPIED_BASES_ALLY   = 1779,
-    BG_BFG_OP_RESOURCES_ALLY        = 1776,
-    BG_BFG_OP_RESOURCES_HORDE       = 1777,
-    BG_BFG_OP_RESOURCES_MAX         = 1780,
-    BG_BFG_OP_RESOURCES_WARNING     = 1955
+    // Lighthouse
+    OBJECT_LIGHTHOUSE_BANNER_NEUTRAL    = 0,
+    OBJECT_LIGHTHOUSE_BANNER_ALLY       = 1,
+    OBJECT_LIGHTHOUSE_BANNER_HORDE      = 2,
+    OBJECT_LIGHTHOUSE_BANNER_CONT_A     = 3,
+    OBJECT_LIGHTHOUSE_BANNER_CONT_H     = 4,
+    OBJECT_LIGHTHOUSE_AURA_ALLY         = 5,
+    OBJECT_LIGHTHOUSE_AURA_HORDE        = 6,
+    OBJECT_LIGHTHOUSE_AURA_CONTESTED    = 7,
+
+    // Waterworks
+    OBJECT_WATERWORKS_BANNER_NEUTRAL    = 8,
+    OBJECT_WATERWORKS_BANNER_ALLY       = 9,
+    OBJECT_WATERWORKS_BANNER_HORDE      = 10,
+    OBJECT_WATERWORKS_BANNER_CONT_A     = 11,
+    OBJECT_WATERWORKS_BANNER_CONT_H     = 12,
+    OBJECT_WATERWORKS_AURA_ALLY         = 13,
+    OBJECT_WATERWORKS_AURA_HORDE        = 14,
+    OBJECT_WATERWORKS_AURA_CONTESTED    = 15,
+
+    // Mine
+    OBJECT_MINE_BANNER_NEUTRAL          = 16,
+    OBJECT_MINE_BANNER_ALLY             = 17,
+    OBJECT_MINE_BANNER_HORDE            = 18,
+    OBJECT_MINE_BANNER_CONT_A           = 19,
+    OBJECT_MINE_BANNER_CONT_H           = 20,
+    OBJECT_MINE_AURA_ALLY               = 21,
+    OBJECT_MINE_AURA_HORDE              = 22,
+    OBJECT_MINE_AURA_CONTESTED          = 23,
+
+    // Gates
+    OBJECT_GATE_A_1                     = 24,
+    OBJECT_GATE_A_2                     = 25,
+    OBJECT_GATE_H_1                     = 26,
+    OBJECT_GATE_H_2                     = 27,
+
+    // Buffs
+    OBJECT_LIGHTHOUSE_SPEEDBUFF         = 28,
+    OBJECT_LIGHTHOUSE_REGENBUFF         = 29,
+    OBJECT_LIGHTHOUSE_BERSERKBUFF       = 30,
+    OBJECT_WATERWORKS_SPEEDBUFF         = 31,
+    OBJECT_WATERWORKS_REGENBUFF         = 32,
+    OBJECT_WATERWORKS_BERSERKBUFF       = 33,
+    OBJECT_MINE_SPEEDBUFF               = 34,
+    OBJECT_MINE_REGENBUFF               = 35,
+    OBJECT_MINE_BERSERKBUFF             = 36,
+    GILNEAS_OBJECT_MAX                  = 37,
 };
 
-const uint32 BG_BFG_OP_NODESTATES[3]    = {1787, 1782, 1772};
+//BG_BG_OBJECTID_GATE_A               = 205496,
+//BG_BG_OBJECTID_GATE_H               = 207178
 
-const uint32 BG_BFG_OP_NODEICONS[3]     = {1843, 1846, 1845};
-
-enum BG_BFG_NodeObjectId
+enum GilneasMisc
 {
-    BG_BFG_OBJECTID_NODE_BANNER_0 = 208779, // Lighthouse banner
-    BG_BFG_OBJECTID_NODE_BANNER_1 = 208782, // Mine banner
-    BG_BFG_OBJECTID_NODE_BANNER_2 = 208785 // Waterworks banner
+    FLAG_CAPTURING_TIMER    = 60000,
+
+    RESOURCES_WARN          = 1800,
+    MAX_GILNEAS_TEAM_SCORE  = 2000,
+
+    OBJECTIVE_ASSAULT_BASE  = 370,
+    OBJECTIVE_DEFEND_BASE   = 371,
+
+    GILNEAS_START_BATTLE    = 9158,
 };
 
-enum BG_BG_ObjectType
+enum GilneasBattlegroundNodes
 {
-    BG_BFG_OBJECT_BANNER_NEUTRAL            = 0,
-    BG_BFG_OBJECT_BANNER_CONT_A             = 1,
-    BG_BFG_OBJECT_BANNER_CONT_H             = 2,
-    BG_BFG_OBJECT_BANNER_ALLY               = 3,
-    BG_BFG_OBJECT_BANNER_HORDE              = 4,
-    BG_BFG_OBJECT_AURA_ALLY                 = 5,
-    BG_BFG_OBJECT_AURA_HORDE                = 6,
-    BG_BFG_OBJECT_AURA_CONTESTED            = 7,
-    //gates
-    BG_BFG_OBJECT_GATE_A                    = 25,
-    BG_BFG_OBJECT_GATE_H                    = 26,
-    //buffs
-    BG_BFG_OBJECT_SPEEDBUFF_LIGHTHOUSE      = 28,
-    BG_BFG_OBJECT_REGENBUFF_LIGHTHOUSE      = 29,
-    BG_BFG_OBJECT_BERSERKBUFF_LIGHTHOUSE    = 30,
-    BG_BFG_OBJECT_SPEEDBUFF_WATERWORKS      = 31,
-    BG_BFG_OBJECT_REGENBUFF_WATERWORKS      = 32,
-    BG_BFG_OBJECT_BERSERKBUFF_WATERWORKS    = 33,
-    BG_BFG_OBJECT_SPEEDBUFF_MINE            = 34,
-    BG_BFG_OBJECT_REGENBUFF_MINE            = 35,
-    BG_BFG_OBJECT_BERSERKBUFF_MINE          = 36,
-    BG_BFG_OBJECT_MAX                       = 37
+    NODE_LIGHTHOUSE         = 0,
+    NODE_WATERWORKS         = 1,
+    NODE_MINE               = 2,
+
+    GILNEAS_SPIRIT_ALIANCE  = 3,
+    GILNEAS_SPIRIT_HORDE    = 4,
+
+    NODES_COUNT             = 3,
+    ALL_NODES_COUNT         = 5,
 };
 
-/* Object id templates from DB */
-enum BG_BFG_ObjectTypes
+enum GilneasSounds
 {
-    BG_BFG_OBJECTID_BANNER_A        = 208673,
-    BG_BFG_OBJECTID_BANNER_CONT_A   = 208763,
-    BG_BFG_OBJECTID_BANNER_H        = 208748,
-    BG_BFG_OBJECTID_BANNER_CONT_H   = 208733,
-
-    BG_BFG_OBJECTID_AURA_A          = 180100,
-    BG_BFG_OBJECTID_AURA_H          = 180101,
-    BG_BFG_OBJECTID_AURA_C          = 180102,
-
-    BG_BFG_OBJECTID_GATE_A          = 207177,
-    BG_BFG_OBJECTID_GATE_H          = 207178
+    SOUND_NODE_CLAIMED            = 8192,
+    SOUND_NODE_CAPTURED_ALLIANCE  = 8173,
+    SOUND_NODE_CAPTURED_HORDE     = 8213,
+    SOUND_NODE_ASSAULTED_ALLIANCE = 8212,
+    SOUND_NODE_ASSAULTED_HORDE    = 8174,
+    SOUND_NEAR_VICTORY            = 8456
 };
 
-enum BG_BFG_Timers
+float const GilneasNodes[NODES_COUNT][4] =
 {
-    BG_BFG_FLAG_CAPTURING_TIME = 60000
-};
-
-enum BG_BFG_Score
-{
-    BG_BFG_WARNING_NEAR_VICTORY_SCORE = 1800,
-    BG_BFG_MAX_TEAM_SCORE = 2000
-};
-
-/* Do not change below, or this thing will go boom! */
-enum BG_BG_BattlegroundNodes
-{
-    BG_BFG_NODE_LIGHTHOUSE = 0,
-    BG_BFG_NODE_WATERWORKS = 1,
-    BG_BFG_NODE_MINE = 2,
-
-    BG_BFG_DYNAMIC_NODES_COUNT = 3, // Dynamic nodes that can be captured
-
-    BG_BFG_SPIRIT_ALIANCE = 3,
-    BG_BFG_SPIRIT_HORDE = 4,
-
-    BG_BFG_ALL_NODES_COUNT = 5 // All nodes (dynamic and static)
-};
-
-enum BG_BFG_NodeStatus
-{
-    BG_BFG_NODE_TYPE_NEUTRAL = 0,
-    BG_BFG_NODE_TYPE_CONTESTED = 1,
-    BG_BFG_NODE_STATUS_ALLY_CONTESTED = 1,
-    BG_BFG_NODE_STATUS_HORDE_CONTESTED = 2,
-    BG_BFG_NODE_TYPE_OCCUPIED = 3,
-    BG_BFG_NODE_STATUS_ALLY_OCCUPIED = 3,
-    BG_BFG_NODE_STATUS_HORDE_OCCUPIED = 4
-};
-
-enum BG_BFG_Sounds
-{
-    BG_BFG_SOUND_NODE_CLAIMED = 8192,
-    BG_BFG_SOUND_NODE_CAPTURED_ALLIANCE = 8173,
-    BG_BFG_SOUND_NODE_CAPTURED_HORDE = 8213,
-    BG_BFG_SOUND_NODE_ASSAULTED_ALLIANCE = 8212,
-    BG_BFG_SOUND_NODE_ASSAULTED_HORDE = 8174,
-    BG_BFG_SOUND_NEAR_VICTORY = 8456
-};
-
-enum BG_BFG_Objectives
-{
-    BG_OBJECTIVE_ASSAULT_BASE = 122,
-    BG_OBJECTIVE_DEFEND_BASE = 123
-};
-
-#define BG_BFG_NotBGBGWeekendHonorTicks 330
-#define BG_BFG_BGBGWeekendHonorTicks 200
-#define BG_BFG_NotBGBGWeekendReputationTicks 200
-#define BG_BFG_BGBGWeekendReputationTicks 150
-
-#define BG_EVENT_START_BATTLE 5254 // Achievement: Newbs to Plowshares
-
-// x, y, z, o
-const float BG_BFG_NodePositions[BG_BFG_DYNAMIC_NODES_COUNT][4] =
-{
-    {1057.856934f, 1278.269165f, 2.91f, 1.903034f}, // Lighthouse
-    {980.1835f, 947.8692f, 13.998f, 5.9015f}, // Waterwork
-    {1251.010f, 958.3939f, 5.680f, 2.7698f} // Mine
+    { 1057.790f, 1278.285f, 3.1500f, 1.945662f }, // Lighthouse
+    { 1251.010f, 958.2685f, 5.6000f, 5.892280f }, // Waterworks
+    { 980.0446f, 948.7411f, 12.650f, 5.904071f }, // Mine
 };
 
 // x, y, z, o, rot0, rot1, rot2, rot3
-const float BG_BFG_DoorPositions[2][8] =
+float const GilneasDoors[4][8] =
 {
-    {918.876f, 1336.56f, 27.6195f, 2.77481f, 0.0f, 0.0f, 0.983231f, 0.182367f},
-    {1396.15f, 977.014f, 7.43169f, 6.27043f, 0.0f, 0.0f, 0.006378f, -0.99998f}
+    { 918.160f, 1336.75f, 27.6299f, 2.87927f, 0.0f, 0.0f, 0.983231f, 0.182367f },
+    { 918.160f, 1336.75f, 26.6299f, 2.87927f, 0.0f, 0.0f, 0.983231f, 0.182367f },
+    { 1396.15f, 977.014f, 7.43169f, 6.27043f, 0.0f, 0.0f, 0.006378f, -0.99998f },
+    { 1396.15f, 977.014f, 0.33169f, 6.27043f, 0.0f, 0.0f, 0.006378f, -0.99998f },
 };
 
-// Tick intervals and given points: case 0,1,2,3 captured nodes
-const uint32 BG_BFG_TickIntervals[4] = {0, 12000, 6000, 1000};
-const uint32 BG_BFG_TickPoints[4] = {0, 10, 10, 30};
-
-// WorldSafeLocs ids for 3 nodes, and for ally, and horde starting location
-const uint32 BG_BFG_GraveyardIds[BG_BFG_ALL_NODES_COUNT] = {1735, 1736, 1738, 1739, 1740};
-
-// x, y, z, o
-const float BG_BFG_BuffPositions[BG_BFG_DYNAMIC_NODES_COUNT][4] =
+float const GilneasSpiritGuides[ALL_NODES_COUNT][4] =
 {
-    {1063.57f, 1313.42f, 4.91f, 4.14f}, // Lighthouse
-    {961.830f, 977.03f, 14.15f, 4.55f}, // Waterworks
-    {1193.09f, 1017.46f, 7.98f, 0.24f}, // Mine
+    { 1034.82f, 1335.58f, 12.0095f, 5.15f }, // Lighthouse
+    { 887.578f, 937.337f, 23.7737f, 0.45f }, // Waterworks
+    { 1252.23f, 836.547f, 27.7895f, 1.60f }, // Mine
+    { 908.274f, 1338.6f, 27.6449f, 5.95f  }, // Alliance
+    { 1401.38f, 977.125f, 7.44215f, 3.04f }, // Horde
 };
 
-// x, y, z, o
-const float BG_BFG_SpiritGuidePos[BG_BFG_ALL_NODES_COUNT][4] =
+float const GilneasBuffs[NODES_COUNT][4] =
 {
-    {1034.82f, 1335.58f, 12.0095f, 5.15f}, // Lighthouse
-    {887.578f, 937.337f, 23.7737f, 0.45f}, // Waterworks
-    {1252.23f, 836.547f, 27.7895f, 1.60f}, // Mine
-    {908.274f, 1338.6f, 27.6449f, 5.95f}, // Alliance
-    {1401.38f, 977.125f, 7.44215f, 3.04f}, // Horde
+    { 1063.57f, 1313.42f, 4.91f, 4.14f }, // Lighthouse
+    { 961.830f, 977.03f, 14.15f, 4.55f }, // Waterworks
+    { 1193.09f, 1017.46f, 7.98f, 0.24f }, // Mine
 };
 
-struct BG_BFG_BannerTimer
+struct NodeInfo
 {
+    uint8 bannerType;
     uint32 timer;
-    uint8 type;
-    uint8 teamIndex;
+    uint32 team;
 };
 
-struct BattlegroundBFGScore : public BattlegroundScore
+struct GilneasStartingObjects
 {
-    BattlegroundBFGScore(): BasesAssaulted(0), BasesDefended(0) { }
-    ~BattlegroundBFGScore() { }
+    uint32 type;
+    uint32 entry;
+    float x, y, z, o;
+    float rotation0, rotation1, rotation2, rotation3;
+    uint32 respawnTime;
+};
+
+GilneasStartingObjects const gilneasStartingObjects[GILNEAS_OBJECT_MAX] =
+{
+    // Lighthouse
+    { OBJECT_LIGHTHOUSE_BANNER_NEUTRAL, LIGHTHOUSE_BANNER, GilneasNodes[0][0], GilneasNodes[0][1], GilneasNodes[0][2], GilneasNodes[0][3], 0, 0, sin(GilneasNodes[0][3] / 2.0f), cos(GilneasNodes[0][3] / 2.0f), RESPAWN_ONE_DAY },
+    { OBJECT_LIGHTHOUSE_BANNER_CONT_A, OBJECTID_BANNER_CONT_A, GilneasNodes[0][0], GilneasNodes[0][1], GilneasNodes[0][2], GilneasNodes[0][3], 0, 0, sin(GilneasNodes[0][3] / 2.0f), cos(GilneasNodes[0][3] / 2.0f), RESPAWN_ONE_DAY },
+    { OBJECT_LIGHTHOUSE_BANNER_CONT_H, OBJECTID_BANNER_CONT_H, GilneasNodes[0][0], GilneasNodes[0][1], GilneasNodes[0][2], GilneasNodes[0][3], 0, 0, sin(GilneasNodes[0][3] / 2.0f), cos(GilneasNodes[0][3] / 2.0f), RESPAWN_ONE_DAY },
+    { OBJECT_LIGHTHOUSE_BANNER_ALLY, OBJECTID_BANNER_A, GilneasNodes[0][0], GilneasNodes[0][1], GilneasNodes[0][2], GilneasNodes[0][3], 0, 0, sin(GilneasNodes[0][3] / 2.0f), cos(GilneasNodes[0][3] / 2.0f), RESPAWN_ONE_DAY },
+    { OBJECT_LIGHTHOUSE_BANNER_HORDE, OBJECTID_BANNER_H, GilneasNodes[0][0], GilneasNodes[0][1], GilneasNodes[0][2], GilneasNodes[0][3], 0, 0, sin(GilneasNodes[0][3] / 2.0f), cos(GilneasNodes[0][3] / 2.0f), RESPAWN_ONE_DAY },
+    { OBJECT_LIGHTHOUSE_AURA_ALLY, OBJECTID_AURA_A, GilneasNodes[0][0], GilneasNodes[0][1], GilneasNodes[0][2], GilneasNodes[0][3], 0, 0, sin(GilneasNodes[0][3] / 2.0f), cos(GilneasNodes[0][3] / 2.0f), RESPAWN_ONE_DAY },
+    { OBJECT_LIGHTHOUSE_AURA_HORDE, OBJECTID_AURA_H, GilneasNodes[0][0], GilneasNodes[0][1], GilneasNodes[0][2], GilneasNodes[0][3], 0, 0, sin(GilneasNodes[0][3] / 2.0f), cos(GilneasNodes[0][3] / 2.0f), RESPAWN_ONE_DAY },
+    { OBJECT_LIGHTHOUSE_AURA_CONTESTED, OBJECTID_AURA_C, GilneasNodes[0][0], GilneasNodes[0][1], GilneasNodes[0][2], GilneasNodes[0][3], 0, 0, sin(GilneasNodes[0][3] / 2.0f), cos(GilneasNodes[0][3] / 2.0f), RESPAWN_ONE_DAY },
+
+    // Waterworks
+    { OBJECT_WATERWORKS_BANNER_NEUTRAL, WATERWORKS_BANNER, GilneasNodes[1][0], GilneasNodes[1][1], GilneasNodes[1][2], GilneasNodes[1][3], 0, 0, sin(GilneasNodes[1][3] / 2.0f), cos(GilneasNodes[1][3] / 2.0f), RESPAWN_ONE_DAY },
+    { OBJECT_WATERWORKS_BANNER_CONT_A, OBJECTID_BANNER_CONT_A, GilneasNodes[1][0], GilneasNodes[1][1], GilneasNodes[1][2], GilneasNodes[1][3], 0, 0, sin(GilneasNodes[1][3] / 2.0f), cos(GilneasNodes[1][3] / 2.0f), RESPAWN_ONE_DAY },
+    { OBJECT_WATERWORKS_BANNER_CONT_H, OBJECTID_BANNER_CONT_H, GilneasNodes[1][0], GilneasNodes[1][1], GilneasNodes[1][2], GilneasNodes[1][3], 0, 0, sin(GilneasNodes[1][3] / 2.0f), cos(GilneasNodes[1][3] / 2.0f), RESPAWN_ONE_DAY },
+    { OBJECT_WATERWORKS_BANNER_ALLY, OBJECTID_BANNER_A, GilneasNodes[1][0], GilneasNodes[1][1], GilneasNodes[1][2], GilneasNodes[1][3], 0, 0, sin(GilneasNodes[1][3] / 2.0f), cos(GilneasNodes[1][3] / 2.0f), RESPAWN_ONE_DAY },
+    { OBJECT_WATERWORKS_BANNER_HORDE, OBJECTID_BANNER_H, GilneasNodes[1][0], GilneasNodes[1][1], GilneasNodes[1][2], GilneasNodes[1][3], 0, 0, sin(GilneasNodes[1][3] / 2.0f), cos(GilneasNodes[1][3] / 2.0f), RESPAWN_ONE_DAY },
+    { OBJECT_WATERWORKS_AURA_ALLY, OBJECTID_AURA_A, GilneasNodes[1][0], GilneasNodes[1][1], GilneasNodes[1][2], GilneasNodes[1][3], 0, 0, sin(GilneasNodes[1][3] / 2.0f), cos(GilneasNodes[1][3] / 2.0f), RESPAWN_ONE_DAY },
+    { OBJECT_WATERWORKS_AURA_HORDE, OBJECTID_AURA_H, GilneasNodes[1][0], GilneasNodes[1][1], GilneasNodes[1][2], GilneasNodes[1][3], 0, 0, sin(GilneasNodes[1][3] / 2.0f), cos(GilneasNodes[1][3] / 2.0f), RESPAWN_ONE_DAY },
+    { OBJECT_WATERWORKS_AURA_CONTESTED, OBJECTID_AURA_C, GilneasNodes[1][0], GilneasNodes[1][1], GilneasNodes[1][2], GilneasNodes[1][3], 0, 0, sin(GilneasNodes[1][3] / 2.0f), cos(GilneasNodes[1][3] / 2.0f), RESPAWN_ONE_DAY },
+
+    // Mine
+    { OBJECT_MINE_BANNER_NEUTRAL, MINE_BANNER, GilneasNodes[2][0], GilneasNodes[2][1], GilneasNodes[2][2], GilneasNodes[2][3], 0, 0, sin(GilneasNodes[2][3] / 2.0f), cos(GilneasNodes[2][3] / 2.0f), RESPAWN_ONE_DAY },
+    { OBJECT_MINE_BANNER_CONT_A, OBJECTID_BANNER_CONT_A, GilneasNodes[2][0], GilneasNodes[2][1], GilneasNodes[2][2], GilneasNodes[2][3], 0, 0, sin(GilneasNodes[2][3] / 2.0f), cos(GilneasNodes[2][3] / 2.0f), RESPAWN_ONE_DAY },
+    { OBJECT_MINE_BANNER_CONT_H, OBJECTID_BANNER_CONT_H, GilneasNodes[2][0], GilneasNodes[2][1], GilneasNodes[2][2], GilneasNodes[2][3], 0, 0, sin(GilneasNodes[2][3] / 2.0f), cos(GilneasNodes[2][3] / 2.0f), RESPAWN_ONE_DAY },
+    { OBJECT_MINE_BANNER_ALLY, OBJECTID_BANNER_A, GilneasNodes[2][0], GilneasNodes[2][1], GilneasNodes[2][2], GilneasNodes[2][3], 0, 0, sin(GilneasNodes[2][3] / 2.0f), cos(GilneasNodes[2][3] / 2.0f), RESPAWN_ONE_DAY },
+    { OBJECT_MINE_BANNER_HORDE, OBJECTID_BANNER_H, GilneasNodes[2][0], GilneasNodes[2][1], GilneasNodes[2][2], GilneasNodes[2][3], 0, 0, sin(GilneasNodes[2][3] / 2.0f), cos(GilneasNodes[2][3] / 2.0f), RESPAWN_ONE_DAY },
+    { OBJECT_MINE_AURA_ALLY, OBJECTID_AURA_A, GilneasNodes[2][0], GilneasNodes[2][1], GilneasNodes[2][2], GilneasNodes[2][3], 0, 0, sin(GilneasNodes[2][3] / 2.0f), cos(GilneasNodes[2][3] / 2.0f), RESPAWN_ONE_DAY },
+    { OBJECT_MINE_AURA_HORDE, OBJECTID_AURA_H, GilneasNodes[2][0], GilneasNodes[2][1], GilneasNodes[2][2], GilneasNodes[2][3], 0, 0, sin(GilneasNodes[2][3] / 2.0f), cos(GilneasNodes[2][3] / 2.0f), RESPAWN_ONE_DAY },
+    { OBJECT_MINE_AURA_CONTESTED, OBJECTID_AURA_C, GilneasNodes[2][0], GilneasNodes[2][1], GilneasNodes[2][2], GilneasNodes[2][3], 0, 0, sin(GilneasNodes[2][3] / 2.0f), cos(GilneasNodes[2][3] / 2.0f), RESPAWN_ONE_DAY },
+
+    // Gates
+    { OBJECT_GATE_A_1, OBJECTID_GATE_A_1, GilneasDoors[0][0], GilneasDoors[0][1], GilneasDoors[0][2], GilneasDoors[0][3], GilneasDoors[0][4], GilneasDoors[0][5], GilneasDoors[0][6], GilneasDoors[0][7], RESPAWN_IMMEDIATELY },
+    { OBJECT_GATE_A_2, OBJECTID_GATE_A_2, GilneasDoors[1][0], GilneasDoors[1][1], GilneasDoors[1][2], GilneasDoors[1][3], GilneasDoors[1][4], GilneasDoors[1][5], GilneasDoors[1][6], GilneasDoors[1][7], RESPAWN_IMMEDIATELY },
+    { OBJECT_GATE_H_1, OBJECTID_GATE_H_1, GilneasDoors[2][0], GilneasDoors[2][1], GilneasDoors[2][2], GilneasDoors[2][3], GilneasDoors[2][4], GilneasDoors[2][5], GilneasDoors[2][6], GilneasDoors[2][7], RESPAWN_IMMEDIATELY },
+    { OBJECT_GATE_H_2, OBJECTID_GATE_H_2, GilneasDoors[3][0], GilneasDoors[3][1], GilneasDoors[3][2], GilneasDoors[3][3], GilneasDoors[3][4], GilneasDoors[3][5], GilneasDoors[3][6], GilneasDoors[3][7], RESPAWN_IMMEDIATELY },
+    // Buffs
+    { OBJECT_LIGHTHOUSE_SPEEDBUFF, Buff_Entries[0], GilneasBuffs[0][0], GilneasBuffs[0][1], GilneasBuffs[0][2], GilneasBuffs[0][3], 0, 0, sin(GilneasBuffs[0][3] / 2.0f), cos(GilneasBuffs[0][3] / 2.0f), RESPAWN_ONE_DAY },
+    { OBJECT_LIGHTHOUSE_REGENBUFF, Buff_Entries[1], GilneasBuffs[0][0], GilneasBuffs[0][1], GilneasBuffs[0][2], GilneasBuffs[0][3], 0, 0, sin(GilneasBuffs[0][3] / 2.0f), cos(GilneasBuffs[0][3] / 2.0f), RESPAWN_ONE_DAY },
+    { OBJECT_LIGHTHOUSE_BERSERKBUFF, Buff_Entries[2], GilneasBuffs[0][0], GilneasBuffs[0][1], GilneasBuffs[0][2], GilneasBuffs[0][3], 0, 0, sin(GilneasBuffs[0][3] / 2.0f), cos(GilneasBuffs[0][3] / 2.0f), RESPAWN_ONE_DAY },
+    { OBJECT_WATERWORKS_SPEEDBUFF, Buff_Entries[0], GilneasBuffs[1][0], GilneasBuffs[1][1], GilneasBuffs[1][2], GilneasBuffs[1][3], 0, 0, sin(GilneasBuffs[1][3] / 2.0f), cos(GilneasBuffs[1][3] / 2.0f), RESPAWN_ONE_DAY },
+    { OBJECT_WATERWORKS_REGENBUFF, Buff_Entries[1], GilneasBuffs[1][0], GilneasBuffs[1][1], GilneasBuffs[1][2], GilneasBuffs[1][3], 0, 0, sin(GilneasBuffs[1][3] / 2.0f), cos(GilneasBuffs[1][3] / 2.0f), RESPAWN_ONE_DAY },
+    { OBJECT_WATERWORKS_BERSERKBUFF, Buff_Entries[2], GilneasBuffs[1][0], GilneasBuffs[1][1], GilneasBuffs[1][2], GilneasBuffs[1][3], 0, 0, sin(GilneasBuffs[1][3] / 2.0f), cos(GilneasBuffs[1][3] / 2.0f), RESPAWN_ONE_DAY },
+    { OBJECT_MINE_SPEEDBUFF, Buff_Entries[0], GilneasBuffs[2][0], GilneasBuffs[2][1], GilneasBuffs[2][2], GilneasBuffs[2][3], 0, 0, sin(GilneasBuffs[2][3] / 2.0f), cos(GilneasBuffs[2][3] / 2.0f), RESPAWN_ONE_DAY },
+    { OBJECT_MINE_REGENBUFF, Buff_Entries[1], GilneasBuffs[2][0], GilneasBuffs[2][1], GilneasBuffs[2][2], GilneasBuffs[2][3], 0, 0, sin(GilneasBuffs[2][3] / 2.0f), cos(GilneasBuffs[2][3] / 2.0f), RESPAWN_ONE_DAY },
+    { OBJECT_MINE_BERSERKBUFF, Buff_Entries[2], GilneasBuffs[2][0], GilneasBuffs[2][1], GilneasBuffs[2][2], GilneasBuffs[2][3], 0, 0, sin(GilneasBuffs[2][3] / 2.0f), cos(GilneasBuffs[2][3] / 2.0f), RESPAWN_ONE_DAY },
+};
+
+uint32 const GilneasNodestates[3] = { 1767, 1772, 1782 };
+uint32 const GilneasNodeicons[3] = { 1842, 1845, 1846 };
+
+uint32 const GilneasTickIntervals[4] = { 0, 9000, 3000, 1000 };
+uint32 const GilneasTickPoints[4] = { 0, 10, 10, 30 };
+
+uint32 const GilneasGraveyardIds[ALL_NODES_COUNT] = { 1735, 1736, 1738, 1739, 1740 };
+
+static uint32 const GilneasHonor[BG_HONOR_MODE_NUM] =
+{
+    330, // Normal honor
+    200, // Holiday
+};
+
+enum GilneasWorldStates
+{
+    WORLDSTATE_ALLIANCE_SCORE   = 1776,
+    WORLDSTATE_HORDE_SCORE      = 1777,
+    WORLDSTATE_HORDE_BASES      = 1778,
+    WORLDSTATE_ALLIANCE_BASES   = 1779,
+    WORLDSTATE_MAX_SCORE        = 1780,
+    WORLDSTATE_RESOURCES_WARN   = 1955,
+};
+
+struct BattlegroundBGScore : public BattlegroundScore
+{
+    BattlegroundBGScore() : BasesAssaulted(0), BasesDefended(0) { }
+    ~BattlegroundBGScore() { }
+
     uint32 BasesAssaulted;
     uint32 BasesDefended;
 };
 
-class BattlegroundBFG : public Battleground
+class BattlegroundBG : public Battleground
 {
-public:
-    BattlegroundBFG();
-    ~BattlegroundBFG();
+    friend class BattlegroundMgr;
 
-    void AddPlayer(Player* player);
-    void StartingEventCloseDoors();
-    void StartingEventOpenDoors();
-    void RemovePlayer(Player* player, uint64 guid, uint32 team);
-    void HandleAreaTrigger(Player* Source, uint32 Trigger);
-    bool SetupBattleground();
-    void Reset();
-    void EndBattleground(uint32 winner);
-    WorldSafeLocsEntry const* GetClosestGraveYard(Player* player);
+    public:
+        BattlegroundBG();
+        ~BattlegroundBG();
 
-    /* Score-keeping */
-    void UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor = true);
+        void PostUpdateImpl(uint32 diff);
+        void Reset();
 
-    void FillInitialWorldStates(WorldPacket& data);
+        void AddPlayer(Player* player);
+        void StartingEventCloseDoors();
+        void StartingEventOpenDoors();
 
-    /* Nodes occupying */
-    void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj);
+        virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player);
 
-    /* achievement req. */
-    bool IsAllNodesConrolledByTeam(uint32 team) const;
-    bool IsTeamScores500Disadvantage(uint32 team) const { return m_TeamScores500Disadvantage[GetTeamIndexByTeamId(team)]; }
+        void HandleAreaTrigger(Player* player, uint32 trigger);
+        bool SetupBattleground();
+        void EndBattleground(uint32 winner);
 
-    uint32 GetPrematureWinner();
-private:
-    void PostUpdateImpl(uint32 diff);
-    /* GameObject spawning/removing */
-    void _CreateBanner(uint8 node, uint8 type, uint8 teamIndex, bool delay);
-    void _DelBanner(uint8 node, uint8 type, uint8 teamIndex);
-    void _SendNodeUpdate(uint8 node);
+        void UpdatePlayerScore(Player* player, uint32 type, uint32 value, bool doAddHonor = true);
+        void FillInitialWorldStates(WorldPacket& data);
 
-    /* Creature spawning/removing */
-    // TODO: need to get the peons spawns scripted
-    void _NodeOccupied(uint8 node, Team team);
-    void _NodeDeOccupied(uint8 node);
+        void EventPlayerClickedOnFlag(Player* player, GameObject* /*gameobject*/);
 
-    int32 _GetNodeNameId(uint8 node);
+        void SendNodeUpdate(uint8 node);
+        void CreateBanner(uint8 node, uint8 type, uint32 team, bool delay);
+        void DeleteBanner(uint8 type);
 
-    /* Nodes info:
-    0: neutral
-    1: ally contested
-    2: horde contested
-    3: ally occupied
-    4: horde occupied */
-    uint8 m_Nodes[BG_BFG_DYNAMIC_NODES_COUNT];
-    uint8 m_prevNodes[BG_BFG_DYNAMIC_NODES_COUNT];
-    BG_BFG_BannerTimer m_BannerTimers[BG_BFG_DYNAMIC_NODES_COUNT];
-    uint32 m_NodeTimers[BG_BFG_DYNAMIC_NODES_COUNT];
-    uint32 m_lastTick[BG_TEAMS_COUNT];
-    uint32 m_HonorScoreTics[BG_TEAMS_COUNT];
-    uint32 m_ReputationScoreTics[BG_TEAMS_COUNT];
-    bool m_IsInformedNearVictory;
-    uint32 m_HonorTics;
-    uint32 m_ReputationTics;
-    // need for achievements
-    bool m_TeamScores500Disadvantage[BG_TEAMS_COUNT];
+        void NodeOccupied(uint8 node, uint32 team);
+        void NodeDeOccupied(uint8 node);
+
+        int32 GetNodeNameId(uint8 node) const;
+        int8 GetNodeFromObjectType(uint8 objectType) const;
+        uint8 GetBasesAmount(uint32 team) const;
+        uint32 GetSecondTeam(uint32 team) const;
+
+        bool IsJuggerNotEligible(uint8 team) const;
+        bool IsDontGetCockyKidEligible(uint8 team) const;
+        bool IsFullCoverageEligible(uint8 team) const;
+
+    private:
+        uint32 m_nodeTimers[NODES_COUNT];
+
+        uint32 m_lastTick[BG_TEAMS_COUNT];
+        uint32 m_honorScoreTicks[BG_TEAMS_COUNT];
+
+        bool m_isInformedNearVictory;
+        uint32 m_honorTicks;
+        uint32 m_reputationTicks;
+
+        NodeInfo m_nodeInfo[NODES_COUNT];
+        bool dontGetCockyKid[BG_TEAMS_COUNT];
 };
 #endif

@@ -49,12 +49,14 @@ void UnitAI::DoMeleeAttackIfReady()
     if (me->HasUnitState(UNIT_STATE_CASTING))
         return;
 
-    Unit* victim = me->getVictim();
+    Unit* victim = me->GetVictim();
     //Make sure our attack is ready and we aren't currently casting before checking distance
     if (me->isAttackReady() && me->IsWithinMeleeRange(victim))
     {
         me->AttackerStateUpdate(victim);
         me->resetAttackTimer();
+        if (me->getAttackTimer(OFF_ATTACK) < 500 && me->GetAttackTime(OFF_ATTACK)* me->m_modAttackSpeedPct[OFF_ATTACK] >= 500)
+            me->setAttackTimer(OFF_ATTACK, me->GetAttackTime(OFF_ATTACK)/2);
     }
 
     if (me->haveOffhandWeapon() && me->isAttackReady(OFF_ATTACK) && me->IsWithinMeleeRange(victim))
@@ -71,9 +73,9 @@ bool UnitAI::DoSpellAttackIfReady(uint32 spell)
 
     if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spell))
     {
-        if (me->IsWithinCombatRange(me->getVictim(), spellInfo->GetMaxRange(false)))
+        if (me->IsWithinCombatRange(me->GetVictim(), spellInfo->GetMaxRange(false)))
         {
-            me->CastSpell(me->getVictim(), spell, false);
+            me->CastSpell(me->GetVictim(), spell, false);
             me->resetAttackTimer();
             return true;
         }
@@ -136,7 +138,7 @@ void UnitAI::DoCast(uint32 spellId)
     {
         default:
         case AITARGET_SELF:     target = me; break;
-        case AITARGET_VICTIM:   target = me->getVictim(); break;
+        case AITARGET_VICTIM:   target = me->GetVictim(); break;
         case AITARGET_ENEMY:
         {
             const SpellInfo* spellInfo = sSpellMgr->GetSpellInfo(spellId);
@@ -156,8 +158,8 @@ void UnitAI::DoCast(uint32 spellId)
             DefaultTargetSelector targetSelector(me, range, playerOnly, -(int32)spellId);
             if (!(spellInfo->Attributes & SPELL_ATTR0_BREAKABLE_BY_DAMAGE)
                 && !(spellInfo->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_VICTIM)
-                && targetSelector(me->getVictim()))
-                target = me->getVictim();
+                && targetSelector(me->GetVictim()))
+                target = me->GetVictim();
             else
                 target = SelectTarget(SELECT_TARGET_RANDOM, 0, targetSelector);
             break;
@@ -178,10 +180,10 @@ void UnitAI::DoCast(Unit* victim, uint32 spellId, bool triggered)
 
 void UnitAI::DoCastVictim(uint32 spellId, bool triggered)
 {
-    if (!me->getVictim() || (me->HasUnitState(UNIT_STATE_CASTING) && !triggered))
+    if (!me->GetVictim() || (me->HasUnitState(UNIT_STATE_CASTING) && !triggered))
         return;
 
-    me->CastSpell(me->getVictim(), spellId, triggered);
+    me->CastSpell(me->GetVictim(), spellId, triggered);
 }
 
 void UnitAI::DoCastAOE(uint32 spellId, bool triggered)
@@ -276,7 +278,7 @@ void SimpleCharmedAI::UpdateAI(const uint32 /*diff*/)
     if (!charmer->isInCombat())
         me->GetMotionMaster()->MoveFollow(charmer, PET_FOLLOW_DIST, me->GetFollowAngle());
 
-    Unit* target = me->getVictim();
+    Unit* target = me->GetVictim();
     if (!target || !charmer->IsValidAttackTarget(target))
         AttackStart(charmer->SelectNearestTargetInAttackDistance());
 }
@@ -332,5 +334,5 @@ bool NonTankTargetSelector::operator()(Unit const* target) const
     if (_playerOnly && target->GetTypeId() != TYPEID_PLAYER)
         return false;
 
-    return target != _source->getVictim();
+    return target != _source->GetVictim();
 }

@@ -21,9 +21,11 @@
 enum eRomoggYells
 {
     SAY_AGGRO                   = 0,
-    SAY_SKULLCRAKER             = 1,
-    SAY_KILL                    = 2,
-    SAY_DEATH                   = 3,
+    SAY_CALL_FOR_HELP           = 1,
+    SAY_SKULLCRAKER             = 2,
+    SAY_UNLEASH_SKULLCRAKER     = 3,
+    SAY_KILL                    = 4,
+    SAY_DEATH                   = 5,
 };
 
 enum eRomoggSpells
@@ -128,6 +130,7 @@ public:
                 // Cast The Skullcraker
                 me->CastSpell(me, SPELL_THE_SKULLCRAKER, false);
                 Talk(SAY_SKULLCRAKER);
+                Talk(SAY_UNLEASH_SKULLCRAKER);
             }
             else if (pcreat->GetEntry() == NPC_QUAKE)
             {
@@ -146,9 +149,10 @@ public:
             // Call nearby creatures to help
             if (spell->Id == SPELL_CALL_FOR_HELP)
                 me->CallForHelp(30.0f);
+                Talk(SAY_CALL_FOR_HELP);
         }
 
-        void UpdateAI(uint32 Diff)
+        void UpdateAI(uint32 const Diff)
         {
             if (!UpdateVictim())
                 return;

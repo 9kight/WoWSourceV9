@@ -232,7 +232,7 @@ class boss_steelbreaker : public CreatureScript
                             events.CancelEvent(EVENT_BERSERK);
                             break;
                         case EVENT_FUSION_PUNCH:
-                            if (me->IsWithinMeleeRange(me->getVictim()))
+                            if (me->IsWithinMeleeRange(me->GetVictim()))
                                 DoCastVictim(SPELL_FUSION_PUNCH);
                             events.ScheduleEvent(EVENT_FUSION_PUNCH, urand(13000, 22000));
                             break;
@@ -568,12 +568,12 @@ class boss_stormcaller_brundir : public CreatureScript
                             //me->SetLevitate(false);
                             me->RemoveAurasDueToSpell(RAID_MODE(SPELL_LIGHTNING_TENDRILS_10M, SPELL_LIGHTNING_TENDRILS_25M));
                             me->RemoveAurasDueToSpell(SPELL_LIGHTNING_TENDRILS_VISUAL);
-                            DoStartMovement(me->getVictim());
+                            DoStartMovement(me->GetVictim());
                             events.CancelEvent(EVENT_GROUND);
                             me->getThreatManager().resetAllAggro();
                             break;
                         case EVENT_MOVE_POSITION:
-                            if (me->IsWithinMeleeRange(me->getVictim()))
+                            if (me->IsWithinMeleeRange(me->GetVictim()))
                             {
                                 float x = float(irand(-25, 25));
                                 float y = float(irand(-25, 25));

@@ -956,7 +956,7 @@ enum SpellEffects
     SPELL_EFFECT_UNLOCK_GUILD_VAULT_TAB             = 173, // Guild tab unlocked (guild perk)
     SPELL_EFFECT_174                                = 174,
     SPELL_EFFECT_175                                = 175, // Unused (4.3.4)
-    SPELL_EFFECT_176                                = 176, // Some kind of sanctuary effect (Vanish)
+    SPELL_EFFECT_176                                = 176, // Some kind of sanctuary effect
     SPELL_EFFECT_177                                = 177,
     SPELL_EFFECT_178                                = 178, // Unused (4.3.4)
     SPELL_EFFECT_CREATE_AREATRIGGER                 = 179,
@@ -1431,6 +1431,7 @@ enum Mechanics
     MECHANIC_SAPPED           = 30,
     MECHANIC_ENRAGED          = 31,
     MECHANIC_WOUNDED          = 32,
+	MAX_MECHANIC              = 33
 };
 
 // Used for spell 42292 Immune Movement Impairment and Loss of Control (0x49967ca6)

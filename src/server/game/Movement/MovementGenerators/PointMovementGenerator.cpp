@@ -24,6 +24,7 @@
 #include "MoveSplineInit.h"
 #include "MoveSpline.h"
 #include "Player.h"
+#include "CreatureGroups.h"
 
 //----- Point Movement Generator
 template<class T>
@@ -42,6 +43,11 @@ void PointMovementGenerator<T>::DoInitialize(T* unit)
     if (speed > 0.0f)
         init.SetVelocity(speed);
     init.Launch();
+    
+    //Call for creature group update
+    if (Creature* creature = unit->ToCreature())
+        if (creature->GetFormation() && creature->GetFormation()->getLeader() == creature)
+            creature->GetFormation()->LeaderMoveTo(i_x, i_y, i_z);
 }
 
 template<class T>
@@ -66,6 +72,11 @@ bool PointMovementGenerator<T>::DoUpdate(T* unit, uint32 /*diff*/)
         if (speed > 0.0f) // Default value for point motion type is 0.0, if 0.0 spline will use GetSpeed on unit
             init.SetVelocity(speed);
         init.Launch();
+        
+        //Call for creature group update
+        if (Creature* creature = unit->ToCreature())
+            if (creature->GetFormation() && creature->GetFormation()->getLeader() == creature)
+                creature->GetFormation()->LeaderMoveTo(i_x, i_y, i_z);
     }
 
     return !unit->movespline->Finalized();
@@ -131,7 +142,7 @@ void EffectMovementGenerator::Finalize(Unit* unit)
     // Need restore previous movement since we have no proper states system
     if (unit->isAlive() && !unit->HasUnitState(UNIT_STATE_CONFUSED | UNIT_STATE_FLEEING))
     {
-        if (Unit* victim = unit->getVictim())
+        if (Unit* victim = unit->GetVictim())
             unit->GetMotionMaster()->MoveChase(victim);
         else
             unit->GetMotionMaster()->Initialize();

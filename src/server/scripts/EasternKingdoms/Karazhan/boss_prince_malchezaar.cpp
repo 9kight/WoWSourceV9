@@ -400,8 +400,8 @@ public:
             if (me->HasUnitState(UNIT_STATE_STUNNED))      // While shifting to phase 2 malchezaar stuns himself
                 return;
 
-            if (me->GetUInt64Value(UNIT_FIELD_TARGET) != me->getVictim()->GetGUID())
-                me->SetTarget(me->getVictim()->GetGUID());
+            if (me->GetUInt64Value(UNIT_FIELD_TARGET) != me->GetVictim()->GetGUID())
+                me->SetTarget(me->GetVictim()->GetGUID());
 
             if (phase == 1)
             {
@@ -502,11 +502,11 @@ public:
                         {
                             if (Unit* axe = Unit::GetUnit(*me, axes[i]))
                             {
-                                if (axe->getVictim())
-                                    DoModifyThreatPercent(axe->getVictim(), -100);
+                                if (axe->GetVictim())
+                                    DoModifyThreatPercent(axe->GetVictim(), -100);
                                 if (target)
                                     axe->AddThreat(target, 1000000.0f);
-                                //axe->getThreatManager().tauntFadeOut(axe->getVictim());
+                                //axe->getThreatManager().tauntFadeOut(axe->GetVictim());
                                 //axe->getThreatManager().tauntApply(target);
                             }
                         }
@@ -540,7 +540,7 @@ public:
                 {
                     Unit* target = NULL;
                     if (phase == 1)
-                        target = me->getVictim();        // the tank
+                        target = me->GetVictim();        // the tank
                     else                                          // anyone but the tank
                         target = SelectTarget(SELECT_TARGET_RANDOM, 1, 100, true);
 
@@ -570,18 +570,18 @@ public:
 
         void DoMeleeAttacksIfReady()
         {
-            if (me->IsWithinMeleeRange(me->getVictim()) && !me->IsNonMeleeSpellCasted(false))
+            if (me->IsWithinMeleeRange(me->GetVictim()) && !me->IsNonMeleeSpellCasted(false))
             {
                 //Check for base attack
-                if (me->isAttackReady() && me->getVictim())
+                if (me->isAttackReady() && me->GetVictim())
                 {
-                    me->AttackerStateUpdate(me->getVictim());
+                    me->AttackerStateUpdate(me->GetVictim());
                     me->resetAttackTimer();
                 }
                 //Check for offhand attack
-                if (me->isAttackReady(OFF_ATTACK) && me->getVictim())
+                if (me->isAttackReady(OFF_ATTACK) && me->GetVictim())
                 {
-                    me->AttackerStateUpdate(me->getVictim(), OFF_ATTACK);
+                    me->AttackerStateUpdate(me->GetVictim(), OFF_ATTACK);
                     me->resetAttackTimer(OFF_ATTACK);
                 }
             }

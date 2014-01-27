@@ -58,7 +58,7 @@ void CreatureAI::DoZoneInCombat(Creature* creature /*= NULL*/, float maxRangeToN
         return;
     }
 
-    if (!creature->HasReactState(REACT_PASSIVE) && !creature->getVictim())
+    if (!creature->HasReactState(REACT_PASSIVE) && !creature->GetVictim())
     {
         if (Unit* nearTarget = creature->SelectNearestTarget(maxRangeToNearestTarget))
             creature->AI()->AttackStart(nearTarget);
@@ -75,7 +75,7 @@ void CreatureAI::DoZoneInCombat(Creature* creature /*= NULL*/, float maxRangeToN
         }
     }
 
-    if (!creature->HasReactState(REACT_PASSIVE) && !creature->getVictim())
+    if (!creature->HasReactState(REACT_PASSIVE) && !creature->GetVictim())
     {
         sLog->outError(LOG_FILTER_GENERAL, "DoZoneInCombat called for creature that has empty threat list (creature entry = %u)", creature->GetEntry());
         return;
@@ -131,7 +131,7 @@ void CreatureAI::MoveInLineOfSight(Unit* who)
     if (!me->HasReactState(REACT_AGGRESSIVE))
         return;
 
-    if (me->getVictim())
+    if (me->GetVictim())
         return;
 
     if (me->GetCreatureType() == CREATURE_TYPE_NON_COMBAT_PET) // non-combat pets should just stand there and look good;)
@@ -139,10 +139,20 @@ void CreatureAI::MoveInLineOfSight(Unit* who)
 
     if (me->canStartAttack(who, false))
         AttackStart(who);
-    //else if (who->getVictim() && me->IsFriendlyTo(who)
+    //else if (who->GetVictim() && me->IsFriendlyTo(who)
     //    && me->IsWithinDistInMap(who, sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_ASSISTANCE_RADIUS))
-    //    && me->canStartAttack(who->getVictim(), true)) // TODO: if we use true, it will not attack it when it arrives
-    //    me->GetMotionMaster()->MoveChase(who->getVictim());
+    //    && me->canStartAttack(who->GetVictim(), true)) // TODO: if we use true, it will not attack it when it arrives
+    //    me->GetMotionMaster()->MoveChase(who->GetVictim());
+}
+
+void CreatureAI::JustReachedHome()
+{
+    me->setActive(false);
+}
+
+void CreatureAI::EnterCombat(Unit* /*victim*/)
+{
+    me->setActive(true);
 }
 
 void CreatureAI::EnterEvadeMode()
@@ -177,13 +187,11 @@ void CreatureAI::EnterEvadeMode()
             me->GetVehicleKit()->Reset(true);
     }
 
-
-    me->SetLastDamagedTime(0);
 }
 
 /*void CreatureAI::AttackedBy(Unit* attacker)
 {
-    if (!me->getVictim())
+    if (!me->GetVictim())
         AttackStart(attacker);
 }*/
 
@@ -203,7 +211,7 @@ bool CreatureAI::UpdateVictimWithGaze()
 
     if (me->HasReactState(REACT_PASSIVE))
     {
-        if (me->getVictim())
+        if (me->GetVictim())
             return true;
         else
             me->SetReactState(REACT_AGGRESSIVE);
@@ -211,7 +219,7 @@ bool CreatureAI::UpdateVictimWithGaze()
 
     if (Unit* victim = me->SelectVictim())
         AttackStart(victim);
-    return me->getVictim();
+    return me->GetVictim();
 }
 
 bool CreatureAI::UpdateVictim()
@@ -223,7 +231,7 @@ bool CreatureAI::UpdateVictim()
     {
         if (Unit* victim = me->SelectVictim())
             AttackStart(victim);
-        return me->getVictim();
+        return me->GetVictim();
     }
     else if (me->getThreatManager().isThreatListEmpty())
     {
@@ -251,6 +259,7 @@ bool CreatureAI::_EnterEvadeMode()
     me->LoadCreaturesAddon();
     me->SetLootRecipient(NULL);
     me->ResetPlayerDamageReq();
+    me->SetLastDamagedTime(0);
 
     if (me->IsInEvadeMode())
         return false;

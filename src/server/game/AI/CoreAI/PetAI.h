@@ -43,6 +43,8 @@ class PetAI : public CreatureAI
         void AttackedBy(Unit* attacker);
         void ReceiveEmote(Player* player, uint32 textEmote);
         void HandleReturnMovement();
+        bool IsCasterPet();
+        float GetAttackDistance(Unit* victim = NULL);
 
         // The following aren't used by the PetAI but need to be defined to override
         //  default CreatureAI functions which interfere with the PetAI

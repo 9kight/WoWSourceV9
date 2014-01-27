@@ -71,10 +71,10 @@ struct MembershipRequest
         }
 
         MembershipRequest(uint32 playerGUID, uint32 guildId, uint32 availability, uint32 classRoles, uint32 interests, std::string& comment, time_t submitTime) :
-            _comment(comment), _guildId(guildId), _playerGUID(playerGUID), _availability(availability),
-            _classRoles(classRoles), _interests(interests), _time(submitTime)  {}
-
-        MembershipRequest() : _guildId(0), _playerGUID(0), _availability(0), _classRoles(0),
+            _playerGUID(playerGUID), _guildId(guildId), _availability(availability), _classRoles(classRoles),
+            _interests(interests), _time(submitTime), _comment(comment) {}
+        
+        MembershipRequest() : _playerGUID(0), _guildId(0), _availability(0), _classRoles(0),
             _interests(0), _time(time(NULL)) {}
 
         uint32 GetGuildId() const      { return _guildId; }
@@ -186,14 +186,14 @@ struct LFGuildSettings : public LFGuildPlayer
 
         LFGuildSettings(bool listed, TeamId team) : LFGuildPlayer(), _listed(listed), _team(team) {}
 
-        LFGuildSettings(bool listed, TeamId team, uint32 guid, uint8 role, uint8 availability, uint8 interests, uint8 level) :
-            LFGuildPlayer(guid, role, availability, interests, level), _listed(listed), _team(team) {}
+        LFGuildSettings(bool listed, TeamId team, uint32 guid, uint8 role, uint8 availability, uint8 interests, uint8 level) : _listed(listed),
+            LFGuildPlayer(guid, role, availability, interests, level), _team(team) {}
 
-        LFGuildSettings(bool listed, TeamId team, uint32 guid, uint8 role, uint8 availability, uint8 interests, uint8 level, std::string& comment) :
-            LFGuildPlayer(guid, role, availability, interests, level, comment), _listed(listed), _team(team) {}
+        LFGuildSettings(bool listed, TeamId team, uint32 guid, uint8 role, uint8 availability, uint8 interests, uint8 level, std::string& comment) : _listed(listed),
+            LFGuildPlayer(guid, role, availability, interests, level, comment), _team(team) {}
 
-        LFGuildSettings(LFGuildSettings const& settings) :
-            LFGuildPlayer(settings), _listed(settings.IsListed()), _team(settings.GetTeam()) {}
+        LFGuildSettings(LFGuildSettings const& settings) : _listed(settings.IsListed()), _team(settings.GetTeam()),
+            LFGuildPlayer(settings) {}
 
 
         bool IsListed() const      { return _listed; }

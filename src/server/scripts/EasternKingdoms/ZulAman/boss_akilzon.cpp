@@ -1,351 +1,257 @@
-/*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 
-/* ScriptData
-SDName: boss_Akilzon
-SD%Complete: 75%
-SDComment: Missing timer for Call Lightning and Sound ID's
-SQLUpdate:
-#Temporary fix for Soaring Eagles
-
-EndScriptData */
-
+#include "ScriptPCH.h"
+#include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
-#include "GridNotifiers.h"
-#include "GridNotifiersImpl.h"
+#include "SpellScript.h"
+#include "SpellAuraEffects.h"
+#include "SpellAuras.h"
+#include "MapManager.h"
+#include "Spell.h"
+#include "Vehicle.h"
 #include "Cell.h"
 #include "CellImpl.h"
-#include "zulaman.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "CreatureTextMgr.h"
 #include "Weather.h"
+
+#include "zulaman.h"
+
+enum Yells
+{
+    SAY_AGGRO                  = 0,
+    SAY_SUMMON_EAGLE           = 1,
+    SAY_INTRO                  = 2,
+    SAY_BERSERK                = 3,
+    SAY_SLAY                   = 4,
+    SAY_DEATH                  = 5,
+
+    ANN_STORM                  = 6
+};
 
 enum Spells
 {
-    SPELL_STATIC_DISRUPTION     = 43622,
-    SPELL_STATIC_VISUAL         = 45265,
-    SPELL_CALL_LIGHTNING        = 43661, // Missing timer
-    SPELL_GUST_OF_WIND          = 43621,
-    SPELL_ELECTRICAL_STORM      = 43648,
-    SPELL_BERSERK               = 45078,
-    SPELL_ELECTRICAL_OVERLOAD   = 43658,
-    SPELL_EAGLE_SWOOP           = 44732
+    // Boss
+    SPELL_STATIC_DISRUPTION    = 43622,
+    SPELL_STATIC_VISUAL        = 45265,
+    SPELL_CALL_LIGHTNING       = 43661,
+    SPELL_SUMMON_KIDNAPPER     = 43621,
+    SPELL_ELECTRICAL_STORM     = 43648,
+    SPELL_ELECTRICAL_STORM_VIS = 44007, // Cloud above.
+    SPELL_BERSERK              = 45078,
+    SPELL_ELECTRICAL_OVERLOAD  = 43658,
+
+    // Eagles & Kidnapper
+    SPELL_EAGLE_SWOOP          = 44732,
+    SPELL_PLUCKED              = 97318,
+
+    SPELL_ENTER_VEHICLE        = 46598
 };
 
-enum Says
+enum Mobs
 {
-    SAY_AGGRO                   = 0,
-    SAY_SUMMON                  = 1,
-    SAY_INTRO                   = 2, // Not used in script
-    SAY_ENRAGE                  = 3,
-    SAY_KILL                    = 4,
-    SAY_DEATH                   = 5
+    MOB_SOARING_EAGLE          = 24858,
+    MOB_AMANI_KIDNAPPER        = 52648
 };
 
-enum Misc
+enum EagleLocations
 {
-    MOB_SOARING_EAGLE           = 24858,
-    SE_LOC_X_MAX                = 400,
-    SE_LOC_X_MIN                = 335,
-    SE_LOC_Y_MAX                = 1435,
-    SE_LOC_Y_MIN                = 1370
+    SE_LOC_X_MAX               = 400,
+    SE_LOC_X_MIN               = 335,
+    SE_LOC_Y_MAX               = 1435,
+    SE_LOC_Y_MIN               = 1370
+};
+
+enum Events
+{
+    EVENT_STATIC_DISRUPTION    = 1,
+    EVENT_CALL_LIGHTNING,
+    EVENT_ELECTRICAL_STORM,
+    EVENT_SUMMON_EAGLES,
+    EVENT_SUMMON_KIDNAPPER,
+    EVENT_RELEASE_PLAYER,
+    EVENT_BERSERK
 };
 
 class boss_akilzon : public CreatureScript
 {
-    public:
+public:
+    boss_akilzon() : CreatureScript("boss_akilzon") { }
 
-        boss_akilzon()
-            : CreatureScript("boss_akilzon")
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new boss_akilzonAI(creature);
+    }
+
+    struct boss_akilzonAI : public BossAI
+    {
+        boss_akilzonAI(Creature* creature) : BossAI(creature, DATA_AKILZONEVENT), summons(me)
         {
+            instance = creature->GetInstanceScript();
+            introDone = false;
+        }
+        
+        InstanceScript* instance;
+        EventMap events;
+        SummonList summons;
+
+        bool introDone, isStorm;
+        Unit* stormTarget;
+        Unit* stormVehicle;
+
+        void Reset()
+        {
+            events.Reset();
+            summons.DespawnAll();
+            isStorm = false;
+
+            if (instance)
+                instance->SetData(DATA_AKILZONEVENT, NOT_STARTED);
+
+            SetWeather(WEATHER_STATE_FINE);
+
+            _Reset();
         }
 
-        struct boss_akilzonAI : public ScriptedAI
+        void MoveInLineOfSight(Unit* who)
         {
-            boss_akilzonAI(Creature* creature) : ScriptedAI(creature)
+            if (!introDone && me->IsWithinDistInMap(who, 30) && who->GetTypeId() == TYPEID_PLAYER)
             {
-                instance = creature->GetInstanceScript();
-                memset(BirdGUIDs, 0, sizeof(BirdGUIDs));
+                Talk(SAY_INTRO);
+                introDone = true;
+            }
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            Talk(SAY_AGGRO);
+
+            if (instance)
+            {
+                instance->SetData(DATA_AKILZONEVENT, IN_PROGRESS);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me); // Add
             }
 
-            InstanceScript* instance;
+            events.ScheduleEvent(EVENT_STATIC_DISRUPTION, urand(10000, 20000));
+            events.ScheduleEvent(EVENT_ELECTRICAL_STORM, 60000);
+            events.ScheduleEvent(EVENT_SUMMON_EAGLES, 30000);
+            events.ScheduleEvent(EVENT_SUMMON_KIDNAPPER, urand(20000, 30000));
 
-            uint64 BirdGUIDs[8];
-            uint64 TargetGUID;
-            uint64 CycloneGUID;
-            uint64 CloudGUID;
+            events.ScheduleEvent(EVENT_BERSERK, 10 * MINUTE * IN_MILLISECONDS);
 
-            uint32 StaticDisruption_Timer;
-            uint32 GustOfWind_Timer;
-            uint32 CallLighting_Timer;
-            uint32 ElectricalStorm_Timer;
-            uint32 SummonEagles_Timer;
-            uint32 Enrage_Timer;
+            _EnterCombat();
+        }
 
-            uint32 StormCount;
-            uint32 StormSequenceTimer;
+        void JustSummoned(Creature* summon)
+        {
+            summons.Summon(summon);
+            summon->setActive(true);
+ 
+            if (me->isInCombat())
+                summon->AI()->DoZoneInCombat();
+        }
 
-            bool isRaining;
+        void KilledUnit(Unit* /*victim*/)
+        {
+            Talk(SAY_SLAY);
+        }
 
-            void Reset()
+        void JustDied(Unit* /*killer*/)
+        {
+            Talk(SAY_DEATH);
+            summons.DespawnAll();
+
+            if (instance)
             {
-                if (instance)
-                    instance->SetData(DATA_AKILZONEVENT, NOT_STARTED);
-
-                StaticDisruption_Timer = urand(10000, 20000); //10 to 20 seconds (bosskillers)
-                GustOfWind_Timer = urand(20000, 30000); //20 to 30 seconds(bosskillers)
-                CallLighting_Timer = urand(10000, 20000); //totaly random timer. can't find any info on this
-                ElectricalStorm_Timer = 60000; //60 seconds(bosskillers)
-                Enrage_Timer = 10*MINUTE*IN_MILLISECONDS; //10 minutes till enrage(bosskillers)
-                SummonEagles_Timer = 99999;
-
-                TargetGUID = 0;
-                CloudGUID = 0;
-                CycloneGUID = 0;
-                DespawnSummons();
-                memset(BirdGUIDs, 0, sizeof(BirdGUIDs));
-
-                StormCount = 0;
-                StormSequenceTimer = 0;
-
-                isRaining = false;
-
-                SetWeather(WEATHER_STATE_FINE, 0.0f);
+                instance->SetData(DATA_AKILZONEVENT, DONE);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me); // Remove
             }
 
-            void EnterCombat(Unit* /*who*/)
+            _JustDied();
+        }
+
+        void EnterEvadeMode()
+        {
+            Reset();
+            SetCombatMovement(true);
+            me->GetMotionMaster()->MoveTargetedHome();
+            me->RemoveAllAuras();
+
+            if (instance)
             {
-                Talk(SAY_AGGRO);
-                //DoZoneInCombat();
-                if (instance)
-                    instance->SetData(DATA_AKILZONEVENT, IN_PROGRESS);
+                instance->SetData(DATA_AKILZONEVENT, FAIL);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me); // Remove
             }
 
-            void JustDied(Unit* /*killer*/)
-            {
-                Talk(SAY_DEATH);
-                if (instance)
-                    instance->SetData(DATA_AKILZONEVENT, DONE);
-                DespawnSummons();
-            }
+            _EnterEvadeMode();
+        }
 
-            void KilledUnit(Unit* /*victim*/)
-            {
-                Talk(SAY_KILL);
-            }
+        void SetWeather(uint32 weather)
+        {
+            Map* map = me->GetMap();
+            if (!map->IsDungeon())
+                return;
 
-            void DespawnSummons()
+            WorldPacket data(SMSG_WEATHER, 9);
+            data << uint32(weather) << float(0.5f) << uint8(0);
+            map->SendToPlayers(&data);
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
             {
-                for (uint8 i = 0; i < 8; ++i)
+                switch(eventId)
                 {
-                    Unit* bird = Unit::GetUnit(*me, BirdGUIDs[i]);
-                    if (bird && bird->isAlive())
-                    {
-                        bird->SetVisible(false);
-                        bird->setDeathState(JUST_DIED);
-                    }
-                }
-            }
+                    case EVENT_BERSERK:
+                        Talk(SAY_BERSERK);
+                        DoCast(me, SPELL_BERSERK);
+                        break;
 
-            void SetWeather(uint32 weather, float grade)
-            {
-                Map* map = me->GetMap();
-                if (!map->IsDungeon())
-                    return;
+                    case EVENT_STATIC_DISRUPTION:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                            DoCast(target, SPELL_STATIC_DISRUPTION);
+                        events.ScheduleEvent(EVENT_STATIC_DISRUPTION, urand(10000, 20000));
+                        events.ScheduleEvent(EVENT_CALL_LIGHTNING, urand(2000, 5000));
+                        break;
 
-                WorldPacket data(SMSG_WEATHER, (4+4+4));
-                data << uint32(weather) << float(grade) << uint8(0);
+                    case EVENT_CALL_LIGHTNING:
+                        DoCastVictim(SPELL_CALL_LIGHTNING);
+                        break;
 
-                map->SendToPlayers(&data);
-            }
-
-            void HandleStormSequence(Unit* Cloud) // 1: begin, 2-9: tick, 10: end
-            {
-                if (StormCount < 10 && StormCount > 1)
-                {
-                    // deal damage
-                    int32 bp0 = 800;
-                    for (uint8 i = 2; i < StormCount; ++i)
-                        bp0 *= 2;
-
-                    CellCoord p(Trinity::ComputeCellCoord(me->GetPositionX(), me->GetPositionY()));
-                    Cell cell(p);
-                    cell.SetNoCreate();
-
-                    std::list<Unit*> tempUnitMap;
-
-                    {
-                        Trinity::AnyAoETargetUnitInObjectRangeCheck u_check(me, me, SIZE_OF_GRIDS);
-                        Trinity::UnitListSearcher<Trinity::AnyAoETargetUnitInObjectRangeCheck> searcher(me, tempUnitMap, u_check);
-
-                        TypeContainerVisitor<Trinity::UnitListSearcher<Trinity::AnyAoETargetUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
-                        TypeContainerVisitor<Trinity::UnitListSearcher<Trinity::AnyAoETargetUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
-
-                        cell.Visit(p, world_unit_searcher, *me->GetMap(), *me, SIZE_OF_GRIDS);
-                        cell.Visit(p, grid_unit_searcher, *me->GetMap(), *me, SIZE_OF_GRIDS);
-                    }
-                    //dealdamege
-                    for (std::list<Unit*>::const_iterator i = tempUnitMap.begin(); i != tempUnitMap.end(); ++i)
-                    {
-                        if (!Cloud->IsWithinDist(*i, 6, false))
-                            Cloud->CastCustomSpell(*i, 43137, &bp0, NULL, NULL, true, 0, 0, me->GetGUID());
-                    }
-                    // visual
-                    float x, y, z;
-                    z = me->GetPositionZ();
-                    for (uint8 i = 0; i < 5+rand()%5; ++i)
-                    {
-                        x = 343.0f+rand()%60;
-                        y = 1380.0f+rand()%60;
-                        if (Unit* trigger = me->SummonTrigger(x, y, z, 0, 2000))
+                    case EVENT_ELECTRICAL_STORM:
+                        Talk(ANN_STORM);
+                        SetWeather(WEATHER_STATE_HEAVY_RAIN);
+                        SetCombatMovement(false);
+                        isStorm = true;
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f, true))
                         {
-                            trigger->setFaction(35);
-                            trigger->SetMaxHealth(100000);
-                            trigger->SetHealth(100000);
-                            trigger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                            if (Cloud)
-                                Cloud->CastCustomSpell(trigger, /*43661*/43137, &bp0, NULL, NULL, true, 0, 0, Cloud->GetGUID());
+                            target->CastSpell(target, SPELL_ELECTRICAL_STORM_VIS, true); // Cloud visual.
+
+                            target->SetUnitMovementFlags(MOVEMENTFLAG_DISABLE_GRAVITY);
+                            target->SetCanFly(true);
+                            target->MonsterMoveWithSpeed(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ()+15, 2);
+
+                            DoCast(target, SPELL_ELECTRICAL_STORM, false); // Real spell.
+                            stormTarget = target;
                         }
-                    }
-                }
-                ++StormCount;
-                if (StormCount > 10)
-                {
-                    StormCount = 0; // finish
-                    SummonEagles_Timer = 5000;
-                    me->InterruptNonMeleeSpells(false);
-                    CloudGUID = 0;
-                    if (Cloud)
-                        Cloud->DealDamage(Cloud, Cloud->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-                    SetWeather(WEATHER_STATE_FINE, 0.0f);
-                    isRaining = false;
-                }
-                StormSequenceTimer = 1000;
-            }
+                        events.ScheduleEvent(EVENT_ELECTRICAL_STORM, 60000);
+                        events.ScheduleEvent(EVENT_RELEASE_PLAYER, 8100);
+                        break;
 
-            void UpdateAI(const uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
+                    case EVENT_SUMMON_EAGLES:
+                        Talk(SAY_SUMMON_EAGLE);
 
-                if (StormCount)
-                {
-                    Unit* target = Unit::GetUnit(*me, CloudGUID);
-                    if (!target || !target->isAlive())
-                    {
-                        EnterEvadeMode();
-                        return;
-                    }
-                    else if (Unit* Cyclone = Unit::GetUnit(*me, CycloneGUID))
-                        Cyclone->CastSpell(target, 25160, true); // keep casting or...
-
-                    if (StormSequenceTimer <= diff)
-                        HandleStormSequence(target);
-                    else
-                        StormSequenceTimer -= diff;
-
-                    return;
-                }
-
-                if (Enrage_Timer <= diff)
-                {
-                    Talk(SAY_ENRAGE);
-                    DoCast(me, SPELL_BERSERK, true);
-                    Enrage_Timer = 600000;
-                } else Enrage_Timer -= diff;
-
-                if (StaticDisruption_Timer <= diff)
-                {
-                    Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1);
-                    if (!target) target = me->getVictim();
-                    TargetGUID = target->GetGUID();
-                    DoCast(target, SPELL_STATIC_DISRUPTION, false);
-                    me->SetInFront(me->getVictim());
-                    StaticDisruption_Timer = (10+rand()%8)*1000; // < 20s
-
-                    /*if (float dist = me->IsWithinDist3d(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 5.0f) dist = 5.0f;
-                    SDisruptAOEVisual_Timer = 1000 + floor(dist / 30 * 1000.0f);*/
-                } else StaticDisruption_Timer -= diff;
-
-                if (GustOfWind_Timer <= diff)
-                {
-                    Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1);
-                    if (!target) target = me->getVictim();
-                    DoCast(target, SPELL_GUST_OF_WIND);
-                    GustOfWind_Timer = urand(20, 30) * 1000; //20 to 30 seconds(bosskillers)
-                } else GustOfWind_Timer -= diff;
-
-                if (CallLighting_Timer <= diff)
-                {
-                    DoCastVictim(SPELL_CALL_LIGHTNING);
-                    CallLighting_Timer = urand(12, 17) * 1000; //totaly random timer. can't find any info on this
-                } else CallLighting_Timer -= diff;
-
-                if (!isRaining && ElectricalStorm_Timer < uint32(8000 + rand() % 5000))
-                {
-                    SetWeather(WEATHER_STATE_HEAVY_RAIN, 0.9999f);
-                    isRaining = true;
-                }
-
-                if (ElectricalStorm_Timer <= diff)
-                {
-                    Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50, true);
-                    if (!target)
-                    {
-                        EnterEvadeMode();
-                        return;
-                    }
-                    target->CastSpell(target, 44007, true);//cloud visual
-                    DoCast(target, SPELL_ELECTRICAL_STORM, false);//storm cyclon + visual
-                    float x, y, z;
-                    target->GetPosition(x, y, z);
-                    if (target)
-                    {
-                        target->SetUnitMovementFlags(MOVEMENTFLAG_DISABLE_GRAVITY);
-                        target->MonsterMoveWithSpeed(x, y, me->GetPositionZ()+15, 0);
-                    }
-                    Unit* Cloud = me->SummonTrigger(x, y, me->GetPositionZ()+16, 0, 15000);
-                    if (Cloud)
-                    {
-                        CloudGUID = Cloud->GetGUID();
-                        Cloud->SetUnitMovementFlags(MOVEMENTFLAG_DISABLE_GRAVITY);
-                        Cloud->StopMoving();
-                        Cloud->SetObjectScale(1.0f);
-                        Cloud->setFaction(35);
-                        Cloud->SetMaxHealth(9999999);
-                        Cloud->SetHealth(9999999);
-                        Cloud->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                    }
-                    ElectricalStorm_Timer = 60000; //60 seconds(bosskillers)
-                    StormCount = 1;
-                    StormSequenceTimer = 0;
-                } else ElectricalStorm_Timer -= diff;
-
-                if (SummonEagles_Timer <= diff)
-                {
-                    Talk(SAY_SUMMON);
-
-                    float x, y, z;
-                    me->GetPosition(x, y, z);
-
-                    for (uint8 i = 0; i < 8; ++i)
-                    {
-                        Unit* bird = Unit::GetUnit(*me, BirdGUIDs[i]);
-                        if (!bird) //they despawned on die
+                        float x, y, z;
+                        me->GetPosition(x, y, z);
+                        
+                        for (uint8 i = 0; i < 8; ++i)
                         {
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                             {
@@ -358,109 +264,236 @@ class boss_akilzon : public CreatureScript
                             Creature* creature = me->SummonCreature(MOB_SOARING_EAGLE, x, y, z, 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
                             if (creature)
                             {
-                                creature->AddThreat(me->getVictim(), 1.0f);
-                                creature->AI()->AttackStart(me->getVictim());
-                                BirdGUIDs[i] = creature->GetGUID();
+                                creature->AddThreat(me->GetVictim(), 1.0f);
+                                creature->AI()->AttackStart(me->GetVictim());
                             }
                         }
-                    }
-                    SummonEagles_Timer = 999999;
-                } else SummonEagles_Timer -= diff;
+                        events.ScheduleEvent(EVENT_SUMMON_EAGLES, urand(50000, 60000));
+                        events.ScheduleEvent(EVENT_SUMMON_KIDNAPPER, urand(5000, 8000));
+                        break;
 
-                DoMeleeAttackIfReady();
+                    case EVENT_SUMMON_KIDNAPPER:
+                        me->CastSpell(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()+15, SPELL_SUMMON_KIDNAPPER, true);
+                        break;
+
+                    case EVENT_RELEASE_PLAYER:
+                        SetWeather(WEATHER_STATE_FINE);
+                        SetCombatMovement(true);
+                        isStorm = false;
+                        if (stormTarget)
+                        {
+                            stormTarget->SetUnitMovementFlags(MOVEMENTFLAG_NONE);
+                            stormTarget->SetCanFly(false);
+                        }
+                        break;
+                }
             }
-        };
 
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new boss_akilzonAI(creature);
+            if (!isStorm)
+                DoMeleeAttackIfReady();
         }
+    };
 };
 
-class mob_akilzon_eagle : public CreatureScript
+class npc_akilzon_eagle : public CreatureScript
+{
+public:
+    npc_akilzon_eagle() : CreatureScript("npc_akilzon_eagle") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_akilzon_eagleAI(creature);
+    }
+
+    struct npc_akilzon_eagleAI : public ScriptedAI
+    {
+        npc_akilzon_eagleAI(Creature* creature) : ScriptedAI(creature) { }
+
+        uint32 EagleSwoop_Timer;
+        bool arrived;
+        uint64 TargetGUID;
+
+        void Reset()
+        {
+            EagleSwoop_Timer = urand(5000, 10000);
+            arrived = true;
+            TargetGUID = 0;
+            me->SetUnitMovementFlags(MOVEMENTFLAG_DISABLE_GRAVITY);
+        }
+
+        void MovementInform(uint32, uint32)
+        {
+            arrived = true;
+            if (TargetGUID)
+            {
+                if (Unit* target = Unit::GetUnit(*me, TargetGUID))
+                    DoCast(target, SPELL_EAGLE_SWOOP);
+                TargetGUID = 0;
+                me->SetSpeed(MOVE_RUN, 1.2f);
+                EagleSwoop_Timer = urand(5000, 10000);
+            }
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (EagleSwoop_Timer <= diff)
+                EagleSwoop_Timer = 0;
+            else
+                EagleSwoop_Timer -= diff;
+
+            if (arrived)
+            {
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                {
+                    float x, y, z;
+                    if (EagleSwoop_Timer)
+                    {
+                        x = target->GetPositionX() + irand(-10, 10);
+                        y = target->GetPositionY() + irand(-10, 10);
+                        z = target->GetPositionZ() + urand(10, 15);
+                        if (z > 95)
+                            z = 95.0f - urand(0, 5);
+                    }
+                    else
+                    {
+                        target->GetContactPoint(me, x, y, z);
+                        z += 2;
+                        me->SetSpeed(MOVE_RUN, 5.0f);
+                        TargetGUID = target->GetGUID();
+                    }
+                    me->GetMotionMaster()->MovePoint(0, x, y, z);
+                    arrived = false;
+                }
+            }
+        }
+    };
+};
+
+class npc_amani_kidnapper : public CreatureScript
+{
+public:
+    npc_amani_kidnapper() : CreatureScript("npc_amani_kidnapper") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_amani_kidnapperAI(creature);
+    }
+
+    struct npc_amani_kidnapperAI : public ScriptedAI
+    {
+        npc_amani_kidnapperAI(Creature* creature) : ScriptedAI(creature) { }
+
+        bool arrived;
+        uint64 TargetGUID;
+        uint8 numb;
+
+        void Reset()
+        {
+            arrived = true;
+            TargetGUID = 0;
+            me->SetUnitMovementFlags(MOVEMENTFLAG_DISABLE_GRAVITY);
+
+            numb = 0;
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            Map::PlayerList const& players = me->GetMap()->GetPlayers();
+            for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                if (Player* player = itr->getSource())
+                    ++numb;
+        }
+
+        void MovementInform(uint32, uint32)
+        {
+            if (TargetGUID)
+            {
+                if (Unit* target = Unit::GetUnit(*me, TargetGUID))
+                {
+                    me->AddAura(SPELL_PLUCKED, target);
+                    target->CastSpell(me, SPELL_ENTER_VEHICLE, true);
+                }
+                TargetGUID = 0;
+                me->SetSpeed(MOVE_RUN, 1.2f);
+                me->GetMotionMaster()->MoveRandom(30.0f);
+            }
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (arrived && numb > 1)
+            {
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                {
+                    float x, y, z;
+
+                    target->GetContactPoint(me, x, y, z);
+                    z += 3;
+                    me->SetSpeed(MOVE_RUN, 5.0f);
+                    TargetGUID = target->GetGUID();
+
+                    me->GetMotionMaster()->MovePoint(0, x, y, z);
+                    arrived = false;
+                }
+            }
+            else
+                DoMeleeAttackIfReady();
+        }
+    };
+};
+
+class ExactDistanceCheck
 {
     public:
-        mob_akilzon_eagle() : CreatureScript("mob_akilzon_eagle") { }
+        ExactDistanceCheck(WorldObject* source, float dist) : _source(source), _dist(dist) {}
 
-        struct mob_akilzon_eagleAI : public ScriptedAI
+        bool operator()(WorldObject* unit)
         {
-            mob_akilzon_eagleAI(Creature* creature) : ScriptedAI(creature) { }
+            return _source->GetExactDist2d(unit) < _dist;
+        }
 
-            uint32 EagleSwoop_Timer;
-            bool arrived;
-            uint64 TargetGUID;
+    private:
+        WorldObject* _source;
+        float _dist;
+};
 
-            void Reset()
+class spell_electrical_storm_dmg : public SpellScriptLoader // 43657, 97300
+{
+    public:
+        spell_electrical_storm_dmg() : SpellScriptLoader("spell_electrical_storm_dmg") { }
+
+        class spell_electrical_storm_dmg_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_electrical_storm_dmg_SpellScript);
+
+            void TargetSelect(std::list<WorldObject*>& targets)
             {
-                EagleSwoop_Timer = urand(5000, 10000);
-                arrived = true;
-                TargetGUID = 0;
-                me->SetUnitMovementFlags(MOVEMENTFLAG_DISABLE_GRAVITY);
+                if (targets.empty())
+                    return;
+
+                if (Unit* owner = GetCaster())
+                    targets.remove(owner);
+
+                // Set targets.
+                targets.remove_if(ExactDistanceCheck(GetCaster(), 21.0f));
             }
 
-            void EnterCombat(Unit* /*who*/)
+            void Register()
             {
-                DoZoneInCombat();
-            }
-
-            void MoveInLineOfSight(Unit* /*who*/) {}
-
-            void MovementInform(uint32, uint32)
-            {
-                arrived = true;
-                if (TargetGUID)
-                {
-                    if (Unit* target = Unit::GetUnit(*me, TargetGUID))
-                        DoCast(target, SPELL_EAGLE_SWOOP, true);
-                    TargetGUID = 0;
-                    me->SetSpeed(MOVE_RUN, 1.2f);
-                    EagleSwoop_Timer = urand(5000, 10000);
-                }
-            }
-
-            void UpdateAI(const uint32 diff)
-            {
-                if (EagleSwoop_Timer <= diff)
-                    EagleSwoop_Timer = 0;
-                else
-                    EagleSwoop_Timer -= diff;
-
-                if (arrived)
-                {
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                    {
-                        float x, y, z;
-                        if (EagleSwoop_Timer)
-                        {
-                            x = target->GetPositionX() + irand(-10, 10);
-                            y = target->GetPositionY() + irand(-10, 10);
-                            z = target->GetPositionZ() + urand(10, 15);
-                            if (z > 95)
-                                z = 95.0f - urand(0, 5);
-                        }
-                        else
-                        {
-                            target->GetContactPoint(me, x, y, z);
-                            z += 2;
-                            me->SetSpeed(MOVE_RUN, 5.0f);
-                            TargetGUID = target->GetGUID();
-                        }
-                        me->GetMotionMaster()->MovePoint(0, x, y, z);
-                        arrived = false;
-                    }
-                }
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_electrical_storm_dmg_SpellScript::TargetSelect, EFFECT_0, TARGET_UNIT_SRC_AREA_ALLY);
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        SpellScript* GetSpellScript() const
         {
-            return new mob_akilzon_eagleAI(creature);
+            return new spell_electrical_storm_dmg_SpellScript();
         }
 };
 
 void AddSC_boss_akilzon()
 {
     new boss_akilzon();
-    new mob_akilzon_eagle();
+    new npc_akilzon_eagle();
+    new npc_amani_kidnapper();
+    new spell_electrical_storm_dmg();
 }
-

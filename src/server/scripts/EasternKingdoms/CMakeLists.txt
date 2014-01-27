@@ -31,6 +31,7 @@ file(GLOB_RECURSE scripts_Stratholme EasternKingdoms/Stratholme/*.cpp EasternKin
 file(GLOB_RECURSE scripts_SunkenTemple EasternKingdoms/SunkenTemple/*.cpp EasternKingdoms/SunkenTemple/*.h)
 file(GLOB_RECURSE scripts_SunwellPlateau EasternKingdoms/SunwellPlateau/*.cpp EasternKingdoms/SunwellPlateau/*.h)
 file(GLOB_RECURSE scripts_ThroneOfTheTides EasternKingdoms/ThroneOfTheTides/*.cpp EasternKingdoms/ThroneOfTheTides/*.h)
+file(GLOB_RECURSE scripts_TolBarad EasternKingdoms/TolBarad/*.cpp EasternKingdoms/TolBarad/*.h)
 file(GLOB_RECURSE scripts_Uldaman EasternKingdoms/Uldaman/*.cpp EasternKingdoms/Uldaman/*.h)
 file(GLOB_RECURSE scripts_ZulAman EasternKingdoms/ZulAman/*.cpp EasternKingdoms/ZulAman/*.h)
 file(GLOB_RECURSE scripts_ZulGurub EasternKingdoms/ZulGurub/*.cpp EasternKingdoms/ZulGurub/*.h)
@@ -60,6 +61,7 @@ source_group(EasternKingdoms\\Stratholme FILES ${scripts_Stratholme})
 source_group(EasternKingdoms\\SunkenTemple FILES ${scripts_SunkenTemple})
 source_group(EasternKingdoms\\SunwellPlateau FILES ${scripts_SunwellPlateau})
 source_group(EasternKingdoms\\ThroneOfTheTides FILES ${scripts_ThroneOfTheTides})
+source_group(EasternKingdoms\\TolBarad FILES ${scripts_TolBarad})
 source_group(EasternKingdoms\\Uldaman FILES ${scripts_Uldaman})
 source_group(EasternKingdoms\\ZulAman FILES ${scripts_ZulAman})
 source_group(EasternKingdoms\\ZulGurub FILES ${scripts_ZulGurub})
@@ -91,6 +93,7 @@ set(scripts_STAT_SRCS
   ${scripts_SunkenTemple}
   ${scripts_SunwellPlateau}
   ${scripts_ThroneOfTheTides}
+  ${scripts_TolBarad}
   ${scripts_Uldaman}
   ${scripts_ZulAman}
   ${scripts_ZulGurub}

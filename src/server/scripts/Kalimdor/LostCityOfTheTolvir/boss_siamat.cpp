@@ -446,7 +446,16 @@ public:
     bool Execute(uint64 execTime, uint32 /*diff*/)
     {
         if (_caster)
+        {
             _caster->CastSpell(_caster, SPELL_SLIPSTREAM);
+            Creature *dest = _caster->FindNearestCreature(48097, 200.0f);
+
+            if (dest)
+                _caster->CastSpell(dest, 46598);
+
+            return true;
+        }
+
         return false;
     }
 

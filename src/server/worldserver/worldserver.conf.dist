@@ -1,5 +1,5 @@
 ################################################
-# World Server configuration file #
+# Trinity Core World Server configuration file #
 ################################################
 [worldserver]
 
@@ -107,6 +107,7 @@ CharacterDatabaseInfo = "127.0.0.1;3306;root;ascent;characters"
 LoginDatabase.WorkerThreads     = 1
 WorldDatabase.WorkerThreads     = 1
 CharacterDatabase.WorkerThreads = 1
+HomepageDatabase.WorkerThreads  = 2
 
 #
 #    LoginDatabase.SynchThreads
@@ -120,6 +121,7 @@ CharacterDatabase.WorkerThreads = 1
 LoginDatabase.SynchThreads     = 1
 WorldDatabase.SynchThreads     = 1
 CharacterDatabase.SynchThreads = 2
+HomepageDatabase.SynchThreads  = 2
 
 #
 #    MaxPingTime
@@ -181,7 +183,7 @@ Compression = 1
 #                     1+  - (Enabled)
 #                     0   - (Disabled, No limit)
 
-PlayerLimit = 100
+PlayerLimit = 1000
 
 #
 #    SaveRespawnTimeImmediately
@@ -275,7 +277,7 @@ PlayerSave.Stats.SaveOnlyOnLogout = 1
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-mmap.enablePathFinding = 1
+mmap.enablePathFinding = 0
 
 #
 #    vmap.enableLOS
@@ -1053,7 +1055,7 @@ BeepAtStart = 1
 #        Example:     "Welcome to John\'s Server@This server runs on Trinity Core."
 #        Default:     "Welcome to a Trinity Core server."
 
-Motd = "Welcome to Wow Source."
+Motd = "Welcome to Oficial version 8 of WoWSource 4.3.4."
 
 #
 #    Server.LoginInfo
@@ -1708,7 +1710,7 @@ Visibility.GroupMode = 1
 #                     533 - (Visibility.Distance.BGArenas)
 
 Visibility.Distance.Continents = 90
-Visibility.Distance.Instances = 500
+Visibility.Distance.Instances = 170
 Visibility.Distance.BGArenas = 533
 
 #
@@ -2056,7 +2058,7 @@ Death.Bones.BattlegroundOrArena = 1
 #        Default:     1 - (Enabled)
 #                     0 - (Disabled)
 
-Die.Command.Mode = 1
+Die.Command.Mode = 0
 
 #
 ###################################################################################################
@@ -2069,7 +2071,7 @@ Die.Command.Mode = 1
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-AutoBroadcast.On = 0
+AutoBroadcast.On = 1
 
 #
 #    AutoBroadcast.Center
@@ -2085,7 +2087,7 @@ AutoBroadcast.Center = 0
 #        Description: Timer (in milliseconds) for auto broadcasts.
 #        Default:     60000 - (60 seconds)
 
-AutoBroadcast.Timer = 60000
+AutoBroadcast.Timer = 999999
 
 #
 ###################################################################################################
@@ -2171,6 +2173,10 @@ Battleground.Random.ResetHour = 6
 #         Default:     0 - (Disabled)
 #                      1 - (Enabled, Experimental as of still being in development)
 
+######################
+# WINTERGRASP CONFIG #
+######################
+
 Wintergrasp.Enable = 0
 
 #
@@ -2215,6 +2221,53 @@ Wintergrasp.NoBattleTimer = 150
 #         Default:     10
 
 Wintergrasp.CrashRestartTimer = 10
+
+###################
+# TOLBARAD CONFIG #
+###################
+
+#
+#   Tol Barad.Enable
+#         Enable Tol Barad
+#         Default: 0 - off
+#                  1 - on
+
+Tol.Barad.Enable = 0
+
+#
+#    Tol Barad.PlayerMax
+#         Max players allowed in Tol Barad
+#         Default: 100 (players)
+
+Tol.Barad.PlayerMax = 100
+
+#
+#    Tol Barad.PlayerMin
+#         Min players allowed in Tol Barad
+#         Default: 0 (players)
+
+Tol.Barad.PlayerMin = 0
+
+#
+#    Tol Barad.PlayerMinLvl
+#         Min player level allowed in Tol Barad
+#         Default: 80
+
+Tol.Barad.PlayerMinLvl = 80
+
+#
+#    Tol Barad.BattleTimer
+#         Wartime timer
+#         Default: 30 (in min)
+
+Tol.Barad.BattleTimer = 30
+
+#
+#    Tol Barad.NoBattleTimer
+#         Out of wartime timer
+#         Default: 150 (in min)
+
+Tol.Barad.NoBattleTimer = 150
 
 #
 ###################################################################################################
@@ -2983,7 +3036,7 @@ AllowZoneAndAreaCheckForCreatureAndGameobject = 0
 #        The movement speed is x2 outdoor, inside of Instances/BG/Raids it is 1
 #          (Default: 0) to active set = 1
 #
-DoubleMovementSpeed = 0
+DoubleMovementSpeed = 1
 ##########################################################
 
 ###################################################################################################
@@ -3020,3 +3073,42 @@ ItemLoading.requestSize = 2000
 
 #
 ####################################################################################################
+
+###########################################################
+#   Homepage Settings
+#
+#    HPGold.Refresh.Enabled
+#        Description: activates homepage gold sync with session
+#        Default:     0 - (Disable)
+#                     1 - (Enable)
+
+HPGold.Refresh.Enabled = 1
+
+#
+#   HPGold.Refresh.Interval
+#       Description: interval for sync with hp gold
+#       Default: 10 (seconds)
+
+HPGold.Refresh.Interval = 10
+
+###########################################################
+
+###########################################################
+#   Cronjob Settings
+#
+#    Cronjobs.Enabled
+#        Description: activates cronjobs
+#        Default:     1 - (Enable)
+#                     0 - (Disable)
+#                     
+
+Cronjobs.Enabled = 1
+
+#
+#   Cronjobs.Execute.Interval
+#       Description: interval to execute cronjobs
+#       Default: 5 (seconds)
+
+Cronjobs.Execute.Interval = 5
+
+###########################################################

@@ -133,7 +133,7 @@ class boss_void_reaver : public CreatureScript
                     if (!target_list.empty())
                         target = *(target_list.begin()+rand()%target_list.size());
                     else
-                        target = me->getVictim();
+                        target = me->GetVictim();
 
                     if (target)
                         me->CastSpell(target, SPELL_ARCANE_ORB, false, NULL, NULL, 0);
@@ -146,8 +146,8 @@ class boss_void_reaver : public CreatureScript
                 {
                     DoCastVictim(SPELL_KNOCK_AWAY);
                     //Drop 25% aggro
-                    if (DoGetThreat(me->getVictim()))
-                        DoModifyThreatPercent(me->getVictim(), -25);
+                    if (DoGetThreat(me->GetVictim()))
+                        DoModifyThreatPercent(me->GetVictim(), -25);
                     KnockAway_Timer = 30000;
                 }
                 else

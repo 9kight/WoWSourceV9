@@ -310,7 +310,7 @@ public:
                         CrystalGUID = 0;
 
                         me->GetMotionMaster()->Clear();
-                        me->GetMotionMaster()->MoveChase(me->getVictim());
+                        me->GetMotionMaster()->MoveChase(me->GetVictim());
                     } else EmpowerTimer -= diff;
                 }
             }
@@ -353,10 +353,10 @@ public:
                         CAST_AI(boss_selin_fireheart::boss_selin_fireheartAI, Selin->AI())->DrainingCrystal = false;
                         CAST_AI(boss_selin_fireheart::boss_selin_fireheartAI, Selin->AI())->IsDraining = false;
                         CAST_AI(boss_selin_fireheart::boss_selin_fireheartAI, Selin->AI())->EmpowerTimer = 10000;
-                        if (Selin->getVictim())
+                        if (Selin->GetVictim())
                         {
-                            Selin->AI()->AttackStart(Selin->getVictim());
-                            Selin->GetMotionMaster()->MoveChase(Selin->getVictim());
+                            Selin->AI()->AttackStart(Selin->GetVictim());
+                            Selin->GetMotionMaster()->MoveChase(Selin->GetVictim());
                         }
                     }
                 }

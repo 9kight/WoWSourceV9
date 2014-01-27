@@ -410,8 +410,8 @@ void World::LoadConfigSettings(bool reload)
     }
 
     ///- Read the player limit and the Message of the day from the config file
-    SetPlayerAmountLimit(ConfigMgr::GetIntDefault("PlayerLimit", 1000));
-    SetMotd(ConfigMgr::GetStringDefault("Motd", "Welcome to Server."));
+    SetPlayerAmountLimit(ConfigMgr::GetIntDefault("PlayerLimit", 5));
+    SetMotd(ConfigMgr::GetStringDefault("Motd", "Welcome to WoWSource Version 8."));
 
     ///- Read ticket system setting from the config file
     m_bool_configs[CONFIG_ALLOW_TICKETS] = ConfigMgr::GetBoolDefault("AllowTickets", true);
@@ -1162,6 +1162,34 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_CHARDELETE_MIN_LEVEL] = ConfigMgr::GetIntDefault("CharDelete.MinLevel", 0);
     m_int_configs[CONFIG_CHARDELETE_KEEP_DAYS] = ConfigMgr::GetIntDefault("CharDelete.KeepDays", 30);
 
+    //HP Gold Synch
+    m_bool_configs[CONFIG_HPGOLD_REFRESH_ENABLED] = ConfigMgr::GetBoolDefault("HPGold.Refresh.Enabled", true);
+    m_int_configs[CONFIG_HPGOLD_REFRESH_INTERVAL] = ConfigMgr::GetIntDefault("HPGold.Refresh.Interval", 10);
+    if (int32(m_int_configs[CONFIG_HPGOLD_REFRESH_INTERVAL]) < 10)
+    {
+        sLog->outError(LOG_FILTER_SERVER_LOADING, "HPGold.Refresh.Interval (%i) must be >= 10, set to default 10.", m_int_configs[CONFIG_HPGOLD_REFRESH_INTERVAL]);
+        m_int_configs[CONFIG_HPGOLD_REFRESH_INTERVAL] = 10;
+    }
+    if (reload)
+    {
+        m_timers[WUPDATE_HPGOLD].SetInterval(m_int_configs[CONFIG_HPGOLD_REFRESH_INTERVAL] * IN_MILLISECONDS);
+        m_timers[WUPDATE_HPGOLD].Reset();
+    }
+
+    //Cronjobs
+    m_bool_configs[CONFIG_CRONJOBS_ENABLED] = ConfigMgr::GetBoolDefault("Cronjobs.Enabled", true);
+    m_int_configs[CONFIG_CRONJOBS_INTERVAL] = ConfigMgr::GetIntDefault("Cronjobs.Execute.Interval", 5);
+    if (int32(m_int_configs[CONFIG_CRONJOBS_INTERVAL]) < 1)
+    {
+        sLog->outError(LOG_FILTER_SERVER_LOADING, "Cronjobs.Execute.Interval (%i) must be >= 1, set to default 5.", m_int_configs[CONFIG_CRONJOBS_INTERVAL]);
+        m_int_configs[CONFIG_CRONJOBS_INTERVAL] = 5;
+    }
+    if (reload)
+    {
+        m_timers[WUPDATE_CRONJOBS].SetInterval(m_int_configs[CONFIG_CRONJOBS_INTERVAL] * IN_MILLISECONDS);
+        m_timers[WUPDATE_CRONJOBS].Reset();
+    }
+
     ///- Read the "Data" directory from the config file
     std::string dataPath = ConfigMgr::GetStringDefault("DataDir", "./");
     if (dataPath.at(dataPath.length()-1) != '/' && dataPath.at(dataPath.length()-1) != '\\')
@@ -1246,7 +1274,7 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_WARDEN_CLIENT_RESPONSE_DELAY] = ConfigMgr::GetIntDefault("Warden.ClientResponseDelay", 600);
 
     // Dungeon finder
-    m_int_configs[CONFIG_LFG_OPTIONSMASK] = ConfigMgr::GetIntDefault("DungeonFinder.OptionsMask", 1);
+    m_bool_configs[CONFIG_DUNGEON_FINDER_ENABLE] = ConfigMgr::GetBoolDefault("DungeonFinder.Enable", false);
 
     // DBC_ItemAttributes
     m_bool_configs[CONFIG_DBC_ENFORCE_ITEM_ATTRIBUTES] = ConfigMgr::GetBoolDefault("DBC.EnforceItemAttributes", true);
@@ -1304,6 +1332,14 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_WINTERGRASP_BATTLETIME] = ConfigMgr::GetIntDefault("Wintergrasp.BattleTimer", 30);
     m_int_configs[CONFIG_WINTERGRASP_NOBATTLETIME] = ConfigMgr::GetIntDefault("Wintergrasp.NoBattleTimer", 150);
     m_int_configs[CONFIG_WINTERGRASP_RESTART_AFTER_CRASH] = ConfigMgr::GetIntDefault("Wintergrasp.CrashRestartTimer", 10);
+
+    // TOL BARAD
+    m_bool_configs[CONFIG_TOL_BARAD_ENABLE] = ConfigMgr::GetBoolDefault("Tol.Barad.Enable", false);
+    m_int_configs[CONFIG_TOL_BARAD_PLR_MAX] = ConfigMgr::GetIntDefault("Tol.Barad.PlayerMax", 100);
+    m_int_configs[CONFIG_TOL_BARAD_PLR_MIN] = ConfigMgr::GetIntDefault("Tol.Barad.PlayerMin", 0);
+    m_int_configs[CONFIG_TOL_BARAD_PLR_MIN_LVL] = ConfigMgr::GetIntDefault("Tol.Barad.PlayerMinLvl", 80);
+    m_int_configs[CONFIG_TOL_BARAD_BATTLETIME] = ConfigMgr::GetIntDefault("Tol.Barad.BattleTimer", 15);
+    m_int_configs[CONFIG_TOL_BARAD_NOBATTLETIME] = ConfigMgr::GetIntDefault("Tol.Barad.NoBattleTimer", 150);
 
     ///- ALLOW ZONE AND AREA VALUES CORRECTION AT STARTUP
     m_bool_configs[CONFIG_ALLOW_ZONE_AND_AREA_VALUES_CORRECTION_AT_STARTUP] = ConfigMgr::GetBoolDefault("AllowZoneAndAreaCheckForCreatureAndGameobject", false);
@@ -1580,9 +1616,6 @@ void World::SetInitialWorldSettings()
     sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Loading AreaTrigger script names...");
     sObjectMgr->LoadAreaTriggerScripts();
 
-    sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Loading LFG entrance positions..."); // Must be after areatriggers
-    sLFGMgr->LoadLFGDungeons();
-
     sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Loading Dungeon boss data...");
     sObjectMgr->LoadInstanceEncounters();
 
@@ -1808,6 +1841,12 @@ void World::SetInitialWorldSettings()
     m_timers[WUPDATE_PINGDB].SetInterval(getIntConfig(CONFIG_DB_PING_INTERVAL)*MINUTE*IN_MILLISECONDS);    // Mysql ping time in minutes
 
     m_timers[WUPDATE_GUILDSAVE].SetInterval(getIntConfig(CONFIG_GUILD_SAVE_INTERVAL) * MINUTE * IN_MILLISECONDS);
+
+    //HP Gold Refresh
+    m_timers[WUPDATE_HPGOLD].SetInterval(getIntConfig(CONFIG_HPGOLD_REFRESH_INTERVAL) * IN_MILLISECONDS);
+
+    //Cronjobs
+    m_timers[WUPDATE_CRONJOBS].SetInterval(getIntConfig(CONFIG_CRONJOBS_INTERVAL) * IN_MILLISECONDS);
 
     //to set mailtimer to return mails every day between 4 and 5 am
     //mailtimer is increased when updating auctions
@@ -2089,6 +2128,15 @@ void World::Update(uint32 diff)
     {
         m_timers[WUPDATE_WEATHERS].Reset();
         WeatherMgr::Update(uint32(m_timers[WUPDATE_WEATHERS].GetInterval()));
+    }
+
+    if (sWorld->getBoolConfig(CONFIG_CRONJOBS_ENABLED))
+    {
+        if (m_timers[WUPDATE_CRONJOBS].Passed())
+        {
+            m_timers[WUPDATE_CRONJOBS].Reset();
+            ExecuteCronjobs();
+        }
     }
 
     /// <li> Update uptime table
@@ -2661,6 +2709,7 @@ void World::ShutdownMsg(bool show, Player* player)
         (m_ShutdownTimer > 12 * HOUR && (m_ShutdownTimer % (12 * HOUR)) == 0)) // > 12 h ; every 12 h
     {
         std::string str = secsToTimeString(m_ShutdownTimer);
+        str = str + ShutdownReason;
 
         ServerMessageType msgid = (m_ShutdownMask & SHUTDOWN_MASK_RESTART) ? SERVER_MSG_RESTART_TIME : SERVER_MSG_SHUTDOWN_TIME;
 
@@ -3417,3 +3466,129 @@ void World::InitPacketThrottling()
     opcodePerSecond[CMSG_GUILD_BANK_LOG_QUERY] = 200;
     opcodePerSecond[CMSG_GUILD_EVENT_LOG_QUERY] = 200;
 }
+
+void World::ExecuteCronjobs()
+{
+    QueryResult result = CharacterDatabase.PQuery("SELECT id, guid, type, param1, param2, x, y, z FROM cronjobs");
+
+    if (result)
+    {
+        do
+        {
+            Field* fields = result->Fetch();
+            uint32 id = fields[0].GetUInt32();
+            uint64 guid = fields[1].GetUInt64();
+            uint8 type = fields[2].GetUInt8();
+            bool executed = false;
+
+            switch (type)
+            {
+                case CRONJOB_TELEPORT:
+                {
+                    Player* player = sObjectAccessor->FindPlayer(guid);
+                    if (player)
+                    {
+                        uint32 mapId = atoi(fields[3].GetCString());
+                        float x = fields[5].GetFloat();
+                        float y = fields[6].GetFloat();
+                        float z = fields[7].GetFloat();
+
+                        player->TeleportTo(mapId, x, y, z, 0.0f, 0);
+                        executed = true;
+                    }
+                    break;
+                }
+
+                case CRONJOB_REVIVE:
+                {
+                    Player* player = sObjectAccessor->FindPlayer(guid);
+                    if (player)
+                    {
+                        player->ResurrectPlayer(100.0f, false);
+                        executed = true;
+                    }
+
+                    break;
+                }
+
+                case CRONJOB_LEVEL:
+                {
+                    Player* player = sObjectAccessor->FindPlayer(guid);
+                    if (player)
+                    {
+                        uint8 level = atoi(fields[3].GetCString());
+                        if (level)
+                        {
+                            player->SetLevel(level);
+                            executed = true;
+                        }
+                    }
+
+                    break;
+                }
+
+                case CRONJOB_FACTIONCHANGE:
+                {
+                    Player* player = sObjectAccessor->FindPlayer(guid);
+                    if (player)
+                    {
+                        player->SetAtLoginFlag(AT_LOGIN_CHANGE_FACTION);
+                        executed = true;
+                    }
+                    else
+                    {
+                        CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | %u WHERE guid = %u", 0x40, guid);
+                        executed = true;
+                    }
+
+                    break;
+                }
+
+                case CRONJOB_RACECHANGE:
+                {
+                    Player* player = sObjectAccessor->FindPlayer(guid);
+                    if (player)
+                    {
+                        player->SetAtLoginFlag(AT_LOGIN_CHANGE_RACE);
+                        executed = true;
+                    }
+                    else
+                    {
+                        CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | %u WHERE guid = %u", 0x80, guid);
+                        executed = true;
+                    }
+
+                    break;
+                }
+
+                case CRONJOB_CUSTOMIZE:
+                {
+                    Player* player = sObjectAccessor->FindPlayer(guid);
+                    if (player)
+                    {
+                        player->SetAtLoginFlag(AT_LOGIN_CUSTOMIZE);
+                        executed = true;
+                    }
+                    else
+                    {
+                        CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | %u WHERE guid = %u", 0x08, guid);
+                        executed = true;
+                    }
+
+                    break;
+                }
+
+                default:
+                {
+                    sLog->outError(LOG_FILTER_GENERAL, "[CRONJOB] There is a cronjob with unknown type %u and primary key %u. Skipping", type, id);
+                    break;
+                }
+            }
+
+            if (executed)
+                CharacterDatabase.PExecute("DELETE FROM cronjobs WHERE id = %u", id);
+        }
+        while (result->NextRow());
+    }
+}
+

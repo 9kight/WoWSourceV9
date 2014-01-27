@@ -25,6 +25,7 @@ enum Data64
     DATA_ERUNAK_STONESPEAKER,
     DATA_MINDBENDER_GHURSHA,
     DATA_OZUMAT,
+    DATA_NEPTULON,
 };
 
 enum Data
@@ -51,7 +52,9 @@ enum CreatureIds
     BOSS_COMMANDER_ULTHOK       = 40765,
     BOSS_ERUNAK_STONESPEAKER    = 40825,
     BOSS_MINDBENDER_GHURSHA     = 40788,
-    BOSS_OZUMAT                 = 42172,
+    BOSS_OZUMAT                 = 44566,
+    BOSS_NEPTULON               = 40792,
+
 
     /* Various NPCs */
 
@@ -61,6 +64,7 @@ enum CreatureIds
     NPC_THRONE_TELEPORTER_1     = 51395,
     NPC_THRONE_TELEPORTER_2     = 51391,
     NPC_ULTHOK_VOID             = 40784,
+    NPC_TELEPORTER              = 51391,
 
     // Left Wing counter
     NPC_TAINTED_SENTRY          = 40925,
@@ -112,6 +116,15 @@ enum GameObjectIds
     GO_OZUMAT_TENTACLE_1              = 204927, // Down
     GO_OZUMAT_TENTACLE_2              = 204944, // Up
     GO_INVISIBLE_DOOR                 = 402356,
+};
+
+enum AchievemtsIds
+{
+    NORMAL_OZUMAT_DEFEAT = 4839,
+    HEROIC_OZUMAT_DEFEAT = 5061,
+    HEROIC_OZUMAT_DEFEAT_WHILE_IN_GUILD_GROUP = 5135,
+    HEROIC_NAZJAR_GEYSER_KILLED_TRASH = 5285,
+    HEROIC_DEFEAT_BEHEMOT_WITH_SURGE_EFFECT = 5286,
 };
 
 #endif

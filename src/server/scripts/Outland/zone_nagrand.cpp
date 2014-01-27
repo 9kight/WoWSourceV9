@@ -123,7 +123,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
         if (player->GetQuestStatus(10044) == QUEST_STATUS_INCOMPLETE)
@@ -277,7 +277,7 @@ public:
         void UpdateAI(const uint32 uiDiff)
         {
             npc_escortAI::UpdateAI(uiDiff);
-            if (!me->getVictim())
+            if (!me->GetVictim())
                 return;
 
             if (m_uiChainLightningTimer <= uiDiff)

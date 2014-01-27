@@ -108,7 +108,7 @@ class boss_baron_silverlaine : public CreatureScript
             Talk(RAND(SAY_KILLER_1, SAY_KILLER_2));
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff) 
         {
             if(!UpdateVictim())
                 return;

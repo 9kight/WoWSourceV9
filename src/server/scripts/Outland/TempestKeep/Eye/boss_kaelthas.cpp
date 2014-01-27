@@ -252,7 +252,7 @@ struct advisorbase_ai : public ScriptedAI
 
                 Unit* Target = Unit::GetUnit(*me, DelayRes_Target);
                 if (!Target)
-                    Target = me->getVictim();
+                    Target = me->GetVictim();
 
                 DoResetThreat();
                 AttackStart(Target);
@@ -401,7 +401,7 @@ class boss_kaelthas : public CreatureScript
                     float attackRadius = me->GetAttackDistance(who);
                     if (me->IsWithinDistInMap(who, attackRadius) && me->IsWithinLOSInMap(who))
                     {
-                        if (!me->getVictim() && Phase >= 4)
+                        if (!me->GetVictim() && Phase >= 4)
                         {
                             who->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
                             AttackStart(who);
@@ -742,7 +742,7 @@ class boss_kaelthas : public CreatureScript
                                         //interruptable
                                         me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, false);
                                         int32 dmg = 20000+rand()%5000;
-                                        me->CastCustomSpell(me->getVictim(), SPELL_FIREBALL, &dmg, 0, 0, false);
+                                        me->CastCustomSpell(me->GetVictim(), SPELL_FIREBALL, &dmg, 0, 0, false);
                                         IsCastingFireball = true;
                                         Fireball_Timer = 2500;
                                     }
@@ -865,7 +865,7 @@ class boss_kaelthas : public CreatureScript
 
                                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                                 Phase = 6;
-                                AttackStart(me->getVictim());
+                                AttackStart(me->GetVictim());
                             }
                             else
                                 Phase_Timer -= diff;
@@ -959,7 +959,7 @@ class boss_kaelthas : public CreatureScript
                                         InGravityLapse = false;
                                         GravityLapse_Timer = 60000;
                                         GravityLapse_Phase = 0;
-                                        AttackStart(me->getVictim());
+                                        AttackStart(me->GetVictim());
                                         break;
                                 }
                             }
@@ -1549,7 +1549,7 @@ class mob_phoenix_egg_tk : public CreatureScript
 
             void JustSummoned(Creature* summoned)
             {
-                summoned->AddThreat(me->getVictim(), 0.0f);
+                summoned->AddThreat(me->GetVictim(), 0.0f);
                 summoned->CastSpell(summoned, SPELL_REBIRTH, false);
             }
 

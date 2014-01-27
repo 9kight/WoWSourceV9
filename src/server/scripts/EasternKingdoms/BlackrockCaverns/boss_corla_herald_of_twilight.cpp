@@ -152,7 +152,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 Diff)
+        void UpdateAI(uint32 const Diff)
         {
             if (!UpdateVictim())
                 return;
@@ -214,7 +214,7 @@ public:
             VisualCastTimer = 1000;
         }
 
-        void UpdateAI(uint32 Diff)
+        void UpdateAI(uint32 const Diff)
         {
             if (VisualCastTimer <= Diff)
             {

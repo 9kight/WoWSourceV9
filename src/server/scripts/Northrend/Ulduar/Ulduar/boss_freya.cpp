@@ -1067,7 +1067,7 @@ class npc_detonating_lasher : public CreatureScript
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                     {
                         // Switching to other target - modify aggro of new target by 20% from current target's aggro
-                        me->AddThreat(target, me->getThreatManager().getThreat(me->getVictim(), false) * 1.2f);
+                        me->AddThreat(target, me->getThreatManager().getThreat(me->GetVictim(), false) * 1.2f);
                         me->AI()->AttackStart(target);
                     }
                     changeTargetTimer = urand(5000, 10000);

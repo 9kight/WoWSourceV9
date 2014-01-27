@@ -219,8 +219,8 @@ public:
                         }
                     }
                     // aggro target if Red Beam
-                    if (j == RED_PORTAL && me->getVictim() != target && target->GetTypeId() == TYPEID_PLAYER)
-                        me->getThreatManager().addThreat(target, 100000.0f+DoGetThreat(me->getVictim()));
+                    if (j == RED_PORTAL && me->GetVictim() != target && target->GetTypeId() == TYPEID_PLAYER)
+                        me->getThreatManager().addThreat(target, 100000.0f+DoGetThreat(me->GetVictim()));
                 }
         }
 

@@ -92,6 +92,9 @@ void WorldDatabaseConnection::DoPrepareStatements()
     PrepareStatement(WORLD_INS_DISABLES, "INSERT INTO disables (entry, sourceType, flags, comment) VALUES (?, ?, ?, ?)", CONNECTION_ASYNC);
     PrepareStatement(WORLD_SEL_DISABLES, "SELECT entry FROM disables WHERE entry = ? AND sourceType = ?", CONNECTION_SYNCH);
     PrepareStatement(WORLD_DEL_DISABLES, "DELETE FROM disables WHERE entry = ? AND sourceType = ?", CONNECTION_ASYNC);
-    PrepareStatement(WORLD_INS_SLOW_OPCODE, "INSERT INTO slowopcodes (opcode, duration) VALUES (?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(WORLD_SEL_GUILD_CHALLENGES, "SELECT challengeId, challengeRewardId, challengeType, challengeEntry, xpReward, goldReward, goldExtraReward FROM guild_challenges JOIN guild_challenges_rewards ON guild_challenges.challengeRewardId = guild_challenges_rewards.rewardId", CONNECTION_SYNCH);
+    // 0: uint8
+    PrepareStatement(WORLD_SEL_REQ_XP, "SELECT xp_for_next_level FROM player_xp_for_level WHERE lvl = ?", CONNECTION_SYNCH);   
+	PrepareStatement(WORLD_INS_SLOW_OPCODE, "INSERT INTO slowopcodes (opcode, duration) VALUES (?, ?)", CONNECTION_ASYNC);
     PrepareStatement(WORLD_SEL_GRAVEYARDS, "SELECT id FROM game_graveyard_zone WHERE faction=? OR faction=0", CONNECTION_ASYNC);
 }

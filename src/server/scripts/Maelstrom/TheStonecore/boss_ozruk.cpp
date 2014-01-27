@@ -120,14 +120,14 @@ public:
                         me->GetMotionMaster()->Clear();
                         me->GetMotionMaster()->MoveIdle();
                         me->SetUInt64Value(UNIT_FIELD_TARGET, 0);
-                        me->SetFacingToObject(me->getVictim());
+                        me->SetFacingToObject(me->GetVictim());
                         DoCast(SPELL_GROUND_SLAM);
                         events.ScheduleEvent(EVENT_GROUND_SLAM, 30000);
                         events.ScheduleEvent(EVENT_GROUND_SLAM_END, 4500);
                         break;
                     case EVENT_GROUND_SLAM_END:
                         me->SetReactState(REACT_AGGRESSIVE);
-                        if(Unit * victim = me->getVictim())
+                        if(Unit * victim = me->GetVictim())
                         {
                             me->SetUInt64Value(UNIT_FIELD_TARGET, victim->GetGUID());
                             DoStartMovement(victim);

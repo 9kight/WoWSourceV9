@@ -32,6 +32,9 @@ EndContentData */
 #include "ScriptedGossip.h"
 #include "SpellAuras.h"
 #include "Player.h"
+#include "TemporarySummon.h"
+#include "CombatAI.h"
+
 
 /*######
 ## npc_arete
@@ -65,7 +68,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
         if (player->GetQuestStatus(QUEST_THE_STORY_THUS_FAR) == QUEST_STATUS_INCOMPLETE)
@@ -114,6 +117,7 @@ public:
                 break;
         }
 
+
         return true;
     }
 };
@@ -148,6 +152,7 @@ public:
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SQUIRE_ITEM_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SQUIRE_ITEM_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
         }
+
 
         player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_SQUIRE, creature->GetGUID());
         return true;
@@ -197,6 +202,7 @@ public:
             uiChargeTimer = 7000;
             uiShieldBreakerTimer = 10000;
         }
+
 
         void MovementInform(uint32 uiType, uint32 /*uiId*/)
         {
@@ -394,9 +400,11 @@ class npc_tournament_training_dummy : public CreatureScript
                         break;
                 }
 
+
                 events.Reset();
                 events.ScheduleEvent(EVENT_DUMMY_RECAST_DEFEND, 5000);
             }
+
 
             void EnterEvadeMode()
             {
@@ -411,6 +419,7 @@ class npc_tournament_training_dummy : public CreatureScript
                 damage = 0;
                 events.RescheduleEvent(EVENT_DUMMY_RESET, 10000);
             }
+
 
             void SpellHit(Unit* caster, SpellInfo const* spell)
             {
@@ -436,6 +445,7 @@ class npc_tournament_training_dummy : public CreatureScript
                                 DoCast(caster, SPELL_RANGED_CREDIT, true);
                         break;
                 }
+
 
                 if (spell->Id == SPELL_PLAYER_BREAK_SHIELD)
                     if (!me->HasAura(SPELL_CHARGE_DEFEND) && !me->HasAura(SPELL_RANGED_DEFEND))
@@ -477,6 +487,7 @@ class npc_tournament_training_dummy : public CreatureScript
                         break;
                 }
 
+
                 if (!UpdateVictim())
                     return;
 
@@ -491,6 +502,7 @@ class npc_tournament_training_dummy : public CreatureScript
         {
             return new npc_tournament_training_dummyAI(creature);
         }
+
 
 };
 
@@ -593,6 +605,7 @@ public:
             Summons.DespawnAll();
         }
 
+
         EventMap events;
 
         bool HalofSpawned;
@@ -614,6 +627,7 @@ public:
             events.ScheduleEvent(EVENT_SPAWN, 3000);
         }
 
+
         void EnterCombat(Unit* /*who*/) {}
 
         void MoveInLineOfSight(Unit* /*who*/) {}
@@ -628,6 +642,7 @@ public:
             Summons.DespawnAll();
             me->DespawnOrUnsummon();
         }
+
 
         void UpdateAI(uint32 const diff)
         {
@@ -866,6 +881,286 @@ public:
     }
 };
 
+/*######
+## Borrowed Technology - Id: 13291, The Solution Solution (daily) - Id: 13292, Volatility - Id: 13239, Volatiliy - Id: 13261 (daily)
+######*/
+
+enum BorrowedTechnologyAndVolatility
+{
+    // Spells
+    SPELL_GRAB             = 59318,
+    SPELL_PING_BUNNY       = 59375,
+    SPELL_IMMOLATION       = 54690,
+    SPELL_EXPLOSION        = 59335,
+    SPELL_RIDE             = 56687,
+
+    // Points
+    POINT_GRAB_DECOY       = 1,
+    POINT_FLY_AWAY         = 2,
+
+    // Events
+    EVENT_FLY_AWAY         = 1
+};
+
+class npc_frostbrood_skytalon : public CreatureScript
+{
+    public:
+        npc_frostbrood_skytalon() : CreatureScript("npc_frostbrood_skytalon") { }
+
+        struct npc_frostbrood_skytalonAI : public VehicleAI
+        {
+            npc_frostbrood_skytalonAI(Creature* creature) : VehicleAI(creature) { }
+
+            EventMap events;
+
+            void IsSummonedBy(Unit* summoner)
+            {
+                me->GetMotionMaster()->MovePoint(POINT_GRAB_DECOY, summoner->GetPositionX(), summoner->GetPositionY(), summoner->GetPositionZ());
+            }
+
+
+            void MovementInform(uint32 type, uint32 id)
+            {
+                if (type != POINT_MOTION_TYPE)
+                    return;
+
+                if (id == POINT_GRAB_DECOY)
+                    if (TempSummon* summon = me->ToTempSummon())
+                        if (Unit* summoner = summon->GetSummoner())
+                            DoCast(summoner, SPELL_GRAB); 
+            }
+
+
+            void UpdateAI(uint32 diff)
+            {
+                VehicleAI::UpdateAI(diff);
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    if (eventId == EVENT_FLY_AWAY)
+                    {
+                        Position randomPosOnRadius;
+                        randomPosOnRadius.m_positionZ = (me->GetPositionZ() + 40.0f);
+                        me->GetNearPoint2D(randomPosOnRadius.m_positionX, randomPosOnRadius.m_positionY, 40.0f, me->GetAngle(me));
+                        me->GetMotionMaster()->MovePoint(POINT_FLY_AWAY, randomPosOnRadius);
+                    }
+                }
+            }
+
+            void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
+            {
+                switch (spell->Id)
+                {
+                    case SPELL_EXPLOSION:
+                        DoCast(me, SPELL_IMMOLATION);
+                        break;
+                    case SPELL_RIDE:
+                        DoCastAOE(SPELL_PING_BUNNY);
+                        events.ScheduleEvent(EVENT_FLY_AWAY, 100);
+                        break;
+                }
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_frostbrood_skytalonAI(creature);
+        }
+};
+
+/*######
+## The Flesh Giant Champion - Id: 13235
+######*/
+enum FleshGiant
+{
+    QUEST_FLESH_GIANT_CHAMPION = 13235,
+
+    NPC_MORBIDUS = 30698,
+    NPC_LICH_KING = 31301,
+    NPC_OLAKIN = 31428,
+    NPC_DHAKAR = 31306,
+
+    FACTION_HOSTILE = 14,
+    FACTION_BASIC = 2102,
+
+    EVENT_INTRO = 1,
+    EVENT_LK_SAY_1 = 2,
+    EVENT_LK_SAY_2 = 3,
+    EVENT_LK_SAY_3 = 4,
+    EVENT_LK_SAY_4 = 5,
+    EVENT_LK_SAY_5 = 6,
+    EVENT_OUTRO = 7,
+    EVENT_START = 8,
+
+    SPELL_SIMPLE_TELEPORT = 64195,
+
+    SAY_DHAKAR_START = 0,
+    SAY_LK_1 = 0,
+    SAY_LK_2 = 1,
+    SAY_LK_3 = 2,
+    SAY_LK_4 = 3,
+    SAY_LK_5 = 4,
+    SAY_OLAKIN_PAY = 0
+};
+
+class npc_margrave_dhakar : public CreatureScript
+{
+    public:
+        npc_margrave_dhakar() : CreatureScript("npc_margrave_dhakar") { }
+
+        struct npc_margrave_dhakarAI : public ScriptedAI
+        {
+            npc_margrave_dhakarAI(Creature* creature) : ScriptedAI(creature) , _summons(me), _lichKingGuid(0) { }
+
+            void Reset() 
+            {
+                me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_NONE);
+
+                _events.Reset();
+                _summons.DespawnAll();
+            }
+
+            void sGossipSelect(Player* player, uint32 sender, uint32 action) 
+            {
+                if (player->GetQuestStatus(QUEST_FLESH_GIANT_CHAMPION) == QUEST_STATUS_INCOMPLETE && !player->isInCombat())
+                {
+                    if (me->GetCreatureTemplate()->GossipMenuId == sender && !action)
+                    {
+                        _events.ScheduleEvent(EVENT_INTRO, 1000);
+                        me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    }
+                }
+            }
+
+
+            void UpdateAI(uint32 diff) 
+            {
+                _events.Update(diff);
+
+                while (uint32 eventId = _events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_INTRO:
+                        {
+                            Talk(SAY_DHAKAR_START);
+                            me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY2H);
+
+                            if (Creature* morbidus = me->FindNearestCreature(NPC_MORBIDUS, 50.0f, true))
+                            {
+                                if (Creature* lichKing = me->SummonCreature(NPC_LICH_KING, morbidus->GetPositionX() + 10.0f, morbidus->GetPositionY(), morbidus->GetPositionZ()))
+                                {
+                                    _lichKingGuid = lichKing->GetGUID();
+                                    lichKing->SetFacingTo(morbidus->GetOrientation());
+                                    lichKing->CastSpell(lichKing, SPELL_SIMPLE_TELEPORT, true);
+                                }
+                            }
+
+                            _events.ScheduleEvent(EVENT_LK_SAY_1, 5000);
+                            break;
+                        }
+                        case EVENT_LK_SAY_1:
+                        {
+                            if (Creature* lichKing = Unit::GetCreature(*me, _lichKingGuid))
+                                lichKing->AI()->Talk(SAY_LK_1);
+                            _events.ScheduleEvent(EVENT_LK_SAY_2, 5000);
+                            break;
+                        }
+                        case EVENT_LK_SAY_2:
+                        {
+                            if (Creature* lichKing = Unit::GetCreature(*me, _lichKingGuid))
+                                lichKing->AI()->Talk(SAY_LK_2);
+                            _events.ScheduleEvent(EVENT_LK_SAY_3, 5000);
+                            break;
+                        }
+                        case EVENT_LK_SAY_3:
+                        {
+                            if (Creature* lichKing = Unit::GetCreature(*me, _lichKingGuid))
+                                lichKing->AI()->Talk(SAY_LK_3);
+                            _events.ScheduleEvent(EVENT_LK_SAY_4, 5000);
+                            break;
+                        }
+                        case EVENT_LK_SAY_4:
+                        {
+                            if (Creature* lichKing = Unit::GetCreature(*me, _lichKingGuid))
+                                lichKing->AI()->Talk(SAY_LK_4);
+                            _events.ScheduleEvent(EVENT_OUTRO, 12000);
+                            break;
+                        }
+                        case EVENT_LK_SAY_5:
+                        {
+                            if (Creature* lichKing = Unit::GetCreature(*me, _lichKingGuid))
+                                lichKing->AI()->Talk(SAY_LK_5);
+                            _events.ScheduleEvent(EVENT_OUTRO, 8000);
+                            break;
+                        }
+                        case EVENT_OUTRO:
+                        {
+                            if (Creature* olakin = me->FindNearestCreature(NPC_OLAKIN, 50.0f, true))
+                                olakin->AI()->Talk(SAY_OLAKIN_PAY);
+
+                            if (Creature* lichKing = Unit::GetCreature(*me, _lichKingGuid))
+                                lichKing->DespawnOrUnsummon(0);
+
+                            _events.ScheduleEvent(EVENT_START, 5000);
+                            break;
+                        }
+                        case EVENT_START:
+                        {
+                            if (Creature* morbidus = me->FindNearestCreature(NPC_MORBIDUS, 50.0f, true))
+                            {
+                                morbidus->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE);
+                                morbidus->setFaction(FACTION_HOSTILE);
+                            }
+
+                            break;
+                        }
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+
+        private:
+            EventMap _events;
+            SummonList _summons;
+            uint64 _lichKingGuid;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const 
+    {
+        return new npc_margrave_dhakarAI(creature);
+    }
+};
+
+class npc_morbidus : public CreatureScript
+{
+    public:
+        npc_morbidus() : CreatureScript("npc_morbidus") { }
+
+        struct npc_morbidusAI : public ScriptedAI
+        {
+            npc_morbidusAI(Creature* creature) : ScriptedAI(creature) { }
+
+            void Reset() 
+            {
+                if (Creature* dhakar = me->FindNearestCreature(NPC_DHAKAR, 50.0f, true))
+                    dhakar->AI()->Reset();
+
+                // this will prevent the event to start without morbidus being alive
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                me->SetReactState(REACT_PASSIVE);
+                me->setFaction(FACTION_BASIC);
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const 
+        {
+            return new npc_morbidusAI(creature);
+        }
+};
 void AddSC_icecrown()
 {
     new npc_arete;
@@ -875,4 +1170,7 @@ void AddSC_icecrown()
     new npc_vereth_the_cunning;
     new npc_tournament_training_dummy;
     new npc_blessed_banner();
+    new npc_frostbrood_skytalon();
+    new npc_margrave_dhakar();
+    new npc_morbidus();    
 }

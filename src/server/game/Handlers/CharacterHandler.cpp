@@ -20,6 +20,8 @@
 #include "ArenaTeam.h"
 #include "ArenaTeamMgr.h"
 #include "Battleground.h"
+#include "BattlefieldTB.h"
+#include "BattlefieldMgr.h"
 #include "CalendarMgr.h"
 #include "Chat.h"
 #include "Common.h"
@@ -1071,6 +1073,17 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         }
     }
 
+    if (Group* group = pCurrChar->GetGroup())
+    {
+        if (group->isLFGGroup())
+        {
+            LfgDungeonSet Dungeons;
+            Dungeons.insert(sLFGMgr->GetDungeon(group->GetGUID()));
+            sLFGMgr->SetSelectedDungeons(pCurrChar->GetGUID(), Dungeons);
+            sLFGMgr->SetState(pCurrChar->GetGUID(), sLFGMgr->GetState(group->GetGUID()));
+        }
+    }
+
     if (!pCurrChar->GetMap()->AddPlayerToMap(pCurrChar) || !pCurrChar->CheckInstanceLoginValid())
     {
         AreaTriggerStruct const* at = sObjectMgr->GetGoBackTrigger(pCurrChar->GetMapId());
@@ -1092,6 +1105,18 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
             // remove wrong guild data
             sLog->outError(LOG_FILTER_GENERAL, "Player %s (GUID: %u) marked as member of not existing guild (id: %u), removing guild membership for player.", pCurrChar->GetName().c_str(), pCurrChar->GetGUIDLow(), pCurrChar->GetGuildId());
             pCurrChar->SetInGuild(0);
+        }
+    }
+
+    //Send TB timer to player at login
+    if (sWorld->getBoolConfig(CONFIG_TOL_BARAD_ENABLE))
+    {
+        if (Battlefield * bfTB = sBattlefieldMgr->GetBattlefieldToZoneId(5095))
+        {
+            if (bfTB->IsWarTime())
+                pCurrChar->SendUpdateWorldState(TBClockWorldState[1], uint32(time(NULL)));
+            else
+                pCurrChar->SendUpdateWorldState(TBClockWorldState[1], uint32(bfTB->GetTimer()));
         }
     }
 
@@ -1166,7 +1191,14 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     }
 
     if (pCurrChar->HasAtLoginFlag(AT_LOGIN_FIRST))
+    {
+        //Gebe neuen Kriegern und Todesrittern ihre Kampfstellung / Frostpräsenz auren
+        if (pCurrChar->getClass() == CLASS_WARRIOR)
+            pCurrChar->AddAura(2457 , pCurrChar);
+        else if(pCurrChar->getClass() == CLASS_DEATH_KNIGHT)
+            pCurrChar->AddAura(48266, pCurrChar);
         pCurrChar->RemoveAtLoginFlag(AT_LOGIN_FIRST);
+    }
 
     // show time before shutdown if shutdown planned.
     if (sWorld->IsShuttingDown())

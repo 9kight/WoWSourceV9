@@ -747,7 +747,7 @@ public:
             }
 
             //GreaterFireball_Timer
-            if (GreaterFireball_Timer < diff || me->IsWithinDist(me->getVictim(), 30))
+            if (GreaterFireball_Timer < diff || me->IsWithinDist(me->GetVictim(), 30))
             {
                 DoCastVictim(SPELL_GREATER_FIREBALL);
                 GreaterFireball_Timer = 2000;

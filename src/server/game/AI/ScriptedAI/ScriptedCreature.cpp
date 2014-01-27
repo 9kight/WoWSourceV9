@@ -141,7 +141,7 @@ void ScriptedAI::DoStartNoMovement(Unit* victim)
 
 void ScriptedAI::DoStopAttack()
 {
-    if (me->getVictim())
+    if (me->GetVictim())
         me->AttackStop();
 }
 
@@ -411,7 +411,7 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(uint32 const diff)
         return false;
     }
 
-    if (me->IsInEvadeMode() || !me->getVictim())
+    if (me->IsInEvadeMode() || !me->GetVictim())
         return false;
 
     float x = me->GetPositionX();

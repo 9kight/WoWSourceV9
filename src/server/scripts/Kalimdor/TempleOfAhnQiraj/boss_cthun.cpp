@@ -1033,7 +1033,7 @@ public:
                 return;
 
             //EvadeTimer
-            if (!me->IsWithinMeleeRange(me->getVictim()))
+            if (!me->IsWithinMeleeRange(me->GetVictim()))
             {
                 if (EvadeTimer <= diff)
                 {
@@ -1145,7 +1145,7 @@ public:
                 return;
 
             //EvadeTimer
-            if (!me->IsWithinMeleeRange(me->getVictim()))
+            if (!me->IsWithinMeleeRange(me->GetVictim()))
             {
                 if (EvadeTimer <= diff)
                 {

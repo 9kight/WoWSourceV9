@@ -431,9 +431,9 @@ class boss_alar : public CreatureScript
             {
                 if (me->isAttackReady() && !me->IsNonMeleeSpellCasted(false))
                 {
-                    if (me->IsWithinMeleeRange(me->getVictim()))
+                    if (me->IsWithinMeleeRange(me->GetVictim()))
                     {
-                        me->AttackerStateUpdate(me->getVictim());
+                        me->AttackerStateUpdate(me->GetVictim());
                         me->resetAttackTimer();
                     }
                     else

@@ -54,7 +54,7 @@ enum GameObjects
     GO_ORIGINATION_ELEVATOR,
     GO_LARGE_STONE_OBELISK          = 207410,
     GO_ULDUM_DOOR_14                = 202306,
-    GO_ULDUM_DOOR_15                = 202307,
+    GO_ANHUURS_DOOR                 = 202307,
     GO_ANHUURS_BRIDGE               = 206506,
     GO_SUN_MIRROR                   = 207726,
     GO_VAULT_OF_LIGHTS_BOSS_DOOR    = 202314,
@@ -97,11 +97,23 @@ enum CreatureIds
     NPC_WATER_WARDEN            = 39802,
     NPC_AIR_WARDEN              = 39803,
     NPC_SNAKE                   = 39444,
+    NPC_DUSTBONE_HORROR         = 40450,
+    NPC_JEWELED_SCARAB          = 40458,
+    NPC_BEETLE_STALKER          = 40459, // Summons both Jeweled Scarab and Dustbone Horror
+    NPC_QUICKSAND               = 40503, // Summoned by a spell not in dbc (75550)
+    NPC_INFERNO_TRIGGER         = 47040,
+    NPC_SOLAR_WIND_VORTEX       = 39635,
+    NPC_SOLAR_WIND              = 47922,
 
     // Various NPCs
 
     NPC_BRANN_BRONZEBEARD       = 49941,
     NPC_BRANN_ANRAPHET          = 39908,
+};
+
+enum AreaIds
+{
+    AREA_TOMB_OF_THE_EARTHRAGER = 5610,
 };
 
 #endif

@@ -344,17 +344,17 @@ void WorldSession::HandleGuildFinderPostRequest(WorldPacket& /*recvPacket*/)
     if (!player->GetGuildId()) // Player must be in guild
         return;
 
-    bool isGuildMaster = true;
+    bool IsGuildMaster = true;
     if (Guild* guild = sGuildMgr->GetGuildById(player->GetGuildId()))
         if (guild->GetLeaderGUID() != player->GetGUID())
-            isGuildMaster = false;
+            IsGuildMaster = false;
 
     LFGuildSettings settings = sGuildFinderMgr->GetGuildSettings(player->GetGuildId());
 
     WorldPacket data(SMSG_LF_GUILD_POST_UPDATED, 35);
-    data.WriteBit(isGuildMaster); // Guessed
+    data.WriteBit(IsGuildMaster); // Guessed
 
-    if (isGuildMaster)
+    if (IsGuildMaster)
     {
         data.WriteBit(settings.IsListed());
         data.WriteBits(settings.GetComment().size(), 11);

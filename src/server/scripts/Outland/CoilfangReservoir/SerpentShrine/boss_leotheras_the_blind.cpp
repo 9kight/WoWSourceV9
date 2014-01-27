@@ -138,9 +138,9 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (me->getVictim()->GetGUID() != victimGUID)
+            if (me->GetVictim()->GetGUID() != victimGUID)
             {
-                DoModifyThreatPercent(me->getVictim(), -100);
+                DoModifyThreatPercent(me->GetVictim(), -100);
                 Unit* owner = Unit::GetUnit(*me, victimGUID);
                 if (owner && owner->isAlive())
                 {
@@ -269,7 +269,7 @@ public:
             if (me->HasAura(AURA_BANISH))
                 return;
 
-            if (!me->getVictim() && me->canCreatureAttack(who))
+            if (!me->GetVictim() && me->canCreatureAttack(who))
             {
                 if (me->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
                     return;
@@ -452,7 +452,7 @@ public:
                 NeedThreatReset = false;
                 DoResetThreat();
                 me->GetMotionMaster()->Clear();
-                me->GetMotionMaster()->MoveChase(me->getVictim());
+                me->GetMotionMaster()->MoveChase(me->GetVictim());
             }
 
             //Enrage_Timer (10 min)
@@ -498,18 +498,18 @@ public:
             else
             {
                 //ChaosBlast_Timer
-                if (!me->getVictim())
+                if (!me->GetVictim())
                     return;
-                if (me->IsWithinDist(me->getVictim(), 30))
+                if (me->IsWithinDist(me->GetVictim(), 30))
                     me->StopMoving();
                 if (ChaosBlast_Timer <= diff)
                 {
                     // will cast only when in range of spell
-                    if (me->IsWithinDist(me->getVictim(), 30))
+                    if (me->IsWithinDist(me->GetVictim(), 30))
                     {
                         //DoCastVictim(SPELL_CHAOS_BLAST, true);
                         int damage = 100;
-                        me->CastCustomSpell(me->getVictim(), SPELL_CHAOS_BLAST, &damage, NULL, NULL, false, NULL, NULL, me->GetGUID());
+                        me->CastCustomSpell(me->GetVictim(), SPELL_CHAOS_BLAST, &damage, NULL, NULL, false, NULL, NULL, me->GetGUID());
                     }
                     ChaosBlast_Timer = 3000;
                 } else ChaosBlast_Timer -= diff;
@@ -521,7 +521,7 @@ public:
                     for (ThreatContainer::StorageType::const_iterator itr = ThreatList.begin(); itr != ThreatList.end(); ++itr)
                     {
                         Unit* tempTarget = Unit::GetUnit(*me, (*itr)->getUnitGuid());
-                        if (tempTarget && tempTarget->GetTypeId() == TYPEID_PLAYER && tempTarget->GetGUID() != me->getVictim()->GetGUID() && TargetList.size()<5)
+                        if (tempTarget && tempTarget->GetTypeId() == TYPEID_PLAYER && tempTarget->GetGUID() != me->GetVictim()->GetGUID() && TargetList.size()<5)
                             TargetList.push_back(tempTarget);
                     }
                     //SpellInfo* spell = GET_SPELL(SPELL_INSIDIOUS_WHISPER);
@@ -580,8 +580,8 @@ public:
                 if (Copy)
                  {
                      Demon = Copy->GetGUID();
-                    if (me->getVictim())
-                        Copy->AI()->AttackStart(me->getVictim());
+                    if (me->GetVictim())
+                        Copy->AI()->AttackStart(me->GetVictim());
                 }
                 //set nightelf final form
                 IsFinalForm = true;
@@ -649,17 +649,17 @@ public:
             if (!UpdateVictim())
                 return;
             //ChaosBlast_Timer
-            if (me->IsWithinDist(me->getVictim(), 30))
+            if (me->IsWithinDist(me->GetVictim(), 30))
                 me->StopMoving();
 
             if (ChaosBlast_Timer <= diff)
              {
                 // will cast only when in range od spell
-                if (me->IsWithinDist(me->getVictim(), 30))
+                if (me->IsWithinDist(me->GetVictim(), 30))
                 {
                     //DoCastVictim(SPELL_CHAOS_BLAST, true);
                     int damage = 100;
-                    me->CastCustomSpell(me->getVictim(), SPELL_CHAOS_BLAST, &damage, NULL, NULL, false, NULL, NULL, me->GetGUID());
+                    me->CastCustomSpell(me->GetVictim(), SPELL_CHAOS_BLAST, &damage, NULL, NULL, false, NULL, NULL, me->GetGUID());
                     ChaosBlast_Timer = 3000;
                 }
              } else ChaosBlast_Timer -= diff;

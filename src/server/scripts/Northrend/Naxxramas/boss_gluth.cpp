@@ -130,11 +130,11 @@ public:
                 }
             }
 
-            if (me->getVictim() && me->getVictim()->GetEntry() == MOB_ZOMBIE)
+            if (me->GetVictim() && me->GetVictim()->GetEntry() == MOB_ZOMBIE)
             {
-                if (me->IsWithinMeleeRange(me->getVictim()))
+                if (me->IsWithinMeleeRange(me->GetVictim()))
                 {
-                    me->Kill(me->getVictim());
+                    me->Kill(me->GetVictim());
                     me->ModifyHealth(int32(me->CountPctFromMaxHealth(5)));
                 }
             }

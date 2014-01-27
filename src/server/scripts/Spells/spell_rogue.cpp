@@ -98,6 +98,48 @@ class spell_rog_blade_flurry : public SpellScriptLoader
         }
 };
 
+
+class spell_rog_revealing_strike : public SpellScriptLoader
+{
+    public:
+        spell_rog_revealing_strike() : SpellScriptLoader("spell_rog_revealing_strike") { }
+
+        class spell_rog_revealing_strike_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_rog_revealing_strike_AuraScript);
+
+            bool CheckProc(ProcEventInfo& eventInfo)
+            {
+                if (eventInfo.GetDamageInfo())
+                {
+                    if (const SpellInfo*  procSpell = eventInfo.GetDamageInfo()->GetSpellInfo())
+                    {
+                        if (!procSpell->NeedsComboPoints() || !eventInfo.GetDamageInfo()->GetDamage())
+                            return false;
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+            {
+                PreventDefaultAction();
+            }
+
+            void Register()
+            {
+                DoCheckProc += AuraCheckProcFn(spell_rog_revealing_strike_AuraScript::CheckProc);
+                OnEffectProc += AuraEffectProcFn(spell_rog_revealing_strike_AuraScript::HandleProc, EFFECT_2, SPELL_AURA_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_rog_revealing_strike_AuraScript();
+        }
+};
+
 // 31228 - Cheat Death
 class spell_rog_cheat_death : public SpellScriptLoader
 {
@@ -387,7 +429,7 @@ class spell_rog_prey_on_the_weak : public SpellScriptLoader
             void HandleEffectPeriodic(AuraEffect const* /*aurEff*/)
             {
                 Unit* target = GetTarget();
-                Unit* victim = target->getVictim();
+                Unit* victim = target->GetVictim();
                 if (victim && (target->GetHealthPct() > victim->GetHealthPct()))
                 {
                     if (!target->HasAura(SPELL_ROGUE_PREY_ON_THE_WEAK))
@@ -503,56 +545,49 @@ class spell_rog_stealth : public SpellScriptLoader
         }
 };
 
-// -1943 - Rupture
-class spell_rog_rupture : public SpellScriptLoader
+class spell_rogue_rupture : public SpellScriptLoader
 {
-    public:
-        spell_rog_rupture() : SpellScriptLoader("spell_rog_rupture") { }
+    class script_impl : public AuraScript
+    {
+        PrepareAuraScript(script_impl);
 
-        class spell_rog_rupture_AuraScript : public AuraScript
+        void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool& canBeRecalculated)
         {
-            PrepareAuraScript(spell_rog_rupture_AuraScript);
+            Unit const* const caster = GetCaster();
+            if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
+                return;
 
-            bool Load()
-            {
-                Unit* caster = GetCaster();
-                return caster && caster->GetTypeId() == TYPEID_PLAYER;
-            }
+            float const apPerCombo[] = { 0.0f, 0.015f, 0.024f, 0.03f, 0.03428571f, 0.0375f };
+            uint8 const cp = caster->ToPlayer()->GetComboPoints();
 
-            void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& canBeRecalculated)
-            {
-                if (Unit* caster = GetCaster())
-                {
-                    canBeRecalculated = false;
+            float value = amount + caster->GetTotalAttackPowerValue(BASE_ATTACK) * apPerCombo[cp];
 
-                    float const attackpowerPerCombo[6] =
-                    {
-                        0.0f,
-                        0.015f,         // 1 point:  ${($m1 + $b1*1 + 0.015 * $AP) * 4} damage over 8 secs
-                        0.024f,         // 2 points: ${($m1 + $b1*2 + 0.024 * $AP) * 5} damage over 10 secs
-                        0.03f,          // 3 points: ${($m1 + $b1*3 + 0.03 * $AP) * 6} damage over 12 secs
-                        0.03428571f,    // 4 points: ${($m1 + $b1*4 + 0.03428571 * $AP) * 7} damage over 14 secs
-                        0.0375f         // 5 points: ${($m1 + $b1*5 + 0.0375 * $AP) * 8} damage over 16 secs
-                    };
+            // Revealing Strike
+            if (AuraEffect const* const rsAurEff = caster->GetAuraEffect(84617, EFFECT_2, caster->GetGUID()))
+                AddPct(value, rsAurEff->GetAmount());
 
-                    uint8 cp = caster->ToPlayer()->GetComboPoints();
-                    if (cp > 5)
-                        cp = 5;
-
-                    amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * attackpowerPerCombo[cp]);
-                }
-            }
-
-            void Register()
-            {
-                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_rog_rupture_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_rog_rupture_AuraScript();
+            value *= 0.5f * GetMaxDuration() / IN_MILLISECONDS;
+            value /= aurEff->GetTotalTicks();
+            amount = int32(value);
+            canBeRecalculated = false;
         }
+
+        void Register()
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(script_impl::CalculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+        }
+    };
+
+public:
+    spell_rogue_rupture()
+        : SpellScriptLoader("spell_rogue_rupture")
+    {
+    }
+
+    AuraScript* GetAuraScript() const
+    {
+        return new script_impl();
+    }
 };
 
 // 5938 - Shiv
@@ -771,41 +806,55 @@ class spell_rog_sap : public SpellScriptLoader
         }
 };
 
-// -1776 - Gouge
-class spell_rog_gouge : public SpellScriptLoader
+class spell_rogue_gouge : public SpellScriptLoader
 {
-    public:
-        spell_rog_gouge() : SpellScriptLoader("spell_rog_gouge") { }
+    class aura_script_impl : public AuraScript
+    {
+        enum { SPELL_SANGUINARY_VEIN = 79146 };
 
-        class spell_rog_gouge_AuraScript : public AuraScript
+        PrepareAuraScript(aura_script_impl);
+
+        bool Load()
         {
-            PrepareAuraScript(spell_rog_gouge_AuraScript);
+            Unit const* const caster = GetCaster();
+            return caster && caster->GetTypeId() == TYPEID_PLAYER;
+        }
 
-            bool Validate(SpellInfo const* /*spellInfo*/) { return true; }
+        bool HandleCheckProc(ProcEventInfo& eventInfo)
+        {
+            Unit const* const caster = GetCaster();
+            SpellInfo const* const triggerSpell = eventInfo.GetSpellInfo();
 
-            bool CheckProc(ProcEventInfo& eventInfo)
+            if (triggerSpell)
             {
-                const SpellInfo* spellInfo = eventInfo.GetDamageInfo()->GetSpellInfo();
-                if (!spellInfo)
+                // Prevents proc by damage from the spell itself
+                if (triggerSpell->Id != GetId())
                     return true;
 
-                if (spellInfo->GetAllEffectsMechanicMask() & (1 << MECHANIC_BLEED))
-                    if (AuraEffect* aurEff = eventInfo.GetActor()->GetDummyAuraEffect(SPELLFAMILY_GENERIC, 4821, 1))
-                        if (roll_chance_i(aurEff->GetAmount()))
-                            return false;
-                return true;
+                // Sanguinary Vein
+                if (AuraEffect const* const aurEff = caster->GetAuraEffectOfRankedSpell(SPELL_SANGUINARY_VEIN, EFFECT_1))
+                    if (triggerSpell->GetAuraState() == AURA_STATE_BLEEDING && roll_chance_i(aurEff->GetAmount()))
+                        return false;
             }
 
-            void Register()
-            {
-                DoCheckProc += AuraCheckProcFn(spell_rog_gouge_AuraScript::CheckProc);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_rog_gouge_AuraScript();
+            return true;
         }
+
+        void Register()
+        {
+            DoCheckProc += AuraCheckProcFn(aura_script_impl::HandleCheckProc);
+        }
+    };
+public:
+    spell_rogue_gouge()
+        : SpellScriptLoader("spell_rogue_gouge")
+    {
+    }
+
+    AuraScript* GetAuraScript() const
+    {
+        return new aura_script_impl();
+    }
 };
 
 // 2094 - Blind
@@ -879,23 +928,394 @@ class spell_rog_smoke : public SpellScriptLoader
         }
 };
 
+class spell_rogue_deadly_brew : public SpellScriptLoader
+{
+    class script_impl : public AuraScript
+    {
+        PrepareAuraScript(script_impl);
+
+        enum { SPELL_CRIPPLING_POISON = 3409 };
+
+        void OnProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+        {
+            GetTarget()->CastSpell(eventInfo.GetProcTarget(), SPELL_CRIPPLING_POISON, true, NULL, aurEff);
+        }
+
+        void Register()
+        {
+            OnEffectProc += AuraEffectProcFn(script_impl::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+public:
+    spell_rogue_deadly_brew()
+        : SpellScriptLoader("spell_rogue_deadly_brew")
+    {
+    }
+
+    AuraScript* GetAuraScript() const
+    {
+        return new script_impl();
+    }
+};
+
+class spell_rogue_deadly_momentum : public SpellScriptLoader
+{
+    class script_impl : public AuraScript
+    {
+        PrepareAuraScript(script_impl);
+
+        enum
+        {
+            SPELL_RECUPERATE        = 73651,
+            SPELL_SLICE_AND_DICE    = 5171,
+        };
+
+        void OnApply(AuraEffect const* const, AuraEffectHandleModes)
+        {
+            Unit const* const target = GetTarget();
+
+            // Recuperate
+            if (Aura* const aura = target->GetAura(SPELL_RECUPERATE))
+                aura->RefreshDuration();
+
+            // Slice and Dice
+            if (Aura* const aura = target->GetAura(SPELL_SLICE_AND_DICE))
+                aura->RefreshDuration();
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(script_impl::OnApply, EFFECT_0, SPELL_AURA_ADD_FLAT_MODIFIER, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+        }
+    };
+
+public:
+    spell_rogue_deadly_momentum()
+        : SpellScriptLoader("spell_rogue_deadly_momentum")
+    {
+    }
+
+    AuraScript* GetAuraScript() const
+    {
+        return new script_impl();
+    }
+};
+
+class spell_rogue_eviscerate : public SpellScriptLoader
+{
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl);
+
+        enum
+        {
+            SPELL_EVISCERATE_BONUS  = 37169,
+            SPELL_SERRATED_BLADES   = 14171,
+            SPELL_RUPTURE           = 1943,
+            SPELL_REVEALING_STRIKE  = 84617,
+        };
+
+        bool Load()
+        {
+            return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+        }
+
+        void HandleHit()
+        {
+            Player* const caster = GetCaster()->ToPlayer();
+            Unit* const target = GetHitUnit();
+            if (!target)
+                return;
+
+            int32 value = GetHitDamage();
+            uint8 const cp = caster->GetComboPoints();
+            float const ap = caster->GetTotalAttackPowerValue(BASE_ATTACK);
+
+            value += int32(ap * cp * 0.091f);
+
+            // Eviscerate and Envenom Bonus Damage
+            if (AuraEffect const* const aurEff = caster->GetAuraEffect(SPELL_EVISCERATE_BONUS, EFFECT_0))
+                value += cp * aurEff->GetAmount();
+
+            // Revealing Strike
+            if (AuraEffect const* const aurEff = target->GetAuraEffect(SPELL_REVEALING_STRIKE, EFFECT_2))
+                AddPct(value, aurEff->GetAmount());
+
+            // Serrated Blades
+            if (AuraEffect const* const aurEff = caster->GetAuraEffectOfRankedSpell(SPELL_SERRATED_BLADES, EFFECT_0))
+                if (roll_chance_i(aurEff->GetAmount() * cp))
+                    if (Aura* const aura = target->GetAura(SPELL_RUPTURE, caster->GetGUID()))
+                        aura->RefreshDuration();
+
+            SetHitDamage(value);
+        }
+
+        void Register()
+        {
+            OnHit += SpellHitFn(script_impl::HandleHit);
+        }
+    };
+
+public:
+    spell_rogue_eviscerate()
+        : SpellScriptLoader("spell_rogue_eviscerate")
+    {
+    }
+
+    SpellScript* GetSpellScript() const
+    {
+        return new script_impl();
+    }
+};
+
+class spell_rogue_backstab : public SpellScriptLoader
+{
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl);
+
+        enum
+        {
+            SPELL_MURDEROUS_INTENT          = 14158,
+            SPELL_MURDEROUS_INTENT_ENERGY   = 79132,
+        };
+
+        bool Load()
+        {
+            return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+        }
+
+        void HandleAddComboPoints(SpellEffIndex)
+        {
+            Player* const caster = GetCaster()->ToPlayer();
+            Unit* const target = GetHitUnit();
+            if (!target || !target->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
+                return;
+
+            // Murderous Intent
+            if (AuraEffect const* const aurEff = caster->GetAuraEffectOfRankedSpell(SPELL_MURDEROUS_INTENT, EFFECT_0))
+            {
+                int32 const value = aurEff->GetAmount();
+                caster->CastCustomSpell(caster, SPELL_MURDEROUS_INTENT_ENERGY, &value, NULL, NULL, true);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(script_impl::HandleAddComboPoints, EFFECT_2, SPELL_EFFECT_ADD_COMBO_POINTS);
+        }
+    };
+
+public:
+    spell_rogue_backstab()
+        : SpellScriptLoader("spell_rogue_backstab")
+    {
+    }
+
+    SpellScript* GetSpellScript() const
+    {
+        return new script_impl();
+    }
+};
+
+class spell_rogue_redirect : public SpellScriptLoader
+{
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl);
+
+        bool Load()
+        {
+            return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+        }
+
+        SpellCastResult CheckCast()
+        {
+            Player* const caster = GetCaster()->ToPlayer();
+            Unit* const target = ObjectAccessor::GetUnit(*caster, caster->GetComboTarget());
+            Unit* const selectedUnit = caster->GetSelectedUnit();
+            if (!target || !caster->GetComboPoints())
+                return SPELL_FAILED_NO_COMBO_POINTS;
+
+            if (!selectedUnit || selectedUnit == target || !selectedUnit->isAlive())
+                return SPELL_FAILED_BAD_TARGETS;
+
+            return SPELL_CAST_OK;
+        }
+
+        void HandleAddComboPoints(SpellEffIndex)
+        {
+            Player* const caster = GetCaster()->ToPlayer();
+            uint8 const count = caster->GetComboPoints();
+            SetBasepoints(count);
+
+            // Remove Combo points from old target
+            if (Unit* const target = ObjectAccessor::GetUnit(*caster, caster->GetComboTarget()))
+                target->ClearComboPointHolders();
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(script_impl::CheckCast);
+            OnEffectHitTarget += SpellEffectFn(script_impl::HandleAddComboPoints, EFFECT_0, SPELL_EFFECT_ADD_COMBO_POINTS);
+        }
+    };
+
+public:
+    spell_rogue_redirect()
+        : SpellScriptLoader("spell_rogue_redirect")
+    {
+    }
+
+    SpellScript* GetSpellScript() const
+    {
+        return new script_impl();
+    }
+};
+
+class spell_rogue_glyph_of_hemorrhage : public SpellScriptLoader
+{
+    class script_impl : public AuraScript
+    {
+        PrepareAuraScript(script_impl);
+
+        bool Load()
+        {
+            Unit const* const caster = GetCaster();
+            return caster && caster->GetTypeId() == TYPEID_PLAYER;
+        }
+
+        bool HandleCheckProc(ProcEventInfo& eventInfo)
+        {
+            DamageInfo* const damageInfo = eventInfo.GetDamageInfo();
+            return damageInfo && damageInfo->GetDamage();
+        }
+
+        void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& procInfo)
+        {
+            PreventDefaultAction();
+            Unit* const target = procInfo.GetProcTarget();
+            if (!target)
+                return;
+
+            uint32 const damage = procInfo.GetDamageInfo()->GetDamage();
+            int32 const value = CalculatePct(damage, aurEff->GetAmount());
+            uint32 const triggerSpellId = GetSpellInfo()->Effects[EFFECT_0].TriggerSpell;
+
+            GetCaster()->CastCustomSpell(target, triggerSpellId, &value, NULL, NULL, true);
+        }
+
+        void Register()
+        {
+            DoCheckProc += AuraCheckProcFn(script_impl::HandleCheckProc);
+            OnEffectProc += AuraEffectProcFn(script_impl::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+public:
+    spell_rogue_glyph_of_hemorrhage()
+        : SpellScriptLoader("spell_rogue_glyph_of_hemorrhage")
+    {
+    }
+
+    AuraScript* GetAuraScript() const
+    {
+        return new script_impl();
+    }
+};
+
+class spell_rogue_restless_blades : public SpellScriptLoader
+{
+    class script_impl : public AuraScript
+    {
+        PrepareAuraScript(script_impl);
+
+        enum
+        {
+            SPELL_ADRENALINE_RUSH   = 13750,
+            SPELL_KILLING_SPREE     = 51690,
+            SPELL_REDIRECT          = 73981,
+            SPELL_SPRINT            = 2983,
+        };
+
+        bool Load()
+        {
+            Unit const* const caster = GetCaster();
+            return caster && caster->GetTypeId() == TYPEID_PLAYER;
+        }
+
+        bool HandleCheckProc(ProcEventInfo& eventInfo)
+        {
+            Player* const player = GetUnitOwner()->ToPlayer();
+            if (!player)
+                return false;
+
+            uint8 const comboPoints = player->GetComboPoints();
+            if (!comboPoints)
+                return false;
+
+            return true;
+        }
+
+        void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& procInfo)
+        {
+            Player* const player = GetUnitOwner()->ToPlayer();
+            uint8 const comboPoints = player->GetComboPoints();
+
+            int32 const value = aurEff->GetAmount() * comboPoints;
+
+            // Reduce cooldown of Adrenaline Rush, Killing Spree, Redirect and Sprint
+            player->ModifySpellCooldown(SPELL_ADRENALINE_RUSH, -value);
+            player->ModifySpellCooldown(SPELL_KILLING_SPREE, -value);
+            player->ModifySpellCooldown(SPELL_REDIRECT, -value);
+            player->ModifySpellCooldown(SPELL_SPRINT, -value);
+        }
+
+        void Register()
+        {
+            DoCheckProc += AuraCheckProcFn(script_impl::HandleCheckProc);
+            OnEffectProc += AuraEffectProcFn(script_impl::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+public:
+    spell_rogue_restless_blades()
+        : SpellScriptLoader("spell_rogue_restless_blades")
+    {
+    }
+
+    AuraScript* GetAuraScript() const
+    {
+        return new script_impl();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_blade_flurry();
+    new spell_rog_revealing_strike();
     new spell_rog_cheat_death();
     new spell_rog_deadly_poison();
     new spell_rog_nerves_of_steel();
     new spell_rog_preparation();
     new spell_rog_prey_on_the_weak();
     new spell_rog_recuperate();
-    new spell_rog_rupture();
+    new spell_rogue_rupture();
     new spell_rog_shiv();
     new spell_rog_tricks_of_the_trade();
     new spell_rog_tricks_of_the_trade_proc();
-    new spell_rog_gouge();
+    new spell_rogue_gouge();
     new spell_rog_backstab();
     new spell_rog_sap();
     new spell_rog_smoke();
     new spell_rog_blind();
     new spell_rog_stealth();
+    new spell_rogue_deadly_brew();
+    new spell_rogue_deadly_momentum();
+    new spell_rogue_eviscerate();
+    new spell_rogue_backstab();
+    new spell_rogue_redirect();
+    new spell_rogue_glyph_of_hemorrhage();
+    new spell_rogue_restless_blades();
 }

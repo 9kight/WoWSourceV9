@@ -139,7 +139,7 @@ public:
         {
             switch (creature->GetEntry())
             {
-                case ENTRY_ZUMRAH:
+                case ENTRY_ZUM_RAH:
                     ZumrahGUID = creature->GetGUID();
                     break;
                 case ENTRY_BLY:
@@ -195,7 +195,7 @@ public:
         {
             switch (data)
             {
-                case ENTRY_ZUMRAH:
+                case ENTRY_ZUM_RAH:
                     return ZumrahGUID;
                 case ENTRY_BLY:
                     return BlyGUID;

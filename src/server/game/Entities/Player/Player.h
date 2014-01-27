@@ -1186,6 +1186,7 @@ private:
     uint8 _maxLevel;
     bool _isBattleGround;
     bool _isPvP;
+    bool _isHonnor;
 };
 
 struct PlayerTalentInfo
@@ -1969,6 +1970,7 @@ class Player : public Unit, public GridObject<Player>
 
         void SendCooldownEvent(SpellInfo const* spellInfo, uint32 itemId = 0, Spell* spell = NULL, bool setCooldown = true);
         void ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs);
+        void ModifySpellCooldown(uint32 spellId, int32 cooldown);
         void RemoveSpellCooldown(uint32 spell_id, bool update = false);
         void RemoveSpellCategoryCooldown(uint32 cat, bool update = false);
         void SendClearCooldown(uint32 spell_id, Unit* target);
@@ -2597,7 +2599,6 @@ class Player : public Unit, public GridObject<Player>
         void RemoveAtLoginFlag(AtLoginFlags flags, bool persist = false);
 
         bool isUsingLfg();
-        bool inRandomLfgDungeon();
 
         typedef std::set<uint32> DFQuestsDoneList;
         DFQuestsDoneList m_DFQuests;
@@ -2729,6 +2730,7 @@ class Player : public Unit, public GridObject<Player>
         void CheckAllAchievementCriteria();
         void ResetAchievementCriteria(AchievementCriteriaTypes type, uint64 miscValue1 = 0, uint64 miscValue2 = 0, bool evenIfCriteriaComplete = false);
         void UpdateAchievementCriteria(AchievementCriteriaTypes type, uint64 miscValue1 = 0, uint64 miscValue2 = 0, uint64 miscValue3 = 0, Unit* unit = NULL);
+        void UpdateGuildAchievementCriteria(AchievementCriteriaTypes type, uint64 miscValue1 = 0, uint64 miscValue2 = 0, uint64 miscValue3 = 0, Unit* unit = NULL);
         void StartTimedAchievement(AchievementCriteriaTimedTypes type, uint32 entry, uint32 timeLost = 0);
         void RemoveTimedAchievement(AchievementCriteriaTimedTypes type, uint32 entry);
         void CompletedAchievement(AchievementEntry const* entry);

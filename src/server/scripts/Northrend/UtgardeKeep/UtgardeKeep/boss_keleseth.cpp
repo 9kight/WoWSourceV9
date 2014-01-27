@@ -324,7 +324,7 @@ public:
                         }
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                         me->RemoveFlag(UNIT_FIELD_BYTES_1, UNIT_STAND_STATE_DEAD);
-                        me->GetMotionMaster()->MoveChase(me->getVictim());
+                        me->GetMotionMaster()->MoveChase(me->GetVictim());
                         events.ScheduleEvent(EVENT_DECREPIFY, urand(4, 6)*IN_MILLISECONDS);
                         break;
                 }

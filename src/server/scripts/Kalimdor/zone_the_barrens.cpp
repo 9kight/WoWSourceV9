@@ -19,7 +19,7 @@
 /* ScriptData
 SDName: The_Barrens
 SD%Complete: 90
-SDComment: Quest support: 863
+SDComment: Quest support: 863, 898, 1719, 2458, 4921, 6981,
 SDCategory: Barrens
 EndScriptData */
 
@@ -194,7 +194,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
         if (player->GetQuestStatus(6981) == QUEST_STATUS_INCOMPLETE)
@@ -681,5 +681,10 @@ public:
 
 void AddSC_the_barrens()
 {
+    new npc_beaten_corpse();
+    new npc_gilthares();
+    new npc_sputtervalve();
+    new npc_taskmaster_fizzule();
+    new npc_twiggy_flathead();
     new npc_wizzlecrank_shredder();
 }

@@ -36,9 +36,12 @@ enum DataTypes
     DATA_RENATAKI                   = 6,
     DATA_WUSHOOLAY                  = 7,
     DATA_GRILEK                     = 8,
+    DATA_BEAM_TRIGGER               = 9,
 
     // Jin'do the Godbreaker
     DATA_JINDOR_TRIGGER,
+    DATA_POSITION_ID,
+    DATA_TIKI_MASK_ID,
 };
 
 enum CreatureIds
@@ -57,12 +60,35 @@ enum CreatureIds
 
     // Bloodlord Mandokir
     NPC_CHAINED_SPIRIT              = 52156,
+    NPC_HAKKAR_CHAINS               = 52430,
     NPC_OHGAN                       = 52157,
 
     // Jin'do the Godbreaker
     NPC_JINDO_TRIGGER               = 52150,
     NPC_SPIRIT_OF_HAKKAR            = 52222,
-    NPC_SHADOW_OF_HAKKAR            = 52650
+    NPC_SHADOW_OF_HAKKAR            = 52650,
+
+    NPC_GAS_CLOUD                   = 52062,
+    NPC_HAKKAR_RIFT                 = 52400,
+    NPC_MADNESS_CONTROLLER          = 91004,
+    NPC_TROLL_ARTIFACT_STAND        = 52452,
+    NPC_ELF_ARTIFACT_STAND          = 52450,
+    NPC_DWARF_ARTIFACT_STAND        = 52446,
+    NPC_TROLL_ARTIFACT_SUM          = 52453,
+    NPC_ELF_ARTIFACT_SUM            = 52451,
+    NPC_DWARF_ARTIFACT_SUM          = 52449,
+    NPC_CAVE_IN_TRIGGER             = 52387,
+
+    // Venoxis
+    NPC_GENERAL_PURPOSE_BUNNY       = 45979,
+    NPC_POOL_OF_ACID_TEARS          = 52197,
+    NPC_BLOOD_VENOM                 = 52525,
+    NPC_VENOMOOUS_EFFUSION          = 52288,
+
+    // ZulGurub Misc
+    NPC_BOULDER_LEFT                = 52351,
+    NPC_BOULDER_CENTER              = 52354,
+    NPC_BOULDER_RIGHT               = 52353
 };
 
 enum GameObjectIds

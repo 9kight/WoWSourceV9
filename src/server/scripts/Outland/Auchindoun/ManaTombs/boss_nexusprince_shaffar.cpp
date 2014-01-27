@@ -266,7 +266,7 @@ public:
 
         void JustSummoned(Creature* summoned)
         {
-            summoned->AI()->AttackStart(me->getVictim());
+            summoned->AI()->AttackStart(me->GetVictim());
         }
 
         void UpdateAI(const uint32 diff)

@@ -152,6 +152,7 @@ public:
                     me->MonsterSay(SAY_D_E, LANG_UNIVERSAL, player->GetGUID());
                     me->CastSpell(player, 54732, true);
                     player->RemoveAurasDueToSpell(SPELL_DEAD_STILL);
+					player->SetPhaseMask(1, true);
                     break;
                 case 1 :
                     me->MonsterSay(SAY_D_F, LANG_UNIVERSAL, player->GetGUID());
@@ -671,7 +672,7 @@ public:
     {
         if (player->GetQuestStatus(14242) != QUEST_STATUS_NONE)
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Would you take a gyrocopter?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-        else if (creature->isQuestGiver())
+        else if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
         player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
         return true;
@@ -2229,33 +2230,33 @@ public:
             }
             else
             {
-                if (!me->getVictim())
+                if (!me->GetVictim())
                     return;
                 if (mui1 <= diff)
                 {
                     switch (urand(0, 4))
                     {
                     case 0 :
-                        me->CastSpell(me->getVictim(), 74005, true);
+                        me->CastSpell(me->GetVictim(), 74005, true);
                         //		  DoScriptText(-1039583, me);
                         break;
                     case 1 :
-                        me->CastSpell(me->getVictim(), 74000, true);
+                        me->CastSpell(me->GetVictim(), 74000, true);
                         //		  DoScriptText(-1039584, me);
                         break;
                     case 2 :
-                        me->CastSpell(me->getVictim(), 74004, true);
+                        me->CastSpell(me->GetVictim(), 74004, true);
                         //		  DoScriptText(-1039586, me);
                         break;
                     case 3 :
-                        me->CastSpell(me->getVictim(), 81000, true);
+                        me->CastSpell(me->GetVictim(), 81000, true);
                         //		  DoScriptText(-1039582, me);
                         break;
                     case 4 :
-                        me->CastSpell(me->getVictim(), 74003, true);
+                        me->CastSpell(me->GetVictim(), 74003, true);
                         break;
                     default :
-                        me->CastSpell(me->getVictim(), 74003, true);
+                        me->CastSpell(me->GetVictim(), 74003, true);
                         break;
                     }
                     mui1 = 5000;

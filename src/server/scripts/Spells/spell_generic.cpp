@@ -31,6 +31,7 @@
 #include "Group.h"
 #include "InstanceScript.h"
 #include "LFGMgr.h"
+#include "LFG.h"
 #include "Pet.h"
 #include "ReputationMgr.h"
 #include "SkillDiscovery.h"
@@ -3921,37 +3922,66 @@ class spell_gen_armor_specialization : public SpellScriptLoader
         }
 };
 
-class spell_select_random_target : public SpellScriptLoader
+class spell_gen_luck_of_the_draw : public SpellScriptLoader
 {
-public:
-    spell_select_random_target() : SpellScriptLoader("spell_select_random_target") { }
+    public:
+        spell_gen_luck_of_the_draw() : SpellScriptLoader("spell_gen_luck_of_the_draw") { }
 
-    class spell_select_random_target_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_select_random_target_SpellScript);
-
-        void FilterTargets(std::list<WorldObject*>& targets)
+        class spell_gen_luck_of_the_draw_AuraScript : public AuraScript
         {
-            if (targets.empty())
-                return;
+            PrepareAuraScript(spell_gen_luck_of_the_draw_AuraScript);
 
-            WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
-            targets.clear();
-            if (Player* player = target->ToPlayer())
-                if (player->isAlive())
-                    player->CastSpell(GetCaster(), uint32(GetSpellInfo()->Effects[EFFECT_0].BasePoints), true);
-        }
+            bool Load()
+            {
+                return GetUnitOwner()->GetTypeId() == TYPEID_PLAYER;
+            }
 
-        void Register()
+            // cheap hax to make it have update calls
+            void CalcPeriodic(AuraEffect const* /*effect*/, bool& isPeriodic, int32& amplitude)
+            {
+                isPeriodic = true;
+                amplitude = 5 * IN_MILLISECONDS;
+            }
+
+            void Update(AuraEffect* /*effect*/)
+            {
+                if (Player* owner = GetUnitOwner()->ToPlayer())
+                {
+                    std::set<uint32> dungeons = sLFGMgr->GetSelectedDungeons(owner->GetGUID());
+                    std::set<uint32>::const_iterator itr = dungeons.begin();
+
+                    if (itr == dungeons.end())
+                    {
+                        Remove(AURA_REMOVE_BY_DEFAULT);
+                        return;
+                    }
+
+
+                    LFGDungeonEntry const* randomDungeon = sLFGDungeonStore.LookupEntry(*itr);
+                    if (Group* group = owner->GetGroup())
+                        if (Map const* map = owner->GetMap())
+                            if (group->isLFGGroup())
+                                if (uint32 dungeonId = sLFGMgr->GetDungeon(group->GetGUID(), true))
+                                    if (LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(dungeonId))
+                                        if (uint32(dungeon->map) == map->GetId() && dungeon->difficulty == uint32(map->GetDifficulty()))
+                                            if (randomDungeon && randomDungeon->type == 6)
+                                                return; // in correct dungeon
+
+                    Remove(AURA_REMOVE_BY_DEFAULT);
+                }
+            }
+
+            void Register()
+            {
+                DoEffectCalcPeriodic += AuraEffectCalcPeriodicFn(spell_gen_luck_of_the_draw_AuraScript::CalcPeriodic, EFFECT_0, SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+                OnEffectUpdatePeriodic += AuraEffectUpdatePeriodicFn(spell_gen_luck_of_the_draw_AuraScript::Update, EFFECT_0, SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
         {
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_select_random_target_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            return new spell_gen_luck_of_the_draw_AuraScript();
         }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_select_random_target_SpellScript();
-    }
 };
 
 void AddSC_generic_spell_scripts()
@@ -4054,7 +4084,7 @@ void AddSC_generic_spell_scripts()
     new spell_gen_armor_specialization("spell_war_armor_specialization");
     new spell_gen_ignacious();
     new spell_gen_angerforge();
-    new spell_select_random_target();
     new spell_gen_scales_of_life();
     new spell_gen_apparatus_of_khaz();
+    new spell_gen_luck_of_the_draw();
 }

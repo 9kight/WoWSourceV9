@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -19,11 +19,15 @@
 #ifndef TRINITYCORE_GROUP_H
 #define TRINITYCORE_GROUP_H
 
+#include "Battleground.h"
 #include "DBCEnums.h"
 #include "GroupRefManager.h"
 #include "LootMgr.h"
 #include "QueryResult.h"
 #include "SharedDefines.h"
+#include "Player.h"
+#include "Battlefield.h"
+#include "BattlefieldMgr.h"
 
 class Battlefield;
 class Battleground;
@@ -224,6 +228,7 @@ class Group
         bool isBGGroup()   const;
         bool isBFGroup()   const;
         bool IsCreated()   const;
+        bool IsGuildGroup(uint32 guildId, bool AllInSameMap = false, bool AllInSameInstanceId = false);
         uint64 GetLeaderGUID() const;
         uint64 GetGUID() const;
         uint32 GetLowGUID() const;
@@ -231,7 +236,6 @@ class Group
         LootMethod GetLootMethod() const;
         uint64 GetLooterGuid() const;
         ItemQualities GetLootThreshold() const;
-        uint8 GetGroupType() { return m_groupType; }
 
         uint32 GetDbStoreId() const { return m_dbStoreId; };
 
@@ -256,6 +260,7 @@ class Group
         uint8 GetGuildMembersCount(uint64 guid) const;
 
         uint8 GetMemberGroup(uint64 guid) const;
+        uint8 GetGroupType() { return m_groupType; }
 
         void ConvertToLFG();
         void ConvertToRaid();
@@ -270,6 +275,7 @@ class Group
         void SetTargetIcon(uint8 id, uint64 whoGuid, uint64 targetGuid);
         void SetGroupMemberFlag(uint64 guid, bool apply, GroupMemberFlags flag);
         void SetEveryoneAssistant(Group* group, bool active);
+        void UpdateGuildAchievementCriteria(AchievementCriteriaTypes type, uint32 miscValue1, uint32 miscValue2, uint32 miscValue3, Unit* unit, WorldObject* rewardSource);
         void RemoveUniqueGroupMemberFlag(GroupMemberFlags flag);
 
         Difficulty GetDifficulty(bool isRaid) const;
@@ -301,8 +307,8 @@ class Group
         bool isRollLootActive() const;
         void SendLootStartRoll(uint32 CountDown, uint32 mapid, const Roll &r);
         void SendLootStartRollToPlayer(uint32 countDown, uint32 mapId, Player* p, bool canNeed, Roll const& r);
-        void SendLootRoll(uint64 SourceGuid, uint64 TargetGuid, uint8 RollNumber, uint8 RollType, const Roll &r);
-        void SendLootRollWon(uint64 SourceGuid, uint64 TargetGuid, uint8 RollNumber, uint8 RollType, const Roll &r);
+        void SendLootRoll(uint64 SourceGuid, uint64 TargetGuid, uint32 RollNumber, uint8 RollType, const Roll &r);
+        void SendLootRollWon(uint64 SourceGuid, uint64 TargetGuid, uint32 RollNumber, uint8 RollType, const Roll &r);
         void SendLootAllPassed(Roll const& roll);
         void SendLooter(Creature* creature, Player* pLooter);
         void GroupLoot(Loot* loot, WorldObject* pLootedObject);
@@ -324,7 +330,6 @@ class Group
         InstanceGroupBind* GetBoundInstance(Player* player);
         InstanceGroupBind* GetBoundInstance(Map* aMap);
         InstanceGroupBind* GetBoundInstance(MapEntry const* mapEntry);
-        InstanceGroupBind* GetBoundInstance(Difficulty difficulty, uint32 mapId);
         BoundInstancesMap& GetBoundInstances(Difficulty difficulty);
 
         //RaidMarker System

@@ -36,6 +36,7 @@
 #include "Transport.h"
 #include "Vehicle.h"
 #include "VMapFactory.h"
+#include "LFGMgr.h"
 
 union u_map_magic
 {
@@ -830,6 +831,8 @@ void Map::MoveAllCreaturesInMoveList()
         {
             // update pos
             c->Relocate(c->_newPosition);
+            if (c->IsVehicle())
+                c->GetVehicleKit()->RelocatePassengers();			
             //CreatureRelocationNotify(c, new_cell, new_cell.cellCoord());
             c->UpdateObjectVisibility(false);
         }
@@ -2493,6 +2496,13 @@ bool InstanceMap::AddPlayerToMap(Player* player)
                         ASSERT(playerBind->save == mapSave);
                 }
             }
+
+            if (group && group->isLFGGroup())
+                if (uint32 dungeonId = sLFGMgr->GetDungeon(group->GetGUID(), true))
+                    if (LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(dungeonId))
+                        if (LFGDungeonEntry const* randomDungeon = sLFGDungeonStore.LookupEntry(*(sLFGMgr->GetSelectedDungeons(player->GetGUID()).begin())))
+                            if (uint32(dungeon->map) == GetId() && dungeon->difficulty == uint32(GetDifficulty()) && randomDungeon->type == uint32(LFG_TYPE_RANDOM))
+                                player->CastSpell(player, LFG_SPELL_LUCK_OF_THE_DRAW, true);
         }
 
         // for normal instances cancel the reset schedule when the
@@ -2953,6 +2963,9 @@ float Map::GetVisibilityRange(uint32 cellId) const
                 return MAX_VISIBILITY_DISTANCE;
             else
                 return m_VisibleDistance;
+            break;
+        case 754: // Throne of the Four Winds
+                return MAX_VISIBILITY_DISTANCE;
             break;
         case 580:   // sunwell
             switch (cellId)

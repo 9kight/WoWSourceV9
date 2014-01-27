@@ -32,6 +32,7 @@ enum Spells
     SPELL_SEARING_SHADOWS  = 96913,
     SPELL_BERSERK          = 47008,
     SPELL_GAZE_OF_OCCUTHAR = 97028,
+    SPELL_OCCU_DESTRUCTION = 96968
 };
 
 enum Events
@@ -42,6 +43,8 @@ enum Events
     EVENT_BERSERK          = 4,
     EVENT_GAZE_OF_OCCUTHAR = 5,
     EVENT_AOE              = 6,
+    EVENT_OCCU_DESTRUCT    = 7,
+    EVENT_EYE_REMOVE       = 8
 };
 
 class boss_occuthar : public CreatureScript
@@ -60,7 +63,7 @@ class boss_occuthar : public CreatureScript
                 events.ScheduleEvent(EVENT_EYES_OF_OCCUTHAR, 60000);
                 events.ScheduleEvent(EVENT_FOCUSED_FIRE, 20000);
                 events.ScheduleEvent(EVENT_SEARING_SHADOWS, 15000);
-                instance->HandleGameObject(instance->GetData64(GO_OCCUTHAR_DOOR), false); // set me to true, when we release step by step
+                instance->HandleGameObject(instance->GetData64(GO_OCCUTHAR_DOOR), true); // set me to true, when we release step by step
             }
 
             void EnterCombat(Unit* /*who*/)
@@ -84,7 +87,7 @@ class boss_occuthar : public CreatureScript
 
             void SummDummy()
             {
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
                 me->SummonCreature(NPC_FOCUSED_FIRE_DUMMY, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
             }
 
@@ -137,14 +140,14 @@ class npc_eye_of_occuthar : public CreatureScript
             {
             }
 
-            void Reset()
+            void reset()
             {
                 events.ScheduleEvent(EVENT_GAZE_OF_OCCUTHAR, 8000);
             }
 
             void EnterCombat(Unit* /*who*/)
             {
-                events.ScheduleEvent(EVENT_GAZE_OF_OCCUTHAR, 8000);
+                events.ScheduleEvent(EVENT_GAZE_OF_OCCUTHAR, 1000);
             }
 
             void UpdateAI(uint32 const diff)
@@ -154,7 +157,7 @@ class npc_eye_of_occuthar : public CreatureScript
 
                 events.Update(diff);
 
-                if (me->HasUnitState(UNIT_STATE_CASTING))
+                if(me->HasUnitState(UNIT_STATE_CASTING) && !me->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
                     return;
 
                 while (uint32 eventId = events.ExecuteEvent())
@@ -164,7 +167,14 @@ class npc_eye_of_occuthar : public CreatureScript
                     case EVENT_GAZE_OF_OCCUTHAR:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
                             DoCast(target, SPELL_GAZE_OF_OCCUTHAR);
-                        events.ScheduleEvent(EVENT_GAZE_OF_OCCUTHAR, 20000);
+                        events.ScheduleEvent(EVENT_OCCU_DESTRUCT, 10000);
+                        break;
+                    case EVENT_OCCU_DESTRUCT:
+                        DoCast(me, SPELL_OCCU_DESTRUCTION, false);
+                        events.ScheduleEvent(EVENT_EYE_REMOVE, 1500);
+                        break;
+                    case EVENT_EYE_REMOVE:
+                        me->DisappearAndDie();
                         break;
                         }
                     }

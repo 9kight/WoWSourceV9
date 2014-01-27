@@ -73,6 +73,7 @@ public:
         boss_erudaxAI(Creature* pCreature) : ScriptedAI(pCreature), ShouldSummonAdds(false)
         {
             pInstance = pCreature->GetInstanceScript();
+            me->ApplySpellImmune(0, IMMUNITY_ID, 79466, true); // Binding Shadows
         }
 
         void Reset()
@@ -87,12 +88,12 @@ public:
             isCorruption = false;
         }
 
-		void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* /*who*/)
         {
             ShouldSummonAdds = false;
             me->SetReactState(REACT_AGGRESSIVE);
             me->GetMotionMaster()->Clear();
-            me->GetMotionMaster()->MoveChase(me->getVictim());
+            me->GetMotionMaster()->MoveChase(me->GetVictim());
             events.ScheduleEvent(EVENT_ENFEEBLING_BLOW, 4000);
             events.ScheduleEvent(EVENT_BINDING_SHADOWS, 9000);
             events.ScheduleEvent(EVENT_SHADOW_GALE, 20000);
@@ -115,7 +116,7 @@ public:
                 RemoveShadowGaleDebuffFromPlayers();
                 me->SetReactState(REACT_AGGRESSIVE);
                 me->GetMotionMaster()->Clear();
-                me->GetMotionMaster()->MoveChase(me->getVictim());
+                me->GetMotionMaster()->MoveChase(me->GetVictim());
                 if (rand() % 2)
                     Talk(1);
                 if (Creature *FacelessPortalStalker = Unit::GetCreature(*me, FacelessPortalStalkerGUID))
@@ -379,7 +380,7 @@ public:
                 }
         }
 
-	private:
+    private:
         Creature* GetRandomEgg()
         {
             std::list<Creature*> creatures;

@@ -52,16 +52,13 @@ struct DeclinedName;
 struct ItemTemplate;
 struct MovementInfo;
 
-namespace lfg
-{
-    struct LfgJoinResultData;
-    struct LfgPlayerBoot;
-    struct LfgProposal;
-    struct LfgQueueStatusData;
-    struct LfgPlayerRewardData;
-    struct LfgRoleCheck;
-    struct LfgUpdateData;
-}
+struct LfgJoinResultData;
+struct LfgLockStatus;
+struct LfgPlayerBoot;
+struct LfgProposal;
+struct LfgReward;
+struct LfgRoleCheck;
+struct LfgUpdateData;
 
 enum AccountDataType
 {
@@ -571,6 +568,7 @@ class WorldSession
         void HandleTurnInPetitionOpcode(WorldPacket& recvData);
 
         void HandleGuildQueryOpcode(WorldPacket& recvPacket);
+        void HandleGuildCreateOpcode(WorldPacket& recvPacket);
         void HandleGuildInviteOpcode(WorldPacket& recvPacket);
         void HandleGuildRemoveOpcode(WorldPacket& recvPacket);
         void HandleGuildAcceptOpcode(WorldPacket& recvPacket);
@@ -596,10 +594,16 @@ class WorldSession
         void HandleGuildChangeInfoTextOpcode(WorldPacket& recvPacket);
         void HandleSaveGuildEmblemOpcode(WorldPacket& recvPacket);
         void HandleGuildRequestPartyState(WorldPacket& recvPacket);
-        void HandleGuildRequestMaxDailyXP(WorldPacket& recvPacket);
         void HandleAutoDeclineGuildInvites(WorldPacket& recvPacket);
         void HandleGuildSwitchRankOpcode(WorldPacket& recvPacket);
         void HandleGuildRequestChallengeUpdate(WorldPacket& recvPacket);
+        void HandleGuildRequestMaxDailyXP(WorldPacket& recvPacket);
+        void HandleGuildAchievementMembers(WorldPacket& recvPacket);
+        void HandleGuildSwitchRank(WorldPacket& recvPacket);
+        void HandleGuildRenameRequest(WorldPacket& recvPacket);
+        void HandleGuildChallengeRequest(WorldPacket& recvPacket);
+        void SendGuildCancelInvite(std::string unkString, uint8 unkByte);
+        void HandleGuildRenameCallback(std::string newName);
 
         void HandleGuildFinderAddRecruit(WorldPacket& recvPacket);
         void HandleGuildFinderBrowse(WorldPacket& recvPacket);
@@ -843,7 +847,7 @@ class WorldSession
 
         // Looking for Dungeon/Raid
         void HandleLfgSetCommentOpcode(WorldPacket& recvData);
-        void HandleLfgGetLockInfoOpcode(WorldPacket& recvData);
+        void HandleLfgPlayerLockInfoRequestOpcode(WorldPacket& recvData);
         void SendLfgPlayerLockInfo();
         void SendLfgPartyLockInfo();
         void HandleLfgPartyLockInfoRequestOpcode(WorldPacket& recvData);
@@ -853,20 +857,22 @@ class WorldSession
         void HandleLfgProposalResultOpcode(WorldPacket& recvData);
         void HandleLfgSetBootVoteOpcode(WorldPacket& recvData);
         void HandleLfgTeleportOpcode(WorldPacket& recvData);
-        void HandleLfrJoinOpcode(WorldPacket& recvData);
+        void HandleLfrSearchOpcode(WorldPacket& recvData);
         void HandleLfrLeaveOpcode(WorldPacket& recvData);
-        void HandleLfgGetStatus(WorldPacket& recvData);
+        void HandleDungeonFinderGetSystemInfo(WorldPacket& recvData);
 
-        void SendLfgUpdateStatus(lfg::LfgUpdateData const& updateData, bool party);
-        void SendLfgUpdateParty(lfg::LfgUpdateData const& updateData);
+        void SendLfgUpdatePlayer(const LfgUpdateData& updateData);
+        void SendLfgUpdateParty(const LfgUpdateData& updateData);
+        void SendLfgUpdateStatus(const LfgUpdateData& updateData, bool isParty);
         void SendLfgRoleChosen(uint64 guid, uint8 roles);
-        void SendLfgRoleCheckUpdate(lfg::LfgRoleCheck const& pRoleCheck);
-        void SendLfgLfrList(bool update);
-        void SendLfgJoinResult(lfg::LfgJoinResultData const& joinData);
-        void SendLfgQueueStatus(lfg::LfgQueueStatusData const& queueData);
-        void SendLfgPlayerReward(lfg::LfgPlayerRewardData const& lfgPlayerRewardData);
-        void SendLfgBootProposalUpdate(lfg::LfgPlayerBoot const& boot);
-        void SendLfgUpdateProposal(lfg::LfgProposal const& proposal);
+
+        void SendLfgRoleCheckUpdate(const LfgRoleCheck* pRoleCheck);
+        void SendLfgUpdateSearch(bool update);
+        void SendLfgJoinResult(const LfgJoinResultData& joinData);
+        void SendLfgQueueStatus(uint32 dungeon, int32 waitTime, int32 avgWaitTime, int32 waitTimeTanks, int32 waitTimeHealer, int32 waitTimeDps, uint32 queuedTime, uint8 tanks, uint8 healers, uint8 dps);
+        void SendLfgPlayerReward(uint32 rdungeonEntry, uint32 sdungeonEntry, uint8 done, const LfgReward* reward, const Quest *qRew);
+        void SendLfgBootPlayer(const LfgPlayerBoot* pBoot);
+        void SendLfgUpdateProposal(uint32 proposalId, const LfgProposal *pProp);
         void SendLfgDisabled();
         void SendLfgOfferContinue(uint32 dungeonEntry);
         void SendLfgTeleportError(uint8 err);
@@ -997,6 +1003,7 @@ class WorldSession
         QueryCallback<PreparedQueryResult, std::string> _charRenameCallback;
         QueryCallback<PreparedQueryResult, std::string> _addFriendCallback;
         QueryCallback<PreparedQueryResult, CharacterCreateInfo*, true> _charCreateCallback;
+        QueryCallback<PreparedQueryResult, std::string> _guildRenameCallback;
         QueryResultHolderFuture _charLoginCallback;
 
     private:

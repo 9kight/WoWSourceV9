@@ -305,7 +305,7 @@ public:
                         Unit* target = (*itr)->getTarget();
                         if (target
                                 && target->GetTypeId() == TYPEID_PLAYER
-                                && target->GetGUID() != me->getVictim()->GetGUID()
+                                && target->GetGUID() != me->GetVictim()->GetGUID()
                                 && target->GetPositionZ() > me->GetPositionZ() - 5
                                 && !target->HasAura(AURA_SPECTRAL_EXHAUSTION))
                         {
@@ -335,7 +335,7 @@ public:
             if (bJustReset)//boss is invisible, don't attack
                 return;
 
-            if (!me->getVictim() && me->IsValidAttackTarget(who))
+            if (!me->GetVictim() && me->IsValidAttackTarget(who))
             {
                 float attackRadius = me->GetAttackDistance(who);
                 if (me->IsWithinDistInMap(who, attackRadius))
@@ -781,7 +781,7 @@ public:
             if (AgonyCurseTimer <= diff)
             {
                 Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0);
-                if (!target) target = me->getVictim();
+                if (!target) target = me->GetVictim();
                 DoCast(target, SPELL_AGONY_CURSE);
                 AgonyCurseTimer = 20000;
             } else AgonyCurseTimer -= diff;

@@ -325,6 +325,11 @@ public:
                 }
         }
 
+        void EnterCombat(Unit* who)
+        {
+            me->GetMotionMaster()->MoveChase(who);
+        }
+
         void UpdateAI(const uint32 diff)
         {
             //Return since we have no target
@@ -436,6 +441,11 @@ public:
                     if (pPalehoof && pPalehoof->isAlive())
                         CAST_AI(boss_palehoof::boss_palehoofAI, pPalehoof->AI())->Reset();
                 }
+        }
+
+        void EnterCombat(Unit* who)
+        {
+            me->GetMotionMaster()->MoveChase(who);
         }
 
         void UpdateAI(const uint32 diff)
@@ -552,6 +562,11 @@ public:
                     if (pPalehoof && pPalehoof->isAlive())
                         CAST_AI(boss_palehoof::boss_palehoofAI, pPalehoof->AI())->Reset();
                 }
+        }
+
+        void EnterCombat(Unit* who)
+        {
+            me->GetMotionMaster()->MoveChase(who);
         }
 
         void UpdateAI(const uint32 diff)
@@ -672,6 +687,11 @@ public:
                     if (pPalehoof && pPalehoof->isAlive())
                         CAST_AI(boss_palehoof::boss_palehoofAI, pPalehoof->AI())->Reset();
                 }
+        }
+
+        void EnterCombat(Unit* who)
+        {
+            me->GetMotionMaster()->MoveChase(who);
         }
 
         void UpdateAI(const uint32 diff)

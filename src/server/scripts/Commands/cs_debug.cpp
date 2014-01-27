@@ -90,7 +90,7 @@ public:
             { "itemexpire",     SEC_ADMINISTRATOR,  false, &HandleDebugItemExpireCommand,      "", NULL },
             { "areatriggers",   SEC_ADMINISTRATOR,  false, &HandleDebugAreaTriggersCommand,    "", NULL },
             { "los",            SEC_MODERATOR,      false, &HandleDebugLoSCommand,             "", NULL },
-            { "moveflags",      SEC_ADMINISTRATOR,  false, &HandleDebugMoveflagsCommand,       "", NULL },
+           /* { "moveflags",      SEC_ADMINISTRATOR,  false, &HandleDebugMoveflagsCommand,       "", NULL }, */
             { "phase",          SEC_MODERATOR,      false, &HandleDebugPhaseCommand,           "", NULL },
             { "unroot",         SEC_MODERATOR,      false, &HandleDebugUnRootCommand,          "", NULL },
             { "combat",         SEC_MODERATOR,      false, &HandleDebugCombatCommand,          "", NULL },
@@ -1304,7 +1304,7 @@ public:
         handler->PSendSysMessage(LANG_SET_32BIT_FIELD, opcode, value);
         return true;
     }
-
+/*
     static bool HandleDebugMoveflagsCommand(ChatHandler* handler, char const* args)
     {
         Unit* target = handler->getSelectedUnit();
@@ -1346,7 +1346,7 @@ public:
 
         return true;
     }
-
+*/
     static bool HandleWPGPSCommand(ChatHandler* handler, char const* /*args*/)
     {
         Player* player = handler->GetSession()->GetPlayer();

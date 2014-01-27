@@ -150,7 +150,7 @@ public:
             {
                 if (Unit* pAdd = Unit::GetUnit(*me, m_auiLackeyGUID[i]))
                 {
-                    if (!pAdd->getVictim())
+                    if (!pAdd->GetVictim())
                     {
                         who->SetInCombatWith(pAdd);
                         pAdd->AddThreat(who, 0.0f);
@@ -384,7 +384,7 @@ struct boss_priestess_lackey_commonAI : public ScriptedAI
             {
                 if (Unit* pAdd = Unit::GetUnit(*me, m_auiLackeyGUIDs[i]))
                 {
-                    if (!pAdd->getVictim() && pAdd != me)
+                    if (!pAdd->GetVictim() && pAdd != me)
                     {
                         who->SetInCombatWith(pAdd);
                         pAdd->AddThreat(who, 0.0f);
@@ -394,7 +394,7 @@ struct boss_priestess_lackey_commonAI : public ScriptedAI
 
             if (Creature* pDelrissa = Unit::GetCreature(*me, instance->GetData64(DATA_DELRISSA)))
             {
-                if (pDelrissa->isAlive() && !pDelrissa->getVictim())
+                if (pDelrissa->isAlive() && !pDelrissa->GetVictim())
                 {
                     who->SetInCombatWith(pDelrissa);
                     pDelrissa->AddThreat(who, 0.0f);
@@ -1043,7 +1043,7 @@ public:
 
             boss_priestess_lackey_commonAI::UpdateAI(diff);
 
-            if (me->IsWithinDistInMap(me->getVictim(), ATTACK_DISTANCE))
+            if (me->IsWithinDistInMap(me->GetVictim(), ATTACK_DISTANCE))
             {
                 if (Wing_Clip_Timer <= diff)
                 {

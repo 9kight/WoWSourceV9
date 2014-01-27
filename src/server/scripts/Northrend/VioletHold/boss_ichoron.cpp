@@ -192,7 +192,7 @@ public:
             }
 
             me->SetVisible(true);
-            me->GetMotionMaster()->MoveChase(me->getVictim());
+            me->GetMotionMaster()->MoveChase(me->GetVictim());
         }
 
         uint32 GetData(uint32 type) const

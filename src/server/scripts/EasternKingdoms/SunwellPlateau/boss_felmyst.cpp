@@ -538,7 +538,7 @@ public:
         }
         void UpdateAI(const uint32 /*diff*/)
         {
-            if (!me->getVictim())
+            if (!me->GetVictim())
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                     AttackStart(target);
         }

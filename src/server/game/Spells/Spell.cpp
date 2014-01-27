@@ -662,7 +662,7 @@ void Spell::InitExplicitTargets(SpellCastTargets const& targets)
             }
             // try to use attacked unit as a target
             else if ((m_caster->GetTypeId() == TYPEID_UNIT) && neededTargets & (TARGET_FLAG_UNIT_ENEMY | TARGET_FLAG_UNIT))
-                unit = m_caster->getVictim();
+                unit = m_caster->GetVictim();
 
             // didn't find anything - let's use self as target
             if (!unit && neededTargets & (TARGET_FLAG_UNIT_RAID | TARGET_FLAG_UNIT_PARTY | TARGET_FLAG_UNIT_ALLY))
@@ -836,7 +836,8 @@ void Spell::SelectEffectImplicitTargets(SpellEffIndex effIndex, SpellImplicitTar
             for (uint32 j = effIndex + 1; j < MAX_SPELL_EFFECTS; ++j)
             {
                 SpellEffectInfo const* effects = GetSpellInfo()->Effects;
-                if (effects[effIndex].TargetA.GetTarget() == effects[j].TargetA.GetTarget() &&
+                if (effects[j].IsEffect() &&
+                    effects[effIndex].TargetA.GetTarget() == effects[j].TargetA.GetTarget() &&
                     effects[effIndex].TargetB.GetTarget() == effects[j].TargetB.GetTarget() &&
                     effects[effIndex].ImplicitTargetConditions == effects[j].ImplicitTargetConditions &&
                     effects[effIndex].CalcRadius(m_caster) == effects[j].CalcRadius(m_caster) &&
@@ -939,13 +940,46 @@ void Spell::SelectImplicitChannelTargets(SpellEffIndex effIndex, SpellImplicitTa
     {
         case TARGET_UNIT_CHANNEL_TARGET:
         {
-            WorldObject* target = ObjectAccessor::GetUnit(*m_caster, m_originalCaster->GetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT));
-            CallScriptObjectTargetSelectHandlers(target, effIndex);
-            // unit target may be no longer avalible - teleported out of map for example
-            if (target && target->ToUnit())
-                AddUnitTarget(target->ToUnit(), 1 << effIndex);
+            // Small hacking for only two spell... not getting better wayy
+            if (GetSpellInfo()->Id == 79505)
+            {
+                Map::PlayerList const& players = GetCaster()->GetMap()->GetPlayers();
+                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                    if (Player* player = itr->getSource())
+                        if (player->HasAura(79505))
+                        {
+                            WorldObject* target = ObjectAccessor::GetUnit(*m_caster, player->GetGUID());
+                            CallScriptObjectTargetSelectHandlers(target, effIndex);
+                            if (target && target->ToUnit())
+                                AddUnitTarget(target->ToUnit(), 1 << effIndex);
+                            else
+                                sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "SPELL: cannot find channel spell target for spell ID %u, effect %u", m_spellInfo->Id, effIndex);
+                            break;
+                        }
+            }
+            else if (GetSpellInfo()->Id == 99919)
+            {
+                if (Creature* alysrazor = m_caster->FindNearestCreature(52530, 5000.0f))
+                {
+                    WorldObject* target = ObjectAccessor::GetUnit(*m_caster, alysrazor->GetGUID());
+                    CallScriptObjectTargetSelectHandlers(target, effIndex);
+                    // unit target may be no longer avalible - teleported out of map for example
+                    if (target && target->ToUnit())
+                        AddUnitTarget(target->ToUnit(), 1 << effIndex);
+                    else
+                        sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "SPELL: cannot find channel spell target for spell ID %u, effect %u", m_spellInfo->Id, effIndex);
+                }
+            }
             else
-                sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "SPELL: cannot find channel spell target for spell ID %u, effect %u", m_spellInfo->Id, effIndex);
+            {
+                WorldObject* target = ObjectAccessor::GetUnit(*m_caster, channeledSpell->m_targets.GetUnitTargetGUID());
+                CallScriptObjectTargetSelectHandlers(target, effIndex);
+                // unit target may be no longer avalible - teleported out of map for example
+                if (target && target->ToUnit())
+                    AddUnitTarget(target->ToUnit(), 1 << effIndex);
+                else
+                    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "SPELL: cannot find channel spell target for spell ID %u, effect %u", m_spellInfo->Id, effIndex);
+            }
             break;
         }
         case TARGET_DEST_CHANNEL_TARGET:
@@ -1257,6 +1291,19 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
             case SPELLFAMILY_GENERIC:
                 switch (m_spellInfo->Id)
                 {
+                    case 99052: // Smoldering Devastation
+                    case 98934: // Embare Flare
+                    case 100648:
+                    case 100834:
+                    case 100835:
+                        for (std::list<Unit*>::iterator itr = unitTargets.begin(); itr != unitTargets.end();)
+                        {
+                            if (((*itr)->GetPositionZ() > m_caster->GetPositionZ() ? ((*itr)->GetPositionZ() - m_caster->GetPositionZ()) : (m_caster->GetPositionZ() - (*itr)->GetPositionZ())) > 5.0f)
+                                itr = unitTargets.erase(itr);
+                         else
+                             ++itr;
+                        }
+                        break;
                     case 52759: // Ancestral Awakening
                     case 71610: // Echoes of Light (Althor's Abacus normal version)
                     case 71641: // Echoes of Light (Althor's Abacus heroic version)
@@ -1974,6 +2021,9 @@ void Spell::SearchChainTargets(std::list<WorldObject*>& targets, uint32 chainTar
             jumpRadius = 7.5f;
             break;
         case SPELL_DAMAGE_CLASS_MELEE:
+            if (GetSpellInfo()->RangeEntry != sSpellRangeStore.LookupEntry(2) && GetSpellInfo()->SchoolMask != SPELL_SCHOOL_MASK_NORMAL)
+                jumpRadius = 10.0f;
+            else
             // 5y for swipe, cleave and similar
             jumpRadius = 5.0f;
             break;
@@ -2027,7 +2077,7 @@ void Spell::SearchChainTargets(std::list<WorldObject*>& targets, uint32 chainTar
                 if (Unit* unitTarget = (*itr)->ToUnit())
                 {
                     uint32 deficit = unitTarget->GetMaxHealth() - unitTarget->GetHealth();
-                    if ((deficit > maxHPDeficit || foundItr == tempTargets.end()) && target->IsWithinDist(unitTarget, jumpRadius) && target->IsWithinLOSInMap(unitTarget))
+                    if ((deficit && (deficit > maxHPDeficit || foundItr == tempTargets.end()) && target->IsWithinDist(unitTarget, jumpRadius) && target->IsWithinLOSInMap(unitTarget)))
                     {
                         foundItr = itr;
                         maxHPDeficit = deficit;
@@ -2702,6 +2752,8 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
         player->StartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_SPELL_TARGET, m_spellInfo->Id);
         player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, m_spellInfo->Id, 0, 0, m_caster);
         player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET2, m_spellInfo->Id);
+        player->UpdateGuildAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, m_spellInfo->Id, 0, 0, m_caster);
+        player->UpdateGuildAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET2, m_spellInfo->Id);
     }
 
     if (Player* player = m_caster->ToPlayer())
@@ -3181,8 +3233,10 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
         m_needComboPoints = false;
 
     SpellCastResult result = CheckCast(true);
-    if (result != SPELL_CAST_OK && !IsAutoRepeat())          //always cast autorepeat dummy for triggering
+    if (result != SPELL_CAST_OK && !IsAutoRepeat() && m_spellInfo->Id != 43658)          //always cast autorepeat dummy for triggering
     {
+        if (_triggeredCastFlags & TRIGGERED_DONT_REPORT_CAST_ERROR)
+            result = SPELL_FAILED_DONT_REPORT;
         // Periodic auras should be interrupted when aura triggers a spell which can't be cast
         // for example bladestorm aura should be removed on disarm as of patch 3.3.5
         // channeled periodic spells should be affected by this (arcane missiles, penance, etc)
@@ -3401,6 +3455,8 @@ void Spell::cast(bool skipCheck)
         SpellCastResult castResult = CheckCast(false);
         if (castResult != SPELL_CAST_OK)
         {
+            if (_triggeredCastFlags & TRIGGERED_DONT_REPORT_CAST_ERROR)
+                castResult = SPELL_FAILED_DONT_REPORT;
             SendCastResult(castResult);
             SendInterrupted(0);
             //restore spell mods
@@ -3488,6 +3544,7 @@ void Spell::cast(bool skipCheck)
         }
 
         player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL, m_spellInfo->Id);
+        player->UpdateGuildAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL, m_spellInfo->Id);
     }
 
     if (!(_triggeredCastFlags & TRIGGERED_IGNORE_POWER_AND_REAGENT_COST))
@@ -3800,22 +3857,22 @@ void Spell::_handle_immediate_phase()
 
 void Spell::_handle_finish_phase()
 {
-    if (m_caster->m_movedPlayer)
+    if (Player* const player = m_caster->m_movedPlayer)
     {
         // Take for real after all targets are processed
         if (m_needComboPoints)
-            m_caster->m_movedPlayer->ClearComboPoints();
+            player->ClearComboPoints();
 
         // Real add combo points from effects
         if (m_comboPointGain)
-            m_caster->m_movedPlayer->GainSpellComboPoints(m_comboPointGain);
+            player->GainSpellComboPoints(m_comboPointGain);
 
-        if (m_spellInfo->PowerType == POWER_HOLY_POWER && m_caster->m_movedPlayer->getClass() == CLASS_PALADIN)
-           HandleHolyPower(m_caster->m_movedPlayer);
+        if (m_spellInfo->PowerType == POWER_HOLY_POWER && player->getClass() == CLASS_PALADIN)
+            HandleHolyPower(player);
     }
 
     if (m_caster->m_extraAttacks && GetSpellInfo()->HasEffect(SPELL_EFFECT_ADD_EXTRA_ATTACKS))
-        m_caster->HandleProcExtraAttackFor(m_caster->getVictim());
+        m_caster->HandleProcExtraAttackFor(m_caster->GetVictim());
 
     // TODO: trigger proc phase finish here
 }
@@ -5016,56 +5073,40 @@ void Spell::HandleThreatSpells()
 
 void Spell::HandleHolyPower(Player* caster)
 {
-    if (!caster)
+    // Always use all the holy power we have
+    m_powerCost = caster->GetPower(POWER_HOLY_POWER);
+
+    // Consume Holy Power only if target is hit (except Zealotry)
+    if (!m_powerCost || m_spellInfo->Id == 85696)
         return;
 
     bool hit = true;
-    Player* modOwner = caster->GetSpellModOwner();
-
-    m_powerCost = caster->GetPower(POWER_HOLY_POWER); // Always use all the holy power we have
-    switch (m_spellInfo->Id)
+    if (uint64 const targetGUID = m_targets.GetUnitTargetGUID())
     {
-        case 85673: // Word of glory
+        for (std::list<TargetInfo>::iterator itr = m_UniqueTargetInfo.begin(); itr != m_UniqueTargetInfo.end(); ++itr)
         {
-            // Eternal glory
-            if (AuraEffect* eternalGlory = m_caster->GetDummyAuraEffect(SPELLFAMILY_PALADIN, 2944, EFFECT_0))
-                if (roll_chance_i(eternalGlory->GetAmount()))
-                    m_powerCost = 0;
-            break;
-        }
-        case 85696: // Zealotry
-            m_powerCost = 0;
-            break;
-    }
-
-    if (!m_powerCost || !modOwner)
-        return;
-
-    if (uint64 targetGUID = m_targets.GetUnitTargetGUID())
-    {
-        for (std::list<TargetInfo>::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
-        {
-            if (ihit->targetGUID == targetGUID)
+            if (itr->targetGUID == targetGUID)
             {
-                if (ihit->missCondition != SPELL_MISS_NONE && ihit->missCondition != SPELL_MISS_MISS)
-                    hit = false;
-
-                break;
+                switch (itr->missCondition)
+                {
+                    case SPELL_MISS_MISS:
+                    case SPELL_MISS_DODGE:
+                    case SPELL_MISS_PARRY:
+                        hit = false;
+                    default:
+                        break;
+                }
             }
         }
+    }
 
-        // The spell did hit the target, apply aura cost mods if there are any.
-        if (hit)
-        {
-            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, m_powerCost);
-            m_caster->ModifyPower(POWER_HOLY_POWER, -m_powerCost);
-        }
-    }
-    else if (m_spellInfo->IsPositive())
-    {
+    // Apply aura modifiers
+    Player* const modOwner = caster->GetSpellModOwner();
+    if (hit && modOwner)
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, m_powerCost);
-        m_caster->ModifyPower(POWER_HOLY_POWER, -m_powerCost);
-    }
+
+    if (m_powerCost)
+        m_caster->SetPower(POWER_HOLY_POWER, 0);
 }
 
 void Spell::HandleEffects(Unit* pUnitTarget, Item* pItemTarget, GameObject* pGOTarget, uint32 i, SpellEffectHandleMode mode)
@@ -5091,6 +5132,13 @@ void Spell::HandleEffects(Unit* pUnitTarget, Item* pItemTarget, GameObject* pGOT
 
 SpellCastResult Spell::CheckCast(bool strict)
 {
+    // Anshal Nurture.
+    if (m_spellInfo->Id == 85422 || m_spellInfo->Id == 85425 ||  m_spellInfo->Id == 85429)
+        return SPELL_CAST_OK;
+
+    if ((m_spellInfo->Id == 99844 || m_spellInfo->Id == 99843) && m_caster->GetTypeId() != TYPEID_PLAYER)
+        return SPELL_CAST_OK;
+
     // check death state
     if (!m_caster->isAlive() && !(m_spellInfo->Attributes & SPELL_ATTR0_PASSIVE) && !((m_spellInfo->Attributes & SPELL_ATTR0_CASTABLE_WHILE_DEAD) || (IsTriggered() && !m_triggeredByAuraSpell)))
         return SPELL_FAILED_CASTER_DEAD;
@@ -5167,7 +5215,9 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     Unit::AuraEffectList const& blockSpells = m_caster->GetAuraEffectsByType(SPELL_AURA_BLOCK_SPELL_FAMILY);
     for (Unit::AuraEffectList::const_iterator blockItr = blockSpells.begin(); blockItr != blockSpells.end(); ++blockItr)
-        if (uint32((*blockItr)->GetMiscValue()) == m_spellInfo->SpellFamilyName)
+        if (uint32((*blockItr)->GetMiscValue()) == m_spellInfo->SpellFamilyName &&
+        // hack for Akil'zon electrical storm fix:
+        m_spellInfo->Id != 43653 && m_spellInfo->Id != 43654 && m_spellInfo->Id != 43655 && m_spellInfo->Id != 43656  && m_spellInfo->Id != 43657 && m_spellInfo->Id != 43658 && m_spellInfo->Id != 43659 && m_spellInfo->Id != 44007 && m_spellInfo->Id != 97300)
             return SPELL_FAILED_SPELL_UNAVAILABLE;
 
     bool reqCombat = true;
@@ -5485,7 +5535,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     case 34026: // Kill Command
                     {
                         Pet* pet = m_caster->ToPlayer()->GetPet();
-                        if (!pet || !pet->getVictim() || !pet->isInCombat() || !pet->IsWithinCombatRange(pet->getVictim(), 5.0f))
+                        if (!pet || !pet->GetVictim() || !pet->isInCombat() || !pet->IsWithinCombatRange(pet->GetVictim(), 5.0f))
                             return SPELL_FAILED_OUT_OF_RANGE;
                         break;
                     }

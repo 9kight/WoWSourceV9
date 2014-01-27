@@ -253,7 +253,7 @@ public:
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                     me->RemoveAurasDueToSpell(SPELL_SEISMIC_SHARD);
                     me->RemoveAurasDueToSpell(SPELL_ENERGY_SHIELD);
-                    if(Unit * victim = me->getVictim())
+                    if(Unit * victim = me->GetVictim())
                     {
                         me->SetReactState(REACT_AGGRESSIVE);
                         DoStartMovement(victim);

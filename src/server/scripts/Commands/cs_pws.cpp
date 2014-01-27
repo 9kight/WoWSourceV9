@@ -1,13 +1,19 @@
 #include "ScriptPCH.h"
 #include "Chat.h"
 #include "World.h"
+#include "Player.h"
+#include "unit.h"
+#include "Util.h"
+#include "WorldSession.h"
+#include "Language.h"
+
 
 class KickEvent : public BasicEvent {
     public:
         KickEvent(WorldSession& session) :  _session(session) { }
 
         bool Execute(uint64 /*time*/, uint32 /*diff*/) {
-            _session.KickPlayer("KickEvent PWSCommands");
+            _session.KickPlayer("KickEvent Commands");
             return true;
         }
 
@@ -15,15 +21,15 @@ class KickEvent : public BasicEvent {
         WorldSession& _session;
 };
 
-class PWSPlayer : public PlayerScript
+class PlayerCommand : public PlayerScript
 {
 public:
-    PWSPlayer() : PlayerScript("PWSPlayer") { }
+    PlayerCommand() : PlayerScript("Player") { }
 
     void OnLogin(Player* player) {
         QueryResult result = LoginDatabase.PQuery("SELECT reason FROM account_tempban WHERE accountId = %u", player->GetSession()->GetAccountId());
         if (result) {
-            player->GetSession()->SendAreaTriggerMessage("Dein Account wurde aus dem Spiel genommen! Du wirst in 10 Sekunden gekickt.");
+            player->GetSession()->SendAreaTriggerMessage("Your account has been taken out of the game! You'll be kicked in 10 seconds.");
             player->GetSession()->SendAreaTriggerMessage("|cffff0000Grund: %s", result->Fetch()[0].GetCString());
             
             if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(9454))
@@ -36,9 +42,9 @@ public:
             player->RemoveAurasDueToSpell(9454);
         }
 
-        result = LoginDatabase.PQuery("SELECT FROM_UNIXTIME(`time`), `comment` FROM account_verwarnung WHERE accountid = %u", player->GetSession()->GetAccountId());
+        result = LoginDatabase.PQuery("SELECT FROM_UNIXTIME(`time`), `comment` FROM account_warning WHERE accountid = %u", player->GetSession()->GetAccountId());
         if (result) {
-            ChatHandler(player->GetSession()).PSendSysMessage("|cffff0000Dein Account wurde bereits verwarnt!");
+            ChatHandler(player->GetSession()).PSendSysMessage("|cffff0000Your account has been cautioned!");
             do {
                 Field* field = result->Fetch();
                 const char* date = field[0].GetCString();
@@ -52,13 +58,13 @@ public:
     void OnLogout(Player* player) {
         QueryResult result = LoginDatabase.PQuery("SELECT bannedby FROM account_banned WHERE id = %u AND active = 1", player->GetSession()->GetAccountId());
         if (result)
-            player->GetSession()->KickPlayer("KickEvent PWSCommands");
+            player->GetSession()->KickPlayer("KickEvent Commands");
     }
 };
 
-class pws_commandscript : public CommandScript {
+class commandscript : public CommandScript {
     public:
-        pws_commandscript() : CommandScript("pws_commandscript") { }
+        commandscript() : CommandScript("commandscript") { }
 
         static bool HandleStrafenCommand(ChatHandler* handler, const char* args) {
             Player* target;
@@ -83,27 +89,27 @@ class pws_commandscript : public CommandScript {
                 accountId = handler->GetSession()->GetAccountId();
             }
 
-            uint32 strafpunkte = 0;
+            uint32 penalty_points = 0;
 
-            QueryResult result = LoginDatabase.PQuery("SELECT FROM_UNIXTIME(`time`), `comment`, `by`, strafpunkte, `active`, id FROM account_strafe WHERE account = %u", accountId);
+            QueryResult result = LoginDatabase.PQuery("SELECT FROM_UNIXTIME(`time`), `comment`, `by`, penalty_points, `active`, id FROM account_punishment WHERE account = %u", accountId);
             if (result) {
-                handler->PSendSysMessage("|cffff0000Der Account wurde bereits bestraft!");
+                handler->PSendSysMessage("|cffff0000The account has already been punished!");
                 do {
                     Field* field = result->Fetch();
                     const char* date = field[0].GetCString();
                     const char* comment = field[1].GetCString();
-                    strafpunkte += field[3].GetUInt32();
+                    penalty_points += field[3].GetUInt32();
                     const char* active = field[4].GetUInt8() == 1 ? "" : "[|cffff0000verjaehrt]";
 
                     QueryResult res = LoginDatabase.PQuery("SELECT username FROM account WHERE id = %u", field[2].GetUInt32());
 
                     const char* by = res ? res->Fetch()[0].GetCString() : "Unknown";
 
-                    handler->PSendSysMessage("%s - ID[%u] - %u SP - %s - %s - %s", active, field[5].GetUInt32(), strafpunkte, by, date, comment);
+                    handler->PSendSysMessage("%s - ID[%u] - %u SP - %s - %s - %s", active, field[5].GetUInt32(), penalty_points, by, date, comment);
                 } while (result->NextRow());
-                handler->PSendSysMessage("|cff00ff00Der Account hat %u Strafpunkte!", strafpunkte);
+                handler->PSendSysMessage("|cff00ff00Der Account hat %u penalty_points!", penalty_points);
             } else {
-                handler->PSendSysMessage("Der Account hat keine Strafen!");
+                handler->PSendSysMessage("The account has no penalties!");
             }
 
             return true;
@@ -132,9 +138,9 @@ class pws_commandscript : public CommandScript {
                 accountId = handler->GetSession()->GetAccountId();
             }
 
-            QueryResult result = LoginDatabase.PQuery("SELECT FROM_UNIXTIME(`time`), `comment`, by_account FROM account_verwarnung WHERE accountid = %u", accountId);
+            QueryResult result = LoginDatabase.PQuery("SELECT FROM_UNIXTIME(`time`), `comment`, by_account FROM account_warning WHERE accountid = %u", accountId);
             if (result) {
-                handler->PSendSysMessage("|cffff0000Der Account wurde bereits verwarnt!");
+                handler->PSendSysMessage("|cffff0000The account has been cautioned!");
                 do {
                     Field* field = result->Fetch();
                     const char* date = field[0].GetCString();
@@ -149,7 +155,7 @@ class pws_commandscript : public CommandScript {
                         handler->PSendSysMessage("%s - %s", date, comment);
                 } while (result->NextRow());
             } else {
-                handler->PSendSysMessage("Der Account hat keine Verwarnungen!");
+                handler->PSendSysMessage("The account has no warnings!");
             }
 
             return true;
@@ -168,7 +174,7 @@ class pws_commandscript : public CommandScript {
             QueryResult result = CharacterDatabase.PQuery("SELECT account, guid FROM characters WHERE name = '%s'", playerName);
 
             if (!result) {
-                handler->PSendSysMessage("Spieler nicht gefunden!");
+                handler->PSendSysMessage("Player not found!");
                 return true;
             }
 
@@ -176,12 +182,12 @@ class pws_commandscript : public CommandScript {
             uint32 guid = result->Fetch()[1].GetUInt32();
 
             if (Player* player = ObjectAccessor::FindPlayer(guid)) {
-                ChatHandler(player->GetSession()).PSendSysMessage("Du wurdest soeben verwarnt! |cffff0000Grund: %s", comment);
-                player->GetSession()->SendAreaTriggerMessage("Du wurdest soeben verwarnt! |cffff0000Grund: %s", comment);
+                ChatHandler(player->GetSession()).PSendSysMessage("You were just booked! |cffff0000Grund: %s", comment);
+                player->GetSession()->SendAreaTriggerMessage("You were just booked! |cffff0000Grund: %s", comment);
             }
 
-            LoginDatabase.PExecute("INSERT INTO account_verwarnung (accountId, by_account, comment, `time`) VALUES (%u, %u, '%s', UNIX_TIMESTAMP())", accountId, handler->GetSession()->GetAccountId(), comment);
-            handler->PSendSysMessage("Spieler verwarnt!");
+            LoginDatabase.PExecute("INSERT INTO account_warning (accountId, by_account, comment, `time`) VALUES (%u, %u, '%s', UNIX_TIMESTAMP())", accountId, handler->GetSession()->GetAccountId(), comment);
+            handler->PSendSysMessage("Players warned!");
 
             return true;
         }
@@ -190,25 +196,25 @@ class pws_commandscript : public CommandScript {
             if (!*args)
                 return false;
 
-            sLog->outError(LOG_FILTER_GENERAL, "[PWS-Commands] .strafe executed. Player: %u - Arguments: %s", handler->GetSession()->GetPlayer()->GetGUID(), (char*)args);
+            sLog->outError(LOG_FILTER_GENERAL, "[Commands] .strafe executed. Player: %u - Arguments: %s", handler->GetSession()->GetPlayer()->GetGUID(), (char*)args);
 
             char* playerName = strtok((char*)args, " ");
-            uint32 strafPunkte = atoi(strtok(NULL, " "));
+            uint32 penalty_points = atoi(strtok(NULL, " "));
             char* comment = strtok(NULL, "");
-            uint32 _strafPunkte = strafPunkte;
+            uint32 _penalty_points = penalty_points;
 
-            if (!playerName || !comment | !strafPunkte) 
+            if (!playerName || !comment | !penalty_points) 
                 return false;
 
-            sLog->outError(LOG_FILTER_GENERAL, "[PWS-Commands] .strafe Parameters: PN%s - %uSP - Comment[%s]", playerName, strafPunkte, comment);
+            sLog->outError(LOG_FILTER_GENERAL, "[Commands] .strafe Parameters: PN%s - %uSP - Comment[%s]", playerName, penalty_points, comment);
 
-            if (strafPunkte > 7 && handler->GetSession()->GetSecurity() < 6) {
-                handler->PSendSysMessage("Du kannst maximal 7 Strafpunkte vergeben!");
+            if (penalty_points > 7 && handler->GetSession()->GetSecurity() < 6) {
+                handler->PSendSysMessage("You can assign a maximum 7 penalty_points points!");
                 return true;
             } 
 
-            if (strafPunkte < 1) {
-                handler->PSendSysMessage("Du musst mindestens einen Strafpunkt vergeben!");
+            if (penalty_points < 1) {
+                handler->PSendSysMessage("You have to assign at least one penalty point!");
                 return true;
             }
 
@@ -218,43 +224,43 @@ class pws_commandscript : public CommandScript {
             QueryResult result = CharacterDatabase.PQuery("SELECT account, guid FROM characters WHERE name = '%s'", playerName);
 
             if (!result) {
-                handler->PSendSysMessage("Spieler nicht gefunden!");
+                handler->PSendSysMessage("Player not found!");
                 return true;
             }
 
             uint32 accountId = result->Fetch()[0].GetUInt32();
             uint32 guid = result->Fetch()[1].GetUInt32();
-            sLog->outError(LOG_FILTER_GENERAL, "[PWS-Commands] Get Data GUID: %u - AccountId: %u", guid, accountId);
+            sLog->outError(LOG_FILTER_GENERAL, "[Commands] Get Data GUID: %u - AccountId: %u", guid, accountId);
             
 
-            QueryResult res = LoginDatabase.PQuery("SELECT strafpunkte FROM account_strafe WHERE account = %u", accountId);
+            QueryResult res = LoginDatabase.PQuery("SELECT penalty_points FROM account_punishment WHERE account = %u", accountId);
 
             if (res) {
                 do {
-                    _strafPunkte += res->Fetch()[0].GetUInt32();
+                    _penalty_points += res->Fetch()[0].GetUInt32();
                 } while (res->NextRow());
             }
 
-            uint32 banTime = strafPunkte * 60 * 60 * 24;
+            uint32 banTime = penalty_points * 60 * 60 * 24;
 
             if (Player* player = ObjectAccessor::FindPlayer(guid)) {
                 if (WorldSession* session = player->GetSession()) {
-                    sLog->outError(LOG_FILTER_GENERAL, "[PWS-Commands] init kick event");
-                    ChatHandler(session).PSendSysMessage("|cffff0000Dein Account bekommt eine Sanktion! Du wirst in 10 Sekunden abgemeldet. |cff00ff00Grund: %s", comment);
-                    session->SendAreaTriggerMessage("|cffff0000Dein Account bekommt eine Sanktion! Du wirst in 10 Sekunden abgemeldet. |cff00ff00Grund: %s", comment);
+                    sLog->outError(LOG_FILTER_GENERAL, "[Commands] init kick event");
+                    ChatHandler(session).PSendSysMessage("|cffff0000Your account gets a penalty! You will be logged off in 10 seconds. |cff00ff00Grund: %s", comment);
+                    session->SendAreaTriggerMessage("|cffff0000Your account gets a penalty! You will be logged off in 10 seconds. |cff00ff00Grund: %s", comment);
                     player->m_Events.AddEvent(new KickEvent(*session), player->m_Events.CalculateTime(10000), true);
                 }
             }
 
-            LoginDatabase.PExecute("INSERT INTO account_strafe (account, `by`, `comment`, `strafpunkte`, `time`, `active`) VALUES (%u, %u, '%s', %u, UNIX_TIMESTAMP(), 1)", accountId, handler->GetSession()->GetAccountId(), comment, strafPunkte);
+            LoginDatabase.PExecute("INSERT INTO account_punishment (account, `by`, `comment`, `penalty_points`, `time`, `active`) VALUES (%u, %u, '%s', %u, UNIX_TIMESTAMP(), 1)", accountId, handler->GetSession()->GetAccountId(), comment, penalty_points);
             LoginDatabase.PExecute("INSERT INTO account_banned (id, realm, bandate, unbandate, bannedby, banreason, active) VALUES (%u, '-1', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+%u, '%s', '%s', 1)", accountId, banTime, handler->GetSession()->GetPlayer()->GetName().c_str(), comment);
 
-            if (_strafPunkte >= 10) {
+            if (_penalty_points >= 10) {
                 LoginDatabase.PExecute("UPDATE account SET locked = 1, last_ip = '1337' WHERE id = %u", accountId);
-                sLog->outError(LOG_FILTER_GENERAL, "[PWS-Commands] Account %u locked", accountId);
+                sLog->outError(LOG_FILTER_GENERAL, "[Commands] Account %u locked", accountId);
             }
 
-            handler->PSendSysMessage("Spieler wird gesperrt!");
+            handler->PSendSysMessage("Player is suspended!");
             return true;
         }
 
@@ -264,22 +270,22 @@ class pws_commandscript : public CommandScript {
 
             int id = atoi((char*)args);
 
-            QueryResult result = LoginDatabase.PQuery("SELECT active FROM account_strafe WHERE account = %u", id);
+            QueryResult result = LoginDatabase.PQuery("SELECT active FROM account_punishment WHERE account = %u", id);
 
             if (!result) {
-                handler->PSendSysMessage("Strafe wurde nicht gefunden. ID kontrollieren!");
+                handler->PSendSysMessage("Punishment was not found. check ID!");
                 return true;
             }
 
             if (result->Fetch()[0].GetUInt8() == 0) {
-                handler->PSendSysMessage("Strafe ist verjaehrt!");
+                handler->PSendSysMessage("Punishment is barred!");
                 return true;
             }
 
-            LoginDatabase.PExecute("UPDATE account_strafe SET active = 0 WHERE id = %u", id);
+            LoginDatabase.PExecute("UPDATE account_punishment SET active = 0 WHERE id = %u", id);
             LoginDatabase.PExecute("UPDATE account_banned SET active = 0 WHERE id = %u", id);
             LoginDatabase.PExecute("UPDATE account SET locked = 0 WHERE id = %u", id);
-            handler->PSendSysMessage("Strafe wurde entfernt.");
+            handler->PSendSysMessage("Penalty has been removed.");
             
             return true;
         }
@@ -297,12 +303,12 @@ class pws_commandscript : public CommandScript {
             char* reason = strtok(NULL, "");
 
             if (!reason) {
-                handler->PSendSysMessage("Bitte einen Grund angeben!");
+                handler->PSendSysMessage("Please enter a reason!");
                 return true;
             }
 
             if (!handler->extractPlayerTarget(playerName, &target, &targetGuid, &targetName)) {
-                handler->PSendSysMessage("Spieler nicht gefunden!");
+                handler->PSendSysMessage("Player not found!");
                 return true;
             }
 
@@ -310,7 +316,7 @@ class pws_commandscript : public CommandScript {
                 QueryResult result = CharacterDatabase.PQuery("SELECT account FROM characters WHERE guid = %u", targetGuid);
                     
                 if (!result) {
-                    handler->PSendSysMessage("WTF das kann logisch gesehen nicht passieren Oo");
+                    handler->PSendSysMessage("that can not usualy happen");
                     return true;
                 }
 
@@ -321,17 +327,17 @@ class pws_commandscript : public CommandScript {
 
             QueryResult result = LoginDatabase.PQuery("SELECT reason FROM account_tempban WHERE accountId = %u", accountId);
             if (result) {
-                handler->PSendSysMessage("Der Spieler hat bereits einen TempBan!");
+                handler->PSendSysMessage("The player already has a TempBan!");
                 return true;
             }
 
             LoginDatabase.PQuery("INSERT INTO account_tempban (accountId, reason) VALUES (%u, '%s')", accountId, reason);
 
             if (target) {
-                target->GetSession()->KickPlayer("KickEvent PWSCommands");
+                target->GetSession()->KickPlayer("KickEvent Commands");
             }
 
-            handler->PSendSysMessage("TempBan gesetzt!");
+            handler->PSendSysMessage("TempBan set!");
             
             return true;
         }
@@ -346,7 +352,7 @@ class pws_commandscript : public CommandScript {
                 return false;
 
             if (!handler->extractPlayerTarget((char*)args, &target, &targetGuid, &targetName)) {
-                handler->PSendSysMessage("Spieler nicht gefunden!");
+                handler->PSendSysMessage("Player not found!");
                 return true;
             }
 
@@ -354,7 +360,7 @@ class pws_commandscript : public CommandScript {
                 QueryResult result = CharacterDatabase.PQuery("SELECT account FROM characters WHERE guid = %u", targetGuid);
                     
                 if (!result) {
-                    handler->PSendSysMessage("WTF das kann logisch gesehen nicht passieren Oo");
+                    handler->PSendSysMessage("that can not usualy happen");
                     return true;
                 }
 
@@ -364,18 +370,18 @@ class pws_commandscript : public CommandScript {
             }
 
             LoginDatabase.PExecute("DELETE FROM account_tempban WHERE accountId = %u", accountId);
-            handler->PSendSysMessage("TempBan entfernt");
+            handler->PSendSysMessage("TempBan away");
             
             return true;
         }
 
         ChatCommand* GetCommands() const {
             static ChatCommand PWSCommandTable[] = {
-                { "verwarnungen",    SEC_PLAYER,        true, &HandleWarnInfoCommand,   "",   NULL },
-                { "verwarnen",       SEC_MODERATOR,     true, &HandleWarnCommand,       "",   NULL },
-                { "strafe",          SEC_MODERATOR,     true, &HandleStrafeCommand,     "",   NULL },
-                { "strafen",         SEC_PLAYER,        true, &HandleStrafenCommand,    "",   NULL },
-                { "delstrafe",       SEC_ADMINISTRATOR, true, &HandleDelStrafeCommand,  "",   NULL },
+                { "warnings",    SEC_PLAYER,        true, &HandleWarnInfoCommand,   "",   NULL },
+                { "warn",       SEC_MODERATOR,     true, &HandleWarnCommand,       "",   NULL },
+                { "punishment",          SEC_MODERATOR,     true, &HandleStrafeCommand,     "",   NULL },
+                { "punish",         SEC_PLAYER,        true, &HandleStrafenCommand,    "",   NULL },
+                { "delpenalty",       SEC_ADMINISTRATOR, true, &HandleDelStrafeCommand,  "",   NULL },
                 { "tempban",         SEC_ADMINISTRATOR, true, &HandleTempBanCommand,    "",   NULL },
                 { "deltempban",      SEC_ADMINISTRATOR, true, &HandleDelTempBanCommand, "",   NULL },
                 { NULL, 0, false, NULL, "", NULL }
@@ -386,7 +392,7 @@ class pws_commandscript : public CommandScript {
 };
 
 
-void AddSC_pws_commandscript() {
-    new pws_commandscript();
-    new PWSPlayer();
+void AddSC_commandscript() {
+    new commandscript();
+    new PlayerCommand();
 }

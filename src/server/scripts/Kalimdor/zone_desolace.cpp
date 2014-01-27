@@ -153,7 +153,7 @@ public:
             //timer should always be == 0 unless we already updated entry of creature. Then not expect this updated to ever be in combat.
             if (DespawnTimer && DespawnTimer <= diff)
             {
-                if (!me->getVictim() && me->isAlive())
+                if (!me->GetVictim() && me->isAlive())
                 {
                     Reset();
                     me->setDeathState(JUST_DIED);
@@ -169,6 +169,101 @@ public:
         }
     };
 
+};
+
+/*######
+## go_iruxos
+## Hand of Iruxos
+######*/
+
+enum
+{
+    QUEST_HAND_IRUXOS   = 5381,
+    NPC_DEMON_SPIRIT    = 11876,
+};
+
+class go_iruxos : public GameObjectScript
+{
+    public:
+        go_iruxos() : GameObjectScript("go_iruxos") { }
+
+        bool OnGossipHello(Player* player, GameObject* go)
+        {
+            if (player->GetQuestStatus(QUEST_HAND_IRUXOS) == QUEST_STATUS_INCOMPLETE && !go->FindNearestCreature(NPC_DEMON_SPIRIT, 25.0f, true))
+                player->SummonCreature(NPC_DEMON_SPIRIT, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
+
+            return true;
+        }
+};
+
+/*######
+## npc_dalinda_malem. Quest 1440
+######*/
+
+#define QUEST_RETURN_TO_VAHLARRIEL     1440
+
+class npc_dalinda : public CreatureScript
+{
+public:
+    npc_dalinda() : CreatureScript("npc_dalinda") { }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_RETURN_TO_VAHLARRIEL)
+       {
+            if (npc_escortAI* pEscortAI = CAST_AI(npc_dalinda::npc_dalindaAI, creature->AI()))
+            {
+                pEscortAI->Start(true, false, player->GetGUID());
+                creature->setFaction(113);
+            }
+        }
+        return true;
+    }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_dalindaAI(creature);
+    }
+
+    struct npc_dalindaAI : public npc_escortAI
+    {
+        npc_dalindaAI(Creature* creature) : npc_escortAI(creature) { }
+
+        void WaypointReached(uint32 i)
+        {
+            Player* player = GetPlayerForEscort();
+            switch (i)
+            {
+                case 1:
+                    me->IsStandState();
+                    break;
+                case 15:
+                    if (player)
+                    player->GroupEventHappens(QUEST_RETURN_TO_VAHLARRIEL, me);
+                    break;
+            }
+        }
+
+        void EnterCombat(Unit* /*who*/) { }
+
+        void Reset() {}
+
+        void JustDied(Unit* /*killer*/)
+        {
+            Player* player = GetPlayerForEscort();
+            if (player)
+                player->FailQuest(QUEST_RETURN_TO_VAHLARRIEL);
+            return;
+        }
+
+        void UpdateAI(const uint32 uiDiff)
+        {
+            npc_escortAI::UpdateAI(uiDiff);
+            if (!UpdateVictim())
+                return;
+            DoMeleeAttackIfReady();
+        }
+    };
 };
 
 /*######
@@ -202,5 +297,7 @@ class go_demon_portal : public GameObjectScript
 void AddSC_desolace()
 {
     new npc_aged_dying_ancient_kodo();
+    new go_iruxos();
+    new npc_dalinda();    
     new go_demon_portal();
 }

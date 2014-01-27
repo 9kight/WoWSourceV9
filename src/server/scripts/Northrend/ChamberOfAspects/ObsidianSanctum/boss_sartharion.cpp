@@ -422,7 +422,7 @@ public:
             //if at least one of the dragons are alive and are being called
             bool bCanUseWill = false;
 
-            if (pFetchTene && pFetchTene->isAlive() && !pFetchTene->getVictim())
+            if (pFetchTene && pFetchTene->isAlive() && !pFetchTene->GetVictim())
             {
                 bCanUseWill = true;
                 if (!pFetchTene->isInCombat())
@@ -437,7 +437,7 @@ public:
                     pFetchTene->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             }
 
-            if (pFetchShad && pFetchShad->isAlive() && !pFetchShad->getVictim())
+            if (pFetchShad && pFetchShad->isAlive() && !pFetchShad->GetVictim())
             {
                 bCanUseWill = true;
                 if (!pFetchShad->isInCombat())
@@ -452,7 +452,7 @@ public:
                     pFetchShad->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             }
 
-            if (pFetchVesp && pFetchVesp->isAlive() && !pFetchVesp->getVictim())
+            if (pFetchVesp && pFetchVesp->isAlive() && !pFetchVesp->GetVictim())
             {
                 bCanUseWill = true;
                 if (!pFetchVesp->isInCombat())
@@ -477,7 +477,7 @@ public:
             {
                 if (Creature* temp = Unit::GetCreature(*me, instance->GetData64(uiDataId)))
                 {
-                    if (temp->isAlive() && !temp->getVictim())
+                    if (temp->isAlive() && !temp->GetVictim())
                     {
                         if (temp->HasUnitMovementFlag(MOVEMENTFLAG_WALKING))
                             temp->SetWalk(false);
@@ -1330,7 +1330,7 @@ public:
 
                     for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                     {
-                        if (i->getSource()->isAlive() && i->getSource()->HasAura(SPELL_TWILIGHT_SHIFT, 0) && !i->getSource()->getVictim())
+                        if (i->getSource()->isAlive() && i->getSource()->HasAura(SPELL_TWILIGHT_SHIFT, 0) && !i->getSource()->GetVictim())
                         {
                             i->getSource()->CastSpell(i->getSource(), SPELL_TWILIGHT_SHIFT_REMOVAL_ALL, true);
                             i->getSource()->CastSpell(i->getSource(), SPELL_TWILIGHT_RESIDUE, true);
@@ -1429,14 +1429,14 @@ public:
 
                     for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                     {
-                        if (i->getSource()->isAlive() && i->getSource()->HasAura(SPELL_TWILIGHT_SHIFT, 0) && !i->getSource()->getVictim())
+                        if (i->getSource()->isAlive() && i->getSource()->HasAura(SPELL_TWILIGHT_SHIFT, 0) && !i->getSource()->GetVictim())
                         {
                             i->getSource()->CastSpell(i->getSource(), SPELL_TWILIGHT_SHIFT_REMOVAL_ALL, true);
                             i->getSource()->CastSpell(i->getSource(), SPELL_TWILIGHT_RESIDUE, true);
                             i->getSource()->RemoveAurasDueToSpell(SPELL_TWILIGHT_SHIFT);
                             i->getSource()->RemoveAurasDueToSpell(SPELL_TWILIGHT_SHIFT_ENTER);
                         }
-                        if (i->getSource()->isAlive() && i->getSource()->HasAura(SPELL_TWILIGHT_TORMENT_VESP, 0) && !i->getSource()->getVictim())
+                        if (i->getSource()->isAlive() && i->getSource()->HasAura(SPELL_TWILIGHT_TORMENT_VESP, 0) && !i->getSource()->GetVictim())
                             i->getSource()->RemoveAurasDueToSpell(SPELL_TWILIGHT_TORMENT_VESP);
                     }
                 }

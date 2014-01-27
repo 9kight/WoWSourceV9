@@ -454,8 +454,17 @@ void GuildMgr::LoadGuilds()
         }
     }
 
-    // 11. Validate loaded guild data
-    sLog->outInfo(LOG_FILTER_GENERAL, "Validating data of loaded guilds...");
+    // 11. Load challengesMgr
+     sLog->outInfo(LOG_FILTER_GUILD, "Loading challenges...");
+    {
+        for (GuildContainer::const_iterator itr = GuildStore.begin(); itr != GuildStore.end(); ++itr)
+        {
+            itr->second->GetChallengesMgr()->LoadChallengesFromDB();
+        }
+    }
+
+    // 12. Validate loaded guild data
+     sLog->outInfo(LOG_FILTER_GUILD, "Validating data of loaded guilds...");
     {
         uint32 oldMSTime = getMSTime();
         std::set<Guild*> rm; // temporary storage to avoid modifying GuildStore with RemoveGuild() while iterating

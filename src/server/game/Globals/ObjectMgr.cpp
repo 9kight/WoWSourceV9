@@ -400,8 +400,8 @@ void ObjectMgr::LoadCreatureTemplates()
                                              "spell1, spell2, spell3, spell4, spell5, spell6, spell7, spell8, PetSpellDataId, VehicleId, mingold, maxgold, AIName, MovementType, "
     //                                             71          72         73         74            75            76          77           78          79          80           81          82
                                              "InhabitType, HoverHeight, Health_mod, Mana_mod, Mana_mod_extra, Armor_mod, RacialLeader, questItem1, questItem2, questItem3, questItem4, questItem5, "
-    //                                            83           84            85         86               87                  88          89
-                                             " questItem6, movementId, RegenHealth, equipment_id, mechanic_immune_mask, flags_extra, ScriptName "
+    //                                            83           84            85         86               87                  88          89         90          91
+                                             " questItem6, movementId, RegenHealth, equipment_id, mechanic_immune_mask, flags_extra, ScriptName, currencyId, currencyCount "
                                              "FROM creature_template;");
 
     if (!result)
@@ -504,6 +504,8 @@ void ObjectMgr::LoadCreatureTemplates()
         creatureTemplate.MechanicImmuneMask = fields[87].GetUInt32();
         creatureTemplate.flags_extra        = fields[88].GetUInt32();
         creatureTemplate.ScriptID           = GetScriptId(fields[89].GetCString());
+        creatureTemplate.currencyId         = fields[90].GetUInt32();
+        creatureTemplate.currencyCount      = fields[91].GetUInt32();
 
         ++count;
     }
@@ -1405,6 +1407,93 @@ bool ObjectMgr::SetCreatureLinkedRespawn(uint32 guidLow, uint32 linkedGuidLow)
     return true;
 }
 
+void ObjectMgr::LoadTempSummons()
+{
+    uint32 oldMSTime = getMSTime();
+
+    _tempSummonDataStore.clear();   // needed for reload case
+
+    //                                               0           1             2        3      4           5           6           7            8           9
+    QueryResult result = WorldDatabase.Query("SELECT summonerId, summonerType, groupId, entry, position_x, position_y, position_z, orientation, summonType, summonTime FROM creature_summon_groups");
+
+    if (!result)
+    {
+        sLog->outError(LOG_FILTER_SERVER_LOADING, ">> Loaded 0 temp summons. DB table `creature_summon_groups` is empty.");
+        return;
+    }
+
+    uint32 count = 0;
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint32 summonerId               = fields[0].GetUInt32();
+        SummonerType summonerType       = SummonerType(fields[1].GetUInt8());
+        uint8 group                     = fields[2].GetUInt8();
+
+        switch (summonerType)
+        {
+            case SUMMONER_TYPE_CREATURE:
+                if (!GetCreatureTemplate(summonerId))
+                {
+                    sLog->outError(LOG_FILTER_SQL, "Table `creature_summon_groups` has summoner with non existing entry %u for creature summoner type, skipped.", summonerId);
+                    continue;
+                }
+                break;
+            case SUMMONER_TYPE_GAMEOBJECT:
+                if (!GetGameObjectTemplate(summonerId))
+                {
+                    sLog->outError(LOG_FILTER_SQL, "Table `creature_summon_groups` has summoner with non existing entry %u for gameobject summoner type, skipped.", summonerId);
+                    continue;
+                }
+                break;
+            case SUMMONER_TYPE_MAP:
+                if (!sMapStore.LookupEntry(summonerId))
+                {
+                    sLog->outError(LOG_FILTER_SQL, "Table `creature_summon_groups` has summoner with non existing entry %u for map summoner type, skipped.", summonerId);
+                    continue;
+                }
+                break;
+            default:
+                sLog->outError(LOG_FILTER_SQL, "Table `creature_summon_groups` has unhandled summoner type %u for summoner %u, skipped.", summonerType, summonerId);
+                continue;
+        }
+
+        TempSummonData data;
+        data.entry                      = fields[3].GetUInt32();
+
+        if (!GetCreatureTemplate(data.entry))
+        {
+            sLog->outError(LOG_FILTER_SQL, "Table `creature_summon_groups` has creature in group [Summoner ID: %u, Summoner Type: %u, Group ID: %u] with non existing creature entry %u, skipped.", summonerId, summonerType, group, data.entry);
+            continue;
+        }
+
+        float posX                      = fields[4].GetFloat();
+        float posY                      = fields[5].GetFloat();
+        float posZ                      = fields[6].GetFloat();
+        float orientation               = fields[7].GetFloat();
+
+        data.pos.Relocate(posX, posY, posZ, orientation);
+
+        data.type                       = TempSummonType(fields[8].GetUInt8());
+
+        if (data.type > TEMPSUMMON_MANUAL_DESPAWN)
+        {
+            sLog->outError(LOG_FILTER_SQL, "Table `creature_summon_groups` has unhandled temp summon type %u in group [Summoner ID: %u, Summoner Type: %u, Group ID: %u] for creature entry %u, skipped.", data.type, summonerId, summonerType, group, data.entry);
+            continue;
+        }
+
+        data.time                       = fields[9].GetUInt32();
+
+        TempSummonGroupKey key(summonerId, summonerType, group);
+        _tempSummonDataStore[key].push_back(data);
+
+        ++count;
+
+    } while (result->NextRow());
+
+    sLog->outError(LOG_FILTER_SERVER_LOADING, ">> Loaded %u temp summons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+}
 void ObjectMgr::LoadCreatures()
 {
     uint32 oldMSTime = getMSTime();
@@ -3127,6 +3216,7 @@ void ObjectMgr::LoadPlayerInfo()
             do
             {
                 Field* fields = result->Fetch();
+
 
                 uint32 current_race = fields[0].GetUInt8();
                 if (current_race >= MAX_RACES)
@@ -5047,13 +5137,13 @@ void ObjectMgr::LoadInstanceEncounters()
         DungeonEncounterEntry const* dungeonEncounter = sDungeonEncounterStore.LookupEntry(entry);
         if (!dungeonEncounter)
         {
-            sLog->outError(LOG_FILTER_SQL, "Table `instance_encounters` has an invalid encounter id %u, skipped!", entry);
+            sLog->outError(LOG_FILTER_SQL,"Table `instance_encounters` has an invalid encounter id %u, skipped!", entry);
             continue;
         }
 
-        if (lastEncounterDungeon && !sLFGMgr->GetLFGDungeonEntry(lastEncounterDungeon))
+        if (lastEncounterDungeon && !sLFGDungeonStore.LookupEntry(lastEncounterDungeon))
         {
-            sLog->outError(LOG_FILTER_SQL, "Table `instance_encounters` has an encounter %u (%s) marked as final for invalid dungeon id %u, skipped!", entry, dungeonEncounter->encounterName, lastEncounterDungeon);
+            sLog->outError(LOG_FILTER_SQL,"Table `instance_encounters` has an encounter %u (%s) marked as final for invalid dungeon id %u, skipped!", entry, dungeonEncounter->encounterName, lastEncounterDungeon);
             continue;
         }
 
@@ -5062,7 +5152,7 @@ void ObjectMgr::LoadInstanceEncounters()
         {
             if (itr != dungeonLastBosses.end())
             {
-                sLog->outError(LOG_FILTER_SQL, "Table `instance_encounters` specified encounter %u (%s) as last encounter but %u (%s) is already marked as one, skipped!", entry, dungeonEncounter->encounterName, itr->second->id, itr->second->encounterName);
+                sLog->outError(LOG_FILTER_SQL,"Table `instance_encounters` specified encounter %u (%s) as last encounter but %u (%s) is already marked as one, skipped!", entry, dungeonEncounter->encounterName, itr->second->id, itr->second->encounterName);
                 continue;
             }
 
@@ -5662,7 +5752,7 @@ WorldSafeLocsEntry const* ObjectMgr::GetClosestGraveYard(float x, float y, float
 
     if (!zoneId)
     {
-        if (z > -500)
+        if (z > -5000)
         {
             sLog->outError(LOG_FILTER_GENERAL, "ZoneId not found for map %u coords (%f, %f, %f)", MapId, x, y, z);
             return GetDefaultGraveYard(team);
@@ -6493,6 +6583,53 @@ void ObjectMgr::LoadGameObjectTemplate()
                     CheckGOLinkedTrapId(&got, got.goober.linkedTrapId, 12);
                 break;
             }
+            case GAMEOBJECT_TYPE_TRANSPORT:                 // 11
+            {
+                GameObjectTemplate const* goinfo = GetGameObjectTemplate(entry);
+                TransportAnimationsByEntry::const_iterator itr = sTransportAnimationsByEntry.find(goinfo->entry);
+                if (itr == sTransportAnimationsByEntry.end())
+                {
+                     sLog;
+                    break;
+                }
+
+                if (uint32 frame = goinfo->transport.startFrame)
+                {
+                    if (itr->second.find(frame) == itr->second.end())
+                    {
+                        sLog->outError(LOG_FILTER_SQL, "Gameobject (Entry: %u GoType: %u) has data0=%u but this frame is not in TransportAnimation.dbc! May cause client crashes.",
+                            goinfo->entry, goinfo->type, frame);
+                    }
+                }
+
+                if (uint32 frame = goinfo->transport.nextFrame1)
+                {
+                    if (itr->second.find(frame) == itr->second.end())
+                    {
+                        sLog->outError(LOG_FILTER_SQL, "Gameobject (Entry: %u GoType: %u) has data6=%u but this frame is not in TransportAnimation.dbc! May cause client crashes.",
+                            goinfo->entry, goinfo->type, frame);
+                    }
+                }
+
+                if (uint32 frame = goinfo->transport.nextFrame2)
+                {
+                    if (itr->second.find(frame) == itr->second.end())
+                    {
+                        sLog->outError(LOG_FILTER_SQL, "Gameobject (Entry: %u GoType: %u) has data8=%u but this frame is not in TransportAnimation.dbc! May cause client crashes.",
+                            goinfo->entry, goinfo->type, frame);
+                    }
+                }
+
+                if (uint32 frame = goinfo->transport.nextFrame3)
+                {
+                    if (itr->second.find(frame) == itr->second.end())
+                    {
+                        sLog->outError(LOG_FILTER_SQL, "Gameobject (Entry: %u GoType: %u) has data10=%u but this frame is not in TransportAnimation.dbc! May cause client crashes.",
+                            goinfo->entry, goinfo->type, frame);
+                    }
+                }
+                break;
+            }
             case GAMEOBJECT_TYPE_AREADAMAGE:                //12
             {
                 if (got.areadamage.lockId)
@@ -6819,18 +6956,18 @@ void ObjectMgr::LoadRewardOnKill()
         uint32 creature_id = fields[0].GetUInt32();
 
         RewardOnKillEntry rewOnKill;
-        rewOnKill.RepFaction1          = fields[1].GetInt16();
-        rewOnKill.RepFaction2          = fields[2].GetInt16();
+        rewOnKill.RepFaction1          = fields[1].GetUInt32();
+        rewOnKill.RepFaction2          = fields[2].GetUInt32();
         rewOnKill.IsTeamAward1         = fields[3].GetBool();
-        rewOnKill.ReputationMaxCap1    = fields[4].GetInt8();
+        rewOnKill.ReputationMaxCap1    = fields[4].GetUInt32();
         rewOnKill.RepValue1            = fields[5].GetInt32();
         rewOnKill.IsTeamAward2         = fields[6].GetBool();
-        rewOnKill.ReputationMaxCap2    = fields[7].GetInt8();
+        rewOnKill.ReputationMaxCap2    = fields[7].GetUInt32();
         rewOnKill.RepValue2            = fields[8].GetInt32();
         rewOnKill.TeamDependent        = fields[9].GetUInt8();
-        rewOnKill.CurrencyId1          = fields[10].GetUInt16();
-        rewOnKill.CurrencyId2          = fields[11].GetUInt16();
-        rewOnKill.CurrencyId3          = fields[12].GetUInt16();
+        rewOnKill.CurrencyId1          = fields[10].GetUInt32();
+        rewOnKill.CurrencyId2          = fields[11].GetUInt32();
+        rewOnKill.CurrencyId3          = fields[12].GetUInt32();
         rewOnKill.CurrencyCount1       = fields[13].GetInt32();
         rewOnKill.CurrencyCount2       = fields[14].GetInt32();
         rewOnKill.CurrencyCount3       = fields[15].GetInt32();
@@ -7092,7 +7229,7 @@ void ObjectMgr::LoadQuestPOI()
         {
             fields = points->Fetch();
 
-            QuestPOIPoint point(fields[2].GetInt32(), fields[3].GetUInt32());
+            QuestPOIPoint point(fields[2].GetInt32(), fields[3].GetInt32());
             POIs[fields[0].GetUInt32()][fields[1].GetUInt32()].push_back(point);
         } while (points->NextRow());
     }
@@ -8521,14 +8658,14 @@ bool ObjectMgr::IsVendorItemValid(uint32 vendor_entry, uint32 id, int32 maxcount
         return false;
     }
 
-    if (vItems->GetItemCount() >= MAX_VENDOR_ITEMS) // FIXME: GetItemCount range 0...255 MAX_VENDOR_ITEMS = 300
+/*    if (vItems->GetItemCount() >= MAX_VENDOR_ITEMS) // FIXME: GetItemCount range 0...255 MAX_VENDOR_ITEMS = 300
     {
         if (player)
             ChatHandler(player->GetSession()).SendSysMessage(LANG_COMMAND_ADDVENDORITEMITEMS);
         else
             sLog->outError(LOG_FILTER_SQL, "Table `npc_vendor` has too many items (%u >= %i) for vendor (Entry: %u), ignore", vItems->GetItemCount(), MAX_VENDOR_ITEMS, vendor_entry);
         return false;
-    }
+    } */
 
     return true;
 }

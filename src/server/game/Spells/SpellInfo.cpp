@@ -838,12 +838,19 @@ SpellInfo::SpellInfo(SpellEntry const* spellEntry, SpellEffectEntry const** effe
     PowerType = spellEntry->powerType;
     RangeEntry = spellEntry->rangeIndex ? sSpellRangeStore.LookupEntry(spellEntry->rangeIndex) : NULL;
     Speed = spellEntry->speed;
+
+
+
+
     for (uint8 i = 0; i < 2; ++i)
         SpellVisual[i] = spellEntry->SpellVisual[i];
+
     SpellIconID = spellEntry->SpellIconID;
     ActiveIconID = spellEntry->activeIconID;
     SpellName = spellEntry->SpellName;
     Rank = spellEntry->Rank;
+
+
     SchoolMask = spellEntry->SchoolMask;
     RuneCostID = spellEntry->runeCostID;
     SpellDifficultyId = spellEntry->SpellDifficultyId;
@@ -971,7 +978,6 @@ SpellInfo::SpellInfo(SpellEntry const* spellEntry, SpellEffectEntry const** effe
     for (uint8 i = 0; i < 2; ++i)
         Totem[i] = _totem ? _totem->Totem[i] : 0;
 
-    ExplicitTargetMask = _GetExplicitTargetMask();
     ChainEntry = NULL;
 }
 
@@ -1137,7 +1143,7 @@ bool SpellInfo::NeedsExplicitUnitTarget() const
 
 bool SpellInfo::NeedsToBeTriggeredByCaster() const
 {
-    if (NeedsExplicitUnitTarget())
+    if (NeedsExplicitUnitTarget() || Id == 96946 || Id == 101005)
         return true;
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
     {
@@ -1210,7 +1216,6 @@ bool SpellInfo::IsPassiveStackableWithRanks() const
 
 bool SpellInfo::IsMultiSlotAura() const
 {
-	if(Id == 28305) return false; // Shadowfiend Double Proc.
     return IsPassive() || Id == 55849 || Id == 40075 || Id == 44413; // Power Spark, Fel Flak Fire, Incanter's Absorption
 }
 
@@ -1569,9 +1574,9 @@ SpellCastResult SpellInfo::CheckLocation(uint32 map_id, uint32 zone_id, uint32 a
     // bg spell checks
     switch (Id)
     {
-        case 23333:                                         // Warsong Flag
-        case 23335:                                         // Silverwing Flag
-            return (map_id == 489 || map_id == 726) && player && player->InBattleground() ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
+        case 23333:                                         // Horde Flag
+        case 23335:                                         // Alliance Flag
+            return ((map_id == 489 || map_id == 726) && player && player->InBattleground()) ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
         case 34976:                                         // Netherstorm Flag
             return map_id == 566 && player && player->InBattleground() ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
         case 2584:                                          // Waiting to Resurrect
@@ -2503,15 +2508,14 @@ bool SpellInfo::IsDifferentRankOf(SpellInfo const* spellInfo) const
 bool SpellInfo::IsHighRankOf(SpellInfo const* spellInfo) const
 {
     if (ChainEntry && spellInfo->ChainEntry)
-    {
         if (ChainEntry->first == spellInfo->ChainEntry->first)
             if (ChainEntry->rank > spellInfo->ChainEntry->rank)
                 return true;
-    }
+
     return false;
 }
 
-uint32 SpellInfo::_GetExplicitTargetMask() const
+void SpellInfo::_InitializeExplicitTargetMask()
 {
     bool srcSet = false;
     bool dstSet = false;
@@ -2521,6 +2525,7 @@ uint32 SpellInfo::_GetExplicitTargetMask() const
     {
         if (!Effects[i].IsEffect())
             continue;
+
         targetMask |= Effects[i].TargetA.GetExplicitTargetMask(srcSet, dstSet);
         targetMask |= Effects[i].TargetB.GetExplicitTargetMask(srcSet, dstSet);
 
@@ -2534,9 +2539,11 @@ uint32 SpellInfo::_GetExplicitTargetMask() const
         // don't add explicit object/dest flags when spell has no max range
         if (GetMaxRange(true) == 0.0f && GetMaxRange(false) == 0.0f)
             effectTargetMask &= ~(TARGET_FLAG_UNIT_MASK | TARGET_FLAG_GAMEOBJECT | TARGET_FLAG_CORPSE_MASK | TARGET_FLAG_DEST_LOCATION);
+
         targetMask |= effectTargetMask;
     }
-    return targetMask;
+
+    ExplicitTargetMask = targetMask;
 }
 
 bool SpellInfo::_IsPositiveEffect(uint8 effIndex, bool deep) const
@@ -2931,6 +2938,33 @@ SpellClassOptionsEntry const* SpellInfo::GetSpellClassOptions() const
 SpellCooldownsEntry const* SpellInfo::GetSpellCooldowns() const
 {
     return SpellCooldownsId ? sSpellCooldownsStore.LookupEntry(SpellCooldownsId) : NULL;
+}
+
+void SpellInfo::SetDurationIndex(uint32 index)
+{
+    SpellDurationEntry const* durationIndex = sSpellDurationStore.LookupEntry(index);
+    if (!durationIndex)
+        return;
+
+    DurationEntry = durationIndex;
+}
+
+void SpellInfo::SetRangeIndex(uint32 index)
+{
+    SpellRangeEntry const* rangeIndex = sSpellRangeStore.LookupEntry(index);
+    if (!rangeIndex)
+        return;
+
+    RangeEntry = rangeIndex;
+}
+
+void SpellInfo::SetCastTimeIndex(uint32 index)
+{
+    SpellCastTimesEntry const* castTimeIndex = sSpellCastTimesStore.LookupEntry(index);
+    if (!castTimeIndex)
+        return;
+
+    CastTimeEntry = castTimeIndex;
 }
 
 void SpellInfo::_UnloadImplicitTargetConditionLists()

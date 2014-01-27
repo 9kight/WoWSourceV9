@@ -45,7 +45,7 @@ void WorldSession::HandleBattlemasterHelloOpcode(WorldPacket& recvData)
     if (!unit)
         return;
 
-    if (!unit->isBattleMaster())                             // it's not battlemaster
+    if (!unit->IsBattleMaster())                             // it's not battlemaster
         return;
 
     // Stop the npc if moving
@@ -390,9 +390,9 @@ void WorldSession::HandleBattlefieldListOpcode(WorldPacket& recvData)
         return;
     }
 
-    WorldPacket data;
+    /*WorldPacket data; //This is completely bugged, for example. The client sends CMSG_BATTLEFIELD_LIST when logging in and leveling up for some reason, I don't understand why. 
     sBattlegroundMgr->BuildBattlegroundListPacket(&data, 0, _player, BattlegroundTypeId(bgTypeId));
-    SendPacket(&data);
+    SendPacket(&data);*/
 }
 
 void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recvData)

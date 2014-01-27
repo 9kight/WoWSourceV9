@@ -1,359 +1,628 @@
-#include "halls_of_origination.h"
-#include "Spell.h"
-#include "ScriptedCreature.h"
+/*
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "ScriptMgr.h"
-#include "SpellAuraEffects.h"
-#include "Map.h"
-#include "Vehicle.h"
-#include "MoveSplineInit.h"
-#include "SpellAuras.h"
-#include "ObjectMgr.h"
-#include "Unit.h"
-#include "SpellScript.h"
+#include "ScriptedCreature.h"
+#include "ScriptPCH.h"
+#include "halls_of_origination.h"
+
+enum Texts
+{
+    SAY_AGGRO       = 0,
+    SAY_ENERGIZE    = 1,
+    SAY_SLAY        = 2,
+    SAY_DEATH       = 3
+};
 
 enum Spells
 {
-    SPELL_SOLAR_WINDS_SUMMON        = 74104,
-    SPELL_SOLAR_WINDS_SUMMON_2      = 74106,
+    //Rajh
+    SPELL_SUN_STRIKE                = 73872,
+    SPELL_INFERNO_JUMP              = 87653,
+    SPELL_INFERNO_JUMP_EXPLOSION    = 87647,
+    SPELL_INFERNO_JUMP_VISUAL       = 87645,
+    SPELL_INFERNO_JUMP_TRIGGER      = 87650,
+    SPELL_SUMMON_SOLAR_WIND         = 89130,
     SPELL_SUMMON_SUN_ORB            = 80352,
     SPELL_BLESSING_OF_THE_SUN       = 76352,
-    SPELL_SUN_STRIKE                = 73872,
-    SPELL_INFERNO_LEAP              = 87650,
-    SPELL_INFERNO_LEAP_VEH          = 87653,
-    SPELL_INFERNO_LEAP_DMG          = 87647,
-    SPELL_NO_REGEN                  = 72242,
+    SPELL_RESET_ENERGY              = 69470,
+    //Solar Wind
+    SPELL_FIRE_VORTEX               = 74109,
+    SPELL_SOLAR_FIRE_AURA           = 74107,
+    SPELL_SUMMON_SOLAR_FIRE         = 89130,
+    //Solar Fire Mob
+    SPELL_SOLAR_FIRE                = 89131,
+    //Sun Orb
+    SPELL_SUN                       = 73658,
+    SPELL_SUN_SUN_STRIKE            = 73874,
+    SPELL_CHARGE                    = 82856,
+    //Sun-Touched Servant
+    SPELL_DISPERSE                  = 88097,
+    SPELL_DISPERSE_FINAL            = 88100,
+    //Sun-Touched Speaker
+    SPELL_STOMP                     = 75241,
+    SPELL_FIRE_STORM                = 73861,
 };
-
-enum Entities
-{
-    NPC_SOLAR_WINDS_DUMMY           = 39634,
-    NPC_SOLAR_WINDS                 = 39635,
-    NPC_ORB_OF_THE_SUN              = 40835,
-    NPC_BLAZING_INFERNO             = 40927,
-    NPC_SOLAR_FIRE                  = 47922,
-};
-
 
 enum Events
 {
-    EVENT_SUMMON_SUN_ORB            = 1,
-    EVENT_SOLAR_WINDS,
-    EVENT_SUN_STRIKE,
-    EVENT_INFERNO_LEAP,
-    EVENT_COMBAT_RESET,
-    EVENT_SUN_ORB_JUMP
+    // Rajh
+    EVENT_SUN_STRIKE            = 1,
+    EVENT_INFERNO_JUMP          = 2,
+    EVENT_BLESSING_OF_THE_SUN   = 3,
+    EVENT_SUMMON_SUN_ORB        = 4,
+    EVENT_SUMMON_SOLAR_WIND     = 5,
+    EVENT_ENERGIZE              = 6,
+    // Inferno Leap
+    EVENT_LEAP_EXPLOSION        = 7,
+    // Solar Wind
+    EVENT_MOVE_ARROUND          = 8,
+    EVENT_SUMMON_FIRE           = 9,
+    // Sun Orb
+    EVENT_MOVE_UP               = 10,
+    EVENT_MOVE_DOWN             = 11,
+    EVENT_DESPAWN               = 12,
+    // Fire Elementars
+    EVENT_SUMMON_2              = 13,
+    EVENT_KILL_2                = 15,
+    EVENT_FLAME_WAVE            = 16,
+    EVENT_SEARING_FLAME         = 17,
+    // Sun Touched Speaker
+    EVENT_STOMP                 = 18,
+    EVENT_FIRE_STORM            = 19
 };
 
-enum Misc
+enum Points
 {
-    POINT_CENTER                    = 1,
-    PHASE_NORMAL                    = 1,
-    PHASE_BLESSING                  = 2,
+    POINT_CENTER    = 1,
+    POINT_UP        = 2,
+    POINT_SUN_EXP   = 3
 };
 
-enum Quotes
-{
-    SAY_AGGRO,
-    SAY_BLESSING,
-    SAY_SLAY,
-    SAY_DEATH
-};
-
-static const Position centerPos = {-319.76f, 193.39f, 343.95f, M_PI};
+Position const CenterPos    = {-319.455f, 193.440f, 343.946f, 3.133f};
+Position const SunPoint     = {-317.685f, 192.550f, 379.702f, 0.0f};
 
 class boss_rajh : public CreatureScript
 {
+public:
+    boss_rajh() : CreatureScript("boss_rajh") { }
+
     struct boss_rajhAI : public BossAI
     {
-        boss_rajhAI(Creature * creature) : BossAI(creature, DATA_RAJH)  {}
+        boss_rajhAI(Creature* creature) : BossAI(creature, DATA_RAJH)
+        {
+            DoCast(me, SPELL_RESET_ENERGY, true);
+            Achievement = true;
+            Energized   = true;
+            me->Respawn(true);
+        }
+
+        bool Achievement;
+        bool Energized;
 
         void Reset()
         {
             _Reset();
-            me->SetHealth(me->GetMaxHealth());
-            me->SetReactState(REACT_AGGRESSIVE);
-            events.SetPhase(PHASE_NORMAL);
-            me->SetPower(POWER_ENERGY, 100);
-            DoCast(SPELL_NO_REGEN);
-            DespawnFires();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            DoCast(me, SPELL_RESET_ENERGY, true);
+            me->ModifyPower(POWER_ENERGY, 100);
+            Achievement = true;
+            Energized   = true;
+            DespawnFire(47922);
         }
 
-        void DespawnFires()
+        void DespawnFire(uint32 entry)
         {
-            std::list<Creature *> cList;
-            me->GetCreatureListWithEntryInGrid(cList, NPC_SOLAR_FIRE, 200.0f);
-            if(!cList.empty())
-                for(std::list<Creature*>::const_iterator itr = cList.begin(); itr != cList.end(); ++itr)
-                    (*itr)->DespawnOrUnsummon();
+            std::list<Creature*> creatures;
+            GetCreatureListWithEntryInGrid(creatures, me, entry, 1000.0f);
+            if (creatures.empty())
+                return;
+            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                (*iter)->DespawnOrUnsummon();
         }
 
-        void SpellHit(Unit * /*caster*/, const SpellInfo *spell)
+        void EnterCombat(Unit* /*who*/)
         {
-            Spell * curSpell = me->GetCurrentSpell(CURRENT_GENERIC_SPELL);
-            if(me->HasAura(SPELL_SUMMON_SUN_ORB) || (curSpell && (curSpell->m_spellInfo->Id == SPELL_SUMMON_SUN_ORB || curSpell->m_spellInfo->Id == SPELL_INFERNO_LEAP_VEH)))
-            {
-                for (uint8 i = 0; i < 3; ++i)
-                {
-                    if(spell->Effects[i].Effect == SPELL_EFFECT_INTERRUPT_CAST)
-                    {
-                        me->InterruptSpell(CURRENT_GENERIC_SPELL, false);
-                        me->RemoveAurasDueToSpell(SPELL_SUMMON_SUN_ORB);
-                    }
-                }
-            }
-        }
-
-        void JustSummoned(Creature * summon)
-        {
-            switch(summon->GetEntry())
-            {
-            case NPC_SOLAR_WINDS:
-                summon->GetMotionMaster()->MoveRandom(25.0f);
-                break;
-            case NPC_SOLAR_WINDS_DUMMY:
-                DoCast(summon, SPELL_SOLAR_WINDS_SUMMON_2, true);
-                break;
-            case NPC_ORB_OF_THE_SUN:
-                if(Unit * target = SelectTarget(SELECT_TARGET_RANDOM))
-                    me->SummonCreature(NPC_BLAZING_INFERNO, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 10000);
-                //summon->GetMotionMaster()->Clear();
-                //summon->GetMap()->CreatureRelocation(summon, summon->GetPositionX(), summon->GetPositionY(), summon->GetPositionZ() + 20, 0.0f);
-                //summon->SetPosition(summon->GetPositionX(), summon->GetPositionY(), summon->GetPositionZ() + 20, 0.0f, true);
-                events.ScheduleEvent(EVENT_SUN_ORB_JUMP, 4000);
-                break;
-            default:
-                break;
-            }
-            BossAI::JustSummoned(summon);
-        }
-
-        void JustDied(Unit * )
-        {
-            Talk(SAY_DEATH);
-            _JustDied();
-            DespawnFires();
-        }
-
-        void KillerUnit(Unit * )
-        {
-            Talk(SAY_SLAY);
-        }
-
-        void EnterCombat(Unit * /*who*/)
-        {
-            Talk(SAY_AGGRO);
-            events.ScheduleEvent(EVENT_SUN_STRIKE, urand(5000, 8000), 0, PHASE_NORMAL);
-            events.ScheduleEvent(EVENT_SOLAR_WINDS, urand(8000, 10000), 0, PHASE_NORMAL);
-            events.ScheduleEvent(EVENT_SUMMON_SUN_ORB, urand(15000, 20000), 0, PHASE_NORMAL);
-            events.ScheduleEvent(EVENT_INFERNO_LEAP, urand(25000, 30000), 0, PHASE_NORMAL);
             _EnterCombat();
+            Talk(SAY_AGGRO);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+
+            events.ScheduleEvent(EVENT_SUN_STRIKE, 20000);
+            events.ScheduleEvent(EVENT_INFERNO_JUMP, 15000);
+            events.ScheduleEvent(EVENT_SUMMON_SUN_ORB, 9800);
+            events.ScheduleEvent(EVENT_SUMMON_SOLAR_WIND, 5800);
         }
 
-        void MovementInform(uint32 type, uint32 id)
+        void JustSummoned(Creature* summon)
         {
-            if(type == POINT_MOTION_TYPE && id == POINT_CENTER)
+            BossAI::JustSummoned(summon);
+
+            switch (summon->GetEntry())
             {
-                Talk(SAY_BLESSING);
-                me->GetMotionMaster()->Clear();
-                me->GetMotionMaster()->MoveIdle();
-                me->SetOrientation(M_PI);
-//                me->SendMovementFlagUpdate();
-                DoCast(SPELL_BLESSING_OF_THE_SUN);
-                events.ScheduleEvent(EVENT_COMBAT_RESET, 20000, 0, PHASE_BLESSING);
+            case NPC_INFERNO_TRIGGER:
+                summon->setFaction(16);
+                summon->SetDisplayId(me->GetCreatureTemplate()->Modelid1);
+                summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC);
+                summon->AI()->DoCastAOE(SPELL_INFERNO_JUMP_VISUAL);
+                summon->CastWithDelay(2500, (Unit* )NULL, SPELL_INFERNO_JUMP_EXPLOSION);
+                summon->DespawnOrUnsummon(7500);
+                break;
+            case NPC_SOLAR_WIND:
+                me->SetDisplayId(me->GetCreatureTemplate()->Modelid1);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC);
+                DoCastAOE(SPELL_SOLAR_FIRE);
+                break;
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void KilledUnit(Unit* killed)
         {
-            if(!UpdateVictim())
+            if (killed->GetTypeId() == TYPEID_PLAYER)
+                Talk(SAY_SLAY);
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case POINT_CENTER:
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                    events.ScheduleEvent(EVENT_ENERGIZE, 1);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 const diff)
+        {
+            if (!UpdateVictim())
                 return;
 
             events.Update(diff);
 
-            if(me->HasUnitState(UNIT_STATE_CASTING))
-                return;
-
-            if(uint32 eventId = events.ExecuteEvent())
+            if (me->GetPower(POWER_ENERGY) == 0 && Energized)
             {
-                switch(eventId)
+                Energized = false;
+                me->GetMotionMaster()->MovePoint(POINT_CENTER, CenterPos);
+                events.Reset();
+            }
+
+            if (me->GetPower(POWER_ENERGY) == 100 && !Energized)
+            {
+                if (Unit* target = me->GetVictim())
                 {
-                case EVENT_SUMMON_SUN_ORB:
-                    DoCast(SPELL_SUMMON_SUN_ORB);
-                    events.ScheduleEvent(EVENT_SUMMON_SUN_ORB, urand(30000, 40000), 0, PHASE_NORMAL);
-                    break;
-                case EVENT_SOLAR_WINDS:
-                    DoCast(SPELL_SOLAR_WINDS_SUMMON);
-                    events.ScheduleEvent(EVENT_SOLAR_WINDS, urand(20000, 25000), 0, PHASE_NORMAL);
-                    break;
-                case EVENT_SUN_STRIKE:
-                    DoCastVictim(SPELL_SUN_STRIKE);
-                    events.ScheduleEvent(EVENT_SUN_STRIKE, urand(15000, 20000), 0, PHASE_NORMAL);
-                    break;
-                case EVENT_INFERNO_LEAP:
-                    DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0), SPELL_INFERNO_LEAP);
-                    DoCast(me, SPELL_INFERNO_LEAP_VEH, false);
-                    events.ScheduleEvent(EVENT_INFERNO_LEAP, 15000, 0, PHASE_NORMAL);
-                    break;
-                case EVENT_COMBAT_RESET:
-                    me->SetReactState(REACT_AGGRESSIVE);
-                    events.SetPhase(PHASE_NORMAL);
-                    events.RescheduleEvent(EVENT_SUN_STRIKE, urand(5000, 8000), 0, PHASE_NORMAL);
-                    events.RescheduleEvent(EVENT_SOLAR_WINDS, urand(8000, 10000), 0, PHASE_NORMAL);
-                    events.RescheduleEvent(EVENT_SUMMON_SUN_ORB, urand(15000, 20000), 0, PHASE_NORMAL);
-                    events.RescheduleEvent(EVENT_INFERNO_LEAP, urand(25000, 30000), 0, PHASE_NORMAL);
-                    if(Unit * victim = me->getVictim())
-                    {
-                        me->SetUInt64Value(UNIT_FIELD_TARGET, victim->GetGUID());
-                        DoStartMovement(victim);
-                    }
-                    break;
-                case EVENT_SUN_ORB_JUMP:
-                    if(Creature * orb = me->FindNearestCreature(NPC_ORB_OF_THE_SUN, 100.0f))
-                    {
-                        if(Creature * inferno = me->FindNearestCreature(NPC_BLAZING_INFERNO, 100.0f))
-                        {
-                            orb->GetMotionMaster()->Clear();
-                            orb->GetMotionMaster()->MoveJump(inferno->GetPositionX(), inferno->GetPositionY(), inferno->GetPositionZ(), 30.0f, 30.0f);
-                            orb->EnterVehicle(inferno, 0);
-                        }
-                    }
-                    break;
-                default:
-                    break;
+                    me->GetMotionMaster()->MoveChase(target);
+                    me->Attack(target, false);
+                }
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                events.ScheduleEvent(EVENT_SUN_STRIKE, 20000);
+                events.ScheduleEvent(EVENT_INFERNO_JUMP, 15000);
+                events.ScheduleEvent(EVENT_SUMMON_SUN_ORB, 9800);
+                events.ScheduleEvent(EVENT_SUMMON_SOLAR_WIND, 5800);
+                Energized   = true;
+                Achievement = false;
+            }
+
+            while(uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_INFERNO_JUMP:
+                        DoCastRandom(SPELL_INFERNO_JUMP_TRIGGER, 100.0f);
+                        DoCastAOE(SPELL_INFERNO_JUMP);
+                        events.ScheduleEvent(EVENT_INFERNO_JUMP, 35000);
+                        break;
+                    case EVENT_SUMMON_SUN_ORB:
+                        DoCast(SPELL_SUMMON_SUN_ORB);
+                        events.ScheduleEvent(EVENT_SUMMON_SUN_ORB, 35000);
+                        break;
+                    case EVENT_SUMMON_SOLAR_WIND:
+                        if (me->SummonCreature(NPC_SOLAR_WIND_VORTEX, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()))
+                            events.ScheduleEvent(EVENT_SUMMON_SOLAR_WIND, 35000);
+                        break;
+                    case EVENT_SUN_STRIKE:
+                        DoCastVictim(SPELL_SUN_STRIKE);
+                        events.ScheduleEvent(EVENT_SUN_STRIKE, 35000);
+                        break;
+                    case EVENT_ENERGIZE:
+                        Talk(SAY_ENERGIZE);
+                        if (!Energized)
+                            DoCastAOE(SPELL_BLESSING_OF_THE_SUN);
+                        break;
+                    default:
+                        break;
                 }
             }
-
-            if(me->GetPower(POWER_ENERGY) <= 10.0f && (events.GetPhaseMask() & (1 << PHASE_NORMAL)))
-            {
-                events.SetPhase(PHASE_BLESSING);
-                me->SetReactState(REACT_PASSIVE);
-                me->StopMoving();
-                me->SetUInt64Value(UNIT_FIELD_TARGET, 0);
-                me->GetMotionMaster()->Clear();
-                me->GetMotionMaster()->MovePoint(POINT_CENTER, centerPos);
-            }
-
             DoMeleeAttackIfReady();
+        }
 
-            EnterEvadeIfOutOfCombatArea(diff);
+        void JustDied(Unit* /*who*/)
+        {
+            _JustDied();
+            Talk(SAY_DEATH);
+            DespawnFire(47922);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            instance->DoCompleteAchievement(4841);
+            if (IsHeroic())
+            {
+                instance->DoCompleteAchievement(5065);
+                if (Achievement)
+                    instance->DoCompleteAchievement(5295);
+            }  
         }
     };
 
-public:
-    boss_rajh() : CreatureScript("boss_rajh") {}
-
-    CreatureAI * GetAI(Creature * creature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new boss_rajhAI(creature);
     }
 };
 
-class npc_blazing_inferno : public CreatureScript
+class npc_solar_wind_vortex : public CreatureScript
 {
-    enum
-    {
-        SPELL_BLAZING_INFERNO           = 76195,
-        SPELL_INFERNO_LEAP              = 87647,
-        NPC_RAJH                        = 39378
-    };
+public:
+    npc_solar_wind_vortex() : CreatureScript("npc_solar_wind_vortex") {}
 
-    struct npc_blazing_infernoAI : public ScriptedAI
+    struct npc_solar_wind_vortexAI : public ScriptedAI
     {
-        npc_blazing_infernoAI(Creature * creature) : ScriptedAI(creature) {}
-
-        void PassengerBoarded(Unit* who, int8 /*seatId*/, bool apply)
+        npc_solar_wind_vortexAI(Creature* creature) : ScriptedAI(creature) 
         {
-            if(apply)
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC);
+            me->SetReactState(REACT_PASSIVE);
+        }
+
+        void IsSummonedBy(Unit* /*summoner*/)
+        {
+            me->SetDisplayId(me->GetCreatureTemplate()->Modelid1);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC);
+            me->SetReactState(REACT_PASSIVE);
+            DoCastAOE(SPELL_FIRE_VORTEX);
+            DoCastAOE(SPELL_SOLAR_FIRE_AURA);
+            events.ScheduleEvent(EVENT_MOVE_ARROUND, 100);
+            events.ScheduleEvent(EVENT_SUMMON_FIRE, 3000);
+            me->SetSpeed(MOVE_RUN, 0.5f, false);
+            me->GetMotionMaster()->MoveRandom(50.0f);
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
             {
-                if(who->GetEntry() == NPC_RAJH)
-                    DoCast(SPELL_INFERNO_LEAP);
-                else if (who->GetEntry() == NPC_ORB_OF_THE_SUN)
+                switch (eventId)
                 {
-                    DoCast(who, SPELL_BLAZING_INFERNO, true);
-                    who->ToCreature()->DespawnOrUnsummon(500);
+                    case EVENT_MOVE_ARROUND:
+                        me->GetMotionMaster()->MoveRandom(50.0f);
+                        events.ScheduleEvent(EVENT_MOVE_ARROUND, 10000);
+                        break;
+                    case EVENT_SUMMON_FIRE:
+                        DoCastAOE(SPELL_SUMMON_SOLAR_FIRE);
+                        events.ScheduleEvent(EVENT_SUMMON_FIRE, 3000);
+                        break;
+                    default:
+                        break;
                 }
             }
         }
-
     private:
+        EventMap events;
+    };
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_solar_wind_vortexAI(creature);
+    }
+};
+
+class npc_sunball : public CreatureScript
+{
+public:
+    npc_sunball() : CreatureScript("npc_sunball") {}
+
+    struct npc_sunballAI : public ScriptedAI
+    {
+        npc_sunballAI(Creature* creature) : ScriptedAI(creature) { }
+
+        void IsSummonedBy(Unit* /*summoner*/)
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC);
+            DoCast(me, SPELL_SUN);
+            me->SetCanFly(true);
+            me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
+            me->setFaction(16);
+            events.ScheduleEvent(EVENT_MOVE_UP, 100);
+            me->SetReactState(REACT_PASSIVE);
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case POINT_UP:
+                    events.ScheduleEvent(EVENT_MOVE_DOWN, 7000);
+                    events.ScheduleEvent(EVENT_DESPAWN, 11000);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 const diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_MOVE_UP:
+                        {
+                            float posX = me->GetPositionX();
+                            float posY = me->GetPositionY();
+                            me->GetMotionMaster()->MovePoint(POINT_UP, posX, posY, 370.448f);
+                        }
+                        break;
+                    case EVENT_MOVE_DOWN:
+                        DoCastRandom(SPELL_CHARGE, 0);
+                        break;
+                    case EVENT_DESPAWN:
+                        me->DespawnOrUnsummon(1);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    private:
+        EventMap events;
+    };
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_sunballAI(creature);
+    }
+};
+
+class npc_elementar_1 : public CreatureScript
+{
+public:
+    npc_elementar_1() : CreatureScript("npc_elementar_1") { }
+
+    struct npc_elementar_1AI : public ScriptedAI
+    {
+        npc_elementar_1AI(Creature* creature) : ScriptedAI(creature) { }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            events.ScheduleEvent(EVENT_FLAME_WAVE, 9000);
+            events.ScheduleEvent(EVENT_SEARING_FLAME, 6000);
+        }
+
+        void Reset()
+        {
+            events.Reset();
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
+        {
+            if(!me->IsNonMeleeSpellCasted(false) && HealthBelowPct(3))
+            {
+                DoCast(SPELL_DISPERSE);
+                me->DespawnOrUnsummon(3100);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                me->RemoveAllAuras();
+            }
+        }
+
+        void UpdateAI(uint32 const diff)
+        {
+            events.Update(diff);
+
+            if (!UpdateVictim())
+                return;
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_FLAME_WAVE:
+                        if (IsHeroic())
+                        {
+                            DoCastAOE(89852);
+                            events.ScheduleEvent(EVENT_FLAME_WAVE, 9000);
+                        }
+                        else
+                        {
+                            DoCastAOE(76160);
+                            events.ScheduleEvent(EVENT_FLAME_WAVE, 9000);
+                        }
+                        break;
+                    case EVENT_SEARING_FLAME:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                            if(IsHeroic())
+                            {
+                                DoCast(target, 89849);
+                                events.ScheduleEvent(EVENT_SEARING_FLAME, 6000);
+                            }
+                            else
+                            {
+                                DoCast(target, 74101);
+                                events.ScheduleEvent(EVENT_SEARING_FLAME, 6000);
+                            }
+                        break;
+                    default:
+                        break;
+                }
+            }
+            DoMeleeAttackIfReady();
+        }
+    private:
+         EventMap events;
     };
 
-public:
-    npc_blazing_inferno() : CreatureScript("npc_blazing_inferno") {}
-
-    CreatureAI * GetAI(Creature * creature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_blazing_infernoAI(creature);
+        return new npc_elementar_1AI(creature);
+    }
+};
+
+class npc_elementar_2 : public CreatureScript
+{
+public:
+    npc_elementar_2() : CreatureScript("npc_elementar_2") { }
+
+    struct npc_elementar_2AI : public ScriptedAI
+    {
+        npc_elementar_2AI(Creature* creature) : ScriptedAI(creature) { }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            events.ScheduleEvent(EVENT_FLAME_WAVE, 9000);
+            events.ScheduleEvent(EVENT_SEARING_FLAME, 6000);
+            DoCastAOE(76158);
+        }
+
+        void Reset()
+        {
+            events.Reset();
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
+        {
+            if(!me->IsNonMeleeSpellCasted(false) && HealthBelowPct(3))
+            {
+                DoCast(SPELL_DISPERSE_FINAL);
+                me->DespawnOrUnsummon(3100);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                me->RemoveAllAuras();
+            }
+        }
+        void UpdateAI(uint32 const diff)
+        {
+            events.Update(diff);
+
+            if (!UpdateVictim())
+                return;
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_FLAME_WAVE:
+                        if (IsHeroic())
+                        {
+                            DoCastAOE(89852);
+                            events.ScheduleEvent(EVENT_FLAME_WAVE, 9000);
+                        }
+                        else
+                        {
+                            DoCastAOE(76160);
+                            events.ScheduleEvent(EVENT_FLAME_WAVE, 9000);
+                        }
+                        break;
+                    case EVENT_SEARING_FLAME:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                            if(IsHeroic())
+                            {
+                                DoCast(target, 89849);
+                                events.ScheduleEvent(EVENT_SEARING_FLAME, 6000);
+                            }
+                            else
+                            {
+                                DoCast(target, 74101);
+                                events.ScheduleEvent(EVENT_SEARING_FLAME, 6000);
+                            }
+                        break;
+                    default:
+                        break;
+                }
+            }
+            DoMeleeAttackIfReady();
+        }
+    private:
+        EventMap events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_elementar_2AI(creature);
+    }
+};
+
+class npc_suntouched_speaker : public CreatureScript
+{
+public:
+    npc_suntouched_speaker() : CreatureScript("npc_suntouched_speaker") { }
+
+    struct npc_suntouched_speakerAI : public ScriptedAI
+    {
+        npc_suntouched_speakerAI(Creature* creature) : ScriptedAI(creature) { }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            events.ScheduleEvent(EVENT_FIRE_STORM, 10000);
+            events.ScheduleEvent(EVENT_STOMP, 6000);
+        }
+
+        void Reset()
+        {
+            events.Reset();
+        }
+
+        void UpdateAI(uint32 const diff)
+        {
+            events.Update(diff);
+
+            if (!UpdateVictim())
+                return;
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_FIRE_STORM:
+                        DoCastVictim(SPELL_FIRE_STORM);
+                        events.ScheduleEvent(SPELL_FIRE_STORM, 15000);
+                        break;
+                    case EVENT_STOMP:
+                        DoCastVictim(SPELL_STOMP);
+                        events.ScheduleEvent(EVENT_STOMP, 9000);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            DoMeleeAttackIfReady();
+        }
+    private:
+         EventMap events;
+    };
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_suntouched_speakerAI(creature);
     }
 };
 
 void AddSC_boss_rajh()
 {
-    new boss_rajh();
-    new npc_blazing_inferno();
-};
-
-/*class npc_solar_winds : public CreatureScript
-{
-    enum
-    {
-        POINT_THERE             = 1,
-        POINT_HOME              = 2
-    };
-
-    struct npc_solar_windsAI : public ScriptedAI
-    {
-        npc_solar_windsAI(Creature * creature) : ScriptedAI(creature)
-        {
-        }
-
-        void Reset()
-        {
-            me->GetPosition(&homePos);
-            me->SetReactState(REACT_PASSIVE);
-        }
-
-        void IsSummonedBy(Unit * )
-        {
-            Position pos;
-            me->GetRandomNearPosition(pos, urand(20000, 25000));
-        }
-
-        void MovementInform(uint32 type, uint32 id)
-        {
-            if(type == POINT_MOTION_TYPE)
-            {
-                if (id == POINT_THERE)
-                {
-                    me->GetMotionMaster()->Clear();
-                    me->GetMotionMaster()->MovePoint(POINT_HOME, homePos);
-                }
-                else if (id == POINT_HOME)
-                {
-                    me->GetMotionMaster()->Clear();
-                    me->GetMotionMaster()
-                }
-            }
-        }
-
-        void JustSummoned(Creature * summon)
-        {
-        }
-
-        void UpdateAI(const uint32 diff)
-        {
-        }
-
-    private:
-        bool there;
-        Position homePos;
-    };
-
-public:
-    npc_solar_winds() : CreatureScript("npc_solar_winds") {}
-
-    CreatureAI * GetAI(Creature * creature) const
-    {
-        return new npc_solar_windsAI(creature);
-    }
-};*/
+    new boss_rajh;
+    new npc_sunball;
+    new npc_solar_wind_vortex;
+    new npc_elementar_1;
+    new npc_elementar_2;
+    new npc_suntouched_speaker;
+}

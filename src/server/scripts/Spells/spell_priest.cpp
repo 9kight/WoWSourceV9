@@ -48,6 +48,8 @@ enum PriestSpells
     SPELL_PRIEST_SHADOW_WORD_DEATH                  = 32409,
     SPELL_PRIEST_T9_HEALING_2P                      = 67201,
     SPELL_PRIEST_VAMPIRIC_TOUCH_DISPEL              = 64085,
+    SPELL_PRIEST_HOLY_WORD_SANCTUARY_TRIGGERED      = 88686,
+
 };
 
 enum PriestSpellIcons
@@ -1178,6 +1180,72 @@ public:
     }
 };
 
+class spell_pri_holyword_sanctuary: public SpellScriptLoader
+{
+public:
+    spell_pri_holyword_sanctuary() : SpellScriptLoader("spell_pri_holyword_sanctuary") {}
+
+    class spell_pri_holyword_sanctuary_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_pri_holyword_sanctuary_AuraScript);
+
+        void HandlePeriodicTriggerSpell(AuraEffect const* /*aurEff*/)
+        {
+            if (Unit* owner = GetUnitOwner())
+                if (DynamicObject* dyn = owner->GetDynObject(GetId()))
+                    owner->CastSpell(dyn->GetPositionX(), dyn->GetPositionY(), dyn->GetPositionZ(), SPELL_PRIEST_HOLY_WORD_SANCTUARY_TRIGGERED, true);
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_pri_holyword_sanctuary_AuraScript::HandlePeriodicTriggerSpell, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_pri_holyword_sanctuary_AuraScript();
+    }
+};
+
+class spell_pri_holyword_sanctuary_heal : public SpellScriptLoader
+{
+    public:
+        spell_pri_holyword_sanctuary_heal() : SpellScriptLoader("spell_pri_holyword_sanctuary_heal") { }
+
+        class spell_pri_holyword_sanctuary_heal_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pri_holyword_sanctuary_heal_SpellScript);
+
+            void FilterTargets(std::list<WorldObject*>& unitList)
+            {
+                hitCount = unitList.size();
+            }
+
+            void HandleHeal(SpellEffIndex /*effIndex*/)
+            {
+                if (hitCount <= 6)
+                    return;
+
+                SetHitHeal(GetHitHeal() - GetHitHeal()*(hitCount-6)/hitCount);
+
+            }
+
+            void Register()
+            {
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pri_holyword_sanctuary_heal_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ALLY);
+                OnEffectHitTarget += SpellEffectFn(spell_pri_holyword_sanctuary_heal_SpellScript::HandleHeal, EFFECT_0, SPELL_EFFECT_HEAL);
+            }
+
+            uint8 hitCount;
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_pri_holyword_sanctuary_heal_SpellScript();
+        }
+};
+
 // Psychic scream
 class spell_pri_fear: public SpellScriptLoader
 {
@@ -1277,6 +1345,8 @@ void AddSC_priest_spell_scripts()
     new spell_pri_shadow_orbs();
     new spell_pri_mind_spike();
     new spell_pri_power_word_barrier();
+    new spell_pri_holyword_sanctuary();
+    new spell_pri_holyword_sanctuary_heal();
     new spell_pri_cure_disease();
     new spell_pri_inner_fire();
     new spell_pri_fear();

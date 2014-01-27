@@ -1849,7 +1849,7 @@ bool ConditionMgr::isConditionTypeValid(Condition* cond)
                     return false;
             }
             if (cond->ConditionValue3)
-                sLog->outError(LOG_FILTER_SQL, "ObjectEntry condition has useless data in value3 (%u)!", cond->ConditionValue3);
+                sLog;
             break;
         }
         case CONDITION_TYPE_MASK:

@@ -26,6 +26,7 @@ EndScriptData */
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "scarlet_monastery.h"
+#include "InstanceScript.h"
 
 enum Entry
 {
@@ -33,6 +34,12 @@ enum Entry
     ENTRY_HORSEMAN          = 23682,
     ENTRY_HEAD              = 23775,
     ENTRY_PUMPKIN           = 23694
+};
+
+DoorData const doorData[] =
+{
+    {GOB_KEL_DOOR, NPC_KELESTRES, DOOR_TYPE_ROOM,  BOUNDARY_NONE}, // Kelestres Door
+    {GOB_ASM_DOOR, NPC_ASMODINA, DOOR_TYPE_ROOM,  BOUNDARY_NONE}, // Asmodina Door
 };
 
 #define MAX_ENCOUNTER 2
@@ -49,7 +56,7 @@ public:
 
     struct instance_scarlet_monastery_InstanceMapScript : public InstanceScript
     {
-        instance_scarlet_monastery_InstanceMapScript(Map* map) : InstanceScript(map) {}
+        instance_scarlet_monastery_InstanceMapScript(Map* map) : InstanceScript(map) { }
 
         uint64 PumpkinShrineGUID;
         uint64 HorsemanGUID;
@@ -60,6 +67,9 @@ public:
         uint64 WhitemaneGUID;
         uint64 VorrelGUID;
         uint64 DoorHighInquisitorGUID;
+
+        uint64 _KelDoor;
+        uint64 _AsmDoor;
 
         uint32 encounter[MAX_ENCOUNTER];
 
@@ -76,14 +86,42 @@ public:
             WhitemaneGUID = 0;
             VorrelGUID = 0;
             DoorHighInquisitorGUID = 0;
+
+            _KelDoor = 0;
+            _AsmDoor = 0;
         }
 
         void OnGameObjectCreate(GameObject* go)
         {
             switch (go->GetEntry())
             {
-            case ENTRY_PUMPKIN_SHRINE: PumpkinShrineGUID = go->GetGUID();break;
-            case 104600: DoorHighInquisitorGUID = go->GetGUID(); break;
+            case ENTRY_PUMPKIN_SHRINE:
+                 PumpkinShrineGUID = go->GetGUID();
+                 break;
+            case 104600:
+                 DoorHighInquisitorGUID = go->GetGUID();
+                 break;
+            case GOB_KEL_DOOR:
+                 _KelDoor = go->GetGUID();
+                 AddDoor(go, true);
+                 break;
+            case GOB_ASM_DOOR:
+                 _AsmDoor = go->GetGUID();
+                 AddDoor(go, true);
+                 break;
+            }
+        }
+
+        void OnGameObjectRemove(GameObject* go)
+        {
+            switch(go->GetEntry())
+            {
+                case GOB_KEL_DOOR:
+                    AddDoor(go, false);
+                    break;
+                case GOB_ASM_DOOR:
+                    AddDoor(go, false);
+                    break;
             }
         }
 
@@ -143,6 +181,10 @@ public:
                 case DATA_WHITEMANE:            return WhitemaneGUID;
                 case DATA_VORREL:               return VorrelGUID;
                 case DATA_DOOR_WHITEMANE:       return DoorHighInquisitorGUID;
+                case GOB_KEL_DOOR:
+                    return _KelDoor;
+                case GOB_ASM_DOOR:
+                    return _AsmDoor;
             }
             return 0;
         }

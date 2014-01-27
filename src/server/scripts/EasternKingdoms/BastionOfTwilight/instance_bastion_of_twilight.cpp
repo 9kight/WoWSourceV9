@@ -1,191 +1,279 @@
-/*
-* Copyright (C) 2010-2011 Project Trinity <http://www.projecttrinity.org/>
-*
-* This program is free software; you can redistribute it and/or modify it
-* under the terms of the GNU General Public License as published by the
-* Free Software Foundation; either version 2 of the License, or (at your
-* option) any later version.
-*
-* This program is distributed in the hope that it will be useful, but WITHOUT
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-* more details.
-*
-* You should have received a copy of the GNU General Public License along
-* with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
-
 #include "ScriptPCH.h"
+#include "bastion_of_twilight.h"
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
 #include "ScriptedCreature.h"
 #include "Map.h"
-#include "MapManager.h"
-#include "ZoneScript.h"
 #include "PoolMgr.h"
-#include "AccountMgr.h"
-#include "bastion_of_twilight.h"
-
-#define ENCOUNTERS     5
-
-
-static DoorData const doorData[] =
-{
-    { GO_HALFUS_ENTRANCE,    BOSS_HALFUS,            DOOR_TYPE_ROOM,     BOUNDARY_W },
-    { GO_HALFUS_EXIT,        BOSS_HALFUS,            DOOR_TYPE_PASSAGE,  BOUNDARY_S },
-    { GO_VALIONA_ENTRANCE,   BOSS_VALIONA,           DOOR_TYPE_ROOM,     BOUNDARY_N },
-    { GO_VALIONA_EXIT,       BOSS_VALIONA,           DOOR_TYPE_PASSAGE,  BOUNDARY_S },
-    { GO_COUNCIL_ENTRANCE,   BOSS_ASCENDANT_COUNCIL, DOOR_TYPE_ROOM,     BOUNDARY_N },
-    { GO_COUNCIL_EXIT,       BOSS_ASCENDANT_COUNCIL, DOOR_TYPE_PASSAGE,  BOUNDARY_S },
-    { GO_CHOGALL_ENTRANCE,   BOSS_CHOGALL,           DOOR_TYPE_ROOM,     BOUNDARY_W },
-};
 
 class instance_bastion_of_twilight : public InstanceMapScript
 {
     public:
-        instance_bastion_of_twilight() : InstanceMapScript("instance_bastion_of_twilight", 671)
-        {
-        }
+        instance_bastion_of_twilight() : InstanceMapScript("instance_bastion_of_twilight", 671) { }
 
         struct instance_bastion_of_twilight_InstanceMapScript : public InstanceScript
         {
             instance_bastion_of_twilight_InstanceMapScript(InstanceMap* map) : InstanceScript(map)
             {
-                SetBossNumber(maxEncounter);
-                LoadDoorData(doorData);
-                valionaGUID         = 0;
-                theralionGUID       = 0;
-                sinestraGUID        = 0;
-                twilightFiendsSlain = 0;
+                data_phase = 1;
+                SetBossNumber(MAX_ENCOUNTER);
+                memset(&Encounter, 0, sizeof(Encounter));
             }
 
-            void OnGameObjectCreate(GameObject* gameObject)
+            uint32 uiEncounter[MAX_ENCOUNTER];
+
+            // Bosses
+
+            // Halfus
+            uint64 halfus;          
+            // Valiona and Theralion
+            uint64 valiona;      
+            uint64 theralion;      
+            // Ascendant Council
+            uint8 data_phase;       
+            uint64 ascendantcouncil;
+            uint64 feludius;      
+            uint64 ignacious;    
+            uint64 arion;       
+            uint64 terrastra;   
+            uint64 monstrosity;
+            // Cho'gall
+            uint64 chogall;  
+            // Sinestra
+            uint64 sinestra;   
+            
+            // Gobjects
+            
+            // Misc
+            uint64 chogallHalfus;
+            uint64 chogallValiona;
+            uint64 chogallCouncil;
+
+            void Initialize()
             {
-                switch (gameObject->GetEntry())
-                {
-                    case GO_HALFUS_ENTRANCE:
-                    case GO_HALFUS_EXIT:
-                    case GO_VALIONA_ENTRANCE:
-                    case GO_VALIONA_EXIT:
-                    case GO_COUNCIL_ENTRANCE:
-                    case GO_COUNCIL_EXIT:
-                    case GO_CHOGALL_ENTRANCE:
-                        AddDoor(gameObject, true);
-                        break;
-                }
+                for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                    uiEncounter[i] = NOT_STARTED;
+            
+                // Bosses
+                    // Halfus
+                    halfus           = 0;
+                    // Valiona and Theralion
+                    valiona          = 0;
+                    theralion        = 0;
+                    // Ascendant Council
+                    data_phase        = 0;
+                    ascendantcouncil = 0;
+                    feludius         = 0;
+                    ignacious        = 0;
+                    arion            = 0;
+                    terrastra        = 0;
+                    monstrosity      = 0;
+                    // Cho'gall
+                    chogall          = 0;
+                    // Sinestra
+                    sinestra         = 0;
+            
+                // Gobjects
+            
+                // Misc
+                    chogallHalfus   = 0;
+                    chogallValiona  = 0;
+                    chogallCouncil  = 0;
+            }
+            
+            bool IsEncounterInProgress() const
+            {
+                for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                    if (uiEncounter[i] == IN_PROGRESS)
+                        return true;
+            
+                return false;
             }
 
-            void OnCreatureCreate(Creature* creature)
+            void OnCreatureCreate(Creature* pCreature)
             {
-                switch (creature->GetEntry())
+                switch (pCreature->GetEntry())
                 {
-                    case NPC_VALIONA:
-                        valionaGUID = creature->GetGUID();
+                    case NPC_HALFUS_WORMBREAKER:
+                        halfus = pCreature->GetGUID();
                         break;
-                    case NPC_THERALION:
-                        theralionGUID = creature->GetGUID();
+                    case NPC_VALIONA_BOT:
+                        valiona = pCreature->GetGUID();
+                        break;
+                    case NPC_THERALION_BOT:
+                        theralion = pCreature->GetGUID();
+                        break;
+                    case NPC_ASCENDANT_COUNCIL:
+                        ascendantcouncil = pCreature->GetGUID();
+                        break;
+                    case NPC_FELUDIUS:
+                        feludius = pCreature->GetGUID();
+                        break;
+                    case NPC_IGNACIOUS:
+                        ignacious = pCreature->GetGUID();
+                        break;
+                    case NPC_ARION:
+                        arion = pCreature->GetGUID();
+                        break;
+                    case NPC_TERRASTRA:
+                        terrastra = pCreature->GetGUID();
+                        break;
+                    case NPC_ELEMENTIUM_MONSTROSITY:
+                        monstrosity = pCreature->GetGUID();
+                        break;
+                    case NPC_CHOGALL:
+                        chogall = pCreature->GetGUID();
                         break;
                     case NPC_SINESTRA:
-                        sinestraGUID = creature->GetGUID();
+                        sinestra = pCreature->GetGUID();
+                        break;
+                    case NPC_CHOGALL_HALFUS:
+                        chogallHalfus = pCreature->GetGUID();
+                        break;
+                    case NPC_CHOGALL_DRAGONS:
+                        chogallValiona = pCreature->GetGUID();
+                        break;
+                    case NPC_CHOGALL_COUNCIL:
+                        chogallCouncil = pCreature->GetGUID();
                         break;
                 }
+            }
+
+            void OnGameObjectCreate(GameObject* go)
+            {
+                /*switch(go->GetEntry()) { }*/
+            }
+
+            void SetData(uint32 type, uint32 data)
+            {
+                if (type == DATA_AC_PHASE)
+                    data_phase = data;
+            }
+
+            uint32 GetData(uint32 type) const
+            {
+                if (type == DATA_AC_PHASE)
+                    return data_phase;
+
+                return Encounter[type];
             }
 
             uint64 GetData64(uint32 type) const
             {
                 switch (type)
                 {
-                    case NPC_VALIONA:
-                        return valionaGUID;
-                    case NPC_THERALION:
-                        return theralionGUID;
-                    case BOSS_SINESTRA:
-                        return sinestraGUID;
+                    case NPC_HALFUS_WORMBREAKER:
+                        return halfus;
+                        break;
+                    case NPC_VALIONA_BOT:
+                        return valiona;
+                        break;
+                    case NPC_THERALION_BOT:
+                        return theralion;
+                        break;
+                    case NPC_ASCENDANT_COUNCIL:
+                        return ascendantcouncil;
+                        break;
+                    case NPC_FELUDIUS:
+                        return feludius;
+                        break;
+                    case NPC_IGNACIOUS:
+                        return ignacious;
+                        break;
+                    case NPC_ARION:
+                        return arion;
+                        break;
+                    case NPC_TERRASTRA:
+                        return terrastra;
+                        break;
+                    case NPC_ELEMENTIUM_MONSTROSITY:
+                        return monstrosity;
+                        break;
+                    case NPC_CHOGALL:
+                        return chogall;
+                        break;
+                    case NPC_SINESTRA:
+                        return sinestra;
+                        break;
+                    case NPC_CHOGALL_HALFUS:
+                        return chogallHalfus;
+                        break;
+                    case NPC_CHOGALL_DRAGONS:
+                        return chogallValiona;
+                        break;
+                    case NPC_CHOGALL_COUNCIL:
+                        return chogallCouncil;
+                        break;
                 }
 
-                return 0;
+                return NULL;
             }
 
-            void OnCreatureDeath(Creature* creature)
+            bool SetBossState(uint32 data, EncounterState state) 
             {
-            }
-
-            void SetData(uint32 type, uint32 data)
-            {
-                if (type == DATA_DOUBLE_DRAGON)
-                {
-                    if (data == DATA_RESET)
-                        twilightFiendsSlain = 0;
-                    else if (data == DATA_ACCUMULATE)
-                        ++twilightFiendsSlain;
-                }
-            }
-            
-            bool CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* /*source*/, Unit const* /*target*/, uint32 /*miscvalue1*/)
-            {
-                if (criteria_id == ACH_DOUBLE_DRAGON || criteria_id == ACH_DOUBLE_DRAGON_2)
-                    return twilightFiendsSlain >= 6;
-
-                return false;
-            }
-
-            bool SetBossState(uint32 type, EncounterState state)
-            {
-                if (!InstanceScript::SetBossState(type, state))
+                if (!InstanceScript::SetBossState(data, state))
                     return false;
-
-                 return true;
+            
+                if(state == DONE)
+                {
+                    switch(data)
+                    {
+                        case DATA_HALFUS:
+                        case DATA_VALIONA_THERALION:
+                        case DATA_ASCENDANT_COUNCIL:
+                        case DATA_CHOGALL:
+                        case DATA_SINESTRA:
+                        break;
+                    }
+                }
+            
+                return true;
             }
 
             std::string GetSaveData()
             {
                 OUT_SAVE_INST_DATA;
-
+            
                 std::ostringstream saveStream;
-                saveStream << "B O T " << GetBossSaveData();
-
+                saveStream << "B T" << GetBossSaveData();
+            
                 OUT_SAVE_INST_DATA_COMPLETE;
                 return saveStream.str();
             }
-
-            void Load(char const* str)
+            
+            void Load(const char* in)
             {
-                if (!str)
+                if (!in)
                 {
                     OUT_LOAD_INST_DATA_FAIL;
                     return;
                 }
-
-                OUT_LOAD_INST_DATA(str);
-
-                char dataHead1, dataHead2, dataHead3;
-
-                std::istringstream loadStream(str);
-                loadStream >> dataHead1 >> dataHead2 >> dataHead3;
-
-                if (dataHead1 == 'B' && dataHead2 == 'O' && dataHead3 == 'T')
+            
+                OUT_LOAD_INST_DATA(in);
+            
+                char dataHead1, dataHead2;
+            
+                std::istringstream loadStream(in);
+                loadStream >> dataHead1 >> dataHead2;
+            
+                if (dataHead1 == 'B' && dataHead2 == 'T')
                 {
-                    for (uint8 i = 0; i < maxEncounter; ++i)
+                    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
                     {
                         uint32 tmpState;
                         loadStream >> tmpState;
                         if (tmpState == IN_PROGRESS || tmpState > SPECIAL)
                             tmpState = NOT_STARTED;
-                        SetBossState(i, EncounterState(tmpState));
+                        Encounter[i] = tmpState;
                     }
-                }
-                else
-                    OUT_LOAD_INST_DATA_FAIL;
-
+                } else OUT_LOAD_INST_DATA_FAIL;
+            
                 OUT_LOAD_INST_DATA_COMPLETE;
             }
 
         private:
-            uint64 valionaGUID;
-            uint64 theralionGUID;
-            uint64 sinestraGUID;
-            uint32 twilightFiendsSlain;
+            uint32 Encounter[MAX_ENCOUNTER];
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* map) const

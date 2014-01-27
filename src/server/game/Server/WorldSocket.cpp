@@ -461,8 +461,14 @@ int WorldSocket::Update (void)
     if (m_forceCloseTime < time(NULL))
         return -1;
 
-    if (m_OutActive || (m_OutBuffer->length() == 0 && msg_queue()->is_empty()))
+    if (m_OutActive)
         return 0;
+
+    {
+        ACE_GUARD_RETURN (LockType, Guard, m_OutBufferLock, 0);
+        if (m_OutBuffer->length() == 0 && msg_queue()->is_empty())
+            return 0;
+    }
 
     int ret;
     do

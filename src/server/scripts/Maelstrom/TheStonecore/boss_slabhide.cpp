@@ -69,6 +69,19 @@ public:
             _Reset();
         }
 
+        void MovementInform(uint32 type, uint32 id)
+        {
+            if(type == POINT_MOTION_TYPE)
+            {
+                if(id == POINT_STALACTITE)
+                {
+                    me->HandleEmoteCommand(EMOTE_ONESHOT_LIFTOFF);
+                    events.ScheduleEvent(EVENT_STALACTITE_CAST, 3000);
+                    events.ScheduleEvent(EVENT_STALACTITE_LAND, 13000);
+                }
+            }
+        }
+
         void EnterCombat(Unit* /*who*/)
         {
             events.ScheduleEvent(EVENT_STALACTITE, 20000);
@@ -112,6 +125,9 @@ public:
                     events.ScheduleEvent(EVENT_STALACTITE_LAND, 13000);
                     break;
                 case EVENT_STALACTITE_CAST:
+                    me->SetCanFly(true);
+                    me->SetDisableGravity(true);
+                    me->MonsterMoveWithSpeed(x,y,z + 10.0f, 0, false , false);
                     me->AddAura(SPELL_STALACTITE, me);
                     break;
                 case EVENT_STALACTITE_LAND:
@@ -128,7 +144,7 @@ public:
                     break;
                 case EVENT_STALACTITE_LAND_END:
                     me->SetReactState(REACT_AGGRESSIVE);
-                    if (Unit * victim = me->getVictim())
+                    if (Unit * victim = me->GetVictim())
                     {
                         me->SetUInt64Value(UNIT_FIELD_TARGET, victim->GetGUID());
                         DoStartMovement(victim);
@@ -147,7 +163,7 @@ public:
                     }
                     break;
                 case EVENT_CRYSTAL_STORM:
-                    if (Unit * victim = me->getVictim())
+                    if (Unit * victim = me->GetVictim())
                         me->SetUInt64Value(UNIT_FIELD_TARGET, victim->GetGUID());
                     DoCast(me, SPELL_CRYSTAL_STORM_REQ, true);
                     DoCast(me, SPELL_CRYSTAL_STORM, false);
@@ -192,8 +208,8 @@ public:
         {
             me->GetPosition(x,y,z);
             me->GetMotionMaster()->Clear();
-            //me->NearTeleportTo(x, y, z + 50.0f, 0.0f);
-            //me->SendMovementFlagUpdate();
+            me->MonsterMoveWithSpeed(x,y,z + 50.0f, 20, false , false);
+            me->SendMovementFlagUpdate();
         }
 
         void UpdateAI(uint32 const diff)
@@ -318,7 +334,6 @@ public:
         return new spell_crystal_storm_SpellScript();
     }
 };
-
 void AddSC_boss_slabhide()
 {
     new boss_slabhide();
