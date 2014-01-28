@@ -927,10 +927,15 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
 				case 47243: // Mirror Image
 				case 47244: // Mirror Image
                 {
-					SetBonusDamage(int32(GetOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FROST) * 0.33f));
-					SetBonusDamage(int32(GetOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE) * 0.33f));
-					SetBonusDamage(int32(GetOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_ARCANE) * 0.33f));
-					
+		SetBonusDamage(int32(GetOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FROST) * 0.33f));
+		SetBonusDamage(int32(GetOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE) * 0.33f));
+		SetBonusDamage(int32(GetOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_ARCANE) * 0.33f));
+		
+		// Finaly Done Weapon Cloning			
+		if (uint32 weapon = m_owner->GetUInt32Value(PLAYER_VISIBLE_ITEM_16_ENTRYID))
+		{
+		SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID, weapon);
+		}
                     SetDisplayId(m_owner->GetDisplayId());
 					if (pInfo)
                     {
