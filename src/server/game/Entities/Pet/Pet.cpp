@@ -878,10 +878,10 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                 }
                 case 19668: // Shadowfiend
                 {
-                    if (!pInfo)
+                    if (pInfo)
                     {
-                        SetCreateMana(28 + 10*petlevel);
-                        SetCreateHealth(28 + 30*petlevel);
+                        SetCreateHealth(m_owner->GetMaxHealth());
+                        SetCreateMana(m_owner->GetMaxPower(POWER_MANA) / 1.5);
                     }
                     int32 bonusDmg = (int32(m_owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW)* 0.375f));
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, GetWeaponDamageRange(BASE_ATTACK, MINDAMAGE) + bonusDmg);
@@ -924,16 +924,21 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     break;
                 }
                 case 31216: // Mirror Image
+				case 47243: // Mirror Image
+				case 47244: // Mirror Image
                 {
-                    SetSpellBonusDamage(int32(m_owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FROST) * 0.33f));
+					SetBonusDamage(int32(GetOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FROST) * 0.33f));
+					SetBonusDamage(int32(GetOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE) * 0.33f));
+					SetBonusDamage(int32(GetOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_ARCANE) * 0.33f));
+					
                     SetDisplayId(m_owner->GetDisplayId());
-                    if (!pInfo)
+					if (pInfo)
                     {
-                        SetCreateMana(28 + 30 * petlevel);
-                        SetCreateHealth(28 + 10 * petlevel);
+                        SetCreateHealth(m_owner->GetMaxHealth() / 2.5);
+                        SetCreateMana(m_owner->GetMaxPower(POWER_MANA) / 1.5);
                     }
                     break;
-                }
+				}
                 case 27829: // Ebon Gargoyle
                 {
                     // Guessed
