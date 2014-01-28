@@ -453,7 +453,12 @@ class spell_mage_pyromaniac : public SpellScriptLoader
         {
             PrepareAuraScript(spell_mage_pyromaniac_AuraScript);
 
-            void AfterRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+			bool isFireDot(uint32 auraId)
+            {
+                return auraId == 44457 || auraId == 12654;
+            }
+			
+            void AfterRemove(AuraEffect const* aurEff, AuraEffectHandleModes mode)
             {
                 if (Unit* caster = GetCaster())
                 {
@@ -479,7 +484,7 @@ class spell_mage_pyromaniac : public SpellScriptLoader
                 }
             }
 
-            void AfterApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+            void AfterApply(AuraEffect const* aurEff, AuraEffectHandleModes mode)
             {
                 if (Unit* caster = GetCaster())
                 {
@@ -511,16 +516,11 @@ class spell_mage_pyromaniac : public SpellScriptLoader
                 }
             }
 
-            bool isFireDot(uint32 auraId)
-            {
-                return auraId == 44457 || auraId == 12654 || auraId == 11366;
-            }
+            
 
             void Register()
             {
-                AfterEffectApply += AuraEffectApplyFn(spell_mage_pyromaniac_AuraScript::AfterApply, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
                 AfterEffectApply += AuraEffectApplyFn(spell_mage_pyromaniac_AuraScript::AfterApply, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
-                AfterEffectRemove += AuraEffectRemoveFn(spell_mage_pyromaniac_AuraScript::AfterRemove, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
                 AfterEffectRemove += AuraEffectRemoveFn(spell_mage_pyromaniac_AuraScript::AfterRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
             }
         };
