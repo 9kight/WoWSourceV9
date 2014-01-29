@@ -379,13 +379,13 @@ class spell_mage_orb_filter : public SpellScriptLoader
                             caster->CastSpell(target, 95969, true, NULL, NULL, caster->GetOwnerGUID());
                     }
                     // (Hack Fix) Checking if target is in range and camoufled, then remove camoufled aura.
-                    if (target->HasAura(1784)) 
-			target->RemoveAura(1784);
-		    if (target->HasAura(5215))
-			target->RemoveAura(5215);
-		    if(target->HasAura(32612))
-			target->RemoveAura(32612);
-                    
+                    if (target->HasAura(1784))
+                        target->RemoveAura(1784);
+                    if (target->HasAura(5215))
+                        target->RemoveAura(5215);
+                    if(target->HasAura(32612))
+                        target->RemoveAura(32612);
+
                     caster->AddSpellCooldown(GetSpellInfo()->Id, 0, time(NULL) + GetSpellInfo()->Effects[EFFECT_0].BasePoints / 1000);
                     caster->CastSpell(target, 86719, true);
                     if (!caster->HasAura(82736))
@@ -461,7 +461,7 @@ class spell_mage_pyromaniac : public SpellScriptLoader
         {
             PrepareAuraScript(spell_mage_pyromaniac_AuraScript);
 
-			bool isFireDot(uint32 auraId)
+            bool isFireDot(uint32 auraId)
             {
                 return auraId == 44457 || auraId == 12654;
             }
@@ -523,8 +523,6 @@ class spell_mage_pyromaniac : public SpellScriptLoader
                     }
                 }
             }
-
-            
 
             void Register()
             {
