@@ -84,7 +84,7 @@ class spell_warr_heroic_strike : public SpellScriptLoader
             {
                 OnEffectHitTarget += SpellEffectFn(spell_warr_heroic_strike::spell_warr_heroic_strike_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
             }
-		};
+        };
 
         SpellScript* GetSpellScript() const
         {
