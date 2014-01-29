@@ -851,6 +851,17 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, maxdamage);
                     break;
                 }
+                /*update `creature_template` set `health_mod` = 0, `unit_flags` = 2099209, `unit_flags2` = 264192, `spell1` = 52586, `ScriptName` = 'npc_Tentacle_of_the_Old_Ones' where `entry` in (57220,58077,58078);*/
+		case 57220: // Tentacle of the Old Ones UnBlizzlike
+		case 58077:
+		{
+		     SetCreateHealth(m_owner->GetMaxHealth() / 3.5);
+		}
+		case 58078: 
+		{
+		      SetCreateHealth(m_owner->GetMaxHealth() / 2.8);
+		}
+		break;
                 case 1964: //force of nature
                 {
                     if (!pInfo)
