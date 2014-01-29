@@ -3400,6 +3400,38 @@ public:
    }
 };
 
+// Gurthalak, Voice of the Deeps - Tentacles Attack 
+/*update `creature_template` set `health_mod` = 0, `unit_flags` = 2099209, `unit_flags2` = 264192, `spell1` = 52586, `ScriptName` = 'npc_Tentacle_of_the_Old_Ones' where `entry` in (57220,58077,58078);*/
+/*TODO : Tentacles should not move / Gain Damage spell calculation from AP/STRG(Spell 52586) */
+class npc_Tentacle_of_the_Old_Ones : public CreatureScript
+{
+    public:
+        npc_Tentacle_of_the_Old_Ones() : CreatureScript("npc_Tentacle_of_the_Old_Ones") { }
+
+        struct npc_Tentacle_of_the_Old_OnesAI : CasterAI
+        {
+        npc_Tentacle_of_the_Old_OnesAI(Creature* creature) : CasterAI(creature) {}
+
+		void InitializeAI()
+        {
+            CasterAI::InitializeAI();
+            Unit* owner = me->GetOwner();
+            if (!owner)
+                return;
+
+            me->SetReactState(REACT_AGGRESSIVE);
+        }
+			};
+
+		void UpdateAI(const uint32 diff) {}
+		void EnterCombat(Unit* /*who*/) {}
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_Tentacle_of_the_Old_OnesAI(creature);
+        }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -3441,4 +3473,5 @@ void AddSC_npcs_special()
     new npc_fungal_growth_two();
     new npc_consecration();
     new npc_melee_guardian();
+	new npc_Tentacle_of_the_Old_Ones();
 }
