@@ -463,7 +463,10 @@ class spell_mage_pyromaniac : public SpellScriptLoader
 
             bool isFireDot(uint32 auraId)
             {
-                return auraId == 44457 || auraId == 12654;
+                return 
+                   auraId == 44457 
+                || auraId == 12654 
+                || auraId == 92315; // Pyroblast + Hot Strake Effect.
             }
 			
             void AfterRemove(AuraEffect const* aurEff, AuraEffectHandleModes mode)
