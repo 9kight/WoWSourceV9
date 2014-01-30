@@ -5615,18 +5615,18 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
         case SPELLFAMILY_GENERIC:
             switch (GetId())
             {
-            case 101111:
-            {
-                if (target->GetAura(101111)->GetEffect(0)->GetAmount() < 100)
+                case 101111:
                 {
-                    target->GetAura(101111)->GetEffect(0)->ChangeAmount(target->GetAura(101111)->GetEffect(0)->GetAmount() + 10);
-                    target->GetAura(101111)->SetNeedClientUpdateForTargets();
+                    if (target->GetAura(101111)->GetEffect(0)->GetAmount() < 100)
+                    {
+                        target->GetAura(101111)->GetEffect(0)->ChangeAmount(target->GetAura(101111)->GetEffect(0)->GetAmount() + 10);
+                        target->GetAura(101111)->SetNeedClientUpdateForTargets();
+                    }
+                    break;
                 }
-                break;
-            }
-            case 75592: // Anhuur - Divine Reckoning
-                caster->CastSpell(target, m_spellInfo->Effects[m_effIndex].TriggerSpell, true);
-                break;
+                case 75592: // Anhuur - Divine Reckoning
+                    caster->CastSpell(target, m_spellInfo->Effects[m_effIndex].TriggerSpell, true);
+                    break;
                 case 66149: // Bullet Controller Periodic - 10 Man
                 case 68396: // Bullet Controller Periodic - 25 Man
                 {
@@ -5654,6 +5654,22 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                     {
                         target->CastSpell(target, 64774, true, NULL, NULL, GetCasterGUID());
                         target->RemoveAura(64821);
+                    }
+                    break;
+                case 76691: // Vengeance
+                    {
+                        if(!target->isInCombat())
+                        {
+                            // Remove partially while not in combat, values should be wrong
+                            int32 value = target->GetAuraEffect(76691, EFFECT_0)->GetAmount();
+                            value = ApplyPct(value, 75);
+                            if(uint32(value) < target->CountPctFromMaxHealth(1))
+                                target->RemoveAura(76691);
+                            else
+                                target->CastCustomSpell(target, 76691, &value, &value, NULL, true);
+                        }
+                        if(target->getClass() == CLASS_DRUID && target->GetShapeshiftForm() == FORM_CAT)
+                            target->RemoveAura(76691);
                     }
                     break;
             }
@@ -5748,9 +5764,11 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
             switch (GetId())
             {
                 case 49016: // Hysteria
+                {
                     uint32 damage = uint32(target->CountPctFromMaxHealth(1));
                     target->DealDamage(target, damage, NULL, NODAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
                     break;
+                }
             }
             // Death and Decay
             if (GetSpellInfo()->SpellFamilyFlags[0] & 0x20)

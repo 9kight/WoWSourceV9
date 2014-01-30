@@ -3133,8 +3133,7 @@ void SpellMgr::LoadSpellCustomAttr()
                 break;
             case 92315:	// Mage - Pyromaniac(Dot after casting Pyroblast with Hot Strake + Using Impact set to 3 target)
                 spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_EFFECT_DUMMY;
-				break;   
-                
+                break;
             default:
                 break;
         }
@@ -3200,9 +3199,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 54278:
                 spellInfo->Effects[EFFECT_0].SpellClassMask[0] = 0x000001000; // Proc from Fireball.
                 break;
-            case 93099: // Vengeance (Death Knight)
-                spellInfo->SpellFamilyName = SPELLFAMILY_DEATHKNIGHT;
-                break;
+            //case 93099: // Vengeance (Death Knight)
+            //    spellInfo->SpellFamilyName = SPELLFAMILY_DEATHKNIGHT;
+            //    break;
             case 96461: // Wave of Agony
                 spellInfo->Effects[0].MaxRadiusEntry = 0;
                 break;

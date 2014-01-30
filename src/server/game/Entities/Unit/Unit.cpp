@@ -828,6 +828,46 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
 
         victim->ModifyHealth(-(int32)damage);
 
+        SpellFamilyNames family = SPELLFAMILY_GENERIC;
+        // Vengeance proc
+        switch(victim->getClass())
+        {
+            case CLASS_WARRIOR:     family = SPELLFAMILY_WARRIOR;       break;
+            case CLASS_PALADIN:     family = SPELLFAMILY_PALADIN;       break;
+            case CLASS_DRUID:       family = SPELLFAMILY_DRUID;         break;
+            // Dk's Vengeance has spellfamily warrior flag, don't know why
+            case CLASS_DEATH_KNIGHT:family = SPELLFAMILY_WARRIOR;   break;
+            default: break;
+        }
+        if (AuraEffect *aurEff = victim->GetAuraEffect(SPELL_AURA_DUMMY, family, 3031, 0))
+        {
+            if(this != victim && this->GetTypeId() != TYPEID_PLAYER)
+            {
+                // Tooltip says 5% of damage but wowpedia says:
+                // Patch 4.3.0 (2011-11-29): Vengeance has been redesigned slightly.
+                // It no longer ramps up slowly at the beginning of a fight.
+                // Instead, the first melee attack taken by the tank generates Vengeance equal to 33% of the damage taken by that attack.
+                // In addition, as it updates periodically during the fight, it's always set to at least 33% of the damage taken by the tank in the last 2 seconds.
+                // int32 value = ApplyPct(damage, aurEff->GetAmount());
+                int32 value = ApplyPct(damage, 33);
+                if(value < 1)
+                    value = 1;
+
+                if(uint32(value) > victim->CountPctFromMaxHealth(aurEff->GetAmount()*2))
+                    value = victim->CountPctFromMaxHealth(aurEff->GetAmount()*2);
+
+                if(victim->HasAura(76691))
+                {
+                    value += victim->GetAuraEffect(76691, EFFECT_0)->GetAmount();
+
+                    if(uint32(value) > victim->CountPctFromMaxHealth(aurEff->GetAmount()*2))
+                        value = victim->CountPctFromMaxHealth(aurEff->GetAmount()*2);
+                }
+
+                victim->CastCustomSpell(victim, 76691, &value, &value, NULL, true);
+            }
+        }
+
         if (damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE)
         {
             victim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DIRECT_DAMAGE, spellProto ? spellProto->Id : 0);
@@ -6004,7 +6044,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                     RemoveAura(dummySpell->Id);
                     return false;
                 }
-                case 93098: // Vengeance
+                /*case 93098: // Vengeance
                 {
                     if (!damage || !ToPlayer())
                         return false;
@@ -6028,7 +6068,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                     aur->GetEffect(EFFECT_0)->ChangeAmount(amount);
                     aur->GetEffect(EFFECT_1)->ChangeAmount(amount);
                     break;
-                }
+                }*/
             }
             // Second Wind
             if (dummySpell->SpellIconID == 1697)
@@ -6449,7 +6489,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                     triggered_spell_id = 95746;
                     break;
                 }
-                case 84840: // Vengeance
+                /*case 84840: // Vengeance
                 {
                     if (!damage || !ToPlayer())
                         return false;
@@ -6473,7 +6513,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                     aur->GetEffect(EFFECT_0)->ChangeAmount(amount);
                     aur->GetEffect(EFFECT_1)->ChangeAmount(amount);
                     break;
-                }
+                }*/
                 case 17007: // Leader of the pack
                 {
                     if (GetTypeId() != TYPEID_PLAYER || (GetShapeshiftForm() != FORM_CAT && GetShapeshiftForm() != FORM_BEAR))
@@ -7179,7 +7219,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                     }
                     break;
                 }
-                case 84839: // Vengeance
+                /*case 84839: // Vengeance
                 {
                     if (!damage || !ToPlayer())
                         return false;
@@ -7203,7 +7243,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                     aur->GetEffect(EFFECT_0)->ChangeAmount(amount);
                     aur->GetEffect(EFFECT_1)->ChangeAmount(amount);
                     break;
-                }
+                }*/
                 case 31801: // Seal of Truth
                 {
                     // Only single-target spells
@@ -7838,7 +7878,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                     }
                     break;
                 }
-                case 93099: // Vengeance
+                /*case 93099: // Vengeance
                 {
                     if (!damage || !ToPlayer())
                         return false;
@@ -7862,7 +7902,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                     aur->GetEffect(EFFECT_0)->ChangeAmount(amount);
                     aur->GetEffect(EFFECT_1)->ChangeAmount(amount);
                     break;
-                }
+                }*/
 
                 case 51099: // Ebon Plaguebringer
                 case 51160:
