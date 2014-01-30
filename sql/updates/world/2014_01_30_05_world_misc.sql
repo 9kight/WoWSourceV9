@@ -10,3 +10,7 @@ DELETE FROM creature_addon WHERE guid=104264;
 -- update creature where has the rong equipment id 
 UPDATE creature_template SET equipment_id=0 WHERE entry=3783;
 UPDATE creature_template SET equipment_id=0 WHERE entry=3781;
+
+-- console error fix about rong equipment id for miror image npc
+DELETE FROM creature_equip_template WHERE entry=31216;
+INSERT INTO `creature_equip_template` VALUES ('31216', '1', '47569', '40698', '0');
