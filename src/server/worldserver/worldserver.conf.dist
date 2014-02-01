@@ -3036,7 +3036,7 @@ AllowZoneAndAreaCheckForCreatureAndGameobject = 0
 #        The movement speed is x2 outdoor, inside of Instances/BG/Raids it is 1
 #          (Default: 0) to active set = 1
 #
-DoubleMovementSpeed = 1
+DoubleMovementSpeed = 0
 ##########################################################
 
 ###################################################################################################
