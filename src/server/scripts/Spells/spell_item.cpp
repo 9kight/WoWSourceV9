@@ -2507,6 +2507,171 @@ class spell_item_healthstone : public SpellScriptLoader
         }
 };
 
+enum FlaskOfTheEnchancementSpells
+{
+
+    SPELL_FLASK_OF_ENHANCEMENT_STR = 79638,
+    SPELL_FLASK_OF_ENHANCEMENT_AP  = 79639,
+    SPELL_FLASK_OF_ENHANCEMENT_SP  = 79640,
+};
+
+class spell_item_flask_of_Enhancement : public SpellScriptLoader
+{
+public:
+    spell_item_flask_of_Enhancement() : SpellScriptLoader("spell_item_flask_of_Enhancement") { }
+
+    class spell_item_flask_of_Enhancement_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_item_flask_of_Enhancement_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellEntry*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_FLASK_OF_ENHANCEMENT_STR) || !sSpellMgr->GetSpellInfo(SPELL_FLASK_OF_ENHANCEMENT_AP) || !sSpellMgr->GetSpellInfo(SPELL_FLASK_OF_ENHANCEMENT_SP))
+                return false;
+            return true;
+        }
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            Unit* caster = GetCaster();
+            if(caster->GetStat(STAT_AGILITY) > std::max(caster->GetStat(STAT_INTELLECT),caster->GetStat(STAT_STRENGTH))) // Druid CAC
+            {
+                caster->CastSpell(caster, SPELL_FLASK_OF_ENHANCEMENT_AP, true, NULL);
+            }
+            else
+                if(caster->GetStat(STAT_STRENGTH) > std::max(caster->GetStat(STAT_INTELLECT),caster->GetStat(STAT_AGILITY))) // PALA CAC
+                {
+                    caster->CastSpell(caster, SPELL_FLASK_OF_ENHANCEMENT_STR, true, NULL);
+                }
+                else
+                    if(caster->GetStat(STAT_INTELLECT) > std::max(caster->GetStat(STAT_AGILITY),caster->GetStat(STAT_STRENGTH))) // PALA Heal
+                    {
+                        caster->CastSpell(caster, SPELL_FLASK_OF_ENHANCEMENT_SP, true, NULL);
+                    }
+        }
+
+        void Register()
+        {
+            OnEffectHit += SpellEffectFn(spell_item_flask_of_Enhancement_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_item_flask_of_Enhancement_SpellScript();
+    }
+};
+
+// http://cata.openwow.com/spell=82175
+enum Synapse_Springs_Spells
+{
+
+    Synapse_Springs_Spells_AGI  = 96228,
+    Synapse_Springs_Spells_STR  = 96229,
+    Synapse_Springs_Spells_SP   = 96230,
+};
+
+class spell_item_Synapse_Springs : public SpellScriptLoader
+{
+public:
+    spell_item_Synapse_Springs() : SpellScriptLoader("spell_item_Synapse_Springs") { }
+
+    class spell_item_Synapse_Springs_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_item_Synapse_Springs_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellEntry*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(Synapse_Springs_Spells_STR) || !sSpellMgr->GetSpellInfo(Synapse_Springs_Spells_AGI) || !sSpellMgr->GetSpellInfo(Synapse_Springs_Spells_SP))
+                return false;
+            return true;
+        }
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            Unit* caster = GetCaster();
+            if(caster->GetStat(STAT_INTELLECT) > std::max(caster->GetStat(STAT_AGILITY),caster->GetStat(STAT_STRENGTH))) // Intel Stats
+            {
+                caster->CastSpell(caster, Synapse_Springs_Spells_SP, true, NULL);
+            }
+            else
+                if(caster->GetStat(STAT_AGILITY) > std::max(caster->GetStat(STAT_INTELLECT),caster->GetStat(STAT_STRENGTH))) // Agi Stats
+                {
+                    caster->CastSpell(caster, Synapse_Springs_Spells_AGI, true, NULL);
+                }
+                else
+                    if(caster->GetStat(STAT_STRENGTH) > std::max(caster->GetStat(STAT_INTELLECT),caster->GetStat(STAT_AGILITY))) // Strengh Stats
+                    {
+                        caster->CastSpell(caster, Synapse_Springs_Spells_STR, true, NULL);
+                    }
+        }
+
+        void Register()
+        {
+            OnEffectHit += SpellEffectFn(spell_item_Synapse_Springs_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_item_Synapse_Springs_SpellScript();
+    }
+};
+
+// http://cata.openwow.com/spell=82627
+// http://www.wowhead.com/spell=84427#comments Bad side Effect
+enum Grounded_Plasma_Shield_Spells
+{
+    SPELL_Grounded_Plasma_Shield_SUCESS = 82627, // Proc 18k absorb
+    SPELL_Reversed_Shield              = 82406, // Debuff Side Effect 1
+    //TODO
+    SPELL_Magnetized                   = 82403, // Debuff Side Effect 2
+    SPELL_Painful_Shock                = 82407, // Debuff Side Effect 3 Active le buff 4
+    SPELL_Plasma_Misfire               = 94549, // Debuff Side Effect 4
+};
+
+class Grounded_Plasma_Shield : public SpellScriptLoader
+{
+public:
+    Grounded_Plasma_Shield() : SpellScriptLoader("Grounded_Plasma_Shield") { }
+
+    class Grounded_Plasma_Shield_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(Grounded_Plasma_Shield_SpellScript);
+
+        bool Load()
+        {
+            if (GetCastItem())
+                return false;
+            return true;
+        }
+
+        bool Validate(SpellInfo const* /*spell*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_Grounded_Plasma_Shield_SUCESS) || !sSpellMgr->GetSpellInfo(SPELL_Reversed_Shield) || !sSpellMgr->GetSpellInfo(SPELL_Magnetized) || !sSpellMgr->GetSpellInfo(SPELL_Painful_Shock))
+                return false;
+            return true;
+        }
+
+        void HandleDummy(SpellEffIndex /* effIndex */)
+        {
+            Unit* caster = GetCaster();
+            //Need more random 1/4 bad sideeffect spells
+            caster->CastSpell(caster, roll_chance_i(95) ? SPELL_Grounded_Plasma_Shield_SUCESS : SPELL_Reversed_Shield, true, GetCastItem());
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(Grounded_Plasma_Shield_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new Grounded_Plasma_Shield_SpellScript();
+    }
+};
+
 void AddSC_item_spell_scripts()
 {
     // 23074 Arcanite Dragonling
@@ -2571,4 +2736,8 @@ void AddSC_item_spell_scripts()
     new spell_item_muisek_vessel();
     new spell_item_greatmothers_soulcatcher();
     new spell_item_healthstone();
+    
+    new spell_item_flask_of_Enhancement(); // Spell - 79637
+	new spell_item_Synapse_Springs(); // Spell - 82174
+	new Grounded_Plasma_Shield(); // Spell - 82626
 }
