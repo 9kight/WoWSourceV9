@@ -2,7 +2,7 @@
 #include "Chat.h"
 #include "World.h"
 #include "Player.h"
-#include "unit.h"
+#include "Unit.h"
 #include "Util.h"
 #include "WorldSession.h"
 #include "Language.h"
