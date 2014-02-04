@@ -854,7 +854,7 @@ void ObjectMgr::CheckCreatureTemplate(CreatureTemplate const* cInfo)
         const_cast<CreatureTemplate*>(cInfo)->MovementType = IDLE_MOTION_TYPE;
     }
 
-    if (cInfo->equipmentId <= 0)                          // 0 no equipment
+    if (cInfo->equipmentId != 0)                          // 0 no equipment
     {
         if (!GetEquipmentInfo(cInfo->equipmentId))
         {
@@ -1598,7 +1598,7 @@ void ObjectMgr::LoadCreatures()
             continue;
 
         // -1 no equipment, 0 use default
-        if (data.equipmentId <= 0)
+        if (data.equipmentId != 0)
         {
             if (!GetEquipmentInfo(data.equipmentId))
             {
