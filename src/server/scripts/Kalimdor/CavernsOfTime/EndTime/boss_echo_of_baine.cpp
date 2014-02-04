@@ -49,7 +49,7 @@ enum Spells
     SPELL_MOLTEN_AXE  = 101836, // Extra damage on melee attack, change targets from caster to target. When he falls into lava after Pulverize.
     SPELL_MOLTEN_FIST = 101866, // Extra dmg on melee for players when they touch the lava, they get this when baine gets Molten Axe.
 
-    SPELL_TB_TOTEM    = 101602, // Throw totem back at Baine on click.
+    SPELL_TB_TOTEM    = 101603, // Throw totem back at Baine on click.
     SPELL_TB_TOTEM_A  = 107837, // Visual aura: player has totem to throw.
 };
 
@@ -62,13 +62,16 @@ enum Events
 
 enum Creatures
 {
-    NPC_ROCK_ISLAND = 54496,
-    NPC_WALL_OF_FLAME = 203006,
+    NPC_ROCK_ISLAND      = 54496,
+    NPC_WALL_OF_FLAME    = 203006,
+    NPC_PUL_LOCATION     = 70024,
+    NPC_BAINE            = 54431,
 };
 
 #define SAY_INTRO_CHAT "What dark horrors have you wrought in this place? By my ancestors' honor. I shall take you to task!"
 #define SAY_LAVA_CHAT "My wrath knows no bounds!"
 #define SAY_LAVA2_CHAT "There will be no escape!"
+#define SAY_TEST "TEST"
 #define SAY_DIE_CHAT "Where... is this place? What... have i done? Forgive me, my father..."
 
 class boss_echo_of_baine : public CreatureScript
@@ -106,20 +109,19 @@ class boss_echo_of_baine : public CreatureScript
                 }
 
                 if(GameObject* platform = me->FindNearestGameObject(209693, 500.0f))
-                    platform->SetDestructibleState(GO_DESTRUCTIBLE_REBUILDING);    
+                    platform->SetDestructibleState(GO_DESTRUCTIBLE_REBUILDING);
                 else if(GameObject* platform = me->FindNearestGameObject(209694, 500.0f))
-                    platform->SetDestructibleState(GO_DESTRUCTIBLE_REBUILDING);  
+                    platform->SetDestructibleState(GO_DESTRUCTIBLE_REBUILDING);
                 else if(GameObject* platform = me->FindNearestGameObject(209695, 500.0f))
-                    platform->SetDestructibleState(GO_DESTRUCTIBLE_REBUILDING);  
+                    platform->SetDestructibleState(GO_DESTRUCTIBLE_REBUILDING);
                 else if(GameObject* platform = me->FindNearestGameObject(209670, 500.0f))
-                    platform->SetDestructibleState(GO_DESTRUCTIBLE_REBUILDING);  
+                    platform->SetDestructibleState(GO_DESTRUCTIBLE_REBUILDING);
 
                 std::list<Creature*> creatures;
                 GetCreatureListWithEntryInGrid(creatures, me, 54434, 1000.0f);
                 if (!creatures.empty())
                     for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
                          (*iter)->DespawnOrUnsummon();
-
 
                 if (!me->HasAura(SPELL_BAINE_VIS))
                     DoCast(me, SPELL_BAINE_VIS);
@@ -195,8 +197,8 @@ class boss_echo_of_baine : public CreatureScript
                     instance->HandleGameObject(4002, false);
                 }
 
-                events.ScheduleEvent(EVENT_PULVERIZE, 40000);
-                events.ScheduleEvent(EVENT_THROW_TOTEM, 25000);
+                events.ScheduleEvent(EVENT_PULVERIZE, 30000);
+                events.ScheduleEvent(EVENT_THROW_TOTEM, 10000);
             }
 
             void UpdateAI(const uint32 diff)
@@ -212,12 +214,12 @@ class boss_echo_of_baine : public CreatureScript
                 if (me->IsInWater() && !me->HasAura(SPELL_MOLTEN_AXE))
                     DoCast(me, SPELL_MOLTEN_AXE);
 
-                Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();    
+                Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
                 if (!PlayerList.isEmpty())
-                  for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                    if (Player* playr = i->getSource())
-                        if (playr->IsInWater() && !playr->HasAura(SPELL_MOLTEN_FIST))
-                            playr->AddAura(SPELL_MOLTEN_FIST, playr); // Add the damage aura to players in Magma.
+                    for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                        if (Player* playr = i->getSource())
+                            if (playr->IsInWater() && !playr->HasAura(SPELL_MOLTEN_FIST))
+                                playr->AddAura(SPELL_MOLTEN_FIST, playr); // Add the damage aura to players in Magma.
 
                 events.Update(diff);
 
@@ -227,36 +229,36 @@ class boss_echo_of_baine : public CreatureScript
                     {
                         case EVENT_PULVERIZE_DAMAGE:
                             if(GameObject* platform = me->FindNearestGameObject(209693, 10.0f))
-                                platform->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);    
+                                platform->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
                             else if(GameObject* platform = me->FindNearestGameObject(209694, 10.0f))
-                                platform->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);  
+                                platform->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
                             else if(GameObject* platform = me->FindNearestGameObject(209695, 10.0f))
-                                platform->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);  
+                                platform->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
                             else if(GameObject* platform = me->FindNearestGameObject(209670, 10.0f))
-                                platform->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);  
-
-                            DoCast(me, SPELL_PULVERIZE_D);
+                                platform->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
+                            if (Creature * target = me->FindNearestCreature(NPC_PUL_LOCATION, 100.0f))
+                                DoCast(target, SPELL_PULVERIZE_D);
                             break;
 
                         case EVENT_THROW_TOTEM:
                             Talk(SAY_THROW_TOTEM);
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true)) // SELECT_TARGET_RANDOM, 0, urand(10.0f, 100.0f), true)
+                            {
                                 DoCast(target, SPELL_THROW_TOTEM);
+                            }
                             events.ScheduleEvent(EVENT_THROW_TOTEM, 25000); // every 25 secs.
                             break;
 
                         case EVENT_PULVERIZE:
-                            me->MonsterYell(urand(0,1) == 1 ? SAY_LAVA_CHAT : SAY_LAVA2_CHAT,0,0); 
+                            me->MonsterYell(urand(0,1) == 1 ? SAY_LAVA_CHAT : SAY_LAVA2_CHAT,0,0);
                             Talk(SAY_PULVERIZE);
 
-                            if (Unit* target = SelectTarget(SELECT_TARGET_FARTHEST, 0, 250.0f, true))
+                            if (Creature * target = me->FindNearestCreature(NPC_PUL_LOCATION, 250.0f))
                             {
-                                me->CastSpell(target,SPELL_PULVERIZE_J,true);
                                 me->CastSpell(target,SPELL_PULV_DBM,true);
                             }
 
                             events.ScheduleEvent(EVENT_PULVERIZE, 40000); // every 40 secs.
-
                             events.ScheduleEvent(EVENT_PULVERIZE_DAMAGE, 3000); // You have 3 secs to run.
                             break;
                     }
@@ -272,7 +274,45 @@ class boss_echo_of_baine : public CreatureScript
         }
 };
 
+class baint_totem : public CreatureScript
+{
+    public:
+        baint_totem() : CreatureScript("baint_totem") { }
+
+        struct baint_totemAI : public ScriptedAI
+        {
+            baint_totemAI(Creature* creature) : ScriptedAI(creature) { }
+            bool totem;
+
+            void Reset()
+            {
+                totem = true;
+            }
+
+            void DamageTaken(Unit* /*attacker*/, uint32& damage)
+            {
+                me->setFaction(2110);
+                if (Creature * boss = me->FindNearestCreature(NPC_BAINE, 300.0f))
+                    if (totem)
+                    {
+                        DoCast(boss, SPELL_TB_TOTEM);
+                        me->DespawnOrUnsummon(1000);
+                        totem = false;
+                    }
+            }
+
+            private:
+                EventMap events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new baint_totemAI(creature);
+        }
+};
+
 void AddSC_boss_echo_of_baine()
 {
     new boss_echo_of_baine();
+    new baint_totem();
 }

@@ -62,6 +62,36 @@ enum WarriorSpellIcons
     WARRIOR_ICON_ID_SUDDEN_DEATH                    = 1989,
 };
 
+/// Heroic Strike
+/// Spell Id: 78
+class spell_warr_heroic_strike : public SpellScriptLoader
+{
+ public:
+        spell_warr_heroic_strike() : SpellScriptLoader("spell_warr_heroic_strike") { }
+
+        class spell_warr_heroic_strike_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warr_heroic_strike_SpellScript);
+
+            void CalculateDamage(SpellEffIndex /*effect*/)
+            {
+                // Formula: 8 + AttackPower * 60 / 100
+                if (Unit* caster = GetCaster())
+                        SetHitDamage(int32(8 + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.6f));
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_warr_heroic_strike::spell_warr_heroic_strike_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_warr_heroic_strike_SpellScript();
+        }
+};
+
 /// Bloodthirst
 /// Spell Id: 23881
  class spell_warr_bloodthirst : public SpellScriptLoader
@@ -69,8 +99,8 @@ enum WarriorSpellIcons
     public:
         spell_warr_bloodthirst() : SpellScriptLoader("spell_warr_bloodthirst") { }
  
-         class spell_warr_bloodthirst_SpellScript : public SpellScript
-         {
+        class spell_warr_bloodthirst_SpellScript : public SpellScript
+        {
             PrepareSpellScript(spell_warr_bloodthirst_SpellScript);
  
             void CalculateDamage(SpellEffIndex /*effect*/)
@@ -90,10 +120,10 @@ enum WarriorSpellIcons
             }
         };
 
-         SpellScript* GetSpellScript() const
-         {
+        SpellScript* GetSpellScript() const
+        {
             return new spell_warr_bloodthirst_SpellScript();
-         }
+        }
 };
 
 /// Updated 4.3.4
@@ -272,7 +302,7 @@ class spell_warr_execute : public SpellScriptLoader
                 Unit* caster = GetCaster();
                 if (GetHitUnit())
                 {
-                    int32 damage = GetHitDamage();
+                    int32 damage = GetEffectValue();
                     int32 const maxRageAdd = GetSpellInfo()->Effects[EFFECT_1].BasePoints * 10;
                     int32 const rage = caster->GetPower(POWER_RAGE);
                     int32 const power = std::min(rage, maxRageAdd);
@@ -297,6 +327,36 @@ class spell_warr_execute : public SpellScriptLoader
         SpellScript* GetSpellScript() const
         {
             return new spell_warr_execute_SpellScript();
+        }
+};
+
+/// Cleave - 845
+/// Updated 4.3.4
+class spell_warr_cleave : public SpellScriptLoader
+{
+    public:
+        spell_warr_cleave() : SpellScriptLoader("spell_warr_cleave") { }
+
+        class spell_warr_cleave_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warr_cleave_SpellScript);
+
+            void CalculateDamage(SpellEffIndex /*effect*/)
+            {
+                // Formula: 6 + AttackPower * 0.45
+                if (Unit* caster = GetCaster())
+                    SetHitDamage(int32(6 + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.45f));
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_warr_cleave::spell_warr_cleave_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_warr_cleave_SpellScript();
         }
 };
 
@@ -1102,12 +1162,14 @@ public:
 
 void AddSC_warrior_spell_scripts()
 {
+    new spell_warr_heroic_strike();
     new spell_warr_bloodthirst();
     new spell_warr_charge();
     new spell_warr_concussion_blow();
     new spell_warr_deep_wounds();
     new spell_warr_execute();
     new spell_warr_improved_spell_reflection();
+    new spell_warr_cleave();
     new spell_warr_intimidating_shout();
     new spell_warr_last_stand();
     new spell_warr_overpower();

@@ -77,7 +77,12 @@ enum MageSpells
     SPELL_MAGE_RITUAL_OF_REFRESHMENT_R2          = 92824,
     SPELL_MAGE_RITUAL_OF_REFRESHMENT_R3          = 92827,
 
-    SPELL_MAGE_FINGERS_OF_FROST                  = 44544
+    SPELL_MAGE_FINGERS_OF_FROST                  = 44544,
+    
+    SPELL_MAGE_GLYPH_OF_MIRROR_IMAGE             = 63093,
+    SPELL_MAGE_SUMMON_IMAGES_FROST               = 58832,
+    SPELL_MAGE_SUMMON_IMAGES_FIRE                = 88092,
+    SPELL_MAGE_SUMMON_IMAGES_ARCANE              = 88091,
 };
 
 enum MageIcons
@@ -373,6 +378,14 @@ class spell_mage_orb_filter : public SpellScriptLoader
                         else
                             caster->CastSpell(target, 95969, true, NULL, NULL, caster->GetOwnerGUID());
                     }
+                    // (Hack Fix) Checking if target is in range and camoufled, then remove camoufled aura.
+                    if (target->HasAura(1784))
+                        target->RemoveAura(1784);
+                    if (target->HasAura(5215))
+                        target->RemoveAura(5215);
+                    if(target->HasAura(32612))
+                        target->RemoveAura(32612);
+
                     caster->AddSpellCooldown(GetSpellInfo()->Id, 0, time(NULL) + GetSpellInfo()->Effects[EFFECT_0].BasePoints / 1000);
                     caster->CastSpell(target, 86719, true);
                     if (!caster->HasAura(82736))
@@ -448,7 +461,14 @@ class spell_mage_pyromaniac : public SpellScriptLoader
         {
             PrepareAuraScript(spell_mage_pyromaniac_AuraScript);
 
-            void AfterRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+            bool isFireDot(uint32 auraId)
+            {
+                return auraId == 44457
+                || auraId == 12654
+                || auraId == 92315; // Pyroblast + Hot Strake Effect.
+            }
+
+            void AfterRemove(AuraEffect const* aurEff, AuraEffectHandleModes mode)
             {
                 if (Unit* caster = GetCaster())
                 {
@@ -474,7 +494,7 @@ class spell_mage_pyromaniac : public SpellScriptLoader
                 }
             }
 
-            void AfterApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+            void AfterApply(AuraEffect const* aurEff, AuraEffectHandleModes mode)
             {
                 if (Unit* caster = GetCaster())
                 {
@@ -506,16 +526,9 @@ class spell_mage_pyromaniac : public SpellScriptLoader
                 }
             }
 
-            bool isFireDot(uint32 auraId)
-            {
-                return auraId == 44457 || auraId == 12654 || auraId == 11366;
-            }
-
             void Register()
             {
-                AfterEffectApply += AuraEffectApplyFn(spell_mage_pyromaniac_AuraScript::AfterApply, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
                 AfterEffectApply += AuraEffectApplyFn(spell_mage_pyromaniac_AuraScript::AfterApply, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
-                AfterEffectRemove += AuraEffectRemoveFn(spell_mage_pyromaniac_AuraScript::AfterRemove, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
                 AfterEffectRemove += AuraEffectRemoveFn(spell_mage_pyromaniac_AuraScript::AfterRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
             }
         };
@@ -1701,6 +1714,79 @@ public:
     {
         return new spell_mage_pet_scaling_05_AuraScript();
     }
+};
+
+// 55342 - Mirror Image
+/// Updated 4.3.4
+class spell_mage_mirror_image : public SpellScriptLoader
+{
+    public:
+        spell_mage_mirror_image() : SpellScriptLoader("spell_mage_mirror_image") { }
+
+        class spell_mage_mirror_image_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_mage_mirror_image_SpellScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_GLYPH_OF_MIRROR_IMAGE) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_MAGE_SUMMON_IMAGES_ARCANE) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_MAGE_SUMMON_IMAGES_FIRE) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_MAGE_SUMMON_IMAGES_FROST))
+                    return false;
+                return true;
+            }
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                Unit* caster = GetCaster();
+
+                uint32 spellId = SPELL_MAGE_SUMMON_IMAGES_FROST;
+
+                if (Player* player = caster->ToPlayer())
+                {
+                    bool hasGlyph = false;
+
+                    for (uint32 i = 0; i < MAX_GLYPH_SLOT_INDEX; ++i)
+                        if (uint32 glyphId = player->GetGlyph(player->GetActiveSpec(), i))
+                            if (GlyphPropertiesEntry const* glyph = sGlyphPropertiesStore.LookupEntry(glyphId))
+                                if (glyph->SpellId == SPELL_MAGE_GLYPH_OF_MIRROR_IMAGE)
+                                {
+                                    hasGlyph = true;
+                                    break;
+                                }
+
+                    if (hasGlyph)
+                    {
+                        switch (player->GetPrimaryTalentTree(player->GetActiveSpec()))
+                        {
+
+                            case TALENT_TREE_MAGE_ARCANE:
+                                spellId = SPELL_MAGE_SUMMON_IMAGES_ARCANE;
+                                break;
+                            case TALENT_TREE_MAGE_FIRE:
+                                spellId = SPELL_MAGE_SUMMON_IMAGES_FIRE;
+                                break;
+                            case TALENT_TREE_MAGE_FROST:
+                                spellId = SPELL_MAGE_SUMMON_IMAGES_FROST;
+                                break;
+                        }
+                    }
+                }
+
+                caster->CastSpell(caster, spellId, true);
+            }
+
+            void Register()
+            {
+                OnEffectHit += SpellEffectFn(spell_mage_mirror_image_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_mage_mirror_image_SpellScript();
+        }
 };
 
 

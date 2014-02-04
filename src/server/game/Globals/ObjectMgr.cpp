@@ -854,7 +854,7 @@ void ObjectMgr::CheckCreatureTemplate(CreatureTemplate const* cInfo)
         const_cast<CreatureTemplate*>(cInfo)->MovementType = IDLE_MOTION_TYPE;
     }
 
-    if (cInfo->equipmentId > 0)                          // 0 no equipment
+    if (cInfo->equipmentId <= 0)                          // 0 no equipment
     {
         if (!GetEquipmentInfo(cInfo->equipmentId))
         {
@@ -1598,7 +1598,7 @@ void ObjectMgr::LoadCreatures()
             continue;
 
         // -1 no equipment, 0 use default
-        if (data.equipmentId > 0)
+        if (data.equipmentId <= 0)
         {
             if (!GetEquipmentInfo(data.equipmentId))
             {
@@ -6956,18 +6956,18 @@ void ObjectMgr::LoadRewardOnKill()
         uint32 creature_id = fields[0].GetUInt32();
 
         RewardOnKillEntry rewOnKill;
-        rewOnKill.RepFaction1          = fields[1].GetUInt32();
-        rewOnKill.RepFaction2          = fields[2].GetUInt32();
+        rewOnKill.RepFaction1          = fields[1].GetInt16();
+        rewOnKill.RepFaction2          = fields[2].GetInt16();
         rewOnKill.IsTeamAward1         = fields[3].GetBool();
-        rewOnKill.ReputationMaxCap1    = fields[4].GetUInt32();
+        rewOnKill.ReputationMaxCap1    = fields[4].GetInt8();
         rewOnKill.RepValue1            = fields[5].GetInt32();
         rewOnKill.IsTeamAward2         = fields[6].GetBool();
-        rewOnKill.ReputationMaxCap2    = fields[7].GetUInt32();
+        rewOnKill.ReputationMaxCap2    = fields[7].GetInt8();
         rewOnKill.RepValue2            = fields[8].GetInt32();
         rewOnKill.TeamDependent        = fields[9].GetUInt8();
-        rewOnKill.CurrencyId1          = fields[10].GetUInt32();
-        rewOnKill.CurrencyId2          = fields[11].GetUInt32();
-        rewOnKill.CurrencyId3          = fields[12].GetUInt32();
+        rewOnKill.CurrencyId1          = fields[10].GetUInt16();
+        rewOnKill.CurrencyId2          = fields[11].GetUInt16();
+        rewOnKill.CurrencyId3          = fields[12].GetUInt16();
         rewOnKill.CurrencyCount1       = fields[13].GetInt32();
         rewOnKill.CurrencyCount2       = fields[14].GetInt32();
         rewOnKill.CurrencyCount3       = fields[15].GetInt32();

@@ -416,11 +416,11 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                 if (m_spellInfo->Id == 34428)
                     ApplyPct(damage, m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.45f);
                 // Heroic Strike
-                else if (m_spellInfo->Id == 78)
-                    ApplyPct(damage, 8 + m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 60);
+                //else if (m_spellInfo->Id == 78)
+                //    ApplyPct(damage, 8 + m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.6f);
                 // Cleave
-                else if (m_spellInfo->Id == 845)
-                    ApplyPct(damage, 6 + m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.45);
+                //else if (m_spellInfo->Id == 845)
+                //    ApplyPct(damage, 6 + m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.45f);
                 // Shockwave
                 else if (m_spellInfo->Id == 46968)
                 {
@@ -2916,7 +2916,7 @@ void Spell::EffectSummonPet(SpellEffIndex effIndex)
 
     if (oldPet && owner->GetTypeId() == TYPEID_PLAYER)
         owner->ToPlayer()->RemovePet(oldPet, (oldPet->getPetType() == HUNTER_PET ? PET_SLOT_DELETED : PET_SLOT_NOT_IN_SLOT));
-    
+
     if (owner->getClass() == CLASS_HUNTER && m_spellInfo->SpellIconID == 455)
     {
         Pet* pet = new Pet(owner);
@@ -4739,7 +4739,6 @@ void Spell::EffectRaidMarker(SpellEffIndex effIndex)
     Position pos;
     m_targets.GetDstPos()->GetPosition(&pos);
 
-    
     switch(m_spellInfo->Id)
     {
         case 84996:  //RaidMarker 1
@@ -4757,9 +4756,9 @@ void Spell::EffectRaidMarker(SpellEffIndex effIndex)
         case 85000:  //RaidMarker 5
             group->SetMarker(5,pos,m_caster,GetSpellInfo());
             break;
-        default:            
+        default:
             break;
-    }    
+    }
 }
 
 void Spell::EffectResurrect(SpellEffIndex effIndex)
