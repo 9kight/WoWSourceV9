@@ -197,9 +197,6 @@ const float walkRiplimbAngle = 6;
 // If the Distance between Shannox & Dogs > This Value, all 3 get the Seperation Buff
 const float maxDistanceBetweenShannoxAndDogs = 110;
 
-// The equipment Template of Shannox Spear
-const int ShannoxSpearEquipmentTemplate = 53691;
-
 /**** Shannox ****/
 class boss_shannox: public CreatureScript
 {
@@ -306,7 +303,7 @@ class boss_shannox: public CreatureScript
                     else
                         me->SummonCreature(NPC_RAGEFACE, me->GetPositionX() + 5, me->GetPositionY() + 5, me->GetPositionZ(), TEMPSUMMON_MANUAL_DESPAWN);
 
-                    me->LoadEquipment(ShannoxSpearEquipmentTemplate);
+                    me->LoadEquipment(1, true);
 
                     _Reset();
                 }
@@ -506,7 +503,7 @@ class boss_shannox: public CreatureScript
                                 break;
 
                             case EVENT_DESPAWN_SPEAR:
-                                me->LoadEquipment(ShannoxSpearEquipmentTemplate);
+                                me->LoadEquipment(1, true);
                                 DespawnCreatures(NPC_SHANNOX_SPEAR, 5000.0f);
                                 break;
 
@@ -589,7 +586,7 @@ class boss_shannox: public CreatureScript
                     if (uiPhase == PHASE_RIPLIMB_BRINGS_SPEER && GetRiplimb() && GetRiplimb()->GetDistance(me) <= 1)
                     {
                         uiPhase = PHASE_SHANNOX_HAS_SPEER;
-                        me->LoadEquipment(ShannoxSpearEquipmentTemplate);
+                        me->LoadEquipment(1, true);
 
                         DespawnCreatures(NPC_SHANNOX_SPEAR, 5000.0f);
 

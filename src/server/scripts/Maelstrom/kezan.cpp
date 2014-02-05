@@ -73,7 +73,7 @@ public:
         {
             if (id == 1)
                 work = true;
-            me->LoadEquipment(2901);
+            //me->LoadEquipment(2901, true);
         }
 
         void JustReachedHome() { }

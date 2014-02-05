@@ -236,23 +236,23 @@ public:
             {
             case 6:
                 me->MonsterSay("We touch the jackpot with this place!", LANG_UNIVERSAL, 0);
-                me->LoadEquipment(2901);
+                //me->LoadEquipment(2901, true);
                 me->HandleEmoteCommand(467);
                 break;
             case 9:
                 me->MonsterSay("Wow, what is that all these cave paintings? Oh, I hear monkeys, the?", LANG_UNIVERSAL, 0);
-                me->LoadEquipment(2901);
+                //me->LoadEquipment(2901, true);
                 me->HandleEmoteCommand(467);
                 break;
             case 13:
                 me->MonsterSay("Move to the next.", LANG_UNIVERSAL, 0);
                 break;
             case 12:
-                me->LoadEquipment(2901);
+                //me->LoadEquipment(2901, true);
                 me->HandleEmoteCommand(467);
                 break;
             case 17:
-                me->LoadEquipment(2901);
+                //me->LoadEquipment(2901, true);
                 me->HandleEmoteCommand(467);
                 break;
             case 18:

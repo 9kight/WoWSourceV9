@@ -499,9 +499,8 @@ public:
             cInfo->questItems[5]      = fields[80].GetUInt32();
             cInfo->movementId         = fields[81].GetUInt32();
             cInfo->RegenHealth        = fields[82].GetBool();
-            cInfo->equipmentId        = fields[83].GetUInt32();
-            cInfo->MechanicImmuneMask = fields[84].GetUInt32();
-            cInfo->flags_extra        = fields[85].GetUInt32();
+            cInfo->MechanicImmuneMask = fields[83].GetUInt32();
+            cInfo->flags_extra        = fields[84].GetUInt32();
             cInfo->ScriptID           = sObjectMgr->GetScriptId(fields[86].GetCString());
 
             sObjectMgr->CheckCreatureTemplate(cInfo);

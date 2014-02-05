@@ -1076,7 +1076,7 @@ enum TrinityStrings
 	LANG_NPCINFO_EQUIPMENT              = 5036,
 	LANG_NPCINFO_MECHANIC_IMMUNE        = 5037,
 	LANG_NPCINFO_UNIT_FIELD_FLAGS       = 5038,
-    // Room for more Trinity strings      5036-9999
+    // Room for more Trinity strings      5037-9999
 
     // Level requirement notifications
     LANG_SAY_REQ                        = 6604,
