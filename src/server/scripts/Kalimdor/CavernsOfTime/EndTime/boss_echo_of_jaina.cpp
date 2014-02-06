@@ -181,7 +181,7 @@ class boss_echo_of_jaina : public CreatureScript
             void EnterCombat(Unit* /*who*/)
             {
                 Talk(RAND(SAY_AGGRO_1, SAY_AGGRO_2));
-
+				
                 if (Creature* blink = me->FindNearestCreature(NPC_BLINK_TARGT, 200.0f, true))
                     blink->GetMotionMaster()->MoveFollow(me, 15.0f, 15.0f);
                 else
@@ -193,7 +193,7 @@ class boss_echo_of_jaina : public CreatureScript
                     instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me); // Add
                 }
 
-                events.ScheduleEvent(EVENT_PYROBLAST, 3500);
+                events.ScheduleEvent(EVENT_PYROBLAST, 500);
                 events.ScheduleEvent(EVENT_BLINK, urand(20000, 25000));
                 events.ScheduleEvent(EVENT_FLARECORE, urand(14000, 17000));
             }
@@ -299,14 +299,14 @@ class npc_flarecore : public CreatureScript
             {
                 if (!me->HasAura(SPELL_CHECK_PLAYER_DIST))
                     me->AddAura(SPELL_CHECK_PLAYER_DIST, me);
+					events.ScheduleEvent(EVENT_CHECK_PLAYER, 500);
+					events.ScheduleEvent(EVENT_EXPLODE, 10000);
             }
-
+			
+			
             void EnterCombat(Unit* /*who*/)
             {
                 me->SetReactState(REACT_PASSIVE);
-
-                events.ScheduleEvent(EVENT_CHECK_PLAYER, 500);
-                events.ScheduleEvent(EVENT_EXPLODE, 10000);
             }
 
             void UpdateAI(uint32 const diff)
@@ -330,9 +330,9 @@ class npc_flarecore : public CreatureScript
                         break;
 
                         case EVENT_EXPLODE:
-                        DoCast(me, SPELL_TIME_EXPIRE_FLARE);
-                        me->DespawnOrUnsummon();
-                        break;
+							DoCast(me, SPELL_TIME_EXPIRE_FLARE);
+							me->DespawnOrUnsummon(500);
+							break;
                     }
                 }
             }
@@ -356,11 +356,15 @@ class jaina_frost_blades : public CreatureScript
                 instance = me->GetInstanceScript();
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                 me->SetReactState(REACT_PASSIVE);
-                me->AddAura(SPELL_FROST_BLADES_STUN,me);
             }
 
             InstanceScript* instance;
-
+			
+			void Reset ()
+			{
+				DoCast(me, SPELL_FROST_BLADES_STUN);
+			}
+			
             void UpdateAI(uint32 const diff)
             {
                 float x, y, z;
