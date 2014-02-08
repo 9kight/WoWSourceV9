@@ -25,8 +25,9 @@
 #include "Map.h"
 #include "InstanceScript.h"
 
-enum Yells
+enum Creatures
 {
+	NPC_DARK_MOONLIGHT     = 70021,
 };
 
 enum Spells
@@ -53,7 +54,13 @@ enum Events
     EVENT_GUIDANCE,
     EVENT_TEARS,
     EVENT_TEARS_FALL,
+	EVENT_FALL,
     EVENT_EYE_ELUNE,
+};
+
+enum Actions
+{
+	ACTION_TEAR       = 1,
 };
 
 Position const PoolPositions[5] =
@@ -86,7 +93,6 @@ class boss_echo_of_tyrande : public CreatureScript
             boss_echo_of_tyrandeAI(Creature* creature) : BossAI(creature, BOSS_ECHO_OF_TYRANDE)
             {
                 instance = me->GetInstanceScript();
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
             }
 
             InstanceScript* instance;
@@ -108,6 +114,8 @@ class boss_echo_of_tyrande : public CreatureScript
             {
                 if (Creature * pool = me->FindNearestCreature(45979, 20.0f))
                     pool->DespawnOrUnsummon();
+				if (Creature * pool = me->FindNearestCreature(NPC_DARK_MOONLIGHT, 20.0f))
+                    pool->DespawnOrUnsummon();
 
                 if (instance)
                     instance->SetData(DATA_TYRANDE, DONE);
@@ -117,7 +125,7 @@ class boss_echo_of_tyrande : public CreatureScript
             {
                 if (instance)
                     instance->SetBossState(BOSS_ECHO_OF_TYRANDE, IN_PROGRESS);
-
+				me->SummonCreature(NPC_DARK_MOONLIGHT,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ());
                 events.ScheduleEvent(EVENT_MOONBOLT, 2000);
             }
 
@@ -162,10 +170,11 @@ class boss_echo_of_tyrande : public CreatureScript
                             events.ScheduleEvent(EVENT_TEARS_FALL, 6000);
                             break;
                         case EVENT_TEARS_FALL:
-                            if (Creature * pool = me->FindNearestCreature(45979, 20.0f))
-                                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f))
-                                    pool->CastSpell(target,SPELL_TEARS_OF_ELUNE_FALL,true);
-                            events.ScheduleEvent(EVENT_TEARS_FALL, 1000);
+                            if(Creature * dark = me->FindNearestCreature(NPC_DARK_MOONLIGHT, 100.0f))
+							{
+								dark->AI()->DoAction(ACTION_TEAR);
+							}
+							events.ScheduleEvent(NextEvent(EVENT_MOONBOLT), 2500);
                             break;
                         case EVENT_EYE_ELUNE:
                             DoCast(me,SPELL_EYES_SUMMON);
@@ -345,9 +354,50 @@ class dark_moonlight : public CreatureScript
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                 DoCast(me,SPELL_DARK_MOONLIGHT);
             }
+	
+			void DoAction(int32 action)  
+			{	
+				switch (action)
+				{
+					case ACTION_TEAR:
+						events.ScheduleEvent(EVENT_FALL, 1000);
+						break;
+					default:
+						break;
+				}
+			}
+			
+			void UpdateAI(uint32 diff)  
+            {
+                if (!UpdateVictim())
+                    return;
 
-            InstanceScript* instance;
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+					switch (eventId)
+                    {
+                        case EVENT_FALL:
+							DoCast(me,SPELL_TEARS_OF_ELUNE_FALL);
+							events.ScheduleEvent(EVENT_FALL, 1000);
+                            break;
+							
+                        default:
+                            break;
+                    }
+				}
+			}
+
+			
+			InstanceScript* instance;
+			
+			private:
+				EventMap events;
+            
         };
+		
+		
 
         CreatureAI* GetAI(Creature* creature) const
         {
