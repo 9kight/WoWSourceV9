@@ -181,7 +181,7 @@ class boss_echo_of_jaina : public CreatureScript
             void EnterCombat(Unit* /*who*/)
             {
                 Talk(RAND(SAY_AGGRO_1, SAY_AGGRO_2));
-				
+
                 if (Creature* blink = me->FindNearestCreature(NPC_BLINK_TARGT, 200.0f, true))
                     blink->GetMotionMaster()->MoveFollow(me, 15.0f, 15.0f);
                 else

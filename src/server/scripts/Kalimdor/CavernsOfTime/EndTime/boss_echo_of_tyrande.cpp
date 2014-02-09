@@ -355,19 +355,19 @@ class dark_moonlight : public CreatureScript
                 DoCast(me,SPELL_DARK_MOONLIGHT);
             }
 
-			void DoAction(int32 action)  
-			{	
-				switch (action)
-				{
+            void DoAction(int32 action)  
+            {
+                switch (action)
+                {
                     case ACTION_TEAR:
                         events.ScheduleEvent(EVENT_FALL, 1000);
                         break;
                     default:
                         break;
-				}
-			}
+                }
+            }
 
-			void UpdateAI(uint32 diff)  
+            void UpdateAI(uint32 diff)  
             {
                 if (!UpdateVictim())
                     return;
@@ -385,8 +385,8 @@ class dark_moonlight : public CreatureScript
                         default:
                             break;
                     }
-				}
-			}
+                }
+            }
 
             InstanceScript* instance;
 

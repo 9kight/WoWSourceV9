@@ -10089,7 +10089,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
                 data << uint32(4882) << uint32(0);              // 10 WORLD_STATE_HOR_WAVE_COUNT
             }
             break;
-			
+
             // No break here, intended.
         default:
             data << uint32(0x914) << uint32(0x0);           // 7
