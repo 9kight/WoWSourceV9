@@ -21930,7 +21930,7 @@ bool Player::BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uin
         return false;
     }
 
-    if (count % crItem->maxcount)
+    if (count && crItem->maxcount && count % crItem->maxcount != 0)
     {
         SendEquipError(EQUIP_ERR_CANT_BUY_QUANTITY, NULL, NULL);
         return false;
@@ -26858,7 +26858,7 @@ void Player::_LoadPets(SQLQueryHolder *holder)
                 m_Stables[guid]->m_learnSpells.push_back(t_spell);
             }
             else
-                sLog->outError(LOG_FILTER_PLAYER, "Loading PetSpells (GUID: %u) Pet doesn´t exist on PlayerSlots Clean Up?.", guid);
+                sLog->outError(LOG_FILTER_PLAYER, "Loading PetSpells (GUID: %u) Pet doesnÕ´ exist on PlayerSlots Clean Up?.", guid);
         }
         while (result->NextRow());
     }
@@ -26894,7 +26894,7 @@ void Player::_LoadPets(SQLQueryHolder *holder)
                 m_Stables[guid]->m_auras.push_back(t_aura);
             }
             else
-                sLog->outError(LOG_FILTER_PLAYER, "Loading PetCooldowns (GUID: %u) Pet doesn´t exist on PlayerSlots Clean Up?.", guid);
+                sLog->outError(LOG_FILTER_PLAYER, "Loading PetCooldowns (GUID: %u) Pet doesnÕ´ exist on PlayerSlots Clean Up?.", guid);
         }
         while (result->NextRow());
     }
@@ -26919,7 +26919,7 @@ void Player::_LoadPets(SQLQueryHolder *holder)
                 m_Stables[guid]->m_spellscooldown[spellid] = t_cooldown;
             }
             else
-                sLog->outError(LOG_FILTER_PLAYER, "Loading PetCooldown (GUID: %u) Pet doesn´t exist on PlayerSlots Clean Up?.", guid);
+                sLog->outError(LOG_FILTER_PLAYER, "Loading PetCooldown (GUID: %u) Pet doesnÕ´ exist on PlayerSlots Clean Up?.", guid);
         }
         while (result->NextRow());
     }
