@@ -2316,7 +2316,7 @@ class boss_alysrazor: public CreatureScript
                 {
                     instance = creature->GetInstanceScript();
 
-                    ASSERT(creature->GetVehicleKit()); // Power.
+                    //ASSERT(creature->GetVehicleKit()); // Power.
                     me->SetMaxPower(POWER_ENERGY, 100);
                     me->SetPower(POWER_ENERGY, 100);
                     phase = PHASE_NONE;

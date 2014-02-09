@@ -240,9 +240,9 @@ public:
                 sWorld->SetShutdownMessage(reasonStr);
             }
             sWorld->ShutdownServ(time, 0, SHUTDOWN_EXIT_CODE);
-         }
+        }
 
-         return true;
+        return true;
     }
 
     static bool HandleServerRestartCommand(ChatHandler* /*handler*/, char const* args)

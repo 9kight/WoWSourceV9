@@ -299,11 +299,10 @@ class npc_flarecore : public CreatureScript
             {
                 if (!me->HasAura(SPELL_CHECK_PLAYER_DIST))
                     me->AddAura(SPELL_CHECK_PLAYER_DIST, me);
-					events.ScheduleEvent(EVENT_CHECK_PLAYER, 500);
-					events.ScheduleEvent(EVENT_EXPLODE, 10000);
+                events.ScheduleEvent(EVENT_CHECK_PLAYER, 500);
+                events.ScheduleEvent(EVENT_EXPLODE, 10000);
             }
-			
-			
+
             void EnterCombat(Unit* /*who*/)
             {
                 me->SetReactState(REACT_PASSIVE);
@@ -321,18 +320,18 @@ class npc_flarecore : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_CHECK_PLAYER:
-                        if(me->FindNearestPlayer(2.0f, true))
-                        {
-                            DoCast(me, SPELL_UNSTABLE_FLARE);
-                            me->DespawnOrUnsummon();
-                        }
-                        events.ScheduleEvent(EVENT_CHECK_PLAYER, 500);
-                        break;
+                            if(me->FindNearestPlayer(2.0f, true))
+                            {
+                                DoCast(me, SPELL_UNSTABLE_FLARE);
+                                me->DespawnOrUnsummon();
+                            }
+                            events.ScheduleEvent(EVENT_CHECK_PLAYER, 500);
+                            break;
 
                         case EVENT_EXPLODE:
-							DoCast(me, SPELL_TIME_EXPIRE_FLARE);
-							me->DespawnOrUnsummon(500);
-							break;
+                            DoCast(me, SPELL_TIME_EXPIRE_FLARE);
+                            me->DespawnOrUnsummon(500);
+                            break;
                     }
                 }
             }
@@ -359,12 +358,12 @@ class jaina_frost_blades : public CreatureScript
             }
 
             InstanceScript* instance;
-			
-			void Reset ()
-			{
-				DoCast(me, SPELL_FROST_BLADES_STUN);
-			}
-			
+
+            void Reset ()
+            {
+                DoCast(me, SPELL_FROST_BLADES_STUN);
+            }
+
             void UpdateAI(uint32 const diff)
             {
                 float x, y, z;
