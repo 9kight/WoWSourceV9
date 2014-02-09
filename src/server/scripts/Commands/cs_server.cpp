@@ -205,7 +205,7 @@ public:
             return false;
 
         char* timeStr = strtok((char*) args, " ");
-        char* reason = strtok(NULL, "\r");
+        char* exitCodeStr = strtok(NULL, "");
 
         int32 time = atoi(timeStr);
 
@@ -213,9 +213,8 @@ public:
         if ((time == 0 && (timeStr[0] != '0' || timeStr[1] != '\0')) || time < 0)
             return false;
 
-        if (!handler->GetSession())
+        if (exitCodeStr)
         {
-            char* exitCodeStr = strtok(NULL, "");
             int32 exitCode = atoi(exitCodeStr);
 
             // Handle atoi() errors
@@ -231,16 +230,7 @@ public:
             sWorld->ShutdownServ(time, 0, exitCode);
         }
         else
-        {
-            if (reason != NULL)
-            {
-                std::string reasonStr = reason;
-                reasonStr = "[|cffff0000" + reasonStr + "|r]"; // PWS uses here RED
-
-                sWorld->SetShutdownMessage(reasonStr);
-            }
             sWorld->ShutdownServ(time, 0, SHUTDOWN_EXIT_CODE);
-        }
 
         return true;
     }
