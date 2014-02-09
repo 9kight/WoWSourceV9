@@ -98,7 +98,7 @@ class boss_alizabal : public CreatureScript
                 _Reset();
                 Hate = false;
                 Skewer = false;
-                instance->HandleGameObject(instance->GetData64(GO_ALIZABAL_DOOR), false); // set me to true, when we release step by step
+                //instance->HandleGameObject(instance->GetData64(GO_ALIZABAL_DOOR), false); // set me to true, when we release step by step
             }
 
             void EnterCombat(Unit* /*who*/)
