@@ -4440,15 +4440,15 @@ void Guild::GiveXP(uint32 xp, Player* source, bool challenge)
     {
         _todayExperience += xp;
 
-    if(source)
-    {
-        WorldPacket data(SMSG_GUILD_XP_GAIN, 8);
-        data << uint64(xp);
-        source->GetSession()->SendPacket(&data);
-    }
+        if(source)
+        {
+            WorldPacket data(SMSG_GUILD_XP_GAIN, 8);
+            data << uint64(xp);
+            source->GetSession()->SendPacket(&data);
 
-        if (Member *member = GetMember(source->GetGUID()))
-            member->AddActivity(xp);
+            if (Member* member = GetMember(source->GetGUID()))
+                member->AddActivity(xp);
+        }
     }
 
     if (!xp)

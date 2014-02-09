@@ -48,7 +48,7 @@ enum Spells
 
 enum Events
 {
-    EVENT_MOONBOLT = 1, 
+    EVENT_MOONBOLT = 1,
     EVENT_STARDUST,
     EVENT_MOONLANCE,
     EVENT_GUIDANCE,
@@ -146,19 +146,16 @@ class boss_echo_of_tyrande : public CreatureScript
                         case EVENT_MOONBOLT:
                             if (Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 0, 100.0f))
                                 DoCast(target, SPELL_MOONBOLT);
-
                             events.ScheduleEvent(NextEvent(EVENT_MOONBOLT), 2500);
                             break;
                         case EVENT_STARDUST:
                             DoCastAOE(SPELL_STARDUST);
-
                             events.ScheduleEvent(NextEvent(EVENT_STARDUST), 3000);
                             break;
                         case EVENT_MOONLANCE:
                             me->AttackStop();
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                                 DoCast(target,SPELL_MOONLANCE);
-
                             events.ScheduleEvent(NextEvent(EVENT_MOONLANCE), 2500);
                             break;
                         case EVENT_GUIDANCE:
@@ -180,7 +177,6 @@ class boss_echo_of_tyrande : public CreatureScript
                             DoCast(me,SPELL_EYES_SUMMON);
                             events.ScheduleEvent(NextEvent(EVENT_EYE_ELUNE), 3000);
                             break;
-
                     }
                 }
             }
@@ -347,7 +343,7 @@ class dark_moonlight : public CreatureScript
 
         struct dark_moonlightAI : public ScriptedAI
         {
-            dark_moonlightAI(Creature* creature) : ScriptedAI(creature) 
+            dark_moonlightAI(Creature* creature) : ScriptedAI(creature)
             {
                 instance = me->GetInstanceScript();
                 me->SetReactState(REACT_PASSIVE);
@@ -355,7 +351,7 @@ class dark_moonlight : public CreatureScript
                 DoCast(me,SPELL_DARK_MOONLIGHT);
             }
 
-            void DoAction(int32 action)  
+            void DoAction(int32 action)
             {
                 switch (action)
                 {
@@ -367,7 +363,7 @@ class dark_moonlight : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 diff)  
+            void UpdateAI(uint32 diff)
             {
                 if (!UpdateVictim())
                     return;
@@ -407,7 +403,7 @@ class tyrande_moonlance : public CreatureScript
 
         struct tyrande_moonlanceAI : public ScriptedAI
         {
-            tyrande_moonlanceAI(Creature* creature) : ScriptedAI(creature) 
+            tyrande_moonlanceAI(Creature* creature) : ScriptedAI(creature)
             {
                 instance = me->GetInstanceScript();
                 me->SetReactState(REACT_PASSIVE);
@@ -455,7 +451,7 @@ class eyes_of_elune : public CreatureScript
 
         struct eyes_of_eluneAI : public ScriptedAI
         {
-            eyes_of_eluneAI(Creature* creature) : ScriptedAI(creature) 
+            eyes_of_eluneAI(Creature* creature) : ScriptedAI(creature)
             {
                 instance = me->GetInstanceScript();
                 me->SetReactState(REACT_PASSIVE);
