@@ -382,7 +382,8 @@ public:
 
             if (m_uiPowerTimer <= diff)
             {
-               instance->NormaliseAltPower();
+                if(instance)
+                   instance->NormaliseAltPower();
             }
             else m_uiPowerTimer -= diff;
 
