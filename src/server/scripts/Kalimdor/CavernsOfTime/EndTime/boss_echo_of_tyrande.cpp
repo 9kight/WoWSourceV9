@@ -28,6 +28,7 @@
 enum Creatures
 {
     NPC_DARK_MOONLIGHT     = 70021,
+	NPC_POOL_MOONLIGHT     = 54508,
 };
 
 enum Spells
@@ -300,7 +301,7 @@ class pool_moonlight : public CreatureScript
                             NumSpawnPool = i;
 
                     if (NumSpawnPool != 4)
-                        me->SummonCreature(54508,PoolPositions[NumSpawnPool+1]);
+                        me->SummonCreature(NPC_POOL_MOONLIGHT,PoolPositions[NumSpawnPool+1]);
                     else
                     {
                         if (Creature * Tyrande = me->FindNearestCreature(NPC_ECHO_OF_TYRANDE, 500.0f))
