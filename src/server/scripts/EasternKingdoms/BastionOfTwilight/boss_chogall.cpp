@@ -63,10 +63,10 @@ enum Spells
     SPELL_CONVERSION     = 91303, // Script effect for 25 player only (add below spell to multiple targets?).
     SPELL_WORSHIPPING    = 91317, // "Worshipping Cho'gall" aura - triggers 91331 on cho'gall, needs condition.
 
-    /** Fury of Cho'gall – Cho'gall blasts his current target, 34125 to 35875 Shadow and 34125 to 35875 Physical damage, ++ Physical and Shadow damage taken by 20% for 1 min. **/
+    /** Fury of Cho'gall - Cho'gall blasts his current target, 34125 to 35875 Shadow and 34125 to 35875 Physical damage, ++ Physical and Shadow damage taken by 20% for 1 min. **/
     SPELL_FURY_OF_CHOGALL = 82524, // On tank only.
 
-    /** Flame's Orders – Cho'gall calls forth a Fire elemental and absorbs the elemental into his Twilight Hammer, empowering it with Flaming Destruction. **/
+    /** Flame's Orders - Cho'gall calls forth a Fire elemental and absorbs the elemental into his Twilight Hammer, empowering it with Flaming Destruction. **/
     // On Heroic difficulty Cho'gall gains one additional stack of Flaming Destruction for each 10% health remaining on the elemental when it is absorbed.
     SPELL_FLAME_ORDERS   = 87579, // Summons 47020 - Fire Portal in 15 yards.
     SPELL_F_O_PERIODIC   = 87581, // Trigger above every 50 seconds. - NEED THIS!!!
@@ -78,7 +78,7 @@ enum Spells
     // SPELL_FLAME_ORDERS_2  = 81171, // Summons 43393 - Fire Portal in 15 yards, has no periodic trigger ??! - WTF IS THIS? Not needed...
     // SPELL_FO_SUMMON_2     = 81186, // Summons Fire Elemental very SMALL, 43406 ?! - WTF IS THIS? Not needed...
 
-    /** Shadow's Orders – Cho'gall calls forth a Shadow elemental and absorbs the elemental into his Twilight Hammer, imbuing it with Empowered Shadows. **/
+    /** Shadow's Orders - Cho'gall calls forth a Shadow elemental and absorbs the elemental into his Twilight Hammer, imbuing it with Empowered Shadows. **/
     // On Heroic Difficulty Cho'gall gains one stack of Empowered Shadows for each 10% health remaining on the elemental when it is absorbed.
     SPELL_SHADOW_ORDERS  = 87575, // Summons 47019 - Shadow Portal in 15 yards.
     SPELL_S_O_PERIODIC   = 87576, // Trigger above every 50 seconds. - NEED THIS!!!
@@ -89,13 +89,13 @@ enum Spells
 
     SPELL_ABSORB_SHADOW  = 81566, // Triggers Empowered Shadows (81194) plus visual after 3 sec (!3x3 81571 RADIUS 50k). Has a ride vehicle script eff (for lord going into hammer??).
 
-    /** Summon Corrupting Adherent – Cho'gall summons a Corrupting Adherent from one of twilight portals at the sides of the room. **/
+    /** Summon Corrupting Adherent - Cho'gall summons a Corrupting Adherent from one of twilight portals at the sides of the room. **/
     // Why two summon spells for this script effect? Here: On 25-player Heroic difficulty, Cho'gall activates both portals, summoning two Corrupting Adherents simultaneously.
     SPELL_SUM_ADHER_SE   = 81628, // Script effect with cast time - NEEDS SCRIPT!! Npc 43622 - Corrupting Adherent.
     SPELL_SUMM_ADH_1     = 81611, // First.
     SPELL_SUMM_ADH_2     = 81618, // Second.
 
-    /** Fester Blood – Cho'gall festers the blood of dead Corrupting Adherents, causing pools of Spilled Blood of the Old God to form into animated oozes (blood of the old god). 
+    /** Fester Blood - Cho'gall festers the blood of dead Corrupting Adherents, causing pools of Spilled Blood of the Old God to form into animated oozes (blood of the old god). 
         Fester Blood also causes the dark blood of any living Corrupting Adherents to boil, causing the Festering Blood effect. **/
     SPELL_FESTER_BLOOD   = 82299, // Cast by boss -> after 3 sec 82337 with script eff for Festered Blood (82333) which summons Blood of the Old God oozes - npc 43707 (from dead adh).
     SPELL_FESTERIN_BLOOD = 82914, // Living adherents use this - damage spell, triggers 82919 which is actual damage spell needs radius and script eff for applying corruption.
@@ -103,7 +103,7 @@ enum Spells
     //Phase 2 - 25 to 0 %. !! Boss retains only Fury of Cho'gall spell. !!
     SPELL_CORR_OLD_GOD   = 82361, // Visual, trigger for damage spell 82363 which needs radius and script eff to apply corruption.
 
-    /** Darkened Creations – Darkened Creations, tentacles spawned by Cho'gall, continually try to channel Debilitating Beam  (82411, H: + corruption) on a random player. **/
+    /** Darkened Creations - Darkened Creations, tentacles spawned by Cho'gall, continually try to channel Debilitating Beam  (82411, H: + corruption) on a random player. **/
     SPELL_DARK_CREAT_VIS = 82414, // Some visual dummy shit.
     SPELL_SUMM_DARK_CREA = 82433, // Actual summon spell. Npc Darkened Creation 44045.
 

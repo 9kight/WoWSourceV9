@@ -77,7 +77,7 @@ class spell_warr_heroic_strike : public SpellScriptLoader
             {
                 // Formula: 8 + AttackPower * 60 / 100
                 if (Unit* caster = GetCaster())
-                        SetHitDamage(int32(8 + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.6f));
+                    SetHitDamage(int32(8 + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.6f));
             }
 
             void Register()

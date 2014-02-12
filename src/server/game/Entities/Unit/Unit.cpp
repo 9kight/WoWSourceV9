@@ -11590,49 +11590,49 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                         }
                         break;
                     }
-					case SPELLFAMILY_PALADIN:
-                switch(spellProto->Id)
-                {
-                    // Templar's Verdict
-                    case 85256:
-                    {
-                        int32 damage = victim->CalculateDamage(BASE_ATTACK, true, true);
-
-                        // Divine Purpose check
-                        if (this->HasAura(90174))
+                    case SPELLFAMILY_PALADIN:
+                        switch(spellProto->Id)
                         {
-                            damage *= 2.35f;
-                        }
-                        else
-                        {
-                            switch (this->GetPower(POWER_HOLY_POWER))
+                            // Templar's Verdict
+                            case 85256:
                             {
-                                case 0: // 1 Holy Power
-                                    damage *= 0.3f;
-                                    break;
-                                case 1: // 2 Holy Power
-                                    damage *= 0.9f;
-                                    break;
-                                case 2: // 3 Holy Power
-                                    damage *= 2.35f;
-                                    break;
-                            }
-                        }
+                                int32 damage = victim->CalculateDamage(BASE_ATTACK, true, true);
 
-						crit_chance += damage;
-                    }
+                                // Divine Purpose check
+                                if (this->HasAura(90174))
+                                {
+                                    damage *= 2.35f;
+                                }
+                                else
+                                {
+                                    switch (this->GetPower(POWER_HOLY_POWER))
+                                    {
+                                        case 0: // 1 Holy Power
+                                            damage *= 0.3f;
+                                            break;
+                                        case 1: // 2 Holy Power
+                                            damage *= 0.9f;
+                                            break;
+                                        case 2: // 3 Holy Power
+                                            damage *= 2.35f;
+                                            break;
+                                    }
+                                }
+
+                                crit_chance += damage;
+                            }
+                            break;
+                        }
                     break;
-                }
-                break;
                     case SPELLFAMILY_WARRIOR:
-                       // Victory Rush
-                       if (spellProto->SpellFamilyFlags[1] & 0x100)
-                       {
+                        // Victory Rush
+                        if (spellProto->SpellFamilyFlags[1] & 0x100)
+                        {
                            // Glyph of Victory Rush
-                           if (AuraEffect const* aurEff = GetAuraEffect(58382, 0))
-                               crit_chance += aurEff->GetAmount();
-                           break;
-                       }
+                            if (AuraEffect const* aurEff = GetAuraEffect(58382, 0))
+                                crit_chance += aurEff->GetAmount();
+                            break;
+                        }
                     break;
                 }
             }
