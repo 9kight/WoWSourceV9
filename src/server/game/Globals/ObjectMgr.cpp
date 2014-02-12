@@ -5729,7 +5729,7 @@ void ObjectMgr::LoadGraveyardZones()
             continue;
         }
 
-        if (areaEntry->zone != 0 && zoneId != 4815 && zoneId != 5004 && zoneId != 5144 && zoneId != 5145)
+        if (areaEntry->zone != 0 && zoneId != 4815 && zoneId != 5004 && zoneId != 5144 && zoneId != 5145 && zoneId != 33 && zoneId != 5287)
         {
             sLog->outError(LOG_FILTER_SQL, "Table `game_graveyard_zone` has a record for subzone id (%u) instead of zone, skipped.", zoneId);
             continue;
