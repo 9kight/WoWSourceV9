@@ -645,7 +645,7 @@ public:
 
             if (m_uiPowerTimer <= diff)
             {
-               DoCast(me, SPELL_INCREASE_BAR);
+               DoCast(me, SPELL_INCREASE_BAR, false);
                m_uiPowerTimer = 2000;
             }
             else m_uiPowerTimer -= diff;
