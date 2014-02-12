@@ -60,8 +60,6 @@ EndContentData */
 #include "SpellAuras.h"
 #include "Pet.h"
 
-
-#define SAY_TEST "TEST"
 /*########
 # npc_air_force_bots
 #########*/
@@ -69,11 +67,6 @@ enum SpawnType
 {
     SPAWNTYPE_TRIPWIRE_ROOFTOP,                             // no warning, summon Creature at smaller range
     SPAWNTYPE_ALARMBOT,                                     // cast guards mark and summon npc - if player shows up with that buff duration < 5 seconds attack
-};
-
-enum
-{
-    EVENT_EXPLODE                 = 1,
 };
 
 struct SpawnAssociation
@@ -1897,74 +1890,42 @@ public:
 
 class npc_mage_orb : public CreatureScript
 {
-	public: npc_mage_orb() : CreatureScript("npc_mage_orb") { }
-	
-	struct npc_mage_orbAI : public ScriptedAI
-        {
-			npc_mage_orbAI(Creature* creature) : ScriptedAI(creature)
-            {
-            }
-			
-            void IsSummonedBy(Unit* /*summoner*/)  
-            {
-				me->SummonCreature(70022, me->GetPositionX() ,me->GetPositionY(),me->GetPositionZ(),me->GetOrientation());
-				me->DespawnOrUnsummon();
-            }
-			
-        };
-		
-		CreatureAI* GetAI(Creature* creature) const  
-        {
-            return new npc_mage_orbAI(creature);
-        }
+public:
+   npc_mage_orb() : CreatureScript("npc_mage_orb") {}
+
+   struct npc_mage_orbAI : public ScriptedAI
+   {
+       float newx, newy, newz;
+
+       npc_mage_orbAI(Creature* creature) : ScriptedAI(creature)
+       {
+           newz = me->GetOwner()->GetPositionZ() + 2.0f;
+           float angle = me->GetOwner()->GetAngle(me);
+           newx = me->GetPositionX() + 60 * cos(angle);
+           newy = me->GetPositionY() + 60 * sin(angle);
+       }
+
+       void Reset()
+       {
+           me->SetDisableGravity(false, true);
+           me->SetHover(true);
+           uint32 spellId = me->GetEntry() == 45322 ? 84717 : 82690;
+           me->CastSpell(me, spellId, true);
+           me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
+           me->SetReactState(REACT_PASSIVE);
+           me->GetMotionMaster()->MovePoint(0, newx, newy, newz);
+       }
+
+       void UpdateAI(const uint32 diff) {}
+       void EnterCombat(Unit* /*who*/) {}
+       void AttackStart(Unit* /*who*/) {}
+   };
+
+   CreatureAI* GetAI(Creature* creature) const
+   {
+       return new npc_mage_orbAI(creature);
+   }
 };
-
-class npc_mage_orb_sum : public CreatureScript
-{
-	public: npc_mage_orb_sum() : CreatureScript("npc_mage_orb_sum") { }
-	
-	struct npc_mage_orb_sumAI : public ScriptedAI
-        {
-			npc_mage_orb_sumAI(Creature* creature) : ScriptedAI(creature)
-            {
-            }
-			
-			void IsSummonedBy(Unit* /*summoner*/)  
-            {
-                events.ScheduleEvent(EVENT_EXPLODE, 2000);
-            }
-			void UpdateAI(uint32 diff)  
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                        case EVENT_EXPLODE:
-                            me->MonsterYell(SAY_TEST, 0, 0);
-							events.ScheduleEvent(EVENT_EXPLODE, 2000);
-                            break;
-
-                        default:
-                            break;
-                    }
-                }
-			}
-			private:
-            EventMap events;
-			
-        };
-		
-		CreatureAI* GetAI(Creature* creature) const  
-        {
-            return new npc_mage_orb_sumAI(creature);
-        }
-};
-
 
 class npc_shadowy_apparition : public CreatureScript
 {
@@ -3512,5 +3473,4 @@ void AddSC_npcs_special()
     new npc_consecration();
     new npc_melee_guardian();
 	new npc_Tentacle_of_the_Old_Ones();
-	new npc_mage_orb_sum();
 }

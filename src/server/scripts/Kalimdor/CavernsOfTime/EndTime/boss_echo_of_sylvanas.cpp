@@ -25,9 +25,8 @@
 #include "Map.h"
 #include "InstanceScript.h"
 
-enum Creatures
+enum Yells
 {
-    NPC_BLIGHTED_ARROWS      = 54403,
 };
 
 enum Spells
@@ -98,7 +97,7 @@ class boss_echo_of_sylvanas : public CreatureScript
                 me->RemoveUnitMovementFlag(MOVEMENTFLAG_FLYING);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
 
-                DespawnCreatures(NPC_BLIGHTED_ARROWS);
+                DespawnCreatures(54403);
                 DespawnCreatures(54385);
                 DespawnCreatures(54191);
             }
@@ -126,10 +125,10 @@ class boss_echo_of_sylvanas : public CreatureScript
                 if (instance)
                     instance->SetBossState(BOSS_ECHO_OF_SYLVANAS, IN_PROGRESS);
 
-                //events.ScheduleEvent(EVENT_HIGHBORNE, 5000);
-                //events.ScheduleEvent(EVENT_UNHOLYSHOT, 13000);
-                //events.ScheduleEvent(EVENT_BLACKARROW, 22000);
-                events.ScheduleEvent(EVENT_BLIGHTEDARROW, 5000);
+                events.ScheduleEvent(EVENT_HIGHBORNE, 5000);
+                events.ScheduleEvent(EVENT_UNHOLYSHOT, 13000);
+                events.ScheduleEvent(EVENT_BLACKARROW, 22000);
+                events.ScheduleEvent(EVENT_BLIGHTEDARROW, 30000);
                 events.ScheduleEvent(EVENT_CALLING_START_BLINK, 40000);
             }
 
@@ -156,54 +155,39 @@ class boss_echo_of_sylvanas : public CreatureScript
                         case EVENT_BLACKARROW:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                                 DoCast(target, SPELL_BLACK_ARROW);
-                            events.ScheduleEvent(EVENT_BLACKARROW, 25000);
+                            events.ScheduleEvent(EVENT_BLACKARROW, 30000);
                             break;
 
                         case EVENT_UNHOLYSHOT:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                                 DoCast(target, SPELL_UNHOLY_SHOT);
-                            events.ScheduleEvent(EVENT_UNHOLYSHOT, 15000);
+                            events.ScheduleEvent(EVENT_UNHOLYSHOT, 20000);
                             break;
 
                         case EVENT_BLIGHTEDARROW:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                             {
-                                me->SummonCreature(NPC_BLIGHTED_ARROWS,target->GetPositionX(),target->GetPositionY(),target->GetPositionZ());
-                                me->SummonCreature(NPC_BLIGHTED_ARROWS,target->GetPositionX(),target->GetPositionY()-3.0f,target->GetPositionZ());
-                                me->SummonCreature(NPC_BLIGHTED_ARROWS,target->GetPositionX(),target->GetPositionY()-6.0f,target->GetPositionZ());
-                                me->SummonCreature(NPC_BLIGHTED_ARROWS,target->GetPositionX(),target->GetPositionY()+3.0f,target->GetPositionZ());
-                                me->SummonCreature(NPC_BLIGHTED_ARROWS,target->GetPositionX(),target->GetPositionY()+6.0f,target->GetPositionZ());
+                                me->SummonCreature(54403,target->GetPositionX(),target->GetPositionY(),target->GetPositionZ());
+                                me->SummonCreature(54403,target->GetPositionX(),target->GetPositionY()-3.0f,target->GetPositionZ());
+                                me->SummonCreature(54403,target->GetPositionX(),target->GetPositionY()-6.0f,target->GetPositionZ());
+                                me->SummonCreature(54403,target->GetPositionX(),target->GetPositionY()+3.0f,target->GetPositionZ());
+                                me->SummonCreature(54403,target->GetPositionX(),target->GetPositionY()+6.0f,target->GetPositionZ());
                             }
                             events.ScheduleEvent(EVENT_SYLVANA_BLIGHTEDARROW, 1000);
-                            events.ScheduleEvent(EVENT_BLIGHTEDARROW_BLOW, 4000);
+                            events.ScheduleEvent(EVENT_BLIGHTEDARROW_BLOW, 6000);
                             break;
 
                         case EVENT_SYLVANA_BLIGHTEDARROW:
                             me->AttackStop();
                             me->SetReactState(REACT_PASSIVE);
                             me->AddUnitMovementFlag(MOVEMENTFLAG_FLYING);
-                            //Position pos;
-							me->GetMotionMaster()->MovePoint(1,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ()+4);
+                            Position pos;
+                            me->GetPosition(&pos);
+                            pos.m_positionZ += 8.f;
+                            me->GetMotionMaster()->MoveJump(pos.GetPositionX(),pos.GetPositionY(),pos.GetPositionZ(), 8, 8);
                             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-                            me->SetFacingToObject(me->FindNearestCreature(NPC_BLIGHTED_ARROWS,100.0f));
-                            events.ScheduleEvent(EVENT_SYLVANA_GROUND, 6000);
-                            break;
-							
-						case EVENT_BLIGHTEDARROW_BLOW:
-                            GetCreatureListWithEntryInGrid(BlightedAoe, me, NPC_BLIGHTED_ARROWS, 1000.0f);
-
-                            if (BlightedAoe.empty())
-                               break;
-
-                            for (std::list<Creature*>::iterator iter = BlightedAoe.begin(); iter != BlightedAoe.end(); ++iter)
-                            {
-                                (*iter)->CastSpell((*iter),SPELL_BLIGHTED_ARROWS,true);
-                                (*iter)->DespawnOrUnsummon(1000);
-                            }
-
-                            BlightedAoe.clear();
-
-                            events.ScheduleEvent(EVENT_BLIGHTEDARROW, 20000);
+                            me->SetFacingToObject(me->FindNearestCreature(54403,100.0f));
+                            events.ScheduleEvent(EVENT_SYLVANA_GROUND, 5000);
                             break;
                         
                         case EVENT_SYLVANA_GROUND:
@@ -255,7 +239,7 @@ class boss_echo_of_sylvanas : public CreatureScript
 
                             events.ScheduleEvent(EVENT_HIGHBORNE, 5000);
                             events.ScheduleEvent(EVENT_UNHOLYSHOT, 13000);
-                            events.ScheduleEvent(EVENT_BLACKARROW, 20000);
+                            events.ScheduleEvent(EVENT_BLACKARROW, 22000);
                             events.ScheduleEvent(EVENT_BLIGHTEDARROW, 30000);
                             events.ScheduleEvent(EVENT_CALLING_START_BLINK, 40000);
                             break;
@@ -274,7 +258,24 @@ class boss_echo_of_sylvanas : public CreatureScript
 
                             ghouls.clear();
                             break;
-                        
+
+                        case EVENT_BLIGHTEDARROW_BLOW:
+                            GetCreatureListWithEntryInGrid(BlightedAoe, me, 54403, 1000.0f);
+
+                            if (BlightedAoe.empty())
+                               break;
+
+                            for (std::list<Creature*>::iterator iter = BlightedAoe.begin(); iter != BlightedAoe.end(); ++iter)
+                            {
+                                (*iter)->CastSpell((*iter),SPELL_BLIGHTED_ARROWS,true);
+                                (*iter)->DespawnOrUnsummon(1000);
+                            }
+
+                            BlightedAoe.clear();
+
+                            events.ScheduleEvent(EVENT_BLIGHTEDARROW, 20000);
+                            break;
+
                         case EVENT_CALLING_START:
                             me->AddAura(SPELL_GHOUL_WRACKING_PAIN,me);
                             DoCast(me,SPELL_HIGHBORNE_IMMUNE);
@@ -317,7 +318,6 @@ class blighted_arrow : public CreatureScript
                 instance = me->GetInstanceScript();
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                 me->SetReactState(REACT_PASSIVE);
-				me->AttackStop();
             }
 
             InstanceScript* instance;

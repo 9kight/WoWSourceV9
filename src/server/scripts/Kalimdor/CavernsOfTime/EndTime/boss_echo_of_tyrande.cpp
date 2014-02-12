@@ -27,8 +27,7 @@
 
 enum Creatures
 {
-    NPC_DARK_MOONLIGHT     = 70021,
-	NPC_POOL_MOONLIGHT     = 54508,
+	NPC_DARK_MOONLIGHT     = 70021,
 };
 
 enum Spells
@@ -49,19 +48,19 @@ enum Spells
 
 enum Events
 {
-    EVENT_MOONBOLT = 1,
+    EVENT_MOONBOLT = 1, 
     EVENT_STARDUST,
     EVENT_MOONLANCE,
     EVENT_GUIDANCE,
     EVENT_TEARS,
     EVENT_TEARS_FALL,
-    EVENT_FALL,
+	EVENT_FALL,
     EVENT_EYE_ELUNE,
 };
 
 enum Actions
 {
-    ACTION_TEAR       = 1
+	ACTION_TEAR       = 1,
 };
 
 Position const PoolPositions[5] =
@@ -115,7 +114,7 @@ class boss_echo_of_tyrande : public CreatureScript
             {
                 if (Creature * pool = me->FindNearestCreature(45979, 20.0f))
                     pool->DespawnOrUnsummon();
-                if (Creature * pool = me->FindNearestCreature(NPC_DARK_MOONLIGHT, 20.0f))
+				if (Creature * pool = me->FindNearestCreature(NPC_DARK_MOONLIGHT, 20.0f))
                     pool->DespawnOrUnsummon();
 
                 if (instance)
@@ -126,7 +125,7 @@ class boss_echo_of_tyrande : public CreatureScript
             {
                 if (instance)
                     instance->SetBossState(BOSS_ECHO_OF_TYRANDE, IN_PROGRESS);
-                me->SummonCreature(NPC_DARK_MOONLIGHT,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ());
+				me->SummonCreature(NPC_DARK_MOONLIGHT,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ());
                 events.ScheduleEvent(EVENT_MOONBOLT, 2000);
             }
 
@@ -147,16 +146,19 @@ class boss_echo_of_tyrande : public CreatureScript
                         case EVENT_MOONBOLT:
                             if (Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 0, 100.0f))
                                 DoCast(target, SPELL_MOONBOLT);
+
                             events.ScheduleEvent(NextEvent(EVENT_MOONBOLT), 2500);
                             break;
                         case EVENT_STARDUST:
                             DoCastAOE(SPELL_STARDUST);
+
                             events.ScheduleEvent(NextEvent(EVENT_STARDUST), 3000);
                             break;
                         case EVENT_MOONLANCE:
                             me->AttackStop();
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                                 DoCast(target,SPELL_MOONLANCE);
+
                             events.ScheduleEvent(NextEvent(EVENT_MOONLANCE), 2500);
                             break;
                         case EVENT_GUIDANCE:
@@ -169,15 +171,16 @@ class boss_echo_of_tyrande : public CreatureScript
                             break;
                         case EVENT_TEARS_FALL:
                             if(Creature * dark = me->FindNearestCreature(NPC_DARK_MOONLIGHT, 100.0f))
-                            {
-                                dark->AI()->DoAction(ACTION_TEAR);
-                            }
-                            events.ScheduleEvent(NextEvent(EVENT_MOONBOLT), 2500);
+							{
+								dark->AI()->DoAction(ACTION_TEAR);
+							}
+							events.ScheduleEvent(NextEvent(EVENT_MOONBOLT), 2500);
                             break;
                         case EVENT_EYE_ELUNE:
                             DoCast(me,SPELL_EYES_SUMMON);
                             events.ScheduleEvent(NextEvent(EVENT_EYE_ELUNE), 3000);
                             break;
+
                     }
                 }
             }
@@ -301,7 +304,7 @@ class pool_moonlight : public CreatureScript
                             NumSpawnPool = i;
 
                     if (NumSpawnPool != 4)
-                        me->SummonCreature(NPC_POOL_MOONLIGHT,PoolPositions[NumSpawnPool+1]);
+                        me->SummonCreature(54508,PoolPositions[NumSpawnPool+1]);
                     else
                     {
                         if (Creature * Tyrande = me->FindNearestCreature(NPC_ECHO_OF_TYRANDE, 500.0f))
@@ -344,27 +347,27 @@ class dark_moonlight : public CreatureScript
 
         struct dark_moonlightAI : public ScriptedAI
         {
-            dark_moonlightAI(Creature* creature) : ScriptedAI(creature)
+            dark_moonlightAI(Creature* creature) : ScriptedAI(creature) 
             {
                 instance = me->GetInstanceScript();
                 me->SetReactState(REACT_PASSIVE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                 DoCast(me,SPELL_DARK_MOONLIGHT);
             }
-
-            void DoAction(int32 action)
-            {
-                switch (action)
-                {
-                    case ACTION_TEAR:
-                        events.ScheduleEvent(EVENT_FALL, 1000);
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            void UpdateAI(uint32 diff)
+	
+			void DoAction(int32 action)  
+			{	
+				switch (action)
+				{
+					case ACTION_TEAR:
+						events.ScheduleEvent(EVENT_FALL, 1000);
+						break;
+					default:
+						break;
+				}
+			}
+			
+			void UpdateAI(uint32 diff)  
             {
                 if (!UpdateVictim())
                     return;
@@ -373,23 +376,28 @@ class dark_moonlight : public CreatureScript
 
                 while (uint32 eventId = events.ExecuteEvent())
                 {
-                    switch (eventId)
+					switch (eventId)
                     {
                         case EVENT_FALL:
-                            DoCast(me,SPELL_TEARS_OF_ELUNE_FALL);
-                            events.ScheduleEvent(EVENT_FALL, 1000);
+							DoCast(me,SPELL_TEARS_OF_ELUNE_FALL);
+							events.ScheduleEvent(EVENT_FALL, 1000);
                             break;
+							
                         default:
                             break;
                     }
-                }
-            }
+				}
+			}
 
-            InstanceScript* instance;
-
-            private:
-                EventMap events;
+			
+			InstanceScript* instance;
+			
+			private:
+				EventMap events;
+            
         };
+		
+		
 
         CreatureAI* GetAI(Creature* creature) const
         {
@@ -404,7 +412,7 @@ class tyrande_moonlance : public CreatureScript
 
         struct tyrande_moonlanceAI : public ScriptedAI
         {
-            tyrande_moonlanceAI(Creature* creature) : ScriptedAI(creature)
+            tyrande_moonlanceAI(Creature* creature) : ScriptedAI(creature) 
             {
                 instance = me->GetInstanceScript();
                 me->SetReactState(REACT_PASSIVE);
@@ -452,7 +460,7 @@ class eyes_of_elune : public CreatureScript
 
         struct eyes_of_eluneAI : public ScriptedAI
         {
-            eyes_of_eluneAI(Creature* creature) : ScriptedAI(creature)
+            eyes_of_eluneAI(Creature* creature) : ScriptedAI(creature) 
             {
                 instance = me->GetInstanceScript();
                 me->SetReactState(REACT_PASSIVE);
