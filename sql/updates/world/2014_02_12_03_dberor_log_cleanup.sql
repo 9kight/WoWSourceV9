@@ -16,7 +16,7 @@ DELETE FROM conditions WHERE conditionvalue1=121821;
 DELETE FROM gameobject_template WHERE entry=209318;
 INSERT INTO `gameobject_template` VALUES ('209318', '0', '9779', 'Fragment of Jaina\'s Staff', 'Interact', 'Retrieving', '', '35', '32', '0.2', '0', '0', '0', '0', '0', '0', '0', '1690', '1', '0', '23645', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '', 'go_jaina_staff_fragment', '15595');
 
--- fixing the rong loot extracted from wowhead where value its 0 and cant  work with 0 wil give error so we set to minimum 0.1
+-- fixing the wrong loot extracted from wowhead where value its 0 and cant  work with 0 wil give error so we set to minimum 0.1
 UPDATE creature_loot_template SET ChanceOrQuestChance=0.1 WHERE entry=45922 AND item=68789;
 UPDATE creature_loot_template SET ChanceOrQuestChance=0.1 WHERE entry=45923 AND item=68789;
 UPDATE creature_loot_template SET ChanceOrQuestChance=0.1 WHERE entry=45928 AND item=52364;
