@@ -1752,43 +1752,80 @@ public:
     }
 };
 
-class spell_paladin_judgements_of_the_bold_and_wise : public SpellScriptLoader
+class spell_pal_judgements_of_the_wise : public SpellScriptLoader
 {
-    class script_impl : public AuraScript
-    {
-        PrepareAuraScript(script_impl);
+    public:
+        spell_pal_judgements_of_the_wise() : SpellScriptLoader("spell_pal_judgements_of_the_wise") { }
 
-        int32 m_pct;
-
-        bool Load()
+        class spell_pal_judgements_of_the_wise_AuraScript : public AuraScript
         {
-            m_pct = GetSpellInfo()->Effects[EFFECT_0].BasePoints;
-            Unit const* const caster = GetCaster();
-            return caster && caster->GetTypeId() == TYPEID_PLAYER;
-        }
+            PrepareAuraScript(spell_pal_judgements_of_the_wise_AuraScript);
 
-        void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool& m_canBeRecalculated)
+            bool Load()
+            {
+                if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
+                    return false;
+                return true;
+            }
+
+            void CalculateMana(AuraEffect const* /*aurEff*/, int32& amount, bool& canBeRecalculated)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    canBeRecalculated = true;
+                    int32 basemana = caster->ToPlayer()->GetCreateMana();
+                    amount = basemana * 0.03f;
+                }
+            }
+
+            void Register()
+            {
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pal_judgements_of_the_wise_AuraScript::CalculateMana, EFFECT_0, SPELL_AURA_PERIODIC_ENERGIZE);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
         {
-            Unit const* const caster = GetCaster();
-            amount = CalculatePct(caster->GetMaxPower(POWER_MANA), m_pct) / aurEff->GetTotalTicks();
+            return new spell_pal_judgements_of_the_wise_AuraScript();
         }
+};
 
-        void Register()
+class spell_pal_judgements_of_the_bold : public SpellScriptLoader
+{
+    public:
+        spell_pal_judgements_of_the_bold() : SpellScriptLoader("spell_pal_judgements_of_the_bold") { }
+
+        class spell_pal_judgements_of_the_bold_AuraScript : public AuraScript
         {
-            DoEffectCalcAmount += AuraEffectCalcAmountFn(script_impl::CalculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_ENERGIZE);
+            PrepareAuraScript(spell_pal_judgements_of_the_bold_AuraScript);
+
+            bool Load()
+            {
+                if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
+                    return false;
+                return true;
+            }
+
+            void CalculateMana(AuraEffect const* /*aurEff*/, int32& amount, bool& canBeRecalculated)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    canBeRecalculated = true;
+                    int32 basemana = caster->ToPlayer()->GetCreateMana();
+                    amount = basemana * 0.025f;
+                }
+            }
+
+            void Register()
+            {
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pal_judgements_of_the_bold_AuraScript::CalculateMana, EFFECT_0, SPELL_AURA_PERIODIC_ENERGIZE);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_pal_judgements_of_the_bold_AuraScript();
         }
-    };
-
-public:
-    spell_paladin_judgements_of_the_bold_and_wise()
-        : SpellScriptLoader("spell_paladin_judgements_of_the_bold_and_wise")
-    {
-    }
-
-    AuraScript* GetAuraScript() const
-    {
-        return new script_impl();
-    }
 };
 
 void AddSC_paladin_spell_scripts()
@@ -1825,5 +1862,6 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_holy_wrath();
     new spell_paladin_pursuit_of_justice();
     new spell_paladin_holy_radiance();
-    new spell_paladin_judgements_of_the_bold_and_wise();
+    new spell_pal_judgements_of_the_bold();
+    new spell_pal_judgements_of_the_wise();
 }
