@@ -2269,9 +2269,11 @@ class spell_druid_regrowth : public SpellScriptLoader
 
         void OnPeriodic(AuraEffect const* aurEff)
         {
-            if (AuraEffect const* const regrowth = GetCaster()->GetAuraEffect(SPELL_GLYPH_OF_REGROWTH, EFFECT_0))
-                if (!GetTarget()->HealthAbovePct(regrowth->GetAmount()))
-                    aurEff->GetBase()->RefreshDuration();
+            Unit const* const caster = GetCaster();
+            if (caster)
+                if(AuraEffect const* const regrowth = caster->GetAuraEffect(SPELL_GLYPH_OF_REGROWTH, EFFECT_0))
+                    if (!GetTarget()->HealthAbovePct(regrowth->GetAmount()))
+                        aurEff->GetBase()->RefreshDuration();
         }
 
         void Register()
