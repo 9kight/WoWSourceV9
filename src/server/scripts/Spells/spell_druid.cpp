@@ -1766,10 +1766,10 @@ class spell_dru_starfall_dummy : public SpellScriptLoader
 
         bool operator() (WorldObject* unit)
         {
-            if (unit->GetTypeId() != TYPEID_UNIT)
+            if (unit->GetTypeId() != TYPEID_UNIT && unit->GetTypeId() != TYPEID_PLAYER)
                 return true;
 
-            return !m_caster->IsInCombat(unit->ToUnit()) || unit->ToUnit()->HasBreakableByDamageCrowdControlAura(m_caster);
+            return unit->ToUnit()->HasBreakableByDamageCrowdControlAura(m_caster);
         }
     };
 
