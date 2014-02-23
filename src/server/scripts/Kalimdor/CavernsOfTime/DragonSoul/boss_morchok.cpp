@@ -19,8 +19,9 @@ enum Spells
     SPELL_FURIOUS                   = 103846,
     SPELL_EARTHS_VENGEANCE_CHANNEL  = 103176,
     SPELL_EARTHS_VENGEANCE          = 103178,
-    SPELL_BLACK_BLOOD_OF_THE_EARTH  = 103851,
-    SPELL_RESONATING_CRYSTAL_EX     = 108572,
+    SPELL_BLACK_BLOOD_OF_THE_EARTH  = 103851, 
+	SPELL_BLACK_BLOOD_SUM           = 103180,
+    SPELL_RESONATING_CRYSTAL_EX     = 108572, 
     SPELL_RESONATING_CRYSTAL_AURA   = 103494,
     SPELL_DANGER                    = 103534,
     SPELL_WARNING                   = 103536,
@@ -62,15 +63,27 @@ public:
     {
         boss_morchokAI(Creature* creature) : BossAI(creature, DATA_MORCHOK) { }
 
+		uint32 MorchokHealth;
+		uint32 Raid10N;
+		uint32 Raid10H;
+		uint32 Raid25N;
+		uint32 Raid25H;
         void Reset()
         {
             _Reset();
+			Raid10N = 23400130;
+			Raid10H = 13957449;
+			Raid25N = 66299996;
+			Raid25H = 58631360;
+			MorchokHealth = RAID_MODE(Raid10N, Raid25N, Raid10H, Raid25H);
+			me->SetMaxHealth(MorchokHealth);
+			me->SetFullHealth();
+			me->SetObjectScale(1);
             events.SetPhase(PHASE_NORMAL);
-            me->SetMaxHealth(36000200);
-            events.ScheduleEvent(EVENT_STOMP, urand(5000, 12000));
-            events.ScheduleEvent(EVENT_CRUSH_ARMOR, urand(7000, 15000));
-            events.ScheduleEvent(EVENT_RESONATING_CRYSTAL, urand(30000, 35000));
-            events.ScheduleEvent(EVENT_PHASE_BLACK_BLOOD, urand(60000, 70000));
+            events.ScheduleEvent(EVENT_STOMP, urand(9000, 14000));
+            events.ScheduleEvent(EVENT_CRUSH_ARMOR, urand(10000, 15000));
+            events.ScheduleEvent(EVENT_RESONATING_CRYSTAL, urand(25000, 35000));
+            events.ScheduleEvent(EVENT_PHASE_BLACK_BLOOD, urand(45000, 55000));
             events.ScheduleEvent(EVENT_ENRAGE, 447000);	
         }			
 
@@ -85,6 +98,16 @@ public:
             Talk(SAY_DEATH);			
         }
 
+		void EnterEvadeMode()
+		{
+			events.Reset();
+			summons.DespawnAll();
+			me->GetMotionMaster()->MoveTargetedHome();
+			me->SetObjectScale(1);
+			_Reset();
+			_EnterEvadeMode();
+		}
+		
         void KilledUnit(Unit* victim)
         {
             if (victim->GetTypeId() == TYPEID_PLAYER)
@@ -105,16 +128,18 @@ public:
 
         void DamageTaken(Unit* /*attacker*/, uint32& damage)
         {
-            if(me->HealthBelowPctDamaged(80, damage))
+            if (me->HealthBelowPct(80) && me->HealthAbovePct(71) )
                 me->SetObjectScale(0.7);
-            else if(me->HealthBelowPctDamaged(70, damage))
-                me->SetObjectScale(0.6);
-            else if(me->HealthBelowPctDamaged(60, damage))
-                me->SetObjectScale(0.5);
-            else if(me->HealthBelowPctDamaged(50, damage))
-                me->SetObjectScale(0.4);
-            else if(me->HealthBelowPctDamaged(40, damage))
-                me->SetObjectScale(0.3);
+            else if(me->HealthBelowPct(70) && me->HealthAbovePct(61))
+				me->SetObjectScale(0.6);
+			else if(me->HealthBelowPct(60) && me->HealthAbovePct(51))
+				me->SetObjectScale(0.5);
+			else if(me->HealthBelowPct(50) && me->HealthAbovePct(41))
+				me->SetObjectScale(0.4);
+			else if(me->HealthBelowPct(40) && me->HealthAbovePct(31))
+				me->SetObjectScale(0.3);
+			else if(me->HealthBelowPct(20))
+				DoCast(me, SPELL_FURIOUS);
         }
 
         void UpdateAI(uint32 diff)
@@ -122,19 +147,9 @@ public:
             if (!UpdateVictim())
                 return;
 
-            int32 phase1 = 0;
-            int32 sec = 0 ;
-
-            if (me->GetHealthPct() <= 21 && phase1 == 0)
-            {
-                phase1 = 1;
-                DoCast(me, SPELL_FURIOUS);
-            }
-
             if (Unit* victim = me->GetVictim())
                 if (!me->IsWithinLOSInMap(victim) && events.IsInPhase(PHASE_NORMAL))
                     me->DealDamage(victim, victim->GetHealth());
-
 
             events.Update(diff);
 
@@ -153,7 +168,7 @@ public:
                 case EVENT_CRUSH_ARMOR:
                     if (events.IsInPhase(PHASE_NORMAL))
                         DoCastVictim(SPELL_CRUSH_ARMOR);
-                    events.ScheduleEvent(EVENT_CRUSH_ARMOR, urand(7000, 9000));
+                    events.ScheduleEvent(EVENT_CRUSH_ARMOR, urand(12000, 18000));
                     break;
                 case EVENT_RESONATING_CRYSTAL:
                     if (events.IsInPhase(PHASE_NORMAL))
@@ -162,7 +177,7 @@ public:
                             DoCast(target, SPELL_RESONATING_CRYSTAL);
                             Talk(SAY_SUMMON_CRYSTAL);
                         }
-                        events.ScheduleEvent(EVENT_RESONATING_CRYSTAL, urand(30000, 35000));
+                        events.ScheduleEvent(EVENT_RESONATING_CRYSTAL, urand(20000, 25000));
                         break;
                 case EVENT_PHASE_BLACK_BLOOD:
                     events.SetPhase(PHASE_BLACK_BLOOD);
@@ -198,7 +213,7 @@ public:
                     break;
                 case EVENT_PHASE_NORMAL:
                     events.SetPhase(PHASE_NORMAL);							
-                    events.ScheduleEvent(EVENT_PHASE_BLACK_BLOOD, urand(60000, 70000));
+                    events.ScheduleEvent(EVENT_PHASE_BLACK_BLOOD, urand(30000, 50000));
                     break;
                 case EVENT_ENRAGE:
                     me->InterruptNonMeleeSpells(true);
@@ -230,8 +245,11 @@ public:
         npc_resonating_crystalAI(Creature* creature) : ScriptedAI(creature),
             _instance(creature->GetInstanceScript())
         {
+			me->AttackStop();
+			me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
         }
 
+		int32 count;
         void Reset()
         {
             _events.Reset();
@@ -239,6 +257,7 @@ public:
             _events.ScheduleEvent(EVENT_ANTI_EXPLODE, 500);
             _events.ScheduleEvent(EVENT_EXPLODE, 11900);
             _events.ScheduleEvent(EVENT_DESPAWN, 12000);
+			count = 0;
         }
 
         void UpdateAI(uint32 diff)
@@ -278,7 +297,7 @@ public:
                     }
                 case EVENT_ANTI_EXPLODE:
                     {
-                        int32 count = 0;
+                        count = 0;
                         Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
                         if (!PlayerList.isEmpty())
                         {
@@ -433,23 +452,23 @@ public:
         {
             Unit* caster = GetCaster();
             int32 damage;
-            int32 count = 0;
-            int32 damage0 = 0;
-            SetHitDamage(damage0);
+			int32 count = 1;
+            damage = 675000;
+            
 
             if (caster->GetMap()->IsHeroic())
             {
                 if (caster->GetMap()->Is25ManRaid())
-                    damage = 2700000 * 2;
+                    damage = 2700000;
                 else
-                    damage = 1800000 * 2;
+                    damage = 1350000;
             }
             else
             {
                 if (caster->GetMap()->Is25ManRaid())
-                    damage = 2000000 * 2;
+                    damage = 2000000;
                 else
-                    damage = 750000 * 2;				
+                    damage = 675000;				
             }
 
             Map::PlayerList const &PlayerList = caster->GetMap()->GetPlayers();
@@ -457,12 +476,13 @@ public:
                 for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                     if (i->getSource()->isAlive())
                     {
-                        if (caster->GetExactDist(i->getSource()) < 10.0f)
+                        if (caster->GetExactDist(i->getSource()) < 26.0f)
                         {
                             count++;
                         }
                     }
-
+			damage = damage / count;
+			SetHitDamage(damage);
         }
 
         void Register()
