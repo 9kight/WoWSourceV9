@@ -501,7 +501,7 @@ public:
             cInfo->RegenHealth        = fields[82].GetBool();
             cInfo->MechanicImmuneMask = fields[83].GetUInt32();
             cInfo->flags_extra        = fields[84].GetUInt32();
-            cInfo->ScriptID           = sObjectMgr->GetScriptId(fields[86].GetCString());
+            cInfo->ScriptID           = sObjectMgr->GetScriptId(fields[85].GetCString());
 
             sObjectMgr->CheckCreatureTemplate(cInfo);
         }
