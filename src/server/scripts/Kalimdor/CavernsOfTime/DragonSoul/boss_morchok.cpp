@@ -19,9 +19,9 @@ enum Spells
     SPELL_FURIOUS                   = 103846,
     SPELL_EARTHS_VENGEANCE_CHANNEL  = 103176,
     SPELL_EARTHS_VENGEANCE          = 103178,
-    SPELL_BLACK_BLOOD_OF_THE_EARTH  = 103851, 
-	SPELL_BLACK_BLOOD_SUM           = 103180,
-    SPELL_RESONATING_CRYSTAL_EX     = 108572, 
+    SPELL_BLACK_BLOOD_OF_THE_EARTH  = 103851,
+    SPELL_BLACK_BLOOD_SUM           = 103180,
+    SPELL_RESONATING_CRYSTAL_EX     = 108572,
     SPELL_RESONATING_CRYSTAL_AURA   = 103494,
     SPELL_DANGER                    = 103534,
     SPELL_WARNING                   = 103536,
@@ -63,51 +63,51 @@ public:
     {
         boss_morchokAI(Creature* creature) : BossAI(creature, DATA_MORCHOK) { }
 
-		uint32 MorchokHealth;
-		uint32 Raid10N;
-		uint32 Raid10H;
-		uint32 Raid25N;
-		uint32 Raid25H;
+        uint32 MorchokHealth;
+        uint32 Raid10N;
+        uint32 Raid10H;
+        uint32 Raid25N;
+        uint32 Raid25H;
         void Reset()
         {
             _Reset();
-			Raid10N = 23400130;
-			Raid10H = 13957449;
-			Raid25N = 66299996;
-			Raid25H = 58631360;
-			MorchokHealth = RAID_MODE(Raid10N, Raid25N, Raid10H, Raid25H);
-			me->SetMaxHealth(MorchokHealth);
-			me->SetFullHealth();
-			me->SetObjectScale(1);
+            Raid10N = 23400130;
+            Raid10H = 13957449;
+            Raid25N = 66299996;
+            Raid25H = 58631360;
+            MorchokHealth = RAID_MODE(Raid10N, Raid25N, Raid10H, Raid25H);
+            me->SetMaxHealth(MorchokHealth);
+            me->SetFullHealth();
+            me->SetObjectScale(1);
             events.SetPhase(PHASE_NORMAL);
             events.ScheduleEvent(EVENT_STOMP, urand(9000, 14000));
             events.ScheduleEvent(EVENT_CRUSH_ARMOR, urand(10000, 15000));
             events.ScheduleEvent(EVENT_RESONATING_CRYSTAL, urand(25000, 35000));
             events.ScheduleEvent(EVENT_PHASE_BLACK_BLOOD, urand(45000, 55000));
-            events.ScheduleEvent(EVENT_ENRAGE, 447000);	
-        }			
+            events.ScheduleEvent(EVENT_ENRAGE, 447000);
+        }
 
         void EnterCombat(Unit* /*who*/)
         {
             Talk(SAY_AGGRO);
-            _EnterCombat();			    
+            _EnterCombat();
         }
 
         void JustDied(Unit* /*killer*/)
         {
-            Talk(SAY_DEATH);			
+            Talk(SAY_DEATH);
         }
 
-		void EnterEvadeMode()
-		{
-			events.Reset();
-			summons.DespawnAll();
-			me->GetMotionMaster()->MoveTargetedHome();
-			me->SetObjectScale(1);
-			_Reset();
-			_EnterEvadeMode();
-		}
-		
+        void EnterEvadeMode()
+        {
+            events.Reset();
+            summons.DespawnAll();
+            me->GetMotionMaster()->MoveTargetedHome();
+            me->SetObjectScale(1);
+            _Reset();
+            _EnterEvadeMode();
+        }
+
         void KilledUnit(Unit* victim)
         {
             if (victim->GetTypeId() == TYPEID_PLAYER)
@@ -128,18 +128,18 @@ public:
 
         void DamageTaken(Unit* /*attacker*/, uint32& damage)
         {
-            if (me->HealthBelowPct(80) && me->HealthAbovePct(71) )
+            if (me->HealthBelowPct(80) && me->HealthAbovePct(71))
                 me->SetObjectScale(0.7);
             else if(me->HealthBelowPct(70) && me->HealthAbovePct(61))
-				me->SetObjectScale(0.6);
-			else if(me->HealthBelowPct(60) && me->HealthAbovePct(51))
-				me->SetObjectScale(0.5);
-			else if(me->HealthBelowPct(50) && me->HealthAbovePct(41))
-				me->SetObjectScale(0.4);
-			else if(me->HealthBelowPct(40) && me->HealthAbovePct(31))
-				me->SetObjectScale(0.3);
-			else if(me->HealthBelowPct(20))
-				DoCast(me, SPELL_FURIOUS);
+                me->SetObjectScale(0.6);
+            else if(me->HealthBelowPct(60) && me->HealthAbovePct(51))
+                me->SetObjectScale(0.5);
+            else if(me->HealthBelowPct(50) && me->HealthAbovePct(41))
+                me->SetObjectScale(0.4);
+            else if(me->HealthBelowPct(40) && me->HealthAbovePct(31))
+                me->SetObjectScale(0.3);
+            else if(me->HealthBelowPct(20))
+                DoCast(me, SPELL_FURIOUS);
         }
 
         void UpdateAI(uint32 diff)
@@ -163,7 +163,7 @@ public:
                 case EVENT_STOMP:
                     if (events.IsInPhase(PHASE_NORMAL))
                         DoCastVictim(SPELL_STOMP);
-                    events.ScheduleEvent(EVENT_STOMP, urand(12000, 18000));						
+                    events.ScheduleEvent(EVENT_STOMP, urand(12000, 18000));
                     break;
                 case EVENT_CRUSH_ARMOR:
                     if (events.IsInPhase(PHASE_NORMAL))
@@ -182,13 +182,13 @@ public:
                 case EVENT_PHASE_BLACK_BLOOD:
                     events.SetPhase(PHASE_BLACK_BLOOD);
                     events.ScheduleEvent(EVENT_EARTHS_VENGEANCE, 100);
-                    break;							
+                    break;
                 case EVENT_EARTHS_VENGEANCE:
                     DoCast(me, SPELL_EARTHS_VENGEANCE_CHANNEL);
                     float x, y, z, x1, y1, x2, y2, x3, y3, x4, y4;
                     x = me->GetPositionX();
                     y = me->GetPositionY();
-                    z = me->GetPositionZ() - 3;	
+                    z = me->GetPositionZ() - 3;
                     x1 = x + urand(18, 25);
                     y1 = y + urand(18, 25);
                     x2 = x + urand(18, 25);
@@ -196,7 +196,7 @@ public:
                     x3 = x - urand(18, 25);
                     y3 = y + urand(18, 25);
                     x4 = x - urand(18, 25);
-                    y4 = y - urand(18, 25);							
+                    y4 = y - urand(18, 25);
                     //me->SummonCreature(NPC_MINNOR_RESONATING_CRYSTAL, x1, y1, z, 0, TEMPSUMMON_TIMED_DESPAWN, 10000);
                     //me->SummonCreature(NPC_MINNOR_RESONATING_CRYSTAL, x2, y2, z, 0, TEMPSUMMON_TIMED_DESPAWN, 10000);
                     //me->SummonCreature(NPC_MINNOR_RESONATING_CRYSTAL, x3, y3, z, 0, TEMPSUMMON_TIMED_DESPAWN, 10000);
@@ -212,7 +212,7 @@ public:
                     events.ScheduleEvent(EVENT_PHASE_NORMAL, 100, 0, PHASE_BLACK_BLOOD);
                     break;
                 case EVENT_PHASE_NORMAL:
-                    events.SetPhase(PHASE_NORMAL);							
+                    events.SetPhase(PHASE_NORMAL);
                     events.ScheduleEvent(EVENT_PHASE_BLACK_BLOOD, urand(30000, 50000));
                     break;
                 case EVENT_ENRAGE:
@@ -226,7 +226,7 @@ public:
             }
 
             DoMeleeAttackIfReady();
-        }			
+        }
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -245,11 +245,11 @@ public:
         npc_resonating_crystalAI(Creature* creature) : ScriptedAI(creature),
             _instance(creature->GetInstanceScript())
         {
-			me->AttackStop();
-			me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+            me->AttackStop();
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
         }
 
-		int32 count;
+        int32 count;
         void Reset()
         {
             _events.Reset();
@@ -257,7 +257,7 @@ public:
             _events.ScheduleEvent(EVENT_ANTI_EXPLODE, 500);
             _events.ScheduleEvent(EVENT_EXPLODE, 11900);
             _events.ScheduleEvent(EVENT_DESPAWN, 12000);
-			count = 0;
+            count = 0;
         }
 
         void UpdateAI(uint32 diff)
@@ -276,7 +276,7 @@ public:
                 {
                 case EVENT_RESONATING:
                     DoCast(me, SPELL_RESONATING_CRYSTAL_AURA);
-                    break;											
+                    break;
                 case EVENT_EXPLODE:
                     {
                         Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
@@ -285,13 +285,13 @@ public:
                             for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                             {
                                 if (i->getSource()->isAlive())
-                                {								
+                                {
                                     i->getSource()->RemoveAurasDueToSpell(SPELL_SAFE);
                                     i->getSource()->RemoveAurasDueToSpell(SPELL_WARNING);
-                                    i->getSource()->RemoveAurasDueToSpell(SPELL_DANGER);										
+                                    i->getSource()->RemoveAurasDueToSpell(SPELL_DANGER);
                                 }
                             }
-                        }					
+                        }
                         DoCast(me, SPELL_RESONATING_CRYSTAL_EX);
                         break;
                     }
@@ -304,11 +304,11 @@ public:
                             for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                             {
                                 if (i->getSource()->isAlive())
-                                {								
+                                {
                                     if (me->GetExactDist(i->getSource()) < 3.0f)
                                     {
                                         count++;
-                                    }										
+                                    }
                                 }
                             }
                         }
@@ -336,20 +336,20 @@ public:
                                         DoCast(i->getSource(), SPELL_WARNING);
                                         i->getSource()->RemoveAurasDueToSpell(SPELL_DANGER);
                                         i->getSource()->RemoveAurasDueToSpell(SPELL_SAFE);
-                                    }	
+                                    }
                                     else
                                     {
                                         DoCast(i->getSource(), SPELL_SAFE);
                                         i->getSource()->RemoveAurasDueToSpell(SPELL_WARNING);
-                                        i->getSource()->RemoveAurasDueToSpell(SPELL_DANGER);											
+                                        i->getSource()->RemoveAurasDueToSpell(SPELL_DANGER);
                                         _events.ScheduleEvent(EVENT_DESPAWN, 2000);
-                                    }										
+                                    }
                                 }
                             }
-                        }							
-                        _events.ScheduleEvent(EVENT_ANTI_EXPLODE, 500);			
-                        break;	
-                    }	
+                        }
+                        _events.ScheduleEvent(EVENT_ANTI_EXPLODE, 500);
+                        break;
+                    }
                 case EVENT_DESPAWN:
                     {
                         Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
@@ -358,16 +358,16 @@ public:
                             for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                             {
                                 if (i->getSource()->isAlive())
-                                {								
+                                {
                                     i->getSource()->RemoveAurasDueToSpell(SPELL_SAFE);
                                     i->getSource()->RemoveAurasDueToSpell(SPELL_WARNING);
-                                    i->getSource()->RemoveAurasDueToSpell(SPELL_DANGER);										
+                                    i->getSource()->RemoveAurasDueToSpell(SPELL_DANGER);
                                 }
                             }
-                        }						
+                        }
                         me->DespawnOrUnsummon();
                         break;
-                    }	
+                    }
                 default:
                     break;
                 }
@@ -452,9 +452,8 @@ public:
         {
             Unit* caster = GetCaster();
             int32 damage;
-			int32 count = 1;
+            int32 count = 1;
             damage = 675000;
-            
 
             if (caster->GetMap()->IsHeroic())
             {
@@ -468,7 +467,7 @@ public:
                 if (caster->GetMap()->Is25ManRaid())
                     damage = 2000000;
                 else
-                    damage = 675000;				
+                    damage = 675000;
             }
 
             Map::PlayerList const &PlayerList = caster->GetMap()->GetPlayers();
@@ -481,8 +480,8 @@ public:
                             count++;
                         }
                     }
-			damage = damage / count;
-			SetHitDamage(damage);
+            damage = damage / count;
+            SetHitDamage(damage);
         }
 
         void Register()
@@ -514,12 +513,12 @@ public:
             if (!PlayerList.isEmpty())
                 for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                     if (i->getSource()->isAlive())
-                    {							
+                    {
                         if (!caster->IsWithinLOSInMap(i->getSource()))
                         {
                             i->getSource()->RemoveAurasDueToSpell(103785); //TODO this just remove aura stacks but i->getSource() should not receive damage at all
                         }
-                    }		
+                    }
         }
 
         void Register()
