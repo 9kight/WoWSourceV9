@@ -129,15 +129,15 @@ public:
         void DamageTaken(Unit* /*attacker*/, uint32& damage)
         {
             if (me->HealthBelowPct(80) && me->HealthAbovePct(71))
-                me->SetObjectScale(0.7);
+                me->SetObjectScale(0.7f);
             else if(me->HealthBelowPct(70) && me->HealthAbovePct(61))
-                me->SetObjectScale(0.6);
+                me->SetObjectScale(0.6f);
             else if(me->HealthBelowPct(60) && me->HealthAbovePct(51))
-                me->SetObjectScale(0.5);
+                me->SetObjectScale(0.5f);
             else if(me->HealthBelowPct(50) && me->HealthAbovePct(41))
-                me->SetObjectScale(0.4);
+                me->SetObjectScale(0.4f);
             else if(me->HealthBelowPct(40) && me->HealthAbovePct(31))
-                me->SetObjectScale(0.3);
+                me->SetObjectScale(0.3f);
             else if(me->HealthBelowPct(20))
                 DoCast(me, SPELL_FURIOUS);
         }
