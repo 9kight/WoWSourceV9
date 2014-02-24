@@ -6458,6 +6458,14 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                         basepoints0 = int32(CalculatePct(damage, triggerAmount) / (blessHealing->GetMaxDuration() / blessHealing->Effects[0].Amplitude));
                     }
                     break;
+                // Priest Shadow T12 2p bonus
+                case 99155:
+                {
+                    triggered_spell_id = 99156;
+                    target= victim;
+                    basepoints0 = damage * 0.2;
+                    break;
+                }
             }
             break;
         }
@@ -6677,6 +6685,26 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                     CastCustomSpell(70691, SPELLVALUE_BASE_POINT0, damage, victim, true);
                     return true;
                 }
+                // Druid Feral T12 2p bonus
+                case 99001:
+                {
+                    triggered_spell_id = 99002;
+                    target= victim;
+                    basepoints0 = damage * 0.5f;
+                    break;
+                }
+                // Rogue T12 2p bonus (wrong dbc)
+                case 99174:
+                {
+                    triggered_spell_id = 99173;
+                    target= victim;
+                    basepoints0 = damage * 0.3f;
+                    if (victim->GetAura(99173, GetGUID()))
+                    {
+                        basepoints0 += (victim->GetRemainingPeriodicAmount(GetGUID(), 99173, SPELL_AURA_PERIODIC_DAMAGE));
+                    }
+                    break;
+                }
             }
             break;
         }
@@ -6864,6 +6892,15 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
         {
             switch (dummySpell->Id)
             {
+                case 3579: // Lock and Load
+                {
+                    // Proc only from periodic (from trap activation proc another aura of this spell)
+                    if (!(procFlag & PROC_FLAG_DONE_PERIODIC)
+                            || !roll_chance_i(triggerAmount)) return false;
+                    triggered_spell_id = 56453;
+                    target = this;
+                    break;
+                }
                 case 53480: // Roar of Sacrifice
                 {
                     Unit* pet = triggeredByAura->GetCaster();
@@ -7368,6 +7405,20 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                         default:
                             return false;
                     }
+                    break;
+                }
+                case 99074: // Paladin Protection T12 2p bonus
+                {
+                    triggered_spell_id = 99075;
+                    target = victim;
+                    basepoints0 = damage * 0.2f;
+                    break;
+                }
+                case 99093: // Paladin Retribution T12 2p bonus
+                {
+                    triggered_spell_id = 99092;
+                    target= victim;
+                    basepoints0 = damage * 0.15f / 2;
                     break;
                 }
             }
@@ -8487,6 +8538,25 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 /*damage*/, Aura* triggeredByAura
                     break;
             }
             break;
+        }
+        case SPELLFAMILY_SHAMAN:
+        {
+            switch (dummySpell->Id)
+            {
+                // Shaman - Elemental T12 2p bonus
+                case 99204:
+                    if(Player* player = this->ToPlayer())
+                    {
+                        // this proc will reduce the fire elemental totem cooldown by 4 secs.
+                        if(player->HasSpellCooldown(2894))
+                        {
+                            player->ModifySpellCooldown(2894, -4000);
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
     }
     return false;
@@ -11619,7 +11689,7 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                                     }
                                 }
 
-                                crit_chance += damage;
+                                //crit_chance += damage;
                             }
                             break;
                         }
@@ -11727,12 +11797,13 @@ uint32 Unit::SpellCriticalDamageBonus(SpellInfo const* spellProto, uint32 damage
             crit_bonus += damage;
             break;
         default:
+            crit_bonus += damage / 2;                       // for spells is 50%
             // 4.0.1 All mage and warlock spells now crit for 200% damage.
-            if (spellProto->SpellFamilyName == SPELLFAMILY_MAGE || spellProto->SpellFamilyName == SPELLFAMILY_WARLOCK)
-                crit_bonus += damage;
-            else
-                crit_bonus += damage / 2;                       // for spells is 50%
-            break;
+            //if (spellProto->SpellFamilyName == SPELLFAMILY_MAGE || spellProto->SpellFamilyName == SPELLFAMILY_WARLOCK)
+            //    crit_bonus += damage;
+            //else
+            //    crit_bonus += damage / 2;                       // for spells is 50%
+            //break;
     }
 
     crit_mod += (GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, spellProto->GetSchoolMask()) - 1.0f) * 100;
