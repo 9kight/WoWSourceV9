@@ -3402,14 +3402,14 @@ public:
 
 // Gurthalak, Voice of the Deeps - Tentacles Attack
 // TODO: Tentacles should not move / Gain Damage spell calculation from AP/STRG (Spell 52586)
-class npc_Tentacle_of_the_Old_Ones : public CreatureScript
+class npc_tentacle_of_the_old_ones : public CreatureScript
 {
     public:
-        npc_Tentacle_of_the_Old_Ones() : CreatureScript("npc_Tentacle_of_the_Old_Ones") { }
+        npc_tentacle_of_the_old_ones() : CreatureScript("npc_tentacle_of_the_old_ones") { }
 
-        struct npc_Tentacle_of_the_Old_OnesAI : CasterAI
+        struct npc_tentacle_of_the_old_onesAI : CasterAI
         {
-            npc_Tentacle_of_the_Old_OnesAI(Creature* creature) : CasterAI(creature) {}
+            npc_tentacle_of_the_old_onesAI(Creature* creature) : CasterAI(creature) {}
 
             void InitializeAI()
             {
@@ -3427,8 +3427,280 @@ class npc_Tentacle_of_the_Old_Ones : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return new npc_Tentacle_of_the_Old_OnesAI(creature);
+            return new npc_tentacle_of_the_old_onesAI(creature);
         }
+};
+
+class npc_t12_mirror_image : public CreatureScript
+{
+public:
+    npc_t12_mirror_image() : CreatureScript("npc_t12_mirror_image") { }
+
+    struct npc_t12_mirror_imageAI : CasterAI
+    {
+        npc_t12_mirror_imageAI(Creature* creature) : CasterAI(creature) {}
+        uint32 damagespellid;
+        uint32 checkTimer;
+        float followdist;
+
+        void InitializeAI()
+        {
+            CasterAI::InitializeAI();
+            Unit* owner = me->GetOwner();
+            if (!owner)
+                return;
+            owner->CastSpell((Unit*)NULL, 58838, true);
+            // here should be auras (not present in client dbc): 35657, 35658, 35659, 35660 selfcasted by mirror images (stats related?)
+
+            owner->CastSpell(me, 45204, true); // Clone Me!
+            owner->CastSpell(me, 41054, true); // Clone main hand
+            owner->CastSpell(me, 45205, true); // Clone off hand
+            //t12 mirror images will only cast a fireball (hits harder than the normal mirror image)
+            damagespellid = 99062;
+            followdist = PET_FOLLOW_DIST *2;
+            owner = me->ToTempSummon()->GetSummoner();
+            checkTimer = 250;
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (checkTimer <= diff)
+            {
+                if (!me->GetOwner() || !me->GetOwner()->ToPlayer())
+                    return;
+                Player* owner = me->GetOwner()->ToPlayer();
+                //actions by mirror images
+                if(owner->isInCombat()){
+                    if (Unit* target =owner->GetSelectedUnit())
+                    {
+                        if (target->HasAuraTypeWithFamilyFlags(SPELL_AURA_MOD_CONFUSE,SPELLFAMILY_MAGE, 0x01000000))
+                        {
+                            Aura* poly = NULL;
+                            if (target->HasAura(118))            //polymorph sheep
+                                poly = target->GetAura(118);
+                            else if (target->HasAura(28272))     //polymorph pig
+                                poly = target->GetAura(28272);
+                            else if (target->HasAura(28271))     //polymorph turtle
+                                poly = target->GetAura(28271);
+                            else if (target->HasAura(61305))     //polymorph black cat
+                                poly = target->GetAura(61305);
+                            else if (target->HasAura(61721))     //polymorph rabbit
+                                poly = target->GetAura(61721);
+                            else if (target->HasAura(61780))     //polymorph turkey
+                                poly = target->GetAura(61780);
+
+                            if (poly != NULL && poly->GetCasterGUID() == owner->GetGUID()){
+                                // will get back to the caster if his/her target is polymorphed
+                                me->GetMotionMaster()->Clear(false);
+                                me->GetMotionMaster()->MoveFollow(owner, followdist, me->GetFollowAngle(), MOTION_SLOT_ACTIVE);
+                                checkTimer=200;
+                            }
+                        }
+                        else
+                        {
+                            if (me->HasUnitState(UNIT_STATE_CASTING))
+                            { //does not interrupt himself while casting
+                                checkTimer=200;
+                            }
+                            else
+                            {
+                                // fireball spam on target
+                                me->CastSpell(target, damagespellid);
+                                checkTimer=2500;
+                            }
+                        }
+                    }
+                }
+                else
+                { //if out of combat will simply follow the caster
+                    me->GetMotionMaster()->Clear(false);
+                    me->GetMotionMaster()->MoveFollow(owner, followdist, me->GetFollowAngle(), MOTION_SLOT_ACTIVE);
+                    checkTimer=200;
+                }
+            }
+            else
+                checkTimer -=diff;
+        }
+
+        // Do not reload Creature templates on evade mode enter - prevent visual lost
+        void EnterEvadeMode()
+        {
+            if (me->IsInEvadeMode() || !me->isAlive())
+                return;
+
+            Unit* owner = me->GetCharmerOrOwner();
+
+            me->CombatStop(true);
+            if (owner && !me->HasUnitState(UNIT_STATE_FOLLOW))
+            {
+                me->GetMotionMaster()->Clear(false);
+                me->GetMotionMaster()->MoveFollow(owner, followdist, me->GetFollowAngle(), MOTION_SLOT_ACTIVE);
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_t12_mirror_imageAI(creature);
+    }
+};
+
+class npc_t12_fiery_imp : public CreatureScript
+{
+public:
+    npc_t12_fiery_imp() : CreatureScript("npc_t12_fiery_imp") { }
+
+    struct npc_t12_fiery_impAI : CasterAI
+    {
+        npc_t12_fiery_impAI(Creature* creature) : CasterAI(creature) {}
+        uint32 checkTimer;
+        float followdist;
+
+        void InitializeAI()
+        {
+            CasterAI::InitializeAI();
+            Unit* owner = me->GetOwner();
+            if (!owner)
+                return;
+            followdist = PET_FOLLOW_DIST *2;
+            owner = me->ToTempSummon()->GetSummoner();
+            checkTimer = 250;
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (checkTimer <= diff)
+            {
+                if (!me->GetOwner() || !me->GetOwner()->ToPlayer())
+                    return;
+                Player* owner = me->GetOwner()->ToPlayer();
+                //actions by the fiery imp
+                if(owner->isInCombat()){
+                    if (Unit* target =owner->GetSelectedUnit())
+                    {
+                        if (me->HasUnitState(UNIT_STATE_CASTING))
+                        { //does not interrupt himself while casting
+                            checkTimer=200;
+                        }
+                        else
+                        {
+                            // flame blast spam on target
+                            me->CastSpell(target, 99226);
+                            checkTimer=2500;
+                        }
+                    }
+                }
+                else
+                { //if out of combat will simply follow the caster
+                    me->GetMotionMaster()->Clear(false);
+                    me->GetMotionMaster()->MoveFollow(owner, followdist, me->GetFollowAngle(), MOTION_SLOT_ACTIVE);
+                    checkTimer=200;
+                }
+            }
+            else
+                checkTimer -=diff;
+        }
+
+        // Do not reload Creature templates on evade mode enter - prevent visual lost
+        void EnterEvadeMode()
+        {
+            if (me->IsInEvadeMode() || !me->isAlive())
+                return;
+
+            Unit* owner = me->GetCharmerOrOwner();
+
+            me->CombatStop(true);
+            if (owner && !me->HasUnitState(UNIT_STATE_FOLLOW))
+            {
+                me->GetMotionMaster()->Clear(false);
+                me->GetMotionMaster()->MoveFollow(owner, followdist, me->GetFollowAngle(), MOTION_SLOT_ACTIVE);
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_t12_fiery_impAI(creature);
+    }
+};
+
+class npc_t12_burning_treant : public CreatureScript
+{
+public:
+    npc_t12_burning_treant() : CreatureScript("npc_t12_burning_treant") { }
+
+    struct npc_t12_burning_treantAI : CasterAI
+    {
+        npc_t12_burning_treantAI(Creature* creature) : CasterAI(creature) {}
+        uint32 checkTimer;
+        float followdist;
+
+        void InitializeAI()
+        {
+            CasterAI::InitializeAI();
+            Unit* owner = me->GetOwner();
+            if (!owner)
+                return;
+            followdist = PET_FOLLOW_DIST *2;
+            owner = me->ToTempSummon()->GetSummoner();
+            checkTimer = 250;
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (checkTimer <= diff)
+            {
+                if (!me->GetOwner() || !me->GetOwner()->ToPlayer())
+                    return;
+                Player* owner = me->GetOwner()->ToPlayer();
+                //actions by the burning treant
+                if(owner->isInCombat()){
+                    if (Unit* target =owner->GetSelectedUnit())
+                    {
+                        if (me->HasUnitState(UNIT_STATE_CASTING))
+                        { //does not interrupt himself while casting
+                            checkTimer=200;
+                        }
+                        else
+                        {
+                            // fire seed spam on target
+                            me->CastSpell(target, 99026);
+                            checkTimer=2000;
+                        }
+                    }
+                }
+                else
+                { //if out of combat will simply follow the caster
+                    me->GetMotionMaster()->Clear(false);
+                    me->GetMotionMaster()->MoveFollow(owner, followdist, me->GetFollowAngle(), MOTION_SLOT_ACTIVE);
+                    checkTimer=200;
+                }
+            }
+            else
+                checkTimer -=diff;
+        }
+
+        // Do not reload Creature templates on evade mode enter - prevent visual lost
+        void EnterEvadeMode()
+        {
+            if (me->IsInEvadeMode() || !me->isAlive())
+                return;
+
+            Unit* owner = me->GetCharmerOrOwner();
+
+            me->CombatStop(true);
+            if (owner && !me->HasUnitState(UNIT_STATE_FOLLOW))
+            {
+                me->GetMotionMaster()->Clear(false);
+                me->GetMotionMaster()->MoveFollow(owner, followdist, me->GetFollowAngle(), MOTION_SLOT_ACTIVE);
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_t12_burning_treantAI(creature);
+    }
 };
 
 void AddSC_npcs_special()
@@ -3472,5 +3744,8 @@ void AddSC_npcs_special()
     new npc_fungal_growth_two();
     new npc_consecration();
     new npc_melee_guardian();
-	new npc_Tentacle_of_the_Old_Ones();
+    new npc_tentacle_of_the_old_ones();
+    new npc_t12_mirror_image();
+    new npc_t12_fiery_imp();
+    new npc_t12_burning_treant();
 }
