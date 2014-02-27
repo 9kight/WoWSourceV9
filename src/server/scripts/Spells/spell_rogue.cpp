@@ -1200,7 +1200,7 @@ class spell_rogue_glyph_of_hemorrhage : public SpellScriptLoader
                 return;
 
             uint32 const damage = procInfo.GetDamageInfo()->GetDamage();
-            int32 const value = CalculatePct(damage, aurEff->GetAmount());
+            int32 const value = CalculatePct(damage, aurEff->GetAmount()) / 8; // total 40% damage will proc every 3s for 24s, so divide by 8
             uint32 const triggerSpellId = GetSpellInfo()->Effects[EFFECT_0].TriggerSpell;
 
             GetCaster()->CastCustomSpell(target, triggerSpellId, &value, NULL, NULL, true);
