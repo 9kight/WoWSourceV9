@@ -801,15 +801,11 @@ class npc_rageface: public CreatureScript
                         switch (eventId)
                         {
                             case EVENT_CHANGE_TARGET:
-                                if (!me->GetVictim()->HasAura(SPELL_RAGE)
-                                        && !me->HasAura(
-                                                RAID_MODE(SPELL_FACE_RAGE_10N, SPELL_FACE_RAGE_25N, SPELL_FACE_RAGE_10H,
-                                                        SPELL_FACE_RAGE_25H)))
-                                    SelectNewTarget();
-
+                                if(me->GetVictim())
+                                    if (!me->GetVictim()->HasAura(SPELL_RAGE) && !me->HasAura(RAID_MODE(SPELL_FACE_RAGE_10N, SPELL_FACE_RAGE_25N, SPELL_FACE_RAGE_10H, SPELL_FACE_RAGE_25H)))
+                                        SelectNewTarget();
                                 events.ScheduleEvent(EVENT_CHANGE_TARGET, urand(9000, 15000));
                                 break;
-
                             case EVENT_FACE_RAGE:
                                 if (Unit *FaceRageTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 500, true))
                                 {
@@ -825,7 +821,6 @@ class npc_rageface: public CreatureScript
                                 }
                                 events.ScheduleEvent(EVENT_FACE_RAGE, 61000);
                                 break;
-
                             case EVENT_PRISON_DOG_ATTACK_RAGEFACE:
                                 if (Creature *prison = me->FindNearestCreature(NPC_CRYSTAL_PRISON, 50.0f, true))
                                 {
@@ -835,7 +830,6 @@ class npc_rageface: public CreatureScript
                                         events.ScheduleEvent(EVENT_PRISON_DOG_ATTACK_RAGEFACE, 1000);
                                 }
                                 break;
-
                             default:
                                 break;
                         }
