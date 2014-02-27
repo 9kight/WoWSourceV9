@@ -1019,9 +1019,10 @@ void Battleground::EndBattleground(uint32 winner)
                 UpdatePlayerScore(player, SCORE_BONUS_HONOR, loser_honor);
         }
 
-        if(player->GetTeam() && m_BgRaids[player->GetTeam()])
-            if (Guild* guild = sGuildMgr->GetGuildById(player->GetGuildId()))
-                guild->GetChallengesMgr()->CheckBattlegroundChallenge(this, m_BgRaids[player->GetTeam()]);
+        if (isBattleground())
+            if(player->GetTeam() && m_BgRaids[player->GetTeam()])
+                if (Guild* guild = sGuildMgr->GetGuildById(player->GetGuildId()))
+                    guild->GetChallengesMgr()->CheckBattlegroundChallenge(this, m_BgRaids[player->GetTeam()]);
 
         player->ResetAllPowers();
         player->CombatStopWithPets(true);
