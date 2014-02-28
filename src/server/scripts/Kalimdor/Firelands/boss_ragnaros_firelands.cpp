@@ -1772,12 +1772,13 @@ class npc_living_meteor: public CreatureScript
                 {
                     if (m_uiRangeCheckTimer <= diff)
                     {
-                        if (me->IsWithinDistInMap(me->GetVictim(), 2.0f))
-                        {
-                            DoCast(me, SPELL_IMPACT);
-                            me->GetVictim()->RemoveAurasDueToSpell(SPELL_FLAMING_FIXATE);
-                            me->DespawnOrUnsummon();
-                        }
+                        if(me->GetVictim())
+                            if (me->IsWithinDistInMap(me->GetVictim(), 2.0f))
+                            {
+                                DoCast(me, SPELL_IMPACT);
+                                me->GetVictim()->RemoveAurasDueToSpell(SPELL_FLAMING_FIXATE);
+                                me->DespawnOrUnsummon();
+                            }
 
                         m_uiRangeCheckTimer = 2000;
                     }
@@ -1786,8 +1787,11 @@ class npc_living_meteor: public CreatureScript
 
                     if (m_uiTargetChangeTimer <= diff)
                     {
-                        me->GetVictim()->RemoveAurasDueToSpell(SPELL_FLAMING_FIXATE);
-                        me->AddThreat(me->GetVictim(), -1000.0f);
+                        if(me->GetVictim())
+                        {
+                            me->GetVictim()->RemoveAurasDueToSpell(SPELL_FLAMING_FIXATE);
+                            me->AddThreat(me->GetVictim(), -1000.0f);
+                        }
 
                         if (Unit *target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
                         {
