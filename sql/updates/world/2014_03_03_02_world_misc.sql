@@ -171,3 +171,14 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 VALUES (40320, 0, 0, 'If they do not kill you, I will do it myself!', 1, 0, 0, 0, 0, 18523, 'VO_GB_Valiona_Event01');
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`)
 VALUES (40320, 1, 0, 'I will not die for you, Drahga.', 1, 0, 0, 0, 0, 18524, 'VO_GB_Valiona_Event02');
+
+DELETE FROM `creature_text` WHERE `entry`=34748;
+INSERT INTO `creature_text` VALUES ('34748', '0', '0', 'Well, but you are Cingla ? You try to spray me ?', '12', '0', '100', '5', '0', '0', '');
+INSERT INTO `creature_text` VALUES ('34748', '0', '1', 'Please, tel me that this monster of prince didn\'t survive!', '12', '0', '100', '5', '0', '0', '');
+INSERT INTO `creature_text` VALUES ('34748', '0', '2', 'Thank you. But hey, don\'t forget that you owe me money, Kevin!', '12', '0', '100', '5', '0', '0', '');
+INSERT INTO `creature_text` VALUES ('34748', '0', '3', 'Then like it, you go to the explosive to open my rescue capsule. I like your style!', '12', '0', '100', '5', '0', '0', '');
+INSERT INTO `creature_text` VALUES ('34748', '0', '4', 'But that took A these boats of the Alliance we take Dessusa? And there was not a boat of the Horde, also?', '12', '0', '100', '5', '0', '0', '');
+INSERT INTO `creature_text` VALUES ('34748', '0', '5', 'Pattern is prepared! Thank you!', '12', '0', '100', '5', '0', '0', '');
+INSERT INTO `creature_text` VALUES ('34748', '0', '6', 'Well, but you are Cingla ? You try to spray me ?', '12', '0', '100', '5', '0', '0', '');
+INSERT INTO `creature_text` VALUES ('34748', '0', '7', 'Boss? Had told me you were remained.', '12', '0', '100', '5', '0', '0', '');
+INSERT INTO `creature_text` VALUES ('34748', '0', '8', 'And with just a crowbar, it would not have sufficient?', '12', '0', '100', '5', '0', '0', '');
