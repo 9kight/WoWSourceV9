@@ -112,16 +112,16 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 
 DELETE FROM `creature_text` WHERE `entry`=18999;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
-(18999,0,0, 'Hey, did you read the bounty on this wanted poster?',12,7,100,6,0,0, 'Allerian Defender'),
-(18999,0,1, 'The Bone Wastes! I don''t care what''s being offered as a reward, I''m not going into the Bone Wastes!',12,7,100,6,0,0, 'Allerian Defender'),
-(18999,0,2, 'This wanted poster says that they''re offering gold to these so-called adventurers to go kill things. Isn''t that what we do? I don''t think I''m being paid enough!',12,7,100,6,0,0, 'Allerian Defender'),
-(18999,0,3, 'You want to go do the bounty off of this wanted poster after the shift is over?',12,7,100,6,0,0, 'Allerian Defender'),
-(18999,0,4, 'This poster has a bounty on bonelashers. You think I should do that?',12,7,100,6,0,0, 'Allerian Defender'),
-(18999,1,0, 'Is that wanted poster all that you''re going to talk about today?',12,7,100,1,0,0, 'Allerian Defender'),
-(18999,1,1, 'I''m up to looking into that bounty after this shift.',12,7,100,1,0,0, 'Allerian Defender'),
-(18999,1,2, 'I could use the extra money.',12,7,100,1,0,0, 'Allerian Defender'),
-(18999,1,3, 'I don''t know and I don''t care.',12,7,100,1,0,0, 'Allerian Defender'),
-(18999,1,4, 'The bonelashers of the wastes are no laughing matter. I hear they carry diseases!',12,7,100,1,0,0, 'Allerian Defender');
+(18999, 0, 0, 'Hey, did you read the bounty on this wanted poster?',12,7,100,6,0,0, 'Allerian Defender'),
+(18999, 0, 1, 'The Bone Wastes! I don''t care what''s being offered as a reward, I''m not going into the Bone Wastes!',12,7,100,6,0,0, 'Allerian Defender'),
+(18999, 0, 2, 'This wanted poster says that they''re offering gold to these so-called adventurers to go kill things. Isn''t that what we do? I don''t think I''m being paid enough!',12,7,100,6,0,0, 'Allerian Defender'),
+(18999, 0, 3, 'You want to go do the bounty off of this wanted poster after the shift is over?',12,7,100,6,0,0, 'Allerian Defender'),
+(18999, 0, 4, 'This poster has a bounty on bonelashers. You think I should do that?',12,7,100,6,0,0, 'Allerian Defender'),
+(18999, 1, 0, 'Is that wanted poster all that you''re going to talk about today?',12,7,100,1,0,0, 'Allerian Defender'),
+(18999, 1, 1, 'I''m up to looking into that bounty after this shift.',12,7,100,1,0,0, 'Allerian Defender'),
+(18999, 1, 2, 'I could use the extra money.',12,7,100,1,0,0, 'Allerian Defender'),
+(18999, 1, 3, 'I don''t know and I don''t care.',12,7,100,1,0,0, 'Allerian Defender'),
+(18999, 1, 4, 'The bonelashers of the wastes are no laughing matter. I hear they carry diseases!',12,7,100,1,0,0, 'Allerian Defender');
 
 DELETE FROM `creature_text` WHERE `entry`=10184;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
@@ -145,26 +145,26 @@ INSERT INTO `creature_text` VALUES ('2719', '0', '0', '%s enrages', '12', '0', '
 
 DELETE FROM `creature_text` WHERE `entry`=15324;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
-(15324,0,0,"%s goes into a frenzy!",16,0,100,0,0,0,"Qiraji Gladiator");
+(15324, 0, 0, "%s goes into a frenzy!", 16, 0, 100, 0, 0, 0, "Qiraji Gladiator");
 
 DELETE FROM `creature_text` WHERE `entry`=17968;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
-(17968,1,0, 'Your resistance is insignificant.',14,0,100,0,0,10987, 'Archimonde - SAY_AGGRO'),
-(17968,2,0, 'This world will burn!',14,0,100,0,0,10990, 'Archimonde - SAY_DOOMFIRE1'),
-(17968,2,1, 'Manach sheek-thrish!',14,0,100,0,0,11041, 'Archimonde - SAY_DOOMFIRE2'),
-(17968,3,0, 'A-kreesh!',14,0,100,0,0,11041, 'Archimonde - SAY_AIR_BURST1'),
-(17968,3,1, 'Away vermin!',14,0,100,0,0,10989, 'Archimonde - SAY_AIR_BURST2'),
-(17968,4,0, 'All creation will be devoured!',14,0,100,0,0,11044, 'Archimonde - SAY_SLAY1'),
-(17968,4,1, 'Your soul will languish for eternity.',14,0,100,0,0,10991, 'Archimonde - SAY_SLAY12'),
-(17968,4,2, 'I am the coming of the end!',14,0,100,0,0,11045, 'Archimonde - SAY_SLAY3'),
-(17968,5,0, 'At last it is here. Mourn and lament the passing of all you have ever known and all that would have been! Akmin-kurai!',14,0,100,0,0,10993, 'Archimonde - SAY_ENRAGE'),
-(17968,6,0, 'No, it cannot be! Nooo!',14,0,100,0,0,10992, 'Archimonde - SAY_DEATH'),
-(17968,7,0, 'You are mine now.',14,0,100,0,0,10988, 'Archimonde - SAY_SOUL_CHARGE1'),
-(17968,7,1, 'Bow to my will.',14,0,100,0,0,11042, 'Archimonde - SAY_SOUL_CHARGE2');
+(17968, 1, 0, 'Your resistance is insignificant.', 14, 0, 100, 0, 0, 10987, 'Archimonde - SAY_AGGRO'),
+(17968, 2, 0, 'This world will burn!', 14, 0, 100, 0, 0, 10990, 'Archimonde - SAY_DOOMFIRE1'),
+(17968, 2, 1, 'Manach sheek-thrish!', 14, 0, 100, 0, 0, 11041, 'Archimonde - SAY_DOOMFIRE2'),
+(17968, 3, 0, 'A-kreesh!', 14, 0, 100, 0, 0, 11041, 'Archimonde - SAY_AIR_BURST1'),
+(17968, 3, 1, 'Away vermin!', 14, 0, 100, 0, 0, 10989, 'Archimonde - SAY_AIR_BURST2'),
+(17968, 4, 0, 'All creation will be devoured!', 14, 0, 100, 0, 0, 11044, 'Archimonde - SAY_SLAY1'),
+(17968, 4, 1, 'Your soul will languish for eternity.', 14, 0, 100, 0, 0, 10991, 'Archimonde - SAY_SLAY12'),
+(17968, 4, 2, 'I am the coming of the end!', 14, 0, 100, 0, 0, 11045, 'Archimonde - SAY_SLAY3'),
+(17968, 5, 0, 'At last it is here. Mourn and lament the passing of all you have ever known and all that would have been! Akmin-kurai!', 14, 0, 100, 0, 0, 10993, 'Archimonde - SAY_ENRAGE'),
+(17968, 6, 0, 'No, it cannot be! Nooo!', 14, 0, 100, 0, 0, 10992, 'Archimonde - SAY_DEATH'),
+(17968, 7, 0, 'You are mine now.', 14, 0, 100, 0, 0, 10988, 'Archimonde - SAY_SOUL_CHARGE1'),
+(17968, 7, 1, 'Bow to my will.', 14, 0, 100, 0, 0, 11042, 'Archimonde - SAY_SOUL_CHARGE2');
 
 DELETE FROM `creature_text` WHERE `entry`=29281;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`)
-VALUES (29281,0,0, 'My liege! I have done as you asked, and now beseech you for your blessing!',14,0,0,0,0,13856, 'Svala SAY_DIALOG_WITH_ARTHAS_1');
+VALUES (29281,0,0, 'My liege! I have done as you asked, and now beseech you for your blessing!', 14, 0, 0, 0, 0, 13856, 'Svala SAY_DIALOG_WITH_ARTHAS_1');
 
 DELETE FROM `creature_text` WHERE `entry`=40320;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`)
@@ -173,12 +173,13 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 VALUES (40320, 1, 0, 'I will not die for you, Drahga.', 1, 0, 0, 0, 0, 18524, 'VO_GB_Valiona_Event02');
 
 DELETE FROM `creature_text` WHERE `entry`=34748;
-INSERT INTO `creature_text` VALUES ('34748', '0', '0', 'Well, but you are Cingla ? You try to spray me ?', '12', '0', '100', '5', '0', '0', '');
-INSERT INTO `creature_text` VALUES ('34748', '0', '1', 'Please, tel me that this monster of prince didn\'t survive!', '12', '0', '100', '5', '0', '0', '');
-INSERT INTO `creature_text` VALUES ('34748', '0', '2', 'Thank you. But hey, don\'t forget that you owe me money, Kevin!', '12', '0', '100', '5', '0', '0', '');
-INSERT INTO `creature_text` VALUES ('34748', '0', '3', 'Then like it, you go to the explosive to open my rescue capsule. I like your style!', '12', '0', '100', '5', '0', '0', '');
-INSERT INTO `creature_text` VALUES ('34748', '0', '4', 'But that took A these boats of the Alliance we take Dessusa? And there was not a boat of the Horde, also?', '12', '0', '100', '5', '0', '0', '');
-INSERT INTO `creature_text` VALUES ('34748', '0', '5', 'Pattern is prepared! Thank you!', '12', '0', '100', '5', '0', '0', '');
-INSERT INTO `creature_text` VALUES ('34748', '0', '6', 'Well, but you are Cingla ? You try to spray me ?', '12', '0', '100', '5', '0', '0', '');
-INSERT INTO `creature_text` VALUES ('34748', '0', '7', 'Boss? Had told me you were remained.', '12', '0', '100', '5', '0', '0', '');
-INSERT INTO `creature_text` VALUES ('34748', '0', '8', 'And with just a crowbar, it would not have sufficient?', '12', '0', '100', '5', '0', '0', '');
+INSERT INTO `creature_text` VALUES
+(34748, 0, 0, 'Well, but you are Cingla ? You try to spray me ?', 12, 0, 100, 5, 0, 0, ''),
+(34748, 0, 1, 'Please, tel me that this monster of prince didn\'t survive!', 12, 0, 100, 5, 0, 0, ''),
+(34748, 0, 2, 'Thank you. But hey, don\'t forget that you owe me money, Kevin!', 12, 0, 100, 5, 0, 0, ''),
+(34748, 0, 3, 'Then like it, you go to the explosive to open my rescue capsule. I like your style!', 12, 0, 100, 5, 0, 0, ''),
+(34748, 0, 4, 'But that took A these boats of the Alliance we take Dessusa? And there was not a boat of the Horde, also?', 12, 0, 100, 5, 0, 0, ''),
+(34748, 0, 5, 'Pattern is prepared! Thank you!', 12, 0, 100, 5, 0, 0, ''),
+(34748, 0, 6, 'Well, but you are Cingla ? You try to spray me ?', 12, 0, 100, 5, 0, 0, ''),
+(34748, 0, 7, 'Boss? Had told me you were remained.', 12, 0, 100, 5, 0, 0, ''),
+(34748, 0, 8, 'And with just a crowbar, it would not have sufficient?', 12, 0, 100, 5, 0, 0, '');

@@ -1,6 +1,6 @@
--- rong equipment id
-UPDATE creature SET equipment_id=0 WHERE equipment_id=82;
-UPDATE creature SET equipment_id=0 WHERE equipment_id=1;
+-- wrong equipment id
+--UPDATE creature SET equipment_id=0 WHERE equipment_id=82; -- equipment_id field is dropped from creature_template so its not necessary
+--UPDATE creature SET equipment_id=0 WHERE equipment_id=1;
 
 -- errors from console
 DELETE FROM creature_addon WHERE guid=155417;
