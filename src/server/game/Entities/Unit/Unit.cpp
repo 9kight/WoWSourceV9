@@ -6689,20 +6689,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                 case 99001:
                 {
                     triggered_spell_id = 99002;
-                    target= victim;
-                    basepoints0 = damage * 0.5f;
-                    break;
-                }
-                // Rogue T12 2p bonus (wrong dbc)
-                case 99174:
-                {
-                    triggered_spell_id = 99173;
-                    target= victim;
-                    basepoints0 = damage * 0.3f;
-                    if (victim->GetAura(99173, GetGUID()))
-                    {
-                        basepoints0 += (victim->GetRemainingPeriodicAmount(GetGUID(), 99173, SPELL_AURA_PERIODIC_DAMAGE));
-                    }
+                    target = victim;
+                    basepoints0 = damage * 0.05f;
                     break;
                 }
             }
@@ -6865,6 +6853,18 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                         }
                     }
                     return true;
+                }
+                // Rogue T12 2p bonus
+                case 99174:
+                {
+                    triggered_spell_id = 99173;
+                    target= victim;
+                    basepoints0 = damage * 0.3f;
+                    if (victim->GetAura(99173, GetGUID()))
+                    {
+                        basepoints0 += (victim->GetRemainingPeriodicAmount(GetGUID(), 99173, SPELL_AURA_PERIODIC_DAMAGE));
+                    }
+                    break;
                 }
             }
             switch (dummySpell->SpellIconID)
@@ -7417,7 +7417,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                 case 99093: // Paladin Retribution T12 2p bonus
                 {
                     triggered_spell_id = 99092;
-                    target= victim;
+                    target = victim;
                     basepoints0 = damage * 0.15f / 2;
                     break;
                 }
@@ -8959,6 +8959,12 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, uint32 absorb, Au
                         trigger_spell_id = 31616;
                         if (victim && victim->isAlive())
                             victim->getThreatManager().modifyThreatPercent(this, -10);
+                        break;
+                    }
+                    // Shaman Resto T12 - 2P bonus
+                    case 99190:
+                    {
+                        trigger_spell_id = 99189;
                         break;
                     }
                 }
