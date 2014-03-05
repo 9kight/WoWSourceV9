@@ -76,7 +76,7 @@ class boss_hazzarah : public CreatureScript
             {
                 _EnterCombat();
                 Talk(SAY_AGGRO);
-                me->SummonGameObject(GO_THE_CACHE_OF_MADNESS_DOOR, -11938.6, -1843.32, 61.7272, 0.0899053, 0, 0, 0, 0, 0);
+                me->SummonGameObject(GO_THE_CACHE_OF_MADNESS_DOOR, -11938.6f, -1843.32f, 61.7272f, 0.0899053f, 0, 0, 0, 0, 0);
                 events.ScheduleEvent(EVENT_WRATH, 2000);
                 events.ScheduleEvent(EVENT_EARTH_SHOCK, 25000);
                 events.ScheduleEvent(EVENT_NIGHTMARES, 55000);

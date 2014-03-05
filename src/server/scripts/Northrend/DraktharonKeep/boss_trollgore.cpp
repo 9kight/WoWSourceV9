@@ -110,7 +110,7 @@ public:
             instance->SetBossState(DATA_TROLLGORE, IN_PROGRESS);
         }
 
-        void UpdateAI(uint32 diff) 
+        void UpdateAI(uint32 const diff) 
         {
             //Return since we have no target
             if (!UpdateVictim())

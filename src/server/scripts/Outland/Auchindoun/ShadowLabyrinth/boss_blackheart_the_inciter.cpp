@@ -91,7 +91,7 @@ class boss_blackheart_the_inciter : public CreatureScript
                 Talk(SAY_DEATH);
             }
 
-            void UpdateAI(uint32 diff) 
+            void UpdateAI(uint32 const diff) 
             {
                 if (!UpdateVictim())
                     return;

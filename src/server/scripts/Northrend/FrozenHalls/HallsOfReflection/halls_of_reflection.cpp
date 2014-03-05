@@ -341,7 +341,7 @@ class npc_jaina_or_sylvanas_hor : public CreatureScript
             _events.ScheduleEvent(EVENT_WALK_INTRO1, 3000);
         }
 
-        void UpdateAI(uint32 diff) 
+        void UpdateAI(uint32 const diff) 
         {
             _events.Update(diff);
             switch (_events.ExecuteEvent())
@@ -750,7 +750,7 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
             _instance->SetData(DATA_ESCAPE_EVENT, FAIL);
         }
 
-        void DoAction(int32 actionID) 
+        void DoAction(int32 const actionID) 
         {
             switch (actionID)
             {
@@ -781,7 +781,7 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
             }
         }
 
-        void UpdateAI(uint32 diff) 
+        void UpdateAI(uint32 const diff) 
         {
             _events.Update(diff);
 
@@ -1265,7 +1265,7 @@ public:
             _events.ScheduleEvent(EVENT_DARK_MENDING, 20000);
         }
 
-        void UpdateAI(uint32 diff) 
+        void UpdateAI(uint32 const diff) 
         {
             if (!UpdateVictim())
                 return;
@@ -1337,7 +1337,7 @@ public:
             _events.ScheduleEvent(EVENT_HALLUCINATION, 40000);
         }
 
-        void UpdateAI(uint32 diff) 
+        void UpdateAI(uint32 const diff) 
         {
             if (!UpdateVictim())
                 return;
@@ -1423,7 +1423,7 @@ public:
             _events.ScheduleEvent(EVENT_KIDNEY_SHOT, 12000);
         }
 
-        void UpdateAI(uint32 diff) 
+        void UpdateAI(uint32 const diff) 
         {
             if (!UpdateVictim())
                 return;
@@ -1482,7 +1482,7 @@ public:
             _events.ScheduleEvent(EVENT_TORTURED_ENRAGE, 15000);
         }
 
-        void UpdateAI(uint32 diff) 
+        void UpdateAI(uint32 const diff) 
         {
             if (!UpdateVictim())
                 return;
@@ -1537,7 +1537,7 @@ public:
             _events.ScheduleEvent(EVENT_ICE_SHOT, 15000);
         }
 
-        void UpdateAI(uint32 diff) 
+        void UpdateAI(uint32 const diff) 
         {
             if (!UpdateVictim())
                 return;
@@ -1639,7 +1639,7 @@ public:
             _instance->SetData(DATA_FROSWORN_EVENT, IN_PROGRESS);
         }
 
-        void UpdateAI(uint32 diff) 
+        void UpdateAI(uint32 const diff) 
         {
             if (!UpdateVictim())
                 return;
@@ -1724,7 +1724,7 @@ public:
             DoCast(killer, SPELL_SPIRIT_BURST);
         }
 
-        void UpdateAI(uint32 diff) 
+        void UpdateAI(uint32 const diff) 
         {
             if (!UpdateVictim())
                 return;
@@ -1875,7 +1875,7 @@ public:
             ScriptedAI::AttackStart(who);
         }
 
-        void UpdateAI(uint32 diff) 
+        void UpdateAI(uint32 const diff) 
         {
             if (!_instance)
                 return;
@@ -1978,7 +1978,7 @@ public:
             ScriptedAI::AttackStart(who);
         }
 
-        void UpdateAI(uint32 diff) 
+        void UpdateAI(uint32 const diff) 
         {
             if (!_instance)
                 return;
@@ -2077,7 +2077,7 @@ public:
             DoZoneInCombat(me, 100.00f);
         }
 
-        void UpdateAI(uint32 diff) 
+        void UpdateAI(uint32 const diff) 
         {
             if (!_instance)
                 return;

@@ -77,7 +77,7 @@ class boss_king_dred : public CreatureScript
                 events.ScheduleEvent(EVENT_RAPTOR_CALL, urand(20000, 25000));
             }
 
-            void DoAction(int32 action) 
+            void DoAction(int32 const action) 
             {
                 if (action == ACTION_RAPTOR_KILLED)
                     ++raptorsKilled;
@@ -96,7 +96,7 @@ class boss_king_dred : public CreatureScript
                 _JustDied();
             }
 
-            void UpdateAI(uint32 diff) 
+            void UpdateAI(uint32 const diff) 
             {
                 if (!UpdateVictim())
                     return;
@@ -178,7 +178,7 @@ class npc_drakkari_gutripper : public CreatureScript
                 GutRipTimer = urand(10000, 15000);
             }
 
-            void UpdateAI(uint32 diff) 
+            void UpdateAI(uint32 const diff) 
             {
                 if (!UpdateVictim())
                     return;
@@ -228,7 +228,7 @@ class npc_drakkari_scytheclaw : public CreatureScript
                 uiRendTimer = urand(10000, 15000);
             }
 
-            void UpdateAI(uint32 diff) 
+            void UpdateAI(uint32 const diff) 
             {
                 if (!UpdateVictim())
                     return;

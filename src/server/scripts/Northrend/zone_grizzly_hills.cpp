@@ -742,7 +742,7 @@ public:
                     me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             }
 
-            void UpdateAI(uint32 diff) 
+            void UpdateAI(uint32 const diff) 
             {
                 if (_following)
                     if (!me->HasAura(SPELL_FROG_LOVE))

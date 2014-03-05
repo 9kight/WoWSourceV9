@@ -79,7 +79,7 @@ class boss_ammunae : public CreatureScript
             _JustDied();
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if(!UpdateVictim())
                 return;
@@ -220,7 +220,7 @@ class npc_bloodpetal_blossom : public CreatureScript
                 actionTimer = 100;
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if(!done)
             {

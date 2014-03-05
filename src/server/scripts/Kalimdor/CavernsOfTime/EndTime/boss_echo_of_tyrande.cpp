@@ -355,7 +355,7 @@ class dark_moonlight : public CreatureScript
                 DoCast(me,SPELL_DARK_MOONLIGHT);
             }
 	
-			void DoAction(int32 action)  
+			void DoAction(int32 const action)  
 			{	
 				switch (action)
 				{
@@ -367,7 +367,7 @@ class dark_moonlight : public CreatureScript
 				}
 			}
 			
-			void UpdateAI(uint32 diff)  
+			void UpdateAI(uint32 const diff)  
             {
                 if (!UpdateVictim())
                     return;

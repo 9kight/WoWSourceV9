@@ -309,7 +309,7 @@ class boss_jinara : public CreatureScript
                             events.ScheduleEvent(EVENT_WIND_KNOCK, urand(30*IN_MILLISECONDS, 35*IN_MILLISECONDS));
                             break;
                         case EVENT_SUMMON_WALL:
-                            me->SummonGameObject(184320, 170.131, -428.911, 18.533, 1.566390, 0, 0, 0, 0, 0);
+                            me->SummonGameObject(184320, 170.131f, -428.911f, 18.533f, 1.566390f, 0, 0, 0, 0, 0);
                             break;
                         case EVENT_SHADOW_CHARGE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_FARTHEST, 0))
@@ -894,7 +894,7 @@ public:
             events.ScheduleEvent(EVENT_ARCANE_ORB, 25000);
             events.ScheduleEvent(EVENT_ARCANE_ORB, 12000);
 
-            me->SummonGameObject(184320, 264.983, -414.829, 20.077, 3.12472, 0, 0, 0, 0, 0);
+            me->SummonGameObject(184320, 264.983f, -414.829f, 20.077f, 3.12472f, 0, 0, 0, 0, 0);
         }
 
         void JustDied(Unit* /*killer*/)

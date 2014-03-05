@@ -339,7 +339,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;
@@ -607,7 +607,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (mounted)
             {
@@ -666,7 +666,7 @@ public:
             me->DespawnOrUnsummon(20000);
         }
 
-        void UpdateAI(uint32 diff) { }
+        void UpdateAI(uint32 const diff) { }
     };
 };
 
@@ -732,7 +732,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (changeAngelRainTimer <= diff)
             {
@@ -783,7 +783,7 @@ public:
             me->CastSpell(me, SPELL_STORMLING_PRE_AURA, true);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (summonTimmer <= diff)
             {
@@ -837,7 +837,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!me->GetVictim())
                 return;
@@ -945,7 +945,7 @@ public:
                 playerGUID = summoner->GetGUID();
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (playerReturnTimer <= diff)
             {
@@ -1010,7 +1010,6 @@ public:
 
         }
 
-        void UpdateAI(uint32 diff) { }
     };
 };
 
@@ -1060,7 +1059,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (lightningVisual <= diff)
             {
@@ -1142,7 +1141,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (changeAngelTimer <= diff)
             {

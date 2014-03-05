@@ -76,7 +76,7 @@ class boss_wushoolay : public CreatureScript
             {
                 _EnterCombat();
                 Talk(SAY_AGGRO);
-                me->SummonGameObject(GO_THE_CACHE_OF_MADNESS_DOOR, -11938.6, -1843.32, 61.7272, 0.0899053, 0, 0, 0, 0, 0);
+                me->SummonGameObject(GO_THE_CACHE_OF_MADNESS_DOOR, -11938.6f, -1843.32f, 61.7272f, 0.0899053f, 0, 0, 0, 0, 0);
                 events.ScheduleEvent(EVENT_FORKED_LIGHTNING, 5000);
                 events.ScheduleEvent(EVENT_LIGHTNING_CLOUD, 15000);
                 events.ScheduleEvent(EVENT_LIGHTNING_RUSH, 14000);

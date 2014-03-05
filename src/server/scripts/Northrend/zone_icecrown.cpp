@@ -931,7 +931,7 @@ class npc_frostbrood_skytalon : public CreatureScript
             }
 
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 VehicleAI::UpdateAI(diff);
                 events.Update(diff);
@@ -1035,7 +1035,7 @@ class npc_margrave_dhakar : public CreatureScript
             }
 
 
-            void UpdateAI(uint32 diff) 
+            void UpdateAI(uint32 const diff) 
             {
                 _events.Update(diff);
 

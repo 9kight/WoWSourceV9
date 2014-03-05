@@ -255,7 +255,7 @@ public:
                 me->AddUnitState(UNIT_STATE_ROOT);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (HasKilledAkamaAndReseting)
                 return;
@@ -472,7 +472,7 @@ public:
             events.ScheduleEvent(EVENT_DESTRUCTIVE_POISON, 5000);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (StartChannel)
             {
@@ -599,7 +599,7 @@ public:
         void EnterCombat(Unit* /*who*/) {}
         void AttackStart(Unit* /*who*/) {}
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             events.Update(diff);
 
@@ -707,7 +707,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (doSpawning)
             {
@@ -815,7 +815,7 @@ public:
             ScriptedAI::AttackStart(who);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             events.Update(diff);
 
@@ -925,7 +925,7 @@ public:
             events.ScheduleEvent(EVENT_WINDFURY, urand(8000, 12000));
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;
@@ -1015,7 +1015,7 @@ public:
             events.ScheduleEvent(EVENT_EVISCERATE, urand(2000, 5000));
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;
@@ -1097,7 +1097,7 @@ public:
             events.ScheduleEvent(EVENT_LIGHTNING_BOLT, 6000);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;
@@ -1180,7 +1180,7 @@ public:
             events.ScheduleEvent(EVENT_SPIRIT_HEAL, urand (5000, 6000));
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             events.Update(diff);
 

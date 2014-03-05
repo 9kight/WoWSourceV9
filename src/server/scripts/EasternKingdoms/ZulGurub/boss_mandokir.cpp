@@ -269,7 +269,7 @@ class boss_mandokir : public CreatureScript
                 }
             }
 
-            void DoAction(int32 action)
+            void DoAction(int32 const action)
             {
                 switch (action)
                 {
@@ -323,7 +323,7 @@ class boss_mandokir : public CreatureScript
                     CanEvade = true;
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 if (!CanEvade)
                 {
@@ -460,7 +460,7 @@ class npc_ohgan : public CreatureScript
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             }
 
-            void DoAction(int32 action)
+            void DoAction(int32 const action)
             {
                 switch (action)
                 {
@@ -501,7 +501,7 @@ class npc_ohgan : public CreatureScript
                     me->CastSpell((Unit*)NULL, SPELL_OHGAN_ORDERS, true);
             }
 
-            void UpdateAI(uint32 /*diff*/)
+            void UpdateAI(uint32 const /*diff*/)
             {
                 if (!UpdateVictim())
                     return;
@@ -563,7 +563,7 @@ class npc_chained_spirit : public CreatureScript
                 }
             }
 
-            void DoAction(int32 action)
+            void DoAction(int32 const action)
             {
                 if (action == ACTION_CHANGE_FACTION)
                 {

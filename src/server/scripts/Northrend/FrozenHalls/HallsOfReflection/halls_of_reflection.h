@@ -153,7 +153,7 @@ struct boss_horAI : ScriptedAI
             instance->ProcessEvent(0, EVENT_DO_WIPE);
     }
 
-    void DoAction(int32 actionID)
+    void DoAction(int32 const actionID)
     {
         switch (actionID)
         {

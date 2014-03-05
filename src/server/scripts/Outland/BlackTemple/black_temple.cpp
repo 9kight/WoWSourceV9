@@ -113,7 +113,7 @@ public:
             enteredCombat = true;
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
 
             if (!enteredCombat)

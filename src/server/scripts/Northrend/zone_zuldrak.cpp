@@ -1706,7 +1706,7 @@ public:
                     }
             }
 
-            void UpdateAI(uint32 diff) 
+            void UpdateAI(uint32 const diff) 
             {
                 _events.Update(diff);
 

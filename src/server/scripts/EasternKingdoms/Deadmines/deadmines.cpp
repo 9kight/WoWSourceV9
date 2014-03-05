@@ -97,7 +97,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(uint32 const uiDiff)
         {
             if (!me)
                 return;
@@ -170,7 +170,7 @@ public:
                 return;
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(uint32 const uiDiff)
         {
             if (!me || !me->AI() || !UpdateVictim())
                 return;
@@ -291,7 +291,7 @@ public:
             uiTimerEyeGouge = urand(7000, 9000);
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(uint32 const uiDiff)
         {
             if (!me)
                 return;
@@ -355,7 +355,7 @@ public:
                 me->AddAura(57626, me);
         }
 
-        void UpdateAI(uint32 uiDiff) { }
+        void UpdateAI(uint32 const uiDiff) { }
     };
 };
 

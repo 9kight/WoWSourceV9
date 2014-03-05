@@ -84,7 +84,7 @@ class npc_imposing_confrontation_quest : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 if(eventStarted)
                 {

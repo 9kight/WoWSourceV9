@@ -272,7 +272,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(uint32 const uiDiff)
         {
             if (!me || !instance)
                 return;
@@ -445,7 +445,7 @@ public:
                     pAI->VaporsKilled();
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;

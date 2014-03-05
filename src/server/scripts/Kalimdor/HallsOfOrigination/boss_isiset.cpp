@@ -154,7 +154,7 @@ class boss_isiset : public CreatureScript
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if(!UpdateVictim() || split)
                 return;
@@ -277,7 +277,7 @@ class npc_spatial_flux : public CreatureScript
             DoCast(SPELL_ENERGY_FLUX_BEAM);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if(summonTimer <= diff)
             {
