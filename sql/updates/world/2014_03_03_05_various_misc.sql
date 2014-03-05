@@ -3429,5 +3429,17 @@ UPDATE `access_requirement` SET `item_level`=200 WHERE `mapId` IN (632, 650, 658
 UPDATE `access_requirement` SET `item_level`=219 WHERE `mapId`=668;
 
 -- corect the mount display id
+UPDATE `creature_template` SET `modelid1` = 21073 WHERE `entry`=22510;
+UPDATE `creature_template` SET `modelid2` = 21073 WHERE `entry`=22510;
+
+UPDATE `creature_template` SET `modelid1` = 21074 WHERE `entry`=22511;
+UPDATE `creature_template` SET `modelid2` = 21074 WHERE `entry`=22511;
+
 UPDATE `creature_template` SET `modelid1` = 21075 WHERE `entry`=22512;
 UPDATE `creature_template` SET `modelid2` = 21075 WHERE `entry`=22512;
+
+UPDATE `creature_template` SET `modelid1` = 21077 WHERE `entry`=22513;
+UPDATE `creature_template` SET `modelid2` = 21077 WHERE `entry`=22513;
+
+UPDATE `creature_template` SET `modelid1` = 21076 WHERE `entry`=22514;
+UPDATE `creature_template` SET `modelid2` = 21076 WHERE `entry`=22514;
