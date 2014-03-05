@@ -841,7 +841,7 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         }
         if (AuraEffect *aurEff = victim->GetAuraEffect(SPELL_AURA_DUMMY, family, 3031, 0))
         {
-            if(this != victim && this->GetTypeId() != TYPEID_PLAYER)
+            if(this != victim && this->GetTypeId() != TYPEID_PLAYER && !(this->GetTypeId() == TYPEID_UNIT && this->isPet()))
             {
                 // Tooltip says 5% of damage but wowpedia says:
                 // Patch 4.3.0 (2011-11-29): Vengeance has been redesigned slightly.
@@ -6044,31 +6044,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                     RemoveAura(dummySpell->Id);
                     return false;
                 }
-                /*case 93098: // Vengeance
-                {
-                    if (!damage || !ToPlayer())
-                        return false;
-                    
-                    Aura* aur = GetAura(76691);
-                    if (!aur)
-                        aur = AddAura(76691,this);
-                    
-                    if (!aur)
-                        return false;
-                    uint32 amount = CalculatePct(damage, triggeredByAura->GetAmount());
-                    amount += aur->GetEffect(EFFECT_0)->GetAmount();
-                    uint32 maxAmount = 0;
-                    
-                    
-                    maxAmount = ToPlayer()->GetCreateHealth() * 0.1f + ToPlayer()->GetStat(STAT_STAMINA);
-                    amount = std::min(maxAmount, amount);
-                    
-                    aur->SetMaxDuration(30*IN_MILLISECONDS);
-                    aur->SetDuration(30*IN_MILLISECONDS);
-                    aur->GetEffect(EFFECT_0)->ChangeAmount(amount);
-                    aur->GetEffect(EFFECT_1)->ChangeAmount(amount);
-                    break;
-                }*/
             }
             // Second Wind
             if (dummySpell->SpellIconID == 1697)
@@ -7256,31 +7231,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                     }
                     break;
                 }
-                /*case 84839: // Vengeance
-                {
-                    if (!damage || !ToPlayer())
-                        return false;
-                    
-                    Aura* aur = GetAura(76691);
-                    if (!aur)
-                        aur = AddAura(76691,this);
-                    
-                    if (!aur)
-                        return false;
-                    uint32 amount = CalculatePct(damage, triggeredByAura->GetAmount());
-                    amount += aur->GetEffect(EFFECT_0)->GetAmount();
-                    uint32 maxAmount = 0;
-                    
-                    
-                    maxAmount = ToPlayer()->GetCreateHealth() * 0.1f + ToPlayer()->GetStat(STAT_STAMINA);
-                    amount = std::min(maxAmount, amount);
-                    
-                    aur->SetMaxDuration(30*IN_MILLISECONDS);
-                    aur->SetDuration(30*IN_MILLISECONDS);
-                    aur->GetEffect(EFFECT_0)->ChangeAmount(amount);
-                    aur->GetEffect(EFFECT_1)->ChangeAmount(amount);
-                    break;
-                }*/
                 case 31801: // Seal of Truth
                 {
                     // Only single-target spells
@@ -7929,32 +7879,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                     }
                     break;
                 }
-                /*case 93099: // Vengeance
-                {
-                    if (!damage || !ToPlayer())
-                        return false;
-                    
-                    Aura* aur = GetAura(76691);
-                    if (!aur)
-                        aur = AddAura(76691,this);
-                    
-                    if (!aur)
-                        return false;
-                    uint32 amount = CalculatePct(damage, triggeredByAura->GetAmount());
-                    amount += aur->GetEffect(EFFECT_0)->GetAmount();
-                    uint32 maxAmount = 0;
-                    
-                    
-                    maxAmount = ToPlayer()->GetCreateHealth() * 0.1f + ToPlayer()->GetStat(STAT_STAMINA);
-                    amount = std::min(maxAmount, amount);
-                    
-                    aur->SetMaxDuration(30*IN_MILLISECONDS);
-                    aur->SetDuration(30*IN_MILLISECONDS);
-                    aur->GetEffect(EFFECT_0)->ChangeAmount(amount);
-                    aur->GetEffect(EFFECT_1)->ChangeAmount(amount);
-                    break;
-                }*/
-
                 case 51099: // Ebon Plaguebringer
                 case 51160:
                 {
