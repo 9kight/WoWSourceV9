@@ -3202,6 +3202,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 54278:
                 spellInfo->Effects[EFFECT_0].SpellClassMask[0] = 0x000001000; // Proc from Fireball.
                 break;
+				case 22842: //Frenzied regeneration
+                spellInfo->Effects[1].ApplyAuraName = SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT;
+                break;
             //case 93099: // Vengeance (Death Knight)
             //    spellInfo->SpellFamilyName = SPELLFAMILY_DEATHKNIGHT;
             //    break;

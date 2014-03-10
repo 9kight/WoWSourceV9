@@ -1530,7 +1530,7 @@ class spell_dru_owlkin_frenzy : public SpellScriptLoader
         }
 };
 
-class spell_druid_frenzied_regeneration : public SpellScriptLoader
+/*class spell_druid_frenzied_regeneration : public SpellScriptLoader
 {
     class script_impl : public AuraScript
     {
@@ -1580,7 +1580,7 @@ public:
     {
         return new script_impl();
     }
-};
+};*/
 
 // -16972 - Predatory Strikes
 class spell_dru_predatory_strikes : public SpellScriptLoader
@@ -2332,7 +2332,7 @@ void AddSC_druid_spell_scripts()
     new spell_dru_wild_mushroom();
     new spell_dru_wild_mushroom_detonation();
     new spell_dru_rake();
-    new spell_druid_frenzied_regeneration();
+    //new spell_druid_frenzied_regeneration();
     new spell_dru_barkskin();
     new spell_dru_energize();
     new spell_dru_starsurge();
