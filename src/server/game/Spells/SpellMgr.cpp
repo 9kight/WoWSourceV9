@@ -3131,6 +3131,10 @@ void SpellMgr::LoadSpellCustomAttr()
             case 1856: // Vanish - Rogue
                 spellInfo->Effects[0].Effect = SPELL_EFFECT_SANCTUARY;
                 break;
+				// Solar Beam
+            case 78675:
+                spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_MOD_SILENCE;
+                break;
             case 92315:	// Mage - Pyromaniac(Dot after casting Pyroblast with Hot Strake + Using Impact set to 3 target)
                 spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_EFFECT_DUMMY;
                 break;
