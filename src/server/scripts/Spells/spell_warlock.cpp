@@ -282,12 +282,6 @@ class spell_warl_conflagrate : public SpellScriptLoader
         {
             PrepareSpellScript(spell_warl_conflagrate_SpellScript);
 
-            bool Load()
-            {
-                immolateAmount = 0;
-                return true;
-            }
-
             bool Validate(SpellInfo const* /*spellInfo*/)
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_IMMOLATE))
@@ -295,27 +289,16 @@ class spell_warl_conflagrate : public SpellScriptLoader
                 return true;
             }
 
-            SpellCastResult CheckCast()
-            {
-                if (Unit* target = GetExplTargetUnit())
-                    if (AuraEffect const* aurEff = target->GetAuraEffect(SPELL_WARLOCK_IMMOLATE, EFFECT_2, GetCaster()->GetGUID()))
-                        immolateAmount = aurEff->GetAmount() * aurEff->GetTotalTicks();
-
-                return SPELL_CAST_OK;
-            }
-
             void HandleHit(SpellEffIndex /*effIndex*/)
             {
-                SetHitDamage(CalculatePct(immolateAmount, GetSpellInfo()->Effects[EFFECT_1].CalcValue(GetCaster())));
+                if (AuraEffect const* aurEff = GetHitUnit()->GetAuraEffect(SPELL_WARLOCK_IMMOLATE, EFFECT_2, GetCaster()->GetGUID()))
+                    SetHitDamage(CalculatePct(aurEff->GetAmount(), GetSpellInfo()->Effects[EFFECT_1].CalcValue(GetCaster())));
             }
 
             void Register()
             {
-                OnCheckCast += SpellCheckCastFn(spell_warl_conflagrate_SpellScript::CheckCast);
                 OnEffectHitTarget += SpellEffectFn(spell_warl_conflagrate_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
             }
-
-            uint32 immolateAmount;
         };
 
         SpellScript* GetSpellScript() const
