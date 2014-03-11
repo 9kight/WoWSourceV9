@@ -6668,6 +6668,18 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                     basepoints0 = damage * 0.05f;
                     break;
                 }
+                // Rogue T12 2p bonus (wrong dbc)
+                case 99174:
+                {
+                    triggered_spell_id = 99173;
+                    target= victim;
+                    basepoints0 = damage * 0.3f;
+                    if (victim->GetAura(99173, GetGUID()))
+                    {
+                        basepoints0 += (victim->GetRemainingPeriodicAmount(GetGUID(), 99173, SPELL_AURA_PERIODIC_DAMAGE));
+                    }
+                    break;
+                }
             }
             break;
         }
@@ -6828,18 +6840,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                         }
                     }
                     return true;
-                }
-                // Rogue T12 2p bonus
-                case 99174:
-                {
-                    triggered_spell_id = 99173;
-                    target= victim;
-                    basepoints0 = damage * 0.3f;
-                    if (victim->GetAura(99173, GetGUID()))
-                    {
-                        basepoints0 += (victim->GetRemainingPeriodicAmount(GetGUID(), 99173, SPELL_AURA_PERIODIC_DAMAGE));
-                    }
-                    break;
                 }
             }
             switch (dummySpell->SpellIconID)
@@ -17034,6 +17034,7 @@ bool Unit::SetCharmedBy(Unit* charmer, CharmType type, AuraApplication const* au
                 charmer->ToPlayer()->SetClientControl(this, 1);
                 charmer->ToPlayer()->SetMover(this);
                 charmer->ToPlayer()->SetViewpoint(this, true);
+                charmer->ToPlayer()->SetClientControl(this, 0);
                 charmer->ToPlayer()->VehicleSpellInitialize();
                 break;
             case CHARM_TYPE_POSSESS:
@@ -17043,6 +17044,7 @@ bool Unit::SetCharmedBy(Unit* charmer, CharmType type, AuraApplication const* au
                 charmer->ToPlayer()->SetClientControl(this, 1);
                 charmer->ToPlayer()->SetMover(this);
                 charmer->ToPlayer()->SetViewpoint(this, true);
+                charmer->ToPlayer()->SetClientControl(this, 0);
                 charmer->ToPlayer()->PossessSpellInitialize();
                 break;
             case CHARM_TYPE_CHARM:

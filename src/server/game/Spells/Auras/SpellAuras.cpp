@@ -1225,6 +1225,14 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             case SPELLFAMILY_WARRIOR:
                 switch (GetId())
                 {
+                    case 57755: // Glyph of Heroic Throw
+                        if(caster->HasAura(58357))
+                        {
+                            caster->CastSpell(target, 58567, true);
+                            if(!caster->ToPlayer()->HasSpellCooldown(58567))
+                                caster->ToPlayer()->AddSpellCooldown(58567, 0, uint32(time(NULL) + 5)); // Add 5 seconds cooldown
+                        }
+                        break;
                     case 60970: // Heroic Fury (remove Intercept cooldown)
                         if (target->GetTypeId() == TYPEID_PLAYER)
                             target->ToPlayer()->RemoveSpellCooldown(20252, true);

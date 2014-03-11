@@ -109,6 +109,7 @@ bool Group::Create(Player* leader)
     m_guid = MAKE_NEW_GUID(lowguid, 0, HIGHGUID_GROUP);
     m_leaderGuid = leaderGuid;
     m_leaderName = leader->GetName();
+    leader->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GROUP_LEADER);
 
     if (isBGGroup() || isBFGroup())
         m_groupType = GROUPTYPE_BGRAID;
@@ -683,10 +684,10 @@ void Group::ChangeLeader(uint64 guid)
     if (slot == m_memberSlots.end())
         return;
 
-    Player* player = ObjectAccessor::FindPlayer(slot->guid);
+    Player* newLeader = ObjectAccessor::FindPlayer(slot->guid);
 
     // Don't allow switching leader to offline players
-    if (!player)
+    if (!newLeader)
         return;
 
     sScriptMgr->OnGroupChangeLeader(this, m_leaderGuid, guid);
@@ -713,24 +714,29 @@ void Group::ChangeLeader(uint64 guid)
         PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GROUP_INSTANCE_PERM_BINDING);
 
         stmt->setUInt32(0, m_dbStoreId);
-        stmt->setUInt32(1, player->GetGUIDLow());
+        stmt->setUInt32(1, newLeader->GetGUIDLow());
 
         CharacterDatabase.Execute(stmt);
 
         // Copy the permanent binds from the new leader to the group
-        Player::ConvertInstancesToGroup(player, this, true);
+        Player::ConvertInstancesToGroup(newLeader, this, true);
 
         // Update the group leader
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_GROUP_LEADER);
 
-        stmt->setUInt32(0, player->GetGUIDLow());
+        stmt->setUInt32(0, newLeader->GetGUIDLow());
         stmt->setUInt32(1, m_dbStoreId);
 
         CharacterDatabase.Execute(stmt);
     }
 
-    m_leaderGuid = player->GetGUID();
-    m_leaderName = player->GetName();
+    if (Player* oldLeader = ObjectAccessor::FindPlayer(m_leaderGuid))
+        oldLeader->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GROUP_LEADER);
+
+    newLeader->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GROUP_LEADER);
+
+    m_leaderGuid = newLeader->GetGUID();
+    m_leaderName = newLeader->GetName();
     ToggleGroupMemberFlag(slot, MEMBER_FLAG_ASSISTANT, false);
 
     WorldPacket data(SMSG_GROUP_SET_LEADER, m_leaderName.size()+1);

@@ -49,7 +49,8 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
     player->duel->startTimer = now;
     plTarget->duel->startTimer = now;
 
-    player->SetHealth(player->GetMaxHealth());
+	// This part is custom made, and not default.. remove, but in case anyone need this, it's here.
+    /*player->SetHealth(player->GetMaxHealth());
     plTarget->SetHealth(plTarget->GetMaxHealth());
     if (player->getPowerType() == POWER_MANA)
        player->SetPower(POWER_MANA, player->GetMaxPower(POWER_MANA));
@@ -61,7 +62,7 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
     if (!player->GetMap()->IsDungeon()) {
         player->RemoveArenaSpellCooldowns();
         plTarget->RemoveArenaSpellCooldowns();
-    }
+    }*/
 
     player->SendDuelCountdown(3000);
     plTarget->SendDuelCountdown(3000);

@@ -193,8 +193,7 @@ struct PlayerCurrency
    PlayerCurrencyState state;
    uint32 totalCount;
    uint32 weekCount;
-   uint32 week_cap;
-   uint32 new_cap;
+   uint32 weekCap;
 };
 
 typedef UNORDERED_MAP<uint32, PlayerTalent*> PlayerTalentMap;
@@ -1481,11 +1480,12 @@ class Player : public Unit, public GridObject<Player>
         /// send conquest currency points and their cap week/arena
         void SendPvpRewards() const;
         /// return count of currency witch has plr
-        uint32 GetCurrency(uint32 id, bool usePrecision) const;
+        uint32 GetCurrency(uint32 id, bool precision) const;
         /// return count of currency gaind on current week
-        uint32 GetCurrencyOnWeek(uint32 id, bool usePrecision) const;
+        uint32 GetCurrencyOnWeek(uint32 id, bool precision) const;
         /// return week cap by currency id
-        uint32 GetCurrencyWeekCap(uint32 id, bool usePrecision, bool useRating = false) const;
+        uint32 GetCurrencyWeekCap(uint32 id, bool precision) const;
+        uint32 GetCurrencyCurrentWeekCap(uint32 id, bool precision) const;
         /// return presence related currency
         bool HasCurrency(uint32 id, uint32 count) const;
         /// initialize currency count for custom initialization at create character
@@ -2094,7 +2094,7 @@ class Player : public Unit, public GridObject<Player>
         uint32 GetArenaPersonalRating(uint8 slot) const { return GetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (_arenaTeamInfoSlot[slot] * ARENA_TEAM_END) + ARENA_TEAM_PERSONAL_RATING); }
         void SetArenaTeamIdInvited(uint32 ArenaTeamId) { m_ArenaTeamIdInvited = ArenaTeamId; }
         uint32 GetArenaTeamIdInvited() { return m_ArenaTeamIdInvited; }
-        uint32 GetRBGPersonalRating() const { return 0; }
+        uint32 GetRBGPersonalRating() const;
 
         Difficulty GetDifficulty(bool isRaid) const { return isRaid ? m_raidDifficulty : m_dungeonDifficulty; }
         Difficulty GetDungeonDifficulty() const { return m_dungeonDifficulty; }
@@ -2990,7 +2990,7 @@ class Player : public Unit, public GridObject<Player>
 
           * @param  CurrencyTypesEntry for which to retrieve weekly cap
         */
-        uint32 GetCurrencyWeekCap(CurrencyTypesEntry const* currency, bool useRating = false) const;
+        uint32 GetCurrencyWeekCap(CurrencyTypesEntry const* currency) const;
 
         /*
          * @name   GetCurrencyTotalCap
@@ -3001,7 +3001,7 @@ class Player : public Unit, public GridObject<Player>
         uint32 GetCurrencyTotalCap(CurrencyTypesEntry const* currency) const;
 
         /// Updates weekly conquest point cap (dynamic cap)
-        void UpdateConquestCurrencyCap(uint32 currency);
+        void UpdateConquestCurrencyCap();
 
         VoidStorageItem* _voidStorageItems[VOID_STORAGE_MAX_SLOT];
 
@@ -3204,6 +3204,7 @@ class Player : public Unit, public GridObject<Player>
 
         uint32 _activeCheats;
         uint32 _maxPersonalArenaRate;
+        uint32 _ConquestCurrencyTotalWeekCap;
 
         uint32 _groupOutOfRangeUpdateTime;
 

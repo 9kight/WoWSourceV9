@@ -3000,12 +3000,12 @@ Currency.MaxJusticePoints = 4000
 Currency.StartConquestPoints = 0
 
 #
-#    Currency.ConquestPointsDefaultWeekCap
+#    Currency.ConquestPointsWeekCap
 #        Amount of conquest points that player can earn per week
 #        Default: 1350
 #
 
-Currency.ConquestPointsDefaultWeekCap = 1350
+Currency.ConquestPointsWeekCap = 1350
 
 #
 #    Currency.ConquestPointsArenaReward
