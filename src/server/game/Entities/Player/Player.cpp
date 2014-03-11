@@ -1132,6 +1132,8 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
     SetCurrency(CURRENCY_TYPE_JUSTICE_POINTS, sWorld->getIntConfig(CONFIG_CURRENCY_START_JUSTICE_POINTS));
     SetCurrency(CURRENCY_TYPE_VALOR_POINTS, sWorld->getIntConfig(CONFIG_CURRENCY_START_VALOR_POINTS));
     SetCurrency(CURRENCY_TYPE_CONQUEST_POINTS, sWorld->getIntConfig(CONFIG_CURRENCY_START_CONQUEST_POINTS));
+    SetCurrency(CURRENCY_TYPE_CONQUEST_META_ARENA, 0);
+    SetCurrency(CURRENCY_TYPE_CONQUEST_META_BG, 0);
 
     // start with every map explored
     if (sWorld->getBoolConfig(CONFIG_START_ALL_EXPLORED))
@@ -7762,16 +7764,33 @@ uint32 Player::GetCurrencyWeekCap(uint32 id, bool usePrecision) const
 uint32 Player::GetCurrencyCurrentWeekCap(uint32 id, bool usePrecision) const
 {
     PlayerCurrenciesMap::const_iterator itr = _currencyStorage.find(id);
-    if (itr != _currencyStorage.end())
+    if (itr == _currencyStorage.end())
     {
-        return usePrecision ? itr->second.weekCap / 100 : itr->second.weekCap;
+        // if not exist calculate and create new
+        /*uint32 weekCap = GetCurrencyWeekCap(id, usePrecision);
+        PlayerCurrency cur;
+        cur.state = PLAYERCURRENCY_NEW;
+        cur.totalCount = 0;
+        cur.weekCount = 0;
+        if (id == CURRENCY_TYPE_CONQUEST_META_ARENA)
+        {
+            PlayerCurrenciesMap::const_iterator itr_inner = _currencyStorage.find(CURRENCY_TYPE_CONQUEST_POINTS);
+            if (itr_inner != _currencyStorage.end())
+            {
+                cur.weekCount = itr_inner->second.weekCount;
+            }
+        }
+        cur.weekCap = weekCap;
+        _currencyStorage[id] = cur;
+
+        return weekCap;*/
+        // if not exist calculate new
+        return GetCurrencyWeekCap(id, usePrecision);
     }
     else
     {
-        // if not exist, calculate new
-        return GetCurrencyWeekCap(id, usePrecision);
+        return usePrecision ? itr->second.weekCap / 100 : itr->second.weekCap;
     }
-    return 0;
 }
 
 void Player::ResetCurrencyWeekCap()
