@@ -7377,7 +7377,7 @@ bool Player::RewardHonor(Unit* victim, uint32 groupsize, int32 honor, bool pvpto
     GetSession()->SendPacket(&data);
 
     // add honor points
-    ModifyCurrency(CURRENCY_TYPE_HONOR_POINTS, int32(honor), true, true);
+    ModifyCurrency(CURRENCY_TYPE_HONOR_POINTS, int32(honor), true);
 
     // Add guild XP
     if (Guild *guild = GetGuild())
