@@ -3131,8 +3131,7 @@ void SpellMgr::LoadSpellCustomAttr()
             case 1856: // Vanish - Rogue
                 spellInfo->Effects[0].Effect = SPELL_EFFECT_SANCTUARY;
                 break;
-				// Solar Beam
-            case 78675:
+            case 78675: // Solar Beam
                 spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_MOD_SILENCE;
                 break;
             case 92315:	// Mage - Pyromaniac(Dot after casting Pyroblast with Hot Strake + Using Impact set to 3 target)
@@ -3206,7 +3205,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 54278:
                 spellInfo->Effects[EFFECT_0].SpellClassMask[0] = 0x000001000; // Proc from Fireball.
                 break;
-				case 22842: //Frenzied regeneration
+            case 22842: // Frenzied regeneration
                 spellInfo->Effects[1].ApplyAuraName = SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT;
                 break;
             //case 93099: // Vengeance (Death Knight)
