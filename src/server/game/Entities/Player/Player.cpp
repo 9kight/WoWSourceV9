@@ -7668,7 +7668,7 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
 
     // count can't be more then totalCap if used (totalCap > 0)
     uint32 totalCap = GetCurrencyTotalCap(currency);
-    if (totalCap && count > int32(totalCap))
+    if (!isRefund && totalCap && count > int32(totalCap))
         count = totalCap;
 
     int32 newTotalCount = int32(oldTotalCount) + count;
@@ -7688,7 +7688,7 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
     }
 
     // if conquest point exceeds weekcap
-    if(currency->ID == CURRENCY_TYPE_CONQUEST_POINTS && oldWeekCount + count > _ConquestCurrencyTotalWeekCap)
+    if(!isRefund && currency->ID == CURRENCY_TYPE_CONQUEST_POINTS && oldWeekCount + count > _ConquestCurrencyTotalWeekCap)
     {
         newWeekCount = _ConquestCurrencyTotalWeekCap;
         newTotalCount = oldTotalCount + (newWeekCount - oldWeekCount);
@@ -7715,7 +7715,7 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
         if (currency->Category == CURRENCY_CATEGORY_META_CONQUEST)
         {
             // count was changed to week limit, now we can modify original points.
-            ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, count, printLog);
+            ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, count, printLog, ignoreMultipliers, isRefund);
             return;
         }
 
