@@ -238,7 +238,7 @@ class boss_jindo_the_godbreaker : public CreatureScript
                     summoned->SetInCombatWithZone();
             }
 
-            void DoAction(int32 action)
+            void DoAction(int32 const action)
             {
                 if (action == ACTION_CHAIN_DIED)
                 {
@@ -301,7 +301,7 @@ class boss_jindo_the_godbreaker : public CreatureScript
                 _JustDied();
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 events.Update(diff);
 
@@ -438,7 +438,7 @@ class boss_jindo_the_godbreaker_spirit_world : public CreatureScript
                     Talk(JINDO_SPIRIT_YELL_KILL_PLAYER);
             }
 
-            void DoAction(int32 action)
+            void DoAction(int32 const action)
             {
                 if (action == ACTION_HAKKAR_FREE)
                 {
@@ -466,7 +466,7 @@ class boss_jindo_the_godbreaker_spirit_world : public CreatureScript
                 events.ScheduleEvent(EVENT_SHADOW_SPIKE_AND_CALL_SPIRIT, 1000);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim())
                     return;
@@ -524,7 +524,7 @@ struct npc_gurubashi_heavy_trollAI : public ScriptedAI
         events.ScheduleEvent(EVENT_FRENZY, urand(7000, 14000));
     }
 
-    void UpdateAI(uint32 diff)
+    void UpdateAI(uint32 const diff)
     {
         if (!UpdateVictim())
             return;
@@ -633,7 +633,7 @@ class npc_hakkars_chains : public CreatureScript
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             }
 
-            void DoAction(int32 action)
+            void DoAction(int32 const action)
             {
                 if (action == ACTION_DESPAWN)
                     instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);

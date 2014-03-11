@@ -279,7 +279,7 @@ class npc_tiki_torch : public CreatureScript
                     events.ScheduleEvent(EVENT_YOGA_FLAME, 1000 * data);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 events.Update(diff);
 
@@ -346,7 +346,7 @@ class npc_berserking_boulder_roller : public CreatureScript
                 summoned->AI()->DoAction(ACTION_START_MOVING);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 events.Update(diff);
 
@@ -411,7 +411,7 @@ class npc_boulder : public CreatureScript
 
             EventMap events;
 
-            void DoAction(int32 action)
+            void DoAction(int32 const action)
             {
                 if (action == ACTION_START_MOVING)
                 {
@@ -424,7 +424,7 @@ class npc_boulder : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 events.Update(diff);
 
@@ -575,7 +575,7 @@ class npc_tiki_lord_zimwae : public CreatureScript
                 me->m_Events.AddEvent(new ZimwaeEvent(me), me->m_Events.CalculateTime(1500));
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim())
                     return;
@@ -650,7 +650,7 @@ class npc_tiki_lord_muloa : public CreatureScript
                     (*itr)->RemoveAura(96885);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim())
                     return;
@@ -728,7 +728,7 @@ class npc_gub : public CreatureScript
                 me->RemoveAllAuras();
             }
 
-            void UpdateAI(uint32 /*diff*/)
+            void UpdateAI(uint32 const /*diff*/)
             {
                 if (!UpdateVictim())
                     return;
@@ -785,7 +785,7 @@ class npc_chosen_of_hethiss : public CreatureScript
                 events.Reset();
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim())
                     return;
@@ -864,7 +864,7 @@ class npc_mortaxx : public CreatureScript
                 events.Reset();
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim())
                     return;
@@ -974,7 +974,7 @@ class npc_venomancer_mauri : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim())
                     return;
@@ -1089,7 +1089,7 @@ class npc_venomancer_tkulu : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim())
                     return;
@@ -1148,7 +1148,7 @@ struct npc_cauldron_mixerAI : public ScriptedAI
 
     virtual void DoExtraEvent(uint32 event_Id) = 0;
 
-    void UpdateAI(uint32 diff)
+    void UpdateAI(uint32 const diff)
     {
         events.Update(diff);
 
@@ -1399,7 +1399,7 @@ class npc_venomguard_destroyer : public CreatureScript
                 summons.DespawnAll();
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim())
                     return;
@@ -1492,7 +1492,7 @@ class npc_gurubashi_shadow_hunter : public CreatureScript
                 events.Reset();
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 events.Update(diff);
 
@@ -1574,7 +1574,7 @@ class npc_gurubashi_master_chef : public CreatureScript
                 events.Reset();
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim())
                     return;

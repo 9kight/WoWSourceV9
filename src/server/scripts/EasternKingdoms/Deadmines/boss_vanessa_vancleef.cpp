@@ -281,7 +281,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;
@@ -441,7 +441,7 @@ public:
             me->setPowerType(POWER_ENERGY);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (SinisterTimer <= diff)
             {
@@ -511,7 +511,7 @@ public:
                 DoCast(target, SPELL_CHARGE);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (BloodBathTimer <= diff)
             {
@@ -563,7 +563,7 @@ public:
             ShieldTimer = 8000;
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (HolyfireTimer <= diff)
             {
@@ -618,7 +618,7 @@ public:
             threat = true;
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (MotivateTimer <= diff)
             {
@@ -665,7 +665,7 @@ public:
             UppercutTimer = 4000;
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (UppercutTimer <= diff)
             {
@@ -709,7 +709,7 @@ public:
             below = true;
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (AxeHeadTimer <= diff)
             {
@@ -761,7 +761,7 @@ public:
             RagezoneTimer = urand(7000, 9000);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (BloodboltTimer <= diff)
             {
@@ -841,7 +841,7 @@ public:
 
         void EnterCombat(Unit* /*who*/) {}
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (EventStarted)
             {
@@ -984,7 +984,7 @@ public:
                 DoAction(ACTION_EJECT_ALL);
         }
 
-        void DoAction(int32 action)
+        void DoAction(int32 const action)
         {
             switch (action)
             {
@@ -1011,7 +1011,7 @@ public:
             me->SummonCreature(NPC_GLUBTOK_NIGHTMARE, GlubtokNightmare1, TEMPSUMMON_MANUAL_DESPAWN, 0);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (StartFall)
             {
@@ -1337,7 +1337,7 @@ public:
                 me->SummonCreature(NPC_ENRAGED_WORGEN, EnragedWorgen_2[i], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (Nightmare)
             {
@@ -1540,7 +1540,7 @@ public:
             HitTimer = 2500;
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (HitTimer <= diff)
             {
@@ -1607,7 +1607,7 @@ public:
             _JustDied();
 
         }
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (FlagResetTimer <= diff)
             {
@@ -1727,7 +1727,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (FlagResetTimer <= diff)
             {
@@ -1804,7 +1804,7 @@ public:
                                 pAI->NightmarePass();
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (FlagResetTimer <= diff)
             {
@@ -1857,7 +1857,7 @@ public:
                                 pAI->WorgenKilled();
 
         }
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             DoMeleeAttackIfReady();
         }
@@ -1889,7 +1889,7 @@ public:
 
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!me->GetVehicleKit())
                 return;
@@ -1927,7 +1927,7 @@ public:
 
         void OnCharmed(bool /*apply*/){}
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (TurnTimer <= diff)
             {
@@ -1987,7 +1987,7 @@ public:
           }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (RunAway)
             {
@@ -2062,7 +2062,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (startTimerAchievement == true && getAchievementPlayers == true)
             {

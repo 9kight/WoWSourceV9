@@ -152,7 +152,7 @@ class boss_grandmaster_vorpil : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 diff) 
+            void UpdateAI(uint32 const diff) 
             {
                 if (!UpdateVictim())
                     return;
@@ -235,7 +235,7 @@ class mob_voidtraveler : public CreatureScript
 
             void EnterCombat(Unit* /*who*/)  { }
 
-            void UpdateAI(uint32 diff) 
+            void UpdateAI(uint32 const diff) 
             {
                 if (_moveTimer <= diff)
                 {

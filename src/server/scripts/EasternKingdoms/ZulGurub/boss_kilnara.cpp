@@ -164,7 +164,7 @@ class boss_kilnara : public CreatureScript
             {
                 _EnterCombat();
                 Talk(SAY_AGGRO);
-                me->SummonGameObject(GO_FORCEFIELD, -11494.5, -1613.67, 47.3295, 4.71461, 0, 0, 0, 0, 0);
+                me->SummonGameObject(GO_FORCEFIELD, -11494.5f, -1613.67f, 47.3295f, 4.71461f, 0, 0, 0, 0, 0);
                 me->RemoveAura(SPELL_KILNARA_HOVER);
                 events.ScheduleEvent(EVENT_TEARS_OF_BLOOD, 12000);
                 events.ScheduleEvent(EVENT_WAIL_OF_SORROW, 20000);

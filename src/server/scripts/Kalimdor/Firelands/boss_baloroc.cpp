@@ -150,7 +150,7 @@ class boss_baloroc: public CreatureScript
 
                     events.ScheduleEvent(EVENT_BERSERK, 6 * MINUTE * IN_MILLISECONDS);
 
-                    me->SummonGameObject(GOB_DOOR_BALOROC, -17.7031, -65.276, 56.5987, 5.72468, 0, 0, 0, 0, 0);
+                    me->SummonGameObject(GOB_DOOR_BALOROC, -17.7031f, -65.276f, 56.5987f, 5.72468f, 0, 0, 0, 0, 0);
 
                     _EnterCombat();
                 }

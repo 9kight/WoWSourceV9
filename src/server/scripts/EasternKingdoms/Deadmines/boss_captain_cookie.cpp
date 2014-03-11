@@ -113,7 +113,7 @@ public:
                 me->CastSpell((*itr), SPELL_ACHIEVEMENT_AURA, true);
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(uint32 const uiDiff)
         {
             if (!me || !instance)
                 return;

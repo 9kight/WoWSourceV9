@@ -124,7 +124,7 @@ public:
             Talk(SAY_DEATH);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim() || _bubbled)
                 return;
@@ -153,7 +153,7 @@ public:
             }
         }
 
-        void DoAction(int32 action) 
+        void DoAction(int32 const action) 
         {
             if (action == ACTION_CRYSTAL_HANDLER_DIED)
                 CrystalHandlerDied();
@@ -290,7 +290,7 @@ public:
             _temp = 0;
         }
 
-        void UpdateAI(uint32 diff) 
+        void UpdateAI(uint32 const diff) 
         {
             if (_spell)
             {

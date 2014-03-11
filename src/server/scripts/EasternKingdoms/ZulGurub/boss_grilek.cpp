@@ -80,7 +80,7 @@ class boss_grilek : public CreatureScript
             {
                 _EnterCombat();
                 Talk(SAY_AGGRO);
-                me->SummonGameObject(GO_THE_CACHE_OF_MADNESS_DOOR, -11938.6, -1843.32, 61.7272, 0.0899053, 0, 0, 0, 0, 0);
+                me->SummonGameObject(GO_THE_CACHE_OF_MADNESS_DOOR, -11938.6f, -1843.32f, 61.7272f, 0.0899053f, 0, 0, 0, 0, 0);
                 events.ScheduleEvent(EVENT_AVATAR, 10000);
                 events.ScheduleEvent(EVENT_ENTANGLING_ROOTS, 20000);
                 events.ScheduleEvent(EVENT_RUPTURE_LINE, 30000);

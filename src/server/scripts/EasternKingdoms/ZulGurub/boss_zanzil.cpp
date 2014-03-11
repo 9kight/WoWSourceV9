@@ -360,7 +360,7 @@ class boss_zanzil : public CreatureScript
                 summons.Summon(summoned);
             }
 
-            void DoAction(int32 action)
+            void DoAction(int32 const action)
             {
                 if (action == ACTION_FILL_GAS)
                 {
@@ -389,7 +389,7 @@ class boss_zanzil : public CreatureScript
                 events.ScheduleEvent(EVENT_TERRIBLE_TONIC, urand(5000, 15000));
                 events.ScheduleEvent(RAND(EVENT_RESURRECTION_ELIXIR_BERSERKER, EVENT_GRAVEYARD_GAS, EVENT_RESURRECTION_ELIXIR_ZOMBIE), urand(15000, 30000));
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-                me->SummonGameObject(GO_ZANZIL_DOOR, -11613.1, -1360.27, 92.2573, 1.50443, 0, 0, 0, 0, 0);
+                me->SummonGameObject(GO_ZANZIL_DOOR, -11613.1f, -1360.27f, 92.2573f, 1.50443f, 0, 0, 0, 0, 0);
             }
 
             void KilledUnit(Unit* victim)
@@ -409,7 +409,7 @@ class boss_zanzil : public CreatureScript
                     me->RemoveGameObject(forcefield, true);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 events.Update(diff);
 
@@ -579,7 +579,7 @@ struct npc_gurubashi_berserkerAI : public ScriptedAI
         events.ScheduleEvent(EVENT_KNOCK_AWAY, urand(5000, 15000));
     }
 
-    void UpdateAI(uint32 diff)
+    void UpdateAI(uint32 const diff)
     {
         if (!UpdateVictim())
             return;
@@ -672,7 +672,7 @@ class npc_zanzili_zombie : public CreatureScript
             {
             }
 
-            void UpdateAI(uint32 /*diff*/)
+            void UpdateAI(uint32 const /*diff*/)
             {
                 if (!UpdateVictim())
                     return;

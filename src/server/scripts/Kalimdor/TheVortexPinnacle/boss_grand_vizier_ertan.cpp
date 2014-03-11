@@ -165,7 +165,7 @@ class boss_grand_vizier_ertan : public CreatureScript
             Slipstream->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             }
 
-            void DoAction(int32 action)
+            void DoAction(int32 const action)
             {
                 switch (action)
                 {
@@ -183,7 +183,7 @@ class boss_grand_vizier_ertan : public CreatureScript
                 me->CastSpell(me, SPELL_STORMS_EDGE_KNOCKBACK, true);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim())
                     return;

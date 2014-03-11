@@ -116,7 +116,7 @@ class boss_tharon_ja : public CreatureScript
                 DoCastAOE(SPELL_ACHIEVEMENT_CHECK, true);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim())
                     return;

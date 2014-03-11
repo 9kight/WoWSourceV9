@@ -205,7 +205,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) 
+        void UpdateAI(uint32 const diff) 
         {
             if (!UpdateVictim())
             {
@@ -388,7 +388,7 @@ public:
             _events.ScheduleEvent(EVENT_ENCAGE, urand(10000, 20000));
         }
 
-        void UpdateAI(uint32 diff) 
+        void UpdateAI(uint32 const diff) 
         {
 
 

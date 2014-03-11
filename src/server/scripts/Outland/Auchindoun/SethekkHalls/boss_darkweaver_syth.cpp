@@ -124,7 +124,7 @@ public:
             DoCast(me, SPELL_SUMMON_SYTH_SHADOW, true);   //right
         }
 
-        void UpdateAI(uint32 diff) 
+        void UpdateAI(uint32 const diff) 
         {
             if (!UpdateVictim())
                 return;
@@ -222,7 +222,7 @@ public:
 
         void EnterCombat(Unit* /*who*/)  {}
 
-        void UpdateAI(uint32 diff) 
+        void UpdateAI(uint32 const diff) 
         {
             if (!UpdateVictim())
                 return;
@@ -281,7 +281,7 @@ public:
 
         void EnterCombat(Unit* /*who*/)  {}
 
-        void UpdateAI(uint32 diff) 
+        void UpdateAI(uint32 const diff) 
         {
             if (!UpdateVictim())
                 return;
@@ -335,7 +335,7 @@ public:
 
         void EnterCombat(Unit* /*who*/)  {}
 
-        void UpdateAI(uint32 diff) 
+        void UpdateAI(uint32 const diff) 
         {
             if (!UpdateVictim())
                 return;
@@ -390,7 +390,7 @@ public:
 
         void EnterCombat(Unit* /*who*/)  {}
 
-        void UpdateAI(uint32 diff) 
+        void UpdateAI(uint32 const diff) 
         {
             if (!UpdateVictim())
                 return;

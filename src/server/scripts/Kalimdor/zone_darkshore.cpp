@@ -139,7 +139,7 @@ public:
             SetFollowPaused(false);
         }
 
-        void UpdateFollowerAI(uint32 uiDiff)
+        void UpdateFollowerAI(uint32 const uiDiff)
         {
             if (!UpdateVictim())
             {

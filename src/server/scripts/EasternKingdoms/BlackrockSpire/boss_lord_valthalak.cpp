@@ -68,7 +68,7 @@ public:
                 instance->SetData(DATA_LORD_VALTHALAK, DONE);
         }
 
-        void UpdateAI(uint32 diff) 
+        void UpdateAI(uint32 const diff) 
         {
             if (!UpdateVictim())
                 return;

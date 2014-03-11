@@ -226,7 +226,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) 
+        void UpdateAI(uint32 const diff) 
         {
             if (gythEvent)
             {
