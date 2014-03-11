@@ -7377,12 +7377,11 @@ bool Player::RewardHonor(Unit* victim, uint32 groupsize, int32 honor, bool pvpto
     GetSession()->SendPacket(&data);
 
     // add honor points
-    ModifyCurrency(CURRENCY_TYPE_HONOR_POINTS, int32(honor), true);
+    ModifyCurrency(CURRENCY_TYPE_HONOR_POINTS, int32(honor), true, true);
 
     // Add guild XP
     if (Guild *guild = GetGuild())
         guild->GiveXP(uint32(float(honor) * sWorld->getRate(RATE_XP_HONOR_EARNED_GUILD_MODIFIER)), this);
-
 
     if (InBattleground() && honor > 0)
     {
