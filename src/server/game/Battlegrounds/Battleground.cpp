@@ -943,7 +943,7 @@ void Battleground::EndBattleground(uint32 winner)
                 uint32 rating = player->GetArenaPersonalRating(winnerArenaTeam->GetSlot());
                 player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA, rating ? rating : 1);
                 player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_ARENA, GetMapId());
-                player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_META_ARENA, sWorld->getIntConfig(CONFIG_CURRENCY_CONQUEST_POINTS_ARENA_REWARD));
+                player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_META_ARENA, sWorld->getIntConfig(CONFIG_CURRENCY_CONQUEST_POINTS_ARENA_REWARD), true, true); // should give end of week
 
                 winnerArenaTeam->MemberWon(player, loserMatchmakerRating, winnerMatchmakerChange);
 
@@ -978,18 +978,21 @@ void Battleground::EndBattleground(uint32 winner)
         // Reward winner team
         if (team == winner)
         {
-            if (IsRandom() || BattlegroundMgr::IsBGWeekend(GetTypeID()))
+            if (IsRandom())
             {
-                UpdatePlayerScore(player, SCORE_BONUS_HONOR, winner_honor);
-                if (!player->GetRandomWinner())
+                if (BattlegroundMgr::IsBGWeekend(GetTypeID()))
                 {
-                    // 100cp awarded for the first random battleground won each day
-                    player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_META_ARENA, BG_REWARD_WINNER_CONQUEST_FIRST);
-                    player->SetRandomWinner(true);
+                    UpdatePlayerScore(player, SCORE_BONUS_HONOR, winner_honor);
+                    if (!player->GetRandomWinner())
+                    {
+                        // 100cp awarded for the first random battleground won each day
+                        player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_META_BG, BG_REWARD_WINNER_CONQUEST_FIRST, true, true);
+                        player->SetRandomWinner(true);
+                    }
                 }
+                else // 50cp awarded for each non-rated battleground won
+                    player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_META_BG, BG_REWARD_WINNER_CONQUEST_LAST, true, true);
             }
-            else // 50cp awarded for each non-rated battleground won
-                player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_META_ARENA, BG_REWARD_WINNER_CONQUEST_LAST);
 
             // Modify the guild reputation and xp - 167 rep on win, 75k guild xp. Only if group is guild group.
             if (Guild* guild = sGuildMgr->GetGuildById(player->GetGuildId()))
