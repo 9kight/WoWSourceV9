@@ -7468,7 +7468,6 @@ void Player::_SaveCurrency(SQLTransaction& trans)
         switch (itr->second.state)
         {
             case PLAYERCURRENCY_NEW:
-                sLog->outError(LOG_FILTER_PLAYER, "Player::_SaveCurrency new: %u, id: %u", itr->second.weekCap, itr->first);
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_PLAYER_CURRENCY);
                 stmt->setUInt32(0, GetGUIDLow());
                 stmt->setUInt16(1, itr->first);
@@ -7478,7 +7477,6 @@ void Player::_SaveCurrency(SQLTransaction& trans)
                 trans->Append(stmt);
                 break;
             case PLAYERCURRENCY_CHANGED:
-                sLog->outError(LOG_FILTER_PLAYER, "Player::_SaveCurrency changed: %u, id: %u", itr->second.weekCap, itr->first);
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_PLAYER_CURRENCY);
                 stmt->setUInt32(0, itr->second.weekCount);
                 stmt->setUInt32(1, itr->second.totalCount);
