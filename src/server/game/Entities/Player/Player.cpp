@@ -7664,12 +7664,12 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
 
     // count can't be more then weekCap if used (weekCap > 0)
     if (!isRefund && weekCap && count > int32(weekCap))
-        count = weekCap;
+        count = int32(weekCap);
 
     // count can't be more then totalCap if used (totalCap > 0)
     uint32 totalCap = GetCurrencyTotalCap(currency);
     if (!isRefund && totalCap && count > int32(totalCap))
-        count = totalCap;
+        count = int32(totalCap);
 
     int32 newTotalCount = int32(oldTotalCount) + count;
     if (newTotalCount < 0)
@@ -7684,21 +7684,21 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
     {
         newWeekCount = int32(weekCap);
         // weekCap - oldWeekCount always >= 0 as we set limit before!
-        newTotalCount = oldTotalCount + (weekCap - oldWeekCount);
+        newTotalCount = int32(oldTotalCount + (weekCap - oldWeekCount));
     }
 
     // if conquest point exceeds weekcap
-    if(!isRefund && currency->ID == CURRENCY_TYPE_CONQUEST_POINTS && oldWeekCount + count > _ConquestCurrencyTotalWeekCap)
+    if(!isRefund && currency->ID == CURRENCY_TYPE_CONQUEST_POINTS && int32(oldWeekCount) + count > int32(_ConquestCurrencyTotalWeekCap))
     {
-        newWeekCount = _ConquestCurrencyTotalWeekCap;
-        newTotalCount = oldTotalCount + (newWeekCount - oldWeekCount);
+        newWeekCount = int32(_ConquestCurrencyTotalWeekCap);
+        newTotalCount = int32(oldTotalCount + (newWeekCount - oldWeekCount));
     }
 
     // if we get more then totalCap set to maximum;
     if (totalCap && int32(totalCap) < newTotalCount)
     {
         newTotalCount = int32(totalCap);
-        newWeekCount = weekCap;
+        newWeekCount = int32(weekCap);
     }
 
     if (uint32(newTotalCount) != oldTotalCount)
