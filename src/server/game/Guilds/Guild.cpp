@@ -2729,30 +2729,18 @@ void Guild::HandleDisband(WorldSession* session)
 void Guild::HandleGuildPartyRequest(WorldSession* session)
 {
     Player* player = session->GetPlayer();
+    Group* group = player->GetGroup();
 
     // Make sure player is a member of the guild and that he is in a group.
-    if (!IsMember(player->GetGUID()))
+    if (!IsMember(player->GetGUID()) || !group)
         return;
 
-    bool guildParty = false;
-    float xpMultiplier = 0.0f;
-    uint32 CurrGuildPartyMembers, NeededGuildPartyMembers = 0;
-
-    if (Group* group = player->GetGroup())
-    {
-        guildParty = group->IsGuildGroupFor(player);
-        xpMultiplier = group->GetGuildXpRateForPlayer(player);
-        CurrGuildPartyMembers = group->GetMembersCountOfGuild(player->GetGuildId());
-        NeededGuildPartyMembers = group->GetNeededMembersOfSameGuild((player->InArena() && player->GetBattleground()->isRated()) ?
-            player->GetBattleground()->GetArenaType() : 0, player->GetMap());
-    }
-
     WorldPacket data(SMSG_GUILD_PARTY_STATE_RESPONSE, 13);
-    data.WriteBit(guildParty);                          // Is guild group
+    data.WriteBit(player->GetMap()->GetOwnerGuildId(player->GetTeam()) == GetId()); // Is guild group
     data.FlushBits();
-    data << float(xpMultiplier);                        // Guild XP multiplier
-    data << uint32(CurrGuildPartyMembers);              // Current guild members
-    data << uint32(NeededGuildPartyMembers);            // Needed guild members
+    data << float(0.f);                                                             // Guild XP multiplier
+    data << uint32(0);                                                              // Current guild members
+    data << uint32(0);                                                              // Needed guild members
 
     session->SendPacket(&data);
     sLog->outDebug(LOG_FILTER_GUILD, "SMSG_GUILD_PARTY_STATE_RESPONSE [%s]", session->GetPlayerInfo().c_str());
@@ -4758,7 +4746,7 @@ void Guild::UpdateCharacterTotalReputationGuildRep(uint32 total_rep, uint32 guid
 }
 
 
-void Guild::MoveRank(uint32 rankId, uint8 direction)
+/*void Guild::MoveRank(uint32 rankId, uint8 direction)
 {
     for(Ranks::iterator itr = m_ranks.begin(); itr != m_ranks.end();++itr)
     {
@@ -4783,7 +4771,7 @@ void Guild::MoveRank(uint32 rankId, uint8 direction)
             }
         }
     }
-}
+}*/
 
 void Guild::HandleSendChallengeUpdate(WorldSession* session)
 {
