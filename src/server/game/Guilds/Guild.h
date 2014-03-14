@@ -995,7 +995,7 @@ public:
     void ResetDailyExperience(); // Reset cap.
     void AddGuildNews(uint8 type, uint64 guid, uint32 flags, uint32 value);
 
-    void MoveRank(uint32 rankId, uint8 direction);
+    //void MoveRank(uint32 rankId, uint8 direction);
 
     EmblemInfo const& GetEmblemInfo() const { return m_emblemInfo; }
     void ResetTimes(bool weekly);
