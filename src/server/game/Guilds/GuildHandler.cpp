@@ -263,8 +263,8 @@ void WorldSession::HandleGuildSwitchRank(WorldPacket& recvPacket)
 
     Guild* pGuild = GetPlayer()->GetGuild();
 
-    if(pGuild)
-    {
-        pGuild->MoveRank(rank,direction);
-    }
+  //  if(pGuild)
+  //  {
+    //    pGuild->MoveRank(rank,direction);
+  //  }
 }
