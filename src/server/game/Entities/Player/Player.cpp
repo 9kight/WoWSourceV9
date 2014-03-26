@@ -3256,6 +3256,13 @@ void Player::GiveLevel(uint8 level)
     PhaseUpdateData phaseUdateData;
     phaseUdateData.AddConditionType(CONDITION_LEVEL);
 
+    // Learn Running wild and Apprentice Riding to worgens that reach level 20
+    if (level == 20 && getRace() == RACE_WORGEN)
+    {
+        learnSpell(87840, false); // Running wild
+        learnSpell(33388, false); // Apprentice Riding
+    }
+
     phaseMgr.NotifyConditionChanged(phaseUdateData);
 
     // Refer-A-Friend
