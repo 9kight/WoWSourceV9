@@ -92,37 +92,72 @@ class spell_warr_heroic_strike : public SpellScriptLoader
         }
 };
 
-/// Bloodthirst
-/// Spell Id: 23881
- class spell_warr_bloodthirst : public SpellScriptLoader
- {
+/// Updated 4.3.4
+class spell_warr_bloodthirst : public SpellScriptLoader
+{
     public:
         spell_warr_bloodthirst() : SpellScriptLoader("spell_warr_bloodthirst") { }
- 
+
         class spell_warr_bloodthirst_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_warr_bloodthirst_SpellScript);
- 
-            void CalculateDamage(SpellEffIndex /*effect*/)
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
             {
-                // Formula: AttackPower * BasePoints / 100
-                if (Unit* caster = GetCaster())
-                {
-                    int32 dmg = int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 80 / 100);
-                    SetHitDamage(dmg);
-                    caster->CastCustomSpell(caster, 23885, &dmg, NULL, NULL, true);
-                }
+                int32 damage = GetEffectValue();
+                GetCaster()->CastCustomSpell(GetCaster(), SPELL_WARRIOR_BLOODTHIRST, &damage, NULL, NULL, true, NULL);
             }
 
             void Register()
             {
-                OnEffectHitTarget += SpellEffectFn(spell_warr_bloodthirst::spell_warr_bloodthirst_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+                OnEffectHit += SpellEffectFn(spell_warr_bloodthirst_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
             }
         };
 
         SpellScript* GetSpellScript() const
         {
             return new spell_warr_bloodthirst_SpellScript();
+        }
+};
+
+/// Updated 4.3.4
+class spell_warr_bloodthirst_heal : public SpellScriptLoader
+{
+    public:
+        spell_warr_bloodthirst_heal() : SpellScriptLoader("spell_warr_bloodthirst_heal") { }
+
+        class spell_warr_bloodthirst_heal_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warr_bloodthirst_heal_SpellScript);
+
+            void HandleHeal(SpellEffIndex /*effIndex*/)
+            {
+                Unit* caster = GetCaster();
+
+                if(!caster)
+                    return;
+
+                if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(SPELL_WARRIOR_BLOODTHIRST_DAMAGE))
+                {
+                    int32 calculatedHeal = CalculatePct(caster->GetMaxHealth(), float(spellInfo->Effects[EFFECT_1].CalcValue(GetCaster())) / 1000);
+
+                    // Field Dressing check
+                    if(AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_WARRIOR, 2671, EFFECT_1))
+                        AddPct(calculatedHeal, aurEff->GetAmount());
+
+                    SetHitHeal(calculatedHeal);
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_warr_bloodthirst_heal_SpellScript::HandleHeal, EFFECT_0, SPELL_EFFECT_HEAL);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_warr_bloodthirst_heal_SpellScript();
         }
 };
 
@@ -1164,6 +1199,7 @@ void AddSC_warrior_spell_scripts()
 {
     new spell_warr_heroic_strike();
     new spell_warr_bloodthirst();
+	new spell_warr_bloodthirst_heal();
     new spell_warr_charge();
     new spell_warr_concussion_blow();
     new spell_warr_deep_wounds();
