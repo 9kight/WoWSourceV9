@@ -803,6 +803,38 @@ namespace Trinity
             float i_range;
             uint32 i_spell;
     };
+    
+    class AnyUnfriendlyCreatureInUnitRangeCheck
+    {
+        public:
+            explicit AnyUnfriendlyCreatureInUnitRangeCheck(Unit* unitOwner, uint32 entry, float range) : _unitOwner(unitOwner), _entry(entry), _range(range) { }
+
+            bool operator()(Unit* unit) const
+            {
+                // Check unit entry
+                if (unit->GetEntry() != _entry)
+                    return false;
+                    
+                // Check unit owner
+                if (unit->GetCharmerOrOwner() != _unitOwner)
+                    return false;
+                    
+                // Check unit display id
+                if (unit->GetDisplayId() != unit->GetNativeDisplayId())
+                    return false;
+                    
+                // Check owner distance to unit
+                if (_unitOwner->GetDistance2d(unit) > _range)
+                    return false;
+
+                return true;
+            }
+
+        private:
+            Unit* _unitOwner;
+            uint32 _entry;
+            float _range;
+    };
 
     class AnyUnfriendlyUnitInObjectRangeCheck
     {

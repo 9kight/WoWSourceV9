@@ -436,6 +436,15 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
             }
             case SPELLFAMILY_DRUID:
             {
+                // Wild Mushroom damage
+                if (m_spellInfo->Id == 78777)
+                {
+                    // Earth and Moon
+
+                    if(m_caster->HasAura(48506))
+                        m_caster->CastSpell(unitTarget, 60433, true);
+                }
+				
                 // Ferocious Bite
                 if (m_caster->GetTypeId() == TYPEID_PLAYER && (m_spellInfo->SpellFamilyFlags[0] & 0x000800000) && m_spellInfo->SpellVisual[0] == 6587)
                 {
