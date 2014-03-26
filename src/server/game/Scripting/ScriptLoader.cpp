@@ -419,6 +419,11 @@ void AddSC_boss_echo_of_tyrande();
 void AddSC_boss_murozond();
 void AddSC_instance_end_time();
 void AddSC_end_time_teleport();
+
+void AddSC_boss_arcurion();                 // HoT
+void AddSC_boss_asira_dawnslayer();
+void AddSC_boss_archbishop_benedictus();
+
 void AddSC_instance_dragon_soul();   // Dragon Soul
 void AddSC_dragon_soul_teleport_and_transport();
 void AddSC_boss_unsleeping();
@@ -1185,6 +1190,11 @@ void AddKalimdorScripts()
     AddSC_boss_murozond();
     AddSC_instance_end_time();
     AddSC_end_time_teleport();
+	
+    AddSC_boss_arcurion();                 // HoT
+    AddSC_boss_asira_dawnslayer();
+    AddSC_boss_archbishop_benedictus();
+	
     AddSC_instance_dragon_soul();   // Dragon Soul
     AddSC_dragon_soul_teleport_and_transport();
     AddSC_boss_unsleeping();

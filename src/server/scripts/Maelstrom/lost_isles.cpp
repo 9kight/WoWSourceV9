@@ -37,6 +37,11 @@
 #define GIZMO 36600
 #define SPELL_DEAD_STILL 69010
 
+enum Texts
+{
+    SAY_GYRO = 0
+};
+
 class npc_Zapnozzle : public CreatureScript
 {
 public:
@@ -641,28 +646,12 @@ public:
     {
         if (_Quest->GetQuestId() == 14242)
         {
-            if (Creature *t = player->SummonCreature(36143, creature->GetPositionX(), creature->GetPositionY(),  creature->GetPositionZ(),
+            if (Creature *t = player->SummonCreature(39074, creature->GetPositionX(), creature->GetPositionY(),  creature->GetPositionZ(),
                                                      creature->GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 300*IN_MILLISECONDS))
             {
                 player->CastCustomSpell(VEHICLE_SPELL_RIDE_HARDCODED, SPELLVALUE_BASE_POINT0, 1, t, false);
                 CAST_AI(npc_escortAI, (t->AI()))->Start(false, true, player->GetGUID(), _Quest);
-                t->AI()->Talk(0, player->GetGUID());
-            }
-        }
-        return true;
-    }
-
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
-    {
-        player->PlayerTalkClass->ClearMenus();
-        if (action == GOSSIP_ACTION_INFO_DEF + 1)
-        {
-            if (Creature *t = player->SummonCreature(36143, creature->GetPositionX(), creature->GetPositionY(),  creature->GetPositionZ(),
-                                                     creature->GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 300*IN_MILLISECONDS))
-            {
-                player->CastCustomSpell(VEHICLE_SPELL_RIDE_HARDCODED, SPELLVALUE_BASE_POINT0, 1, t, false);
-                CAST_AI(npc_escortAI, (t->AI()))->Start(false, true, player->GetGUID());
-                t->AI()->Talk(0, player->GetGUID());
+                t->AI()->Talk(SAY_GYRO, player->GetGUID());
             }
         }
         return true;

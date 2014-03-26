@@ -978,11 +978,13 @@ void Battleground::EndBattleground(uint32 winner)
         // Reward winner team
         if (team == winner)
         {
+            if (IsRandom() || BattlegroundMgr::IsBGWeekend(GetTypeID()))
+                UpdatePlayerScore(player, SCORE_BONUS_HONOR, winner_honor);
+
             if (IsRandom())
             {
                 if (BattlegroundMgr::IsBGWeekend(GetTypeID()))
                 {
-                    UpdatePlayerScore(player, SCORE_BONUS_HONOR, winner_honor);
                     if (!player->GetRandomWinner())
                     {
                         // 100cp awarded for the first random battleground won each day
