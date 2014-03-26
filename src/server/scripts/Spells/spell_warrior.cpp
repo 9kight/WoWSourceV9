@@ -785,51 +785,53 @@ public:
 // 12328, 18765, 35429 - Sweeping Strikes
 class spell_warr_sweeping_strikes : public SpellScriptLoader
 {
-    class script_impl : public AuraScript
-    {
-        PrepareAuraScript(script_impl);
+    public:
+        spell_warr_sweeping_strikes() : SpellScriptLoader("spell_warr_sweeping_strikes") { }
 
-        enum { SPELL_SWEEPING_STRIKES_PROC = 12723 };
-
-        Unit* m_target;
-
-        bool Load()
+        class spell_warr_sweeping_strikes_AuraScript : public AuraScript
         {
-            m_target = NULL;
-            return true;
-        }
+            PrepareAuraScript(spell_warr_sweeping_strikes_AuraScript);
 
-        bool CheckProc(ProcEventInfo& eventInfo)
+            bool Validate(SpellInfo const* /*spellInfo*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK))
+                    return false;
+                return true;
+            }
+
+            bool Load()
+            {
+                _procTarget = NULL;
+                return true;
+            }
+
+            bool CheckProc(ProcEventInfo& eventInfo)
+            {
+                _procTarget = eventInfo.GetActor()->SelectNearbyTarget(eventInfo.GetProcTarget());
+                return _procTarget;
+            }
+
+            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
+            {
+                PreventDefaultAction();
+                GetTarget()->CastSpell(_procTarget, SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK, true, NULL, aurEff);
+            }
+
+            void Register()
+            {
+                DoCheckProc += AuraCheckProcFn(spell_warr_sweeping_strikes_AuraScript::CheckProc);
+                OnEffectProc += AuraEffectProcFn(spell_warr_sweeping_strikes_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+            }
+
+        private:
+            Unit* _procTarget;
+        };
+
+        AuraScript* GetAuraScript() const
         {
-            m_target = eventInfo.GetActor()->SelectNearbyTarget(eventInfo.GetProcTarget());
-            return m_target;
+            return new spell_warr_sweeping_strikes_AuraScript();
         }
-
-        void HandleProc(AuraEffect const* aurEff, ProcEventInfo&)
-        {
-            PreventDefaultAction();
-            GetTarget()->CastSpell(m_target, SPELL_SWEEPING_STRIKES_PROC, true, NULL, aurEff);
-        }
-
-        void Register()
-        {
-            DoCheckProc += AuraCheckProcFn(script_impl::CheckProc);
-            OnEffectProc += AuraEffectProcFn(script_impl::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
-        }
-    };
-
-public:
-    spell_warr_sweeping_strikes()
-        : SpellScriptLoader("spell_warr_sweeping_strikes")
-    {
-    }
-
-    AuraScript* GetAuraScript() const
-    {
-        return new script_impl();
-    }
 };
-
 // 23920 - Spell reflect
 class spell_warr_spell_reflect : public SpellScriptLoader
 {
