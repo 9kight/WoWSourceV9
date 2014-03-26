@@ -102,6 +102,20 @@ class spell_warr_bloodthirst : public SpellScriptLoader
         {
             PrepareSpellScript(spell_warr_bloodthirst_SpellScript);
 
+            void HandleDamage(SpellEffIndex /*effIndex*/)
+            {
+                int32 damage = GetEffectValue();
+                ApplyPct(damage, GetCaster()->GetTotalAttackPowerValue(BASE_ATTACK));
+
+                Unit* caster = GetCaster();
+                if (Unit* target = GetHitUnit())
+                {
+                    damage = GetCaster()->SpellDamageBonusDone(target, GetSpellInfo(), uint32(damage), SPELL_DIRECT_DAMAGE);
+                    damage = target->SpellDamageBonusTaken(GetSpellInfo(), damage, SPELL_DIRECT_DAMAGE, 1, caster->GetGUID());;
+                }
+                SetHitDamage(damage);
+            }
+
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 int32 damage = GetEffectValue();
@@ -110,11 +124,12 @@ class spell_warr_bloodthirst : public SpellScriptLoader
 
             void Register()
             {
+                OnEffectHitTarget += SpellEffectFn(spell_warr_bloodthirst_SpellScript::HandleDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
                 OnEffectHit += SpellEffectFn(spell_warr_bloodthirst_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const 
         {
             return new spell_warr_bloodthirst_SpellScript();
         }
@@ -132,30 +147,17 @@ class spell_warr_bloodthirst_heal : public SpellScriptLoader
 
             void HandleHeal(SpellEffIndex /*effIndex*/)
             {
-                Unit* caster = GetCaster();
-
-                if(!caster)
-                    return;
-
                 if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(SPELL_WARRIOR_BLOODTHIRST_DAMAGE))
-                {
-                    int32 calculatedHeal = CalculatePct(caster->GetMaxHealth(), float(spellInfo->Effects[EFFECT_1].CalcValue(GetCaster())) / 1000);
-
-                    // Field Dressing check
-                    if(AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_WARRIOR, 2671, EFFECT_1))
-                        AddPct(calculatedHeal, aurEff->GetAmount());
-
-                    SetHitHeal(calculatedHeal);
-                }
+                    SetHitHeal(GetCaster()->CountPctFromMaxHealth(spellInfo->Effects[EFFECT_1].CalcValue(GetCaster())) / 100);
             }
 
-            void Register()
+            void Register() 
             {
                 OnEffectHitTarget += SpellEffectFn(spell_warr_bloodthirst_heal_SpellScript::HandleHeal, EFFECT_0, SPELL_EFFECT_HEAL);
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const 
         {
             return new spell_warr_bloodthirst_heal_SpellScript();
         }
