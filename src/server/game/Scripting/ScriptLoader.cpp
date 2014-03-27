@@ -670,6 +670,13 @@ void AddSC_boss_warlord_kalithresh();
 void AddSC_instance_steam_vault();
 void AddSC_boss_hungarfen();                 //CR Underbog
 void AddSC_boss_the_black_stalker();
+
+void AddSC_instance_the_slave_pens();        // Salve Pens
+void AddSC_boss_quagmirran();
+void AddSC_boss_rokmar_the_crackler();
+void AddSC_boss_ahune();
+void AddSC_boss_mennu_the_betrayer();
+
 void AddSC_boss_gruul();                     //Gruul's Lair
 void AddSC_boss_high_king_maulgar();
 void AddSC_instance_gruuls_lair();
@@ -1287,6 +1294,13 @@ void AddOutlandScripts()
     AddSC_boss_hungarfen();                 //CR Underbog
     AddSC_boss_the_black_stalker();
     AddSC_boss_gruul();                     //Gruul's Lair
+	
+    AddSC_instance_the_slave_pens();        // Salve Pens
+    AddSC_boss_quagmirran();
+    AddSC_boss_rokmar_the_crackler();
+    AddSC_boss_ahune();
+    AddSC_boss_mennu_the_betrayer();	
+	
     AddSC_boss_high_king_maulgar();
     AddSC_instance_gruuls_lair();
     AddSC_boss_broggok();                   //HC Blood Furnace
