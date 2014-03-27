@@ -22,7 +22,6 @@ enum
 	SAY_DEATH                    = 2,
     SAY_KILL                     = 1,
     SAY_AGGRO                    = 0,
-	
 };
 
 enum Spells 
@@ -51,28 +50,6 @@ enum Events
 	
 	EVENT_SAY_TRANSFORMATION    = 7,
 	EVENT_TWILIGHT_EPITAPHY_2   = 8,
-
-
-
-};
-
-
-enum thrall_spels
-{
-  SPELL_LAVA_BURST              = 107980,
-  
-  NPC_BISHOP                    = 54938,
-  NPC_THRALL                    = 54971,
-};
-
-enum thrall_events
-{
-  EVENT_LAVA_BURST              = 1
-};
-
-enum EncounterActions
-{
-    ACTION_START_ATACK            = 1,
 };
 
 class boss_archbishop_benedictus : public CreatureScript
@@ -98,7 +75,6 @@ public:
         InstanceScript *instance;
         EventMap events;
 		
-
         void Reset() 
         {
             casted = false;
@@ -111,9 +87,9 @@ public:
 		    Talk(SAY_DEATH);
 
 			 if (instance)
-             {
                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TWILIGHT_EPITAPHY_2);
-             }
+			   instance->SetData(DATA_ARCHBISHOP_EVENT, DONE);
+
 			
         }
 
@@ -133,8 +109,7 @@ public:
             if (instance)
                 instance->SetData(DATA_ARCHBISHOP_EVENT, IN_PROGRESS);
         }
-		
-		
+				
         void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
@@ -159,8 +134,7 @@ public:
 			            events.ScheduleEvent(EVENT_CORRUPTING_TWILIGHT, 6000);
                         events.ScheduleEvent(EVENT_WAVE_TWILIGHT, 30000);						
                 }
-				
-				
+								
             events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent()) 
@@ -219,8 +193,7 @@ public:
                        break;
 				}
             }		
-						
-			
+									
             DoMeleeAttackIfReady();
         }
     };

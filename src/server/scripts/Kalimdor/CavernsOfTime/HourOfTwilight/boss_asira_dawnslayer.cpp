@@ -32,7 +32,6 @@ enum Events
 	EVENT_LESSER_BLADE_BARRIER
 };
 
-
 class boss_asira_dawnslayer : public CreatureScript
 {
 public:
@@ -67,7 +66,7 @@ public:
         {
 			Talk(SAY_DEATH);
             if (instance)
-                instance->SetData(DATA_ASIRA_EVENT, DONE);
+            instance->SetData(DATA_ASIRA_EVENT, DONE);
         }
 			
         void KilledUnit(Unit* /*victim*/)
@@ -126,13 +125,10 @@ public:
             // Health check
             if (HealthBelowPct(30 * m_uiHealthAmountModifier) && !casted)
             {
-
 				   DoCast(me, SPELL_BLADE_BARRIER);
 				   events.ScheduleEvent(EVENT_LESSER_BLADE_BARRIER, 12000);
 				   casted = true;
-
-            }
-			
+            }			
             DoMeleeAttackIfReady();
         }
     };

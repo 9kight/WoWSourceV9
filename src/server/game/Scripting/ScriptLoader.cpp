@@ -420,9 +420,11 @@ void AddSC_boss_murozond();
 void AddSC_instance_end_time();
 void AddSC_end_time_teleport();
 
-void AddSC_boss_arcurion();                 // HoT
+void AddSC_instance_hour_of_twilight();            // HoT
+void AddSC_boss_arcurion();
 void AddSC_boss_asira_dawnslayer();
 void AddSC_boss_archbishop_benedictus();
+void AddSC_trash_mobs_hot();
 
 void AddSC_instance_dragon_soul();   // Dragon Soul
 void AddSC_dragon_soul_teleport_and_transport();
@@ -1191,9 +1193,11 @@ void AddKalimdorScripts()
     AddSC_instance_end_time();
     AddSC_end_time_teleport();
 	
-    AddSC_boss_arcurion();                 // HoT
+    AddSC_instance_hour_of_twilight();            // HoT
+    AddSC_boss_arcurion();
     AddSC_boss_asira_dawnslayer();
     AddSC_boss_archbishop_benedictus();
+    AddSC_trash_mobs_hot();
 	
     AddSC_instance_dragon_soul();   // Dragon Soul
     AddSC_dragon_soul_teleport_and_transport();
