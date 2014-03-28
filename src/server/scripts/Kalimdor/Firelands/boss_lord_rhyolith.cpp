@@ -48,7 +48,15 @@ enum KarSpells
     SPELL_SUM_LAVA_SPAWN = 99575
 };
 
-
+// I have all the correct text and sound will fix this later i first want to see if this fix the crash issue
+enum eYells
+(
+   SAY_AGGRO    = 6,
+   SAY_KILLED   = 12,
+   SAY_DIED     = 1,
+   SAY_PHASE2   = 8
+   
+};
 class kar_the_everburning: public CreatureScript
 {
     public:
@@ -252,27 +260,6 @@ class Unstable_Pyrelord: public CreatureScript
                 }
         };
 };
-
-enum Yells
-{
-    /*
-     Lord Rhyolith yells: Augh - smooshy little pests, look what you've done!
-     Lord Rhyolith yells: Broken. Mnngghhh... broken...
-     Lord Rhyolith yells: Buuurrrnn!
-     Lord Rhyolith yells: Eons I have slept undisturbed... Now this... Creatures of flesh, now you will BURN!
-     Lord Rhyolith yells: Finished.
-     Lord Rhyolith yells: Graaahh!
-     Lord Rhyolith yells: Hah? Hruumph? Soft little fleshy-things? Here? Nuisances, nuisances!
-     Lord Rhyolith yells: I'll crush you underfoot!
-     Lord Rhyolith yells: Oh you little beasts...
-     Lord Rhyolith yells: Oww now hey.
-     Lord Rhyolith yells: Sear the flesh from their tiny frames.
-     Lord Rhyolith yells: So soft!
-     Lord Rhyolith yells: Squeak, little pest.
-     Lord Rhyolith yells: Stomp now.
-     Lord Rhyolith yells: Succumb to living flame.
-     Lord Rhyolith yells: Uurrghh now you... you infuriate me!
-     */
 
     YELL_AGGRO = 0, YELL_KILLED = 1, YELL_DIED = 2, YELL_PHASE2 = 3
 };
@@ -497,7 +484,7 @@ class boss_lord_rhyolith: public CreatureScript
 
                     me->SetSpeed(MOVE_RUN, speedRateLow);
 
-                    Talk(YELL_AGGRO);
+                    Talk(SAY_AGGRO);
                     instance->SetBossState(DATA_LORD_RHYOLITH, IN_PROGRESS);
 
                     Phase = PHASE_1;
@@ -523,14 +510,14 @@ class boss_lord_rhyolith: public CreatureScript
 
                 void KilledUnit(Unit* /*who*/)
                 {
-                    Talk(YELL_KILLED);
+                    Talk(SAY_KILLED);
                 }
 
                 void JustDied(Unit* /*killer*/)
                 {
                     instance->SetBossState(DATA_LORD_RHYOLITH, DONE);
 
-                    Talk(YELL_DIED);
+                    Talk(SAY_DIED);
                     summons.DespawnAll();
 
                     if (GetLeftLeg())
@@ -688,7 +675,7 @@ class boss_lord_rhyolith: public CreatureScript
                             events.CancelEvent(EVENT_THERMAL_IGNITION2);
                             events.CancelEvent(EVENT_CONCUSSIVE_STOMP_VOLCAN);
 
-                            Talk(YELL_PHASE2);
+                            Talk(SAY_PHASE2);
 
                             me->SetDisplayId(MODEL_PHASE2);
                             me->SetSpeed(MOVE_RUN, speedRateNormal);
