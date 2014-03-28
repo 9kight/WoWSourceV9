@@ -32,7 +32,6 @@ enum Spells
 
 enum Events
 {
-    EVENT_YOGA_FLAME        = 1,
     EVENT_FULL_OF_MEAT,
     EVENT_FISH_SLAP,
     EVENT_SLAP_CHOP,
@@ -256,6 +255,11 @@ public:
     }
 };
 
+enum
+{
+    EVENT_YOGA_FLAME        = 1,
+};
+
 class npc_tiki_torch : public CreatureScript
 {
     public:
@@ -279,7 +283,7 @@ class npc_tiki_torch : public CreatureScript
                     events.ScheduleEvent(EVENT_YOGA_FLAME, 1000 * data);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(const uint32 diff)
             {
                 events.Update(diff);
 
