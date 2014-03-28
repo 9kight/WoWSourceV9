@@ -50,7 +50,7 @@ enum KarSpells
 
 // I have all the correct text and sound will fix this later i first want to see if this fix the crash issue
 enum eYells
-(
+{
    SAY_AGGRO    = 6,
    SAY_KILLED   = 12,
    SAY_DIED     = 1,
@@ -259,9 +259,6 @@ class Unstable_Pyrelord: public CreatureScript
                     return me->FindNearestCreature(53616, 125.0f, true);
                 }
         };
-};
-
-    YELL_AGGRO = 0, YELL_KILLED = 1, YELL_DIED = 2, YELL_PHASE2 = 3
 };
 
 enum Spells
