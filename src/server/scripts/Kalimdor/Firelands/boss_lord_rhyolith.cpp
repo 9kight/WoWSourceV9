@@ -372,8 +372,7 @@ enum eYells
    
    SAY_EMOTE_SUPERHEATED  = 16,
    SAY_EMOTE_VOLCANO      = 17,
-   SAY_EMOTE_MAGMA        = 18,
-   SAY_EMOTE_PHASE2       = 19
+   SAY_EMOTE_MAGMA        = 18
    
 };
 
@@ -795,7 +794,6 @@ class boss_lord_rhyolith: public CreatureScript
 
                     if (Phase == PHASE_2)
                         DoMeleeAttackIfReady();
-						Talk(SAY_EMOTE_PHASE2);
                 }
 
                 Creature* GetLeftLeg()
