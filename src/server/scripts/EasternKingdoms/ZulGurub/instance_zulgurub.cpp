@@ -18,6 +18,7 @@
 
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
+#include "UnitAI.h"
 #include "zulgurub.h"
 
 DoorData const doorData[] =
@@ -51,23 +52,39 @@ class instance_zulgurub : public InstanceMapScript
             {
                 SetBossNumber(EncounterCount);
                 LoadDoorData(doorData);
+            }
+
+             uint64 venoxisGUID;
+             uint64 mandokirGUID;
+             uint64 kilnaraGUID;
+             uint64 zanzilGUID;
+             uint64 jindoGUID;
+             uint64 hazzarahGUID;
+             uint64 renatakiGUID;
+             uint64 wushoolayGUID;
+             uint64 grilekGUID;
+             uint64 jindoTiggerGUID;
+             uint8 tikiMaskId;			
+
+            void Initialize()
+            {
                 venoxisGUID         = 0;
                 mandokirGUID        = 0;
                 kilnaraGUID         = 0;
                 zanzilGUID          = 0;
-                jindoGUID           = 0;
                 hazzarahGUID        = 0;
                 renatakiGUID        = 0;
                 wushoolayGUID       = 0;
                 grilekGUID          = 0;
-                jindoTiggerGUID     = 0;
+                jindoTiggerGUID     = 0;			   
+                jindoGUID           = 0;
                 tikiMaskId          = 0;
 
                 for (int i = 0; i < 6; ++i)
                     if (Creature* torch = instance->SummonCreature(52419, TikiTorchSP[i]))
                         torch->GetAI()->SetData(DATA_POSITION_ID, i);
             }
-
+			
             void OnCreatureCreate(Creature* creature)
             {
                 switch (creature->GetEntry())
@@ -268,18 +285,6 @@ class instance_zulgurub : public InstanceMapScript
                 OUT_LOAD_INST_DATA_COMPLETE;
             }
 
-        protected:
-             uint64 venoxisGUID;
-             uint64 mandokirGUID;
-             uint64 kilnaraGUID;
-             uint64 zanzilGUID;
-             uint64 jindoGUID;
-             uint64 hazzarahGUID;
-             uint64 renatakiGUID;
-             uint64 wushoolayGUID;
-             uint64 grilekGUID;
-             uint64 jindoTiggerGUID;
-             uint8 tikiMaskId;
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* map) const
