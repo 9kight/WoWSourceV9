@@ -16,11 +16,10 @@
  */
 
 #include "ScriptMgr.h"
-#include "ScriptedCreature.h"
-#include "Spell.h"
-#include "SpellScript.h"
 #include "Vehicle.h"
 #include "MoveSplineInit.h"
+#include "ScriptedCreature.h"
+#include "SpellScript.h"
 #include "zulgurub.h"
 
 enum Spells
@@ -29,76 +28,6 @@ enum Spells
     SPELL_CURSED_ARTIFACT          = 97040, // Pulsing Aura
     SPELL_SHATTER_ARTIFACT         = 97065
 };
-
-enum Events
-{
-    EVENT_YOGA_FLAME        = 1,
-    EVENT_FULL_OF_MEAT,
-    EVENT_FISH_SLAP,
-    EVENT_SLAP_CHOP,
-    EVENT_SHOOT_VISUAL,
-    EVENT_SHOOT,
-    EVENT_SHADOWED_SHOT,
-    EVENT_POOL_OF_ACRID_TEARS,
-    EVENT_BREATH_OF_HETHISS,
-    EVENT_RETURN_TO_FIGHT,
-    EVENT_CAULDRON_NEUTRALIZER,
-    EVENT_BUBBLING_MIXTURE,
-    EVENT_CRUSH_HERBS,
-    EVENT_GOUT_OF_FLAME,
-    EVENT_DRAIN_BLUE_CAULDRON,
-    EVENT_FROSTBURN_FORMULA,
-    EVENT_DRAIN_RED_CAULDRON,
-    EVENT_DRAGONS_BREATH,
-    EVENT_DRAIN_GREEN_CAULDRON,
-    EVENT_TOXIC_LINK,
-    EVENT_WHISPERS_OF_HETHISS, // Script for spell implemented in Venoxis script.
-    EVENT_POISON_BOLT,
-    EVENT_SHADOW_BOLT_VOLLEY,
-    EVENT_PSYCHIC_SCREAM,
-    EVENT_POISON_BOLT_VOLLEY,
-    EVENT_TIKI_TORCH,
-    EVENT_BONE_VOLLEY,
-    EVENT_ROLLING_BOULDERS_LEFT,
-    EVENT_ROLLING_BOULDERS_CENTER,
-    EVENT_ROLLING_BOULDERS_RIGHT,
-    EVENT_KNOCK_AWAY,
-    EVENT_THUNDERCLAP,
-    EVENT_BOULDER_BOOM,
-};
-
-enum Actions
-{
-    ACTION_START_MOVING    = 1,
-};
-
-enum Points
-{
-    POINT_BOULDER          = 1,
-};
-
-const Position TkuluTotemSP[2]=
-{
-    {-11962.6f, -1643.23f, 37.5636f, 3.54302f},
-    {-11962.6f, -1643.24f, 37.5545f, 3.52556f},
-};
-
-const Position TkuluCauldronSP = {-11963.8f, -1643.33f, 36.7988f, 0.0f};
-
-const Position MauriTotemSP[2]=
-{
-    {-11885.7f, -1319.80f, 78.6447f, 0.523599f},
-    {-11886.0f, -1319.92f, 78.6269f, 5.550150f},
-};
-
-const Position GubFishSP[3]=
-{
-    {-11869.5f, -1504.78f, 8.93495f, 0.0f},
-    {-11858.2f, -1510.84f, 8.10302f, 0.0f},
-    {-11852.2f, -1499.59f, 8.80203f, 0.0f},
-};
-
-const Position MauriCauldronSP = {-11885.9f, -1319.81f, 77.9252f, 0.0f};
 
 /*#####
 ## Edge of Madness
@@ -256,6 +185,11 @@ public:
     }
 };
 
+enum
+{
+    EVENT_YOGA_FLAME        = 1,
+};
+
 class npc_tiki_torch : public CreatureScript
 {
     public:
@@ -290,6 +224,26 @@ class npc_tiki_torch : public CreatureScript
                 }
             }
         };
+};
+
+enum eBolders
+{
+    EVENT_ROLLING_BOULDERS_LEFT             = 1,
+    EVENT_ROLLING_BOULDERS_CENTER           = 2,
+    EVENT_ROLLING_BOULDERS_RIGHT            = 3,
+
+    EVENT_KNOCK_AWAY                        = 4,
+    EVENT_THUNDERCLAP                       = 5,
+
+    EVENT_BOULDER_BOOM                      = 1,
+
+    NPC_BOULDER_LEFT                        = 52351,
+    NPC_BOULDER_CENTER                      = 52354,
+    NPC_BOULDER_RIGHT                       = 52353,
+
+    POINT_BOULDER                           = 1,
+
+    ACTION_START_MOVING                     = 1,
 };
 
 class npc_berserking_boulder_roller : public CreatureScript
@@ -524,6 +478,11 @@ class spell_boulder_smash : public SpellScriptLoader
         }
 };
 
+enum
+{
+    EVENT_BONE_VOLLEY           = 1,
+};
+
 class npc_tiki_lord_zimwae : public CreatureScript
 {
     class ZimwaeEvent : public BasicEvent
@@ -589,6 +548,11 @@ class npc_tiki_lord_zimwae : public CreatureScript
                 }
             }
         };
+};
+
+enum
+{
+    EVENT_TIKI_TORCH           = 1,
 };
 
 class npc_tiki_lord_muloa : public CreatureScript
@@ -668,6 +632,13 @@ class npc_tiki_lord_muloa : public CreatureScript
         };
 };
 
+const Position GubFishSP[3]=
+{
+    {-11869.5f, -1504.78f, 8.93495f, 0.0f},
+    {-11858.2f, -1510.84f, 8.10302f, 0.0f},
+    {-11852.2f, -1499.59f, 8.80203f, 0.0f},
+};
+
 class npc_gub : public CreatureScript
 {
     public:
@@ -728,7 +699,7 @@ class npc_gub : public CreatureScript
                 me->RemoveAllAuras();
             }
 
-            void UpdateAI(uint32 const /*diff*/)
+            void UpdateAI(const uint32 /*diff*/)
             {
                 if (!UpdateVictim())
                     return;
@@ -736,6 +707,11 @@ class npc_gub : public CreatureScript
                 DoMeleeAttackIfReady();
             }
         };
+};
+
+enum
+{
+    EVENT_POISON_BOLT_VOLLEY        = 1,
 };
 
 class npc_chosen_of_hethiss : public CreatureScript
@@ -829,6 +805,12 @@ class npc_witch_doctor_quin : public CreatureScript
         };
 };
 
+enum
+{
+    EVENT_SHADOW_BOLT_VOLLEY        = 1,
+    EVENT_PSYCHIC_SCREAM            = 2,
+};
+
 class npc_mortaxx : public CreatureScript
 {
     public:
@@ -891,10 +873,24 @@ class npc_mortaxx : public CreatureScript
         };
 };
 
+const Position MauriTotemSP[2]=
+{
+    {-11885.7f, -1319.80f, 78.6447f, 0.523599f},
+    {-11886.0f, -1319.92f, 78.6269f, 5.550150f},
+};
+
+const Position MauriCauldronSP = {-11885.9f, -1319.81f, 77.9252f, 0.0f};
+
 const uint32 TotemSpell[2]=
 {
     96936,
     96937,
+};
+
+enum
+{
+    EVENT_WHISPERS_OF_HETHISS       = 1, // Script for spell implemented in Venoxis script.
+    EVENT_POISON_BOLT               = 2,
 };
 
 class npc_venomancer_mauri : public CreatureScript
@@ -1012,6 +1008,19 @@ class npc_venomancer_mauri : public CreatureScript
         };
 };
 
+const Position TkuluTotemSP[2]=
+{
+    {-11962.6f, -1643.23f, 37.5636f, 3.54302f},
+    {-11962.6f, -1643.24f, 37.5545f, 3.52556f},
+};
+
+const Position TkuluCauldronSP = {-11963.8f, -1643.33f, 36.7988f, 0.0f};
+
+enum
+{
+    EVENT_TOXIC_LINK                  = 1, // Script for spell implemented in Venoxis script.
+};
+
 class npc_venomancer_tkulu : public CreatureScript
 {
     public:
@@ -1121,6 +1130,21 @@ class npc_venomancer_tkulu : public CreatureScript
                 DoMeleeAttackIfReady();
             }
         };
+};
+
+enum
+{
+    EVENT_BUBBLING_MIXTURE      = 1,
+    EVENT_CRUSH_HERBS           = 2,
+    EVENT_GOUT_OF_FLAME         = 3,
+
+    EVENT_DRAIN_BLUE_CAULDRON   = 4,
+    EVENT_FROSTBURN_FORMULA     = 5,
+
+    EVENT_DRAIN_RED_CAULDRON    = 6,
+    EVENT_DRAGONS_BREATH        = 7,
+
+    EVENT_DRAIN_GREEN_CAULDRON  = 8,
 };
 
 struct npc_cauldron_mixerAI : public ScriptedAI
@@ -1349,6 +1373,14 @@ class npc_gurubashi_cauldron_mixer : public CreatureScript
         };
 };
 
+enum
+{
+    EVENT_POOL_OF_ACRID_TEARS           = 1,
+    EVENT_BREATH_OF_HETHISS             = 2,
+    EVENT_RETURN_TO_FIGHT               = 3,
+    EVENT_CAULDRON_NEUTRALIZER          = 4,
+};
+
 class npc_venomguard_destroyer : public CreatureScript
 {
     public:
@@ -1447,6 +1479,13 @@ class npc_venomguard_destroyer : public CreatureScript
         };
 };
 
+enum
+{
+    EVENT_SHOOT_VISUAL          = 1,
+    EVENT_SHOOT                 = 2,
+    EVENT_SHADOWED_SHOT         = 3,
+};
+
 class npc_gurubashi_shadow_hunter : public CreatureScript
 {
     public:
@@ -1538,6 +1577,13 @@ class npc_gurubashi_shadow_hunter : public CreatureScript
                 }
             }
         };
+};
+
+enum
+{
+    EVENT_FULL_OF_MEAT          = 1,
+    EVENT_FISH_SLAP             = 2,
+    EVENT_SLAP_CHOP             = 3,
 };
 
 class npc_gurubashi_master_chef : public CreatureScript

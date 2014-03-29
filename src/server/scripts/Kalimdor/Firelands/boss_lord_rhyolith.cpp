@@ -48,7 +48,6 @@ enum KarSpells
     SPELL_SUM_LAVA_SPAWN = 99575
 };
 
-
 class kar_the_everburning: public CreatureScript
 {
     public:
@@ -253,30 +252,6 @@ class Unstable_Pyrelord: public CreatureScript
         };
 };
 
-enum Yells
-{
-    /*
-     Lord Rhyolith yells: Augh - smooshy little pests, look what you've done!
-     Lord Rhyolith yells: Broken. Mnngghhh... broken...
-     Lord Rhyolith yells: Buuurrrnn!
-     Lord Rhyolith yells: Eons I have slept undisturbed... Now this... Creatures of flesh, now you will BURN!
-     Lord Rhyolith yells: Finished.
-     Lord Rhyolith yells: Graaahh!
-     Lord Rhyolith yells: Hah? Hruumph? Soft little fleshy-things? Here? Nuisances, nuisances!
-     Lord Rhyolith yells: I'll crush you underfoot!
-     Lord Rhyolith yells: Oh you little beasts...
-     Lord Rhyolith yells: Oww now hey.
-     Lord Rhyolith yells: Sear the flesh from their tiny frames.
-     Lord Rhyolith yells: So soft!
-     Lord Rhyolith yells: Squeak, little pest.
-     Lord Rhyolith yells: Stomp now.
-     Lord Rhyolith yells: Succumb to living flame.
-     Lord Rhyolith yells: Uurrghh now you... you infuriate me!
-     */
-
-    YELL_AGGRO = 0, YELL_KILLED = 1, YELL_DIED = 2, YELL_PHASE2 = 3
-};
-
 enum Spells
 {
     /*** Boss spells ***/
@@ -387,10 +362,19 @@ const int timerConcussiveStomp2 = urand(35000, 45000);
 // Spark of Rhyolith
 const int timerInfernalRage = 5000;
 
-#define EMOTE_SUPERHEATED       "Lord Rhyolith grows impatient and becomes Superheated!"
-#define EMOTE_VOLCANO           "Lord Rhyolith extinguishes a nearby volcano!"
-#define EMOTE_MAGMA             "Lord Rhyolith reaches towards the magma beyond his platform!"
-#define EMOTE_PHASE2            "Lord Rhyolith loses his Obsidian Armor and is now exposed!"
+// I have all the correct text and sound will fix this later i first want to see if this fix the crash issue
+enum eYells
+{
+   SAY_AGGRO              = 6,
+   SAY_KILLED             = 12,
+   SAY_DIED               = 1,
+   SAY_PHASE2             = 8,
+   
+   SAY_EMOTE_SUPERHEATED  = 16,
+   SAY_EMOTE_VOLCANO      = 17,
+   SAY_EMOTE_MAGMA        = 18
+   
+};
 
 class boss_lord_rhyolith: public CreatureScript
 {
@@ -497,7 +481,7 @@ class boss_lord_rhyolith: public CreatureScript
 
                     me->SetSpeed(MOVE_RUN, speedRateLow);
 
-                    Talk(YELL_AGGRO);
+                    Talk(SAY_AGGRO);
                     instance->SetBossState(DATA_LORD_RHYOLITH, IN_PROGRESS);
 
                     Phase = PHASE_1;
@@ -523,14 +507,14 @@ class boss_lord_rhyolith: public CreatureScript
 
                 void KilledUnit(Unit* /*who*/)
                 {
-                    Talk(YELL_KILLED);
+                    Talk(SAY_KILLED);
                 }
 
                 void JustDied(Unit* /*killer*/)
                 {
                     instance->SetBossState(DATA_LORD_RHYOLITH, DONE);
 
-                    Talk(YELL_DIED);
+                    Talk(SAY_DIED);
                     summons.DespawnAll();
 
                     if (GetLeftLeg())
@@ -688,7 +672,7 @@ class boss_lord_rhyolith: public CreatureScript
                             events.CancelEvent(EVENT_THERMAL_IGNITION2);
                             events.CancelEvent(EVENT_CONCUSSIVE_STOMP_VOLCAN);
 
-                            Talk(YELL_PHASE2);
+                            Talk(SAY_PHASE2);
 
                             me->SetDisplayId(MODEL_PHASE2);
                             me->SetSpeed(MOVE_RUN, speedRateNormal);
@@ -719,7 +703,7 @@ class boss_lord_rhyolith: public CreatureScript
 
                         if (me->GetPositionZ() <= 100.0f && lavaFlow == false)
                         {
-                            me->MonsterTextEmote(EMOTE_MAGMA, 0, true);
+                            Talk(SAY_EMOTE_MAGMA);
                             lavaFlow = true;
                         }
 
@@ -754,7 +738,7 @@ class boss_lord_rhyolith: public CreatureScript
                                 break;
 
                             case EVENT_SUPERHEATED:
-                                me->MonsterTextEmote(EMOTE_SUPERHEATED, 0, true);
+                                Talk(SAY_EMOTE_SUPERHEATED);
                                 DoCast(me, SPELL_SUPERHEATED);
 
                                 events.ScheduleEvent(EVENT_SUPERHEATED, timerSuperheated);
@@ -1114,7 +1098,7 @@ class npc_rhyolith_volcano: public CreatureScript
 
                         if (Creature* rhyolith = GetClosestCreatureWithEntry(me, NPC_RHYOLITH, 150.0f))
                         {
-                            rhyolith->MonsterTextEmote(EMOTE_VOLCANO, 0, true);
+                            Talk(SAY_EMOTE_VOLCANO);
                             rhyolith->SummonCreature(NPC_RHYOLITH_CRATER, me->GetPositionX(), me->GetPositionY(),
                                     me->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN);
                             me->DespawnOrUnsummon();

@@ -420,9 +420,11 @@ void AddSC_boss_murozond();
 void AddSC_instance_end_time();
 void AddSC_end_time_teleport();
 
-void AddSC_boss_arcurion();                 // HoT
+void AddSC_instance_hour_of_twilight();            // HoT
+void AddSC_boss_arcurion();
 void AddSC_boss_asira_dawnslayer();
 void AddSC_boss_archbishop_benedictus();
+void AddSC_trash_mobs_hot();
 
 void AddSC_instance_dragon_soul();   // Dragon Soul
 void AddSC_dragon_soul_teleport_and_transport();
@@ -668,6 +670,13 @@ void AddSC_boss_warlord_kalithresh();
 void AddSC_instance_steam_vault();
 void AddSC_boss_hungarfen();                 //CR Underbog
 void AddSC_boss_the_black_stalker();
+
+void AddSC_instance_the_slave_pens();        // Salve Pens
+void AddSC_boss_quagmirran();
+void AddSC_boss_rokmar_the_crackler();
+void AddSC_boss_ahune();
+void AddSC_boss_mennu_the_betrayer();
+
 void AddSC_boss_gruul();                     //Gruul's Lair
 void AddSC_boss_high_king_maulgar();
 void AddSC_instance_gruuls_lair();
@@ -1191,9 +1200,11 @@ void AddKalimdorScripts()
     AddSC_instance_end_time();
     AddSC_end_time_teleport();
 	
-    AddSC_boss_arcurion();                 // HoT
+    AddSC_instance_hour_of_twilight();            // HoT
+    AddSC_boss_arcurion();
     AddSC_boss_asira_dawnslayer();
     AddSC_boss_archbishop_benedictus();
+    AddSC_trash_mobs_hot();
 	
     AddSC_instance_dragon_soul();   // Dragon Soul
     AddSC_dragon_soul_teleport_and_transport();
@@ -1283,6 +1294,13 @@ void AddOutlandScripts()
     AddSC_boss_hungarfen();                 //CR Underbog
     AddSC_boss_the_black_stalker();
     AddSC_boss_gruul();                     //Gruul's Lair
+	
+    AddSC_instance_the_slave_pens();        // Salve Pens
+    AddSC_boss_quagmirran();
+    AddSC_boss_rokmar_the_crackler();
+    AddSC_boss_ahune();
+    AddSC_boss_mennu_the_betrayer();	
+	
     AddSC_boss_high_king_maulgar();
     AddSC_instance_gruuls_lair();
     AddSC_boss_broggok();                   //HC Blood Furnace

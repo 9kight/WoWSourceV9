@@ -39,9 +39,9 @@ enum DataTypes
     DATA_BEAM_TRIGGER               = 9,
 
     // Jin'do the Godbreaker
-    DATA_JINDOR_TRIGGER,
-    DATA_POSITION_ID,
-    DATA_TIKI_MASK_ID,
+    DATA_JINDOR_TRIGGER             = 10,
+    DATA_POSITION_ID                = 11,
+    DATA_TIKI_MASK_ID               = 12,
 };
 
 enum CreatureIds
@@ -85,10 +85,6 @@ enum CreatureIds
     NPC_BLOOD_VENOM                 = 52525,
     NPC_VENOMOOUS_EFFUSION          = 52288,
 
-    // ZulGurub Misc
-    NPC_BOULDER_LEFT                = 52351,
-    NPC_BOULDER_CENTER              = 52354,
-    NPC_BOULDER_RIGHT               = 52353
 };
 
 enum GameObjectIds
