@@ -11488,16 +11488,16 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                             crit_chance = 0.0f;
                         break;
                     case SPELLFAMILY_PALADIN:
-                        // Word of Glory
-                        if (spellProto->Id == 85673)
+                    // Word of glory
+                        if(spellProto->Id == 85673)
                         {
-                            // Last Word
-                            if (AuraEffect const* const aurEff = GetAuraEffectOfRankedSpell(20234, EFFECT_0))
-                                if (victim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
-                                    crit_chance += aurEff->GetAmount();
-                            break;
+                            if(victim->HasAura(20235)) // Last Word rank 2
+                                if(victim->HealthBelowPct(35))
+                                    crit_chance += 60.0f;
+                            if(victim->HasAura(20234)) // Last Word rank 1
+                                if(victim->HealthBelowPct(35))
+                                    crit_chance += 30.0f;
                         }
-                        break;
                         // Flash of light
                         if (spellProto->SpellFamilyFlags[0] & 0x40000000)
                         {
