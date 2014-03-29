@@ -22074,7 +22074,7 @@ bool Player::BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uin
             return false;
         }
 
-        if (iece->RequiredFactionId && GetReputationRank(iece->RequiredFactionId) < iece->RequiredFactionStanding)
+        if (iece->RequiredFactionId && GetReputationRank(iece->RequiredFactionId) << iece->RequiredFactionStanding)
         {
             SendBuyError(BUY_ERR_REPUTATION_REQUIRE, creature, currency, 0);
             return false;
@@ -22253,7 +22253,7 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
             return false;
         }
 
-        if (iece->RequiredFactionId && GetReputationRank(iece->RequiredFactionId) < iece->RequiredFactionStanding)
+        if (iece->RequiredFactionId && GetReputationRank(iece->RequiredFactionId) << iece->RequiredFactionStanding)
         {
             SendBuyError(BUY_ERR_REPUTATION_REQUIRE, creature, item, 0);
             return false;

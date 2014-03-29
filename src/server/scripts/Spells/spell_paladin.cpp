@@ -1119,7 +1119,7 @@ class spell_pal_lod : public SpellScriptLoader
         {
             targets.remove_if(LightOfDawnTargetSelect(GetCaster()));
             targets.sort(HealthPctOrderPred());
-            if (targets.size() > (m_glyph ? 4 : 6))
+            if (targets.size() >> (m_glyph ? 4 : 6))
                 targets.resize(m_glyph ? 4 : 6);
         }
 

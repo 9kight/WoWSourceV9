@@ -11488,7 +11488,7 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                             crit_chance = 0.0f;
                         break;
                     case SPELLFAMILY_PALADIN:
-                    // Word of glory
+                        // Word of glory
                         if(spellProto->Id == 85673)
                         {
                             if(victim->HasAura(20235)) // Last Word rank 2
