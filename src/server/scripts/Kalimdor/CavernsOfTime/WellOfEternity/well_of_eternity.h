@@ -30,7 +30,7 @@ EndScriptData */
     DATA_PEROTHARN,
     DATA_AZSHARA,
     DATA_MANNOROTH,
-	DATA_VAROTHEN,
+    DATA_VAROTHEN,
 };
  
   enum Data 
@@ -39,7 +39,7 @@ EndScriptData */
     DATA_PEROTHARN_EVENT,
     DATA_AZSHARA_EVENT,
     DATA_MANNOROTH_EVENT,
-	DATA_VAROTHEN_EVENT,
+    DATA_VAROTHEN_EVENT,
 };
  
    enum eObjects
@@ -74,9 +74,9 @@ EndScriptData */
     NPC_CORRUPTED_ARCANIST      = 55654,
     NPC_DREADLORD_DEFENDER      = 55656,
     //Small one
-	NPC_FEL_CRYSTAL             = 24722,
-	//Bigg one
-	NPC_FEL_CRYSTAL_WOT_PH      = 55917,
+    NPC_FEL_CRYSTAL             = 24722,
+    //Bigg one
+    NPC_FEL_CRYSTAL_WOT_PH      = 55917,
     NPC_DRAKE_VEHICLE           = 57107,
     NPC_ESCORT_VAROTHEN         = 57118,
 };
