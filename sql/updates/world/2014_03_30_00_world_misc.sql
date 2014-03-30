@@ -28,3 +28,24 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (4979, 1, 7, 'I\'d never join anything like this. Better keep this, though. It\'ll come in handy in the privy...', 12, 0, 100, 1, 0, 0, 'theramore guard SAY_QUEST3'),
 (4979, 1, 9, '...as a deserter, you\'ll enjoy activities like tethered swimming and dog grooming? How ridiculous!', 12, 0, 100, 1, 0, 0, 'theramore guard SAY_QUEST2'),
 (4979, 1, 10, 'What a bunch of lunatics! You actually believe this stuff?', 12, 0, 100, 1, 0, 0, 'theramore guard SAY_QUEST3');
+
+-- scriptnames
+UPDATE creature_template SET ScriptName = 'boss_perotharn' WHERE entry = 55085;
+UPDATE creature_template SET ScriptName = 'npc_legion_demon' WHERE entry = 55503;
+
+DELETE FROM instance_template WHERE map = 939;
+INSERT INTO `instance_template` (`map`, `parent`, `script`, `allowMount`) VALUES 
+(939, 0, 'instance_well_of_eternity', 1);
+
+-- gameobjects
+DELETE FROM gameobject WHERE id = 210000;
+SET @GUID = (SELECT MAX(`guid`) FROM `gameobject`);
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zone`, `area`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+(@GUID + 1, 210000, 939, 5788, 5993, 1, 1, 3491.21, -5202.25, 229.95, 4.04047, 0, 0, 0.900692, -0.434459, 300, 0, 1),
+(@GUID + 2, 210000, 939, 5788, 5993, 1, 1, 3221.62, -5003.72, 194.095, 0.758429, 0, 0, 0.370191, 0.928956, 300, 0, 1);
+
+DELETE FROM gossip_menu_option WHERE menu_id = 13406;
+INSERT INTO `gossip_menu_option` (`menu_id`, `id`, `option_icon`, `option_text`, `option_id`, `npc_option_npcflag`, `action_menu_id`, `action_poi_id`, `box_coded`, `box_money`, `box_text`) VALUES 
+(13406, 0, 0, 'Teleport to the garden entrance.', 1, 1, 0, 0, 0, 0, ''),
+(13406, 5, 0, 'Teleport to Azshara\'s Palace.', 1, 1, 0, 0, 0, 0, ''),
+(13406, 7, 0, 'Teleport to The Well of Eternity.', 1, 1, 0, 0, 0, 0, '');
