@@ -426,6 +426,11 @@ void AddSC_boss_asira_dawnslayer();
 void AddSC_boss_archbishop_benedictus();
 void AddSC_trash_mobs_hot();
 
+        
+void AddSC_instance_well_of_eternity();           //WellOfEternity
+void AddSC_well_of_eternity(); 
+void AddSC_boss_perotharn();
+
 void AddSC_instance_dragon_soul();   // Dragon Soul
 void AddSC_dragon_soul_teleport_and_transport();
 void AddSC_boss_unsleeping();
@@ -1205,6 +1210,10 @@ void AddKalimdorScripts()
     AddSC_boss_asira_dawnslayer();
     AddSC_boss_archbishop_benedictus();
     AddSC_trash_mobs_hot();
+    
+    AddSC_instance_well_of_eternity();         //WellOfEternity
+    AddSC_well_of_eternity();	
+    AddSC_boss_perotharn();	
 	
     AddSC_instance_dragon_soul();   // Dragon Soul
     AddSC_dragon_soul_teleport_and_transport();
