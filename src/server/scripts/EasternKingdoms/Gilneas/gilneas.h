@@ -50,6 +50,7 @@ enum CreatureIds
     NPC_WORGEN_RUNT_C1                                = 35188, // Quest - By the skin of his teeth spawns
     NPC_WORGEN_RUNT_C2                                = 35456, // Quest - By the skin of his teeth spawns
 	NPC_COMMANDEERED_CANNON                           = 35914,
+	NPC_KRENNAN                                       = 35753
 };
 
 enum QuestIds
@@ -89,7 +90,8 @@ enum SpellIds
 	SPELL_GILNEAS_CANNON_CAMERA                        = 93555,
 	SPELL_CANNON_FIRE                                  = 68235,
     SPELL_WORGEN_BITE                                  = 72870,
-    SPELL_INFECTED_BITE                                = 72872,	
+    SPELL_INFECTED_BITE                                = 72872,
+    SPELL_QUEST_DETECTION                              = 49416	
 };
 
 enum NpcTextIds
