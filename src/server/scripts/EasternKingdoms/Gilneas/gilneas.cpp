@@ -2059,6 +2059,12 @@ public:
         void AttackStart(Unit* /*who*/) {}
         void EnterCombat(Unit* /*who*/) {}
         void EnterEvadeMode() {}
+		
+        bool Say;
+        bool Move;
+        bool Cast;
+        bool KrennanDead;
+        uint32 SayTimer;		
 
         void Reset()
         {
@@ -2071,7 +2077,7 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if (Creature *krennan = me->FindNearestCreature(300693, 50))
+            if (Creature *krennan = me->FindNearestCreature(35753, 50))
                 if (!KrennanDead)
                 {
                     krennan->DespawnOrUnsummon();
@@ -2103,13 +2109,6 @@ public:
             else
                 SayTimer -= diff;
         }
-
-    private :
-        bool Say;
-        bool Move;
-        bool Cast;
-        bool KrennanDead;
-        uint32 SayTimer;
 
     };
 
@@ -2754,6 +2753,67 @@ public:
         }
         return true;
     }
+};
+
+enum eHorrid
+{
+  SAY_BARREL    = 0
+};
+
+/* ######
+## You Can't Take 'Em Alone - 14348
+###### */
+class npc_horrid_abomination : public CreatureScript
+{
+public:
+    npc_horrid_abomination() : CreatureScript("npc_horrid_abomination") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_horrid_abominationAI(creature);
+    }
+
+    struct npc_horrid_abominationAI : public ScriptedAI
+    {
+        npc_horrid_abominationAI(Creature* creature) : ScriptedAI(creature) {}
+
+        uint32 DieTimer;
+
+        void Reset ()
+        {
+            me->ClearUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED);
+            DieTimer = 5000;
+        }
+
+        void SpellHit(Unit* caster, const SpellInfo* spell)
+        {
+            if (spell->Id == SPELL_BARREL_KEG && caster->GetTypeId() == TYPEID_PLAYER && caster->ToPlayer()->GetQuestStatus(QUEST_YOU_CANT_TAKE_EM_ALONE) == QUEST_STATUS_INCOMPLETE)
+            {
+                caster->ToPlayer()->KilledMonsterCredit(QUEST_14348_KILL_CREDIT, 0);
+                me->AddUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED);
+                Talk(SAY_BARREL);
+
+            }
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (DieTimer <= diff)
+            {
+                if (me->HasAura(SPELL_BARREL_KEG))
+                    me->DisappearAndDie();
+                else
+                    DieTimer = 1000;
+            }
+            else
+                DieTimer -= diff;
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
 };
 
 /*######
@@ -3991,6 +4051,7 @@ void AddSC_gilneas()
     new npc_lord_darius_crowley_c3();
     new npc_king_genn_greymane();
     new npc_crowley_horse();
+	new npc_horrid_abomination();
     new spell_keg_placed();
     new npc_king_greymanes_horse();
     new npc_krennan_aranas_c2();

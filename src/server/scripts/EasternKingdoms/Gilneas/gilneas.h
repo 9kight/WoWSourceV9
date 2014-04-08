@@ -63,6 +63,8 @@ enum QuestIds
     QUEST_SACRIFICES                                   = 14212,
     QUEST_THE_BATTLE_FOR_GILNEAS_CITY                  = 24904,
 	QUEST_ROYAL_ORDERS                                 = 14099,
+	QUEST_14348_KILL_CREDIT                            = 36233,
+	QUEST_YOU_CANT_TAKE_EM_ALONE                       = 14348
 };
 
 enum SpellIds
@@ -91,7 +93,8 @@ enum SpellIds
 	SPELL_CANNON_FIRE                                  = 68235,
     SPELL_WORGEN_BITE                                  = 72870,
     SPELL_INFECTED_BITE                                = 72872,
-    SPELL_QUEST_DETECTION                              = 49416	
+    SPELL_QUEST_DETECTION                              = 49416,
+    SPELL_BARREL_KEG                                   = 69094	
 };
 
 enum NpcTextIds

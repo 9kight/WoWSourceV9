@@ -108,3 +108,15 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 DELETE FROM creature WHERE id = 14026;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zone`, `area`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
 (294506, 14026, 654, 4714, 4786, 1, 1, 0, 1, -1823.3, 2293.67, 42.0455, 0.112287, 300, 0, 0, 175983, 8909, 0, 0, 0, 0);
+
+-- You Can't Take 'Em Alone - 14348
+UPDATE creature_template SET ScriptName = 'npc_horrid_abomination' WHERE entry = 36231;
+
+DELETE FROM creature_text WHERE entry = 36231;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(36231, 0, 0, 'Barrel smell like gunpowder...', 14, 0, 100, 0, 0, 0, ''),
+(36231, 0, 1, 'GAH!!!! I CAN\'T SEE IN HERE!!!!', 14, 0, 100, 0, 0, 0, ''),
+(36231, 0, 2, 'Get back here! I smashes you!', 14, 0, 100, 0, 0, 0, ''),
+(36231, 0, 3, 'I gots bad feeling...', 14, 0, 100, 0, 0, 0, ''),
+(36231, 0, 4, 'This not be good...', 14, 0, 100, 0, 0, 0, ''),
+(36231, 0, 5, 'Uh-oh... this gonna hurts me...', 14, 0, 100, 0, 0, 0, ''); 
