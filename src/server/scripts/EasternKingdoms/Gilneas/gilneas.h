@@ -63,8 +63,8 @@ enum QuestIds
     QUEST_SACRIFICES                                   = 14212,
     QUEST_THE_BATTLE_FOR_GILNEAS_CITY                  = 24904,
 	QUEST_ROYAL_ORDERS                                 = 14099,
-	QUEST_14348_KILL_CREDIT                            = 36233,
-	QUEST_YOU_CANT_TAKE_EM_ALONE                       = 14348
+    QUEST_14348_KILL_CREDIT                            = 36233,
+    QUEST_YOU_CANT_TAKE_EM_ALONE                       = 14348
 };
 
 enum SpellIds
