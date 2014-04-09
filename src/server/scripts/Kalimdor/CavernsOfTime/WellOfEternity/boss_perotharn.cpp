@@ -16,16 +16,22 @@
 
  /* ScriptData
 SDName: boss_perotharn
-SD%Complete: 0
+SD%Complete: 40%
 SDComment: Placeholder
 SDCategory: Well of Eternity
 EndScriptData */
+
+/**Things todo**/
+/*Script Spells*/
+//DoCast(me, 105635, true); @ 70% HP plus summon eyes entry 55868 and 55879 not sure about count
+/**Things todo end**/
 
 #include "well_of_eternity.h"
 
 enum
 {
-    // ToDo: add spells and yells here
+    EVENT_FEL_FLAMES = 1,
+	EVENT_FEL_DECAY  = 2
 };
 
 class boss_perotharn : public CreatureScript
@@ -45,7 +51,11 @@ public:
             instance = creature->GetInstanceScript();			
         }
 
-          InstanceScript* instance;
+        bool casted;
+        uint32 PerotharnkHealth;
+        uint32 heroic10;		
+        InstanceScript *instance;
+        EventMap events;;
 		  
            bool IsRegularMode;
 
@@ -53,12 +63,22 @@ public:
                 {
                   me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                   me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                  heroic10 = 9544310;
+				  PerotharnkHealth = DUNGEON_MODE( heroic10);
+				  me->SetMaxHealth(PerotharnkHealth);
+                  me->SetFullHealth();
+                  casted = false;
+			      events.Reset();					  
                 }
 
 				void EnterCombat(Unit* /*who*/)
                 {
                  if (instance)
                      instance->SetData(DATA_PEROTHARN_EVENT, IN_PROGRESS);
+					 Talk(0);
+                     events.ScheduleEvent(EVENT_FEL_FLAMES, urand(10000,11000));
+                     events.ScheduleEvent(EVENT_FEL_DECAY, urand(17000,20000));					 
+					 
                 }				
 				
 
@@ -66,10 +86,12 @@ public:
                 {
                  if (instance)
                      instance->SetData(DATA_PEROTHARN_EVENT, DONE);
+					 Talk(3);
                 }
 
              void KilledUnit(Unit* Victim) 
                {
+			     Talk(2);
                }
 
              void JustReachedHome() 
@@ -78,17 +100,57 @@ public:
                     instance->SetData(DATA_PEROTHARN_EVENT, FAIL);
                }
 
-           void UpdateAI(const uint32 uiDiff) 
-              {
-           if (!UpdateVictim())
+        void DamageTaken(Unit* /*attacker*/, uint32& damage)
+        {
+            // Health check
+            if (me->HealthBelowPct(70) && !casted)
+            {
+				   Talk(1, true);
+				   DoCast(104905);
+				   casted = true;
+            }
+            else
+            if (me->HealthBelowPct(20) && !casted)
+            {
+				   Talk(4, true);
+				   DoCast(me, 105521, true);
+				   casted = true;
+            }				
+		}			   
+			   
+        void UpdateAI(uint32 const diff)
+        {
+            if (!UpdateVictim())
                 return;
 
             if (me->HasUnitState(UNIT_STATE_CASTING))
-                return;
+                return;			
+				
+            events.Update(diff);
 
-                DoMeleeAttackIfReady();
-  
-              }
+            while (uint32 eventId = events.ExecuteEvent()) 
+            {
+                switch (eventId)
+                {
+                    case EVENT_FEL_FLAMES:
+					 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+						 DoCast(target, 108141);
+						 events.ScheduleEvent(EVENT_FEL_FLAMES, 11000);
+                         break;
+    
+                    case EVENT_FEL_DECAY:
+					  if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                         DoCast(target, 105544);
+					     events.ScheduleEvent(EVENT_FEL_DECAY, 17000);
+                         break;
+																											
+					default:
+                       break;
+				}
+            }
+			
+            DoMeleeAttackIfReady();
+        }
 	 };
 };
 
