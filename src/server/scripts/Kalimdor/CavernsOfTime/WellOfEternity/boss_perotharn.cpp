@@ -31,7 +31,7 @@ EndScriptData */
 enum
 {
     EVENT_FEL_FLAMES = 1,
-	EVENT_FEL_DECAY  = 2
+    EVENT_FEL_DECAY  = 2
 };
 
 class boss_perotharn : public CreatureScript
@@ -53,7 +53,7 @@ public:
 
         bool casted;
         uint32 PerotharnkHealth;
-        uint32 heroic10;		
+        uint32 heroic5;		
         InstanceScript *instance;
         EventMap events;;
 		  
@@ -63,19 +63,19 @@ public:
                 {
                   me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                   me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                  heroic10 = 9544310;
-				  PerotharnkHealth = DUNGEON_MODE( heroic10);
-				  me->SetMaxHealth(PerotharnkHealth);
+                  heroic5 = 9544310;
+                  PerotharnkHealth = DUNGEON_MODE( heroic5);
+                  me->SetMaxHealth(PerotharnkHealth);
                   me->SetFullHealth();
                   casted = false;
-			      events.Reset();					  
+                  events.Reset();					  
                 }
 
-				void EnterCombat(Unit* /*who*/)
+                void EnterCombat(Unit* /*who*/)
                 {
                  if (instance)
                      instance->SetData(DATA_PEROTHARN_EVENT, IN_PROGRESS);
-					 Talk(0);
+                     Talk(0);
                      events.ScheduleEvent(EVENT_FEL_FLAMES, urand(10000,11000));
                      events.ScheduleEvent(EVENT_FEL_DECAY, urand(17000,20000));					 
 					 
@@ -105,16 +105,16 @@ public:
             // Health check
             if (me->HealthBelowPct(70) && !casted)
             {
-				   Talk(1, true);
-				   DoCast(104905);
-				   casted = true;
+                Talk(1, true);
+                DoCast(104905);
+                casted = true;
             }
             else
             if (me->HealthBelowPct(20) && !casted)
             {
-				   Talk(4, true);
-				   DoCast(me, 105521, true);
-				   casted = true;
+                Talk(4, true);
+                DoCast(me, 105521, true);
+                casted = true;
             }				
 		}			   
 			   
@@ -133,19 +133,19 @@ public:
                 switch (eventId)
                 {
                     case EVENT_FEL_FLAMES:
-					 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-						 DoCast(target, 108141);
-						 events.ScheduleEvent(EVENT_FEL_FLAMES, 11000);
+                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                         DoCast(target, 108141);
+                         events.ScheduleEvent(EVENT_FEL_FLAMES, 11000);
                          break;
     
                     case EVENT_FEL_DECAY:
-					  if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                          DoCast(target, 105544);
-					     events.ScheduleEvent(EVENT_FEL_DECAY, 17000);
+                         events.ScheduleEvent(EVENT_FEL_DECAY, 17000);
                          break;
 																											
-					default:
-                       break;
+                         default:
+                         break;
 				}
             }
 			
