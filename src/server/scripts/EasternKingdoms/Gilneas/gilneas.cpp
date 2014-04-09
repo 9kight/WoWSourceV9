@@ -4028,6 +4028,28 @@ public:
 	}
 };
 
+/*######
+## npc_lord_godfrey_map
+######*/
+class npc_lord_godfrey_map : public CreatureScript
+{
+public:
+    npc_lord_godfrey_map() : CreatureScript("npc_lord_godfrey_map") { }
+	bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+	{		
+        if (quest->GetQuestId() == 14396)
+            {
+              std::set<uint32> terrainswap;
+              std::set<uint32> phaseId;
+              terrainswap.insert(655);
+              phaseId.insert(1);
+              player->GetSession()->SendSetPhaseShift(phaseId, terrainswap);
+			}
+
+		return true;
+	}
+};
+
 void AddSC_gilneas()
 {
 	new spell_attack_lurker();
@@ -4084,4 +4106,5 @@ void AddSC_gilneas()
     new npc_chauve_souris_capture();
 	new npc_commandeered_cannon();
 	new npc_lord_godfrey_p4_8();
+	new npc_lord_godfrey_map();
 }

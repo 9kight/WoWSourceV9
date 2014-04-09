@@ -64,7 +64,6 @@ public:
                   me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                   me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                   heroic5 = 9544310;
-                  PerotharnkHealth = DUNGEON_MODE( heroic5);
                   me->SetMaxHealth(PerotharnkHealth);
                   me->SetFullHealth();
                   casted = false;

@@ -42,3 +42,6 @@ INSERT INTO smart_scripts (entryorguid, source_type, id, link, event_type, event
 DELETE FROM creature_text WHERE comment = "Deathwing/goblin";
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
 ('46484','1','0','The sun sets on this mortal world, fools! Surrender to your order, comes as the Hour of Twilight!','14','0','100','0','0','0','Deathwing/goblin');
+
+
+update creature_template set scriptname = 'npc_lord_godfrey_map' where entry = 36290;
