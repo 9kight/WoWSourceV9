@@ -12,3 +12,7 @@ INSERT INTO `spell_proc_event` VALUES (56836, 0x00, 0x09, 0x00040000, 0x00000000
 INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES ('61336', '50322', '1', 'Survival Instincts');-- (87099) Sin and Punishment (Rank 1)
 DELETE FROM `spell_proc_event` WHERE `entry` IN (87099);
 INSERT INTO `spell_proc_event` VALUES (87099, 0x01, 0x06, 0x00000000, 0x00000000, 0x00000000, 0x00040000, 0x00000002, 0, 100, 0);
+
+-- lacerate
+DELETE FROM `spell_script_names` WHERE `spell_id`=33745;
+INSERT INTO `spell_script_names` (`spell_id`,`ScriptName`) VALUES (33745,'spell_dru_lacerate');

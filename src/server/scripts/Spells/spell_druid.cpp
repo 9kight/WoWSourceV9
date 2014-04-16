@@ -1070,55 +1070,6 @@ class spell_dru_feral_aggression : public SpellScriptLoader
         }
 };
 
-class spell_dru_pulverize : public SpellScriptLoader
-{
-    class script_impl : public SpellScript
-    {
-        PrepareSpellScript(script_impl);
-
-        enum
-        {
-            SPELL_LACERATE          = 33745,
-            SPELL_PULVERIZE_CRIT    = 80951,
-        };
-
-        void HandleScript(SpellEffIndex)
-        {
-            Unit* const caster = GetCaster();
-            Unit* const target = GetHitUnit();
-            if (!target)
-                return;
-
-            uint8 stacks = 0;
-            if (Aura* const aura = target->GetAura(SPELL_LACERATE, caster->GetGUID()))
-            {
-                stacks = aura->GetStackAmount();
-                int32 const value = sSpellMgr->GetSpellInfo(SPELL_PULVERIZE_CRIT)->Effects[EFFECT_0].CalcValue(caster) * stacks;
-                caster->CastCustomSpell(caster, SPELL_PULVERIZE_CRIT, &value, NULL, NULL, true);
-            }
-
-            SetHitDamage(GetHitDamage() + (GetEffectValue() * stacks));
-
-        }
-
-        void Register()
-        {
-            OnEffectHitTarget += SpellEffectFn(script_impl::HandleScript, EFFECT_2, SPELL_EFFECT_NORMALIZED_WEAPON_DMG);
-        }
-    };
-
-public:
-    spell_dru_pulverize()
-        : SpellScriptLoader("spell_dru_pulverize")
-    {
-    }
-
-    SpellScript* GetSpellScript() const
-    {
-        return new script_impl();
-    }
-};
-
 // Barkskin
 class spell_dru_barkskin : public SpellScriptLoader
 {
@@ -2431,6 +2382,93 @@ public:
     }
 };
 
+// pulverize
+class spell_dru_pulverize : public SpellScriptLoader
+{
+    public:
+        spell_dru_pulverize() : SpellScriptLoader("spell_dru_pulverize") { }
+
+        class spell_dru_pulverize_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_dru_pulverize_SpellScript);
+
+            void OnHit()
+            {
+                if (Unit* caster=GetCaster())
+                {
+                    if (Unit* target=GetHitUnit())
+                    {
+                        if (AuraEffect const* lacerate = target->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE,SPELLFAMILY_DRUID,0x00000000,0x00000100,0x00000000,caster->GetGUID()))
+                        {
+                            int32 bp0 = 3*lacerate->GetBase()->GetStackAmount();
+                            caster->CastCustomSpell(caster,80951,&bp0,0,0,true);
+                            target->RemoveAura(lacerate->GetBase());
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                
+                AfterHit += SpellHitFn(spell_dru_pulverize_SpellScript::OnHit);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_dru_pulverize_SpellScript();
+        }
+};
+
+// lacerate
+class spell_dru_lacerate : public SpellScriptLoader
+{
+    public:
+        spell_dru_lacerate() : SpellScriptLoader("spell_dru_lacerate") { }
+
+        class spell_dru_lacerate_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_dru_lacerate_AuraScript);
+
+            bool Validate(SpellInfo const* /*spell*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(50334))
+                    return false;
+                return true;
+            }
+
+            void OnPeriodic(AuraEffect const* aurEff)
+            {
+                if(Unit* caster = GetCaster())
+                {
+                    if (Player* player = caster->ToPlayer())
+                    {   
+                        // Berserk
+                        if(player->HasTalent(50334, player->GetActiveSpec()))
+                        {
+                            if(roll_chance_i(50))
+                            {
+                                player->RemoveSpellCooldown(33878, true);
+                                player->CastSpell(player, 93622, true);
+                            }
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_dru_lacerate_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_dru_lacerate_AuraScript();
+        }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_dash();
@@ -2479,4 +2517,5 @@ void AddSC_druid_spell_scripts()
     new spell_druid_blood_in_the_water();
     new spell_druid_shred_maul();
     new spell_druid_regrowth();
+	new spell_dru_lacerate();
 }
