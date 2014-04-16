@@ -3411,6 +3411,8 @@ class npc_Tentacle_of_the_Old_Ones : public CreatureScript
         {
             npc_Tentacle_of_the_Old_OnesAI(Creature* creature) : CasterAI(creature) {}
 
+            uint32 Mindflays_Timer;			
+			
             void InitializeAI()
             {
                 CasterAI::InitializeAI();
@@ -3420,10 +3422,24 @@ class npc_Tentacle_of_the_Old_Ones : public CreatureScript
 
                 me->SetReactState(REACT_AGGRESSIVE);
             }
-        };
 
-        void UpdateAI(const uint32 diff) { }
-        void EnterCombat(Unit* /*who*/) { }
+        void UpdateAI(const uint32 diff) 
+		{ 
+               if (!UpdateVictim())
+               return;
+
+           if(Mindflays_Timer<= diff)
+               {
+             DoCast(me->GetVictim(),52586);
+                     Mindflays_Timer = 6000;          
+               }else Mindflays_Timer -= diff;		
+		}
+        void EnterCombat(Unit* /*who*/)
+		{ 
+		  DoCast(me->GetVictim(),52586);
+		}			
+			
+        };
 
         CreatureAI* GetAI(Creature* creature) const
         {
