@@ -48,7 +48,9 @@ enum HunterSpells
     SPELL_HUNTER_KILL_COMMAND_CRIT_10               = 60110,
     SPELL_HUNTER_KILL_COMMAND_CRIT_20               = 60113,
     SPELL_HUNTER_FOCUSED_FIRE_1                     = 35029,
-    SPELL_HUNTER_FOCUSED_FIRE_2                     = 35030
+    SPELL_HUNTER_FOCUSED_FIRE_2                     = 35030,
+	SPELL_HUNTER_FOCUS_ENERGIZE                     = 82716,
+	SPELL_HUNTER_GLYPH_OF_SILENCING_SHOT            = 56836
 };
 
 enum HunterPetCalculate
@@ -1743,6 +1745,45 @@ class spell_hun_concussive: public SpellScriptLoader
         }
 };
 
+// 34490 - Silencing Shot
+class spell_hun_silencing_shot : public SpellScriptLoader
+{
+    public:
+        spell_hun_silencing_shot() : SpellScriptLoader("spell_hun_silencing_shot") { }
+
+        class spell_hun_silencing_shot_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_hun_silencing_shot_AuraScript);
+
+            void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                Unit* caster = GetCaster();
+                Unit* target = GetTarget();
+                if (caster && target)
+                {
+                    // Glyph of Silencing Shot energize on spell interruption
+                    if (caster->HasAura(SPELL_HUNTER_GLYPH_OF_SILENCING_SHOT) && target->HasUnitState(UNIT_STATE_CASTING))
+                    {
+                        // Fixed value
+                        int32 bp0 = 10;
+                        caster->CastCustomSpell(caster, SPELL_HUNTER_FOCUS_ENERGIZE, &bp0, NULL, NULL, true);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectApply += AuraEffectApplyFn(spell_hun_silencing_shot_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_MOD_SILENCE, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+            }
+        };
+
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_hun_silencing_shot_AuraScript();
+        }
+};
+
 void AddSC_hunter_spell_scripts()
 {
     new spell_hun_chimera_shot();
@@ -1780,4 +1821,5 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_pet_damage_spells();
     new spell_hun_pet_spirit_mend();
     new spell_hun_mend_pet();
+	new spell_hun_silencing_shot();
 }
