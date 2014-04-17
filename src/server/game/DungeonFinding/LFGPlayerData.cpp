@@ -95,3 +95,19 @@ const LfgDungeonSet& LfgPlayerData::GetSelectedDungeons() const
 {
     return m_SelectedDungeons;
 }
+
+LfgState LfgPlayerData::GetOldState() const
+{
+    return m_OldState;
+}
+
+uint64 LfgPlayerData::GetGroup() const
+{
+    return m_Group;
+}
+
+uint8 LfgPlayerData::GetTeam() const
+{
+    return m_Team;
+}
+
