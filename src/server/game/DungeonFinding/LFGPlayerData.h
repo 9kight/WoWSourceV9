@@ -42,7 +42,11 @@ class LfgPlayerData
 
         // General
         LfgState GetState() const;
+        LfgState GetOldState() const;
+        //LfgGuidSet const& GetPlayers() const;
         const LfgLockMap& GetLockedDungeons() const;
+        uint8 GetTeam() const;
+        uint64 GetGroup() const;
         // Queue
         uint8 GetRoles() const;
         const std::string& GetComment() const;
@@ -53,11 +57,14 @@ class LfgPlayerData
         LfgState m_State;                                  ///< State if group in LFG
         LfgState m_OldState;                               ///< Old State
         // Player
+       // LfgGuidSet m_Players;                              ///< Players in group
         LfgLockMap m_LockedDungeons;                       ///< Dungeons player can't do and reason
+        uint8 m_Team;                                      ///< Player team - determines the queue to join
         // Queue
         uint8 m_Roles;                                     ///< Roles the player selected when joined LFG
         std::string m_Comment;                             ///< Player comment used when joined LFG
         LfgDungeonSet m_SelectedDungeons;                  ///< Selected Dungeons when joined LFG
+        uint64 m_Group;                                    ///< Original group of player when joined LFG
 };
 
 #endif
