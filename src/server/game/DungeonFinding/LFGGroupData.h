@@ -22,8 +22,8 @@
 
 enum LfgGroupEnum
 {
-    LFG_GROUP_MAX_KICKS                           = 3,
-    LFG_GROUP_KICK_VOTES_NEEDED                   = 3
+    LFG_GROUP_MAX_KICKS = 3,
+//    LFG_GROUP_KICK_VOTES_NEEDED = 4,
 };
 
 /**
@@ -34,6 +34,8 @@ class LfgGroupData
     public:
         LfgGroupData();
         ~LfgGroupData();
+
+        bool IsLfgGroup();
 
         // General
         void SetState(LfgState state);
@@ -46,16 +48,23 @@ class LfgGroupData
 
         // General
         LfgState GetState() const;
+        LfgState GetOldState() const;
+        uint8 GetPlayerCount() const;
         // Dungeon
         uint32 GetDungeon(bool asId = true) const;
         // VoteKick
         uint8 GetVotesNeeded() const;
         uint8 GetKicksLeft() const;
 
+        LfgGuidSet const& GetPlayers() const;
+
+
     private:
         // General
         LfgState m_State;                                  ///< State if group in LFG
         LfgState m_OldState;                               ///< Old State
+        uint64 m_Leader;                                   ///< Leader GUID
+        LfgGuidSet m_Players;                              ///< Players in group
         // Dungeon
         uint32 m_Dungeon;                                  ///< Dungeon entry
         // Vote Kick
