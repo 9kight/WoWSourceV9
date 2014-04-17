@@ -18,14 +18,19 @@
 #include "LFG.h"
 #include "LFGGroupData.h"
 
-LfgGroupData::LfgGroupData():
-m_State(LFG_STATE_NONE), m_OldState(LFG_STATE_NONE), m_Dungeon(0),
-m_VotesNeeded(LFG_GROUP_KICK_VOTES_NEEDED), m_KicksLeft(LFG_GROUP_MAX_KICKS)
+
+LfgGroupData::LfgGroupData() : m_State(LFG_STATE_NONE), m_OldState(LFG_STATE_NONE),
+m_Leader(0), m_Dungeon(0), m_KicksLeft(LFG_GROUP_MAX_KICKS)
 {
 }
 
 LfgGroupData::~LfgGroupData()
 {
+}
+
+bool LfgGroupData::IsLfgGroup()
+{
+    return m_OldState != LFG_STATE_NONE;
 }
 
 void LfgGroupData::SetState(LfgState state)
@@ -41,6 +46,8 @@ void LfgGroupData::SetState(LfgState state)
             m_State = state;
     }
 }
+
+
 
 void LfgGroupData::RestoreState()
 {
@@ -79,4 +86,19 @@ uint8 LfgGroupData::GetVotesNeeded() const
 uint8 LfgGroupData::GetKicksLeft() const
 {
     return m_KicksLeft;
+}
+
+uint8 LfgGroupData::GetPlayerCount() const
+{
+    return m_Players.size();
+}
+
+LfgState LfgGroupData::GetOldState() const
+{
+    return m_OldState;
+}
+
+LfgGuidSet const& LfgGroupData::GetPlayers() const
+{
+    return m_Players;
 }
