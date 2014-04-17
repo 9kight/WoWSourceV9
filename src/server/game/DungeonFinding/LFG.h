@@ -22,6 +22,13 @@
 
 #define LFG_MULTYPLIER 100
 
+/*enum LFGEnum
+{
+    LFG_TANKS_NEEDED = 1,
+    LFG_HEALERS_NEEDED = 1,
+    LFG_DPS_NEEDED = 3
+};*/
+
 enum LfgRoles
 {
     ROLE_NONE                                    = 0x00,
@@ -33,20 +40,22 @@ enum LfgRoles
 
 enum LfgUpdateType
 {
-    LFG_UPDATETYPE_DEFAULT                       = 0,      // Internal Use
-    LFG_UPDATETYPE_LEADER                        = 1,
-    LFG_UPDATETYPE_ROLECHECK_ABORTED             = 4,
-    LFG_UPDATETYPE_JOIN_PROPOSAL                 = 5,
-    LFG_UPDATETYPE_ROLECHECK_FAILED              = 6,
-    LFG_UPDATETYPE_REMOVED_FROM_QUEUE            = 7,
-    LFG_UPDATETYPE_PROPOSAL_FAILED               = 8,
-    LFG_UPDATETYPE_PROPOSAL_DECLINED             = 9,
-    LFG_UPDATETYPE_GROUP_FOUND                   = 10,
-    LFG_UPDATETYPE_ADDED_TO_QUEUE                = 12,
-    LFG_UPDATETYPE_PROPOSAL_BEGIN                = 13,
-    LFG_UPDATETYPE_CLEAR_LOCK_LIST               = 14,
-    LFG_UPDATETYPE_GROUP_MEMBER_OFFLINE          = 15,
-    LFG_UPDATETYPE_GROUP_DISBAND                 = 16
+    LFG_UPDATETYPE_DEFAULT = 0,      // Internal Use
+    LFG_UPDATETYPE_LEADER = 1,
+    LFG_UPDATETYPE_ROLECHECK_ABORTED = 4,
+    LFG_UPDATETYPE_JOIN_PROPOSAL = 5,
+    LFG_UPDATETYPE_ROLECHECK_FAILED = 6,
+    LFG_UPDATETYPE_REMOVED_FROM_QUEUE = 7,
+    LFG_UPDATETYPE_PROPOSAL_FAILED = 8,
+    LFG_UPDATETYPE_PROPOSAL_DECLINED = 9,
+    LFG_UPDATETYPE_GROUP_FOUND = 10,
+    LFG_UPDATETYPE_ADDED_TO_QUEUE = 12,
+    LFG_UPDATETYPE_PROPOSAL_BEGIN = 13,
+    LFG_UPDATETYPE_CLEAR_LOCK_LIST = 14,
+    LFG_UPDATETYPE_UPDATE_STATUS = 15,
+    LFG_UPDATETYPE_GROUP_MEMBER_OFFLINE = 16,
+    LFG_UPDATETYPE_GROUP_DISBAND = 17,
+    LFG_UPDATETYPE_JOIN_QUEUE_INITIAL = 24
 };
 
 enum LfgState
@@ -94,5 +103,12 @@ struct LfgLockStatus
 typedef std::set<uint32> LfgDungeonSet;
 typedef std::map<uint32, LfgLockStatusType> LfgLockMap;
 typedef std::map<uint64, LfgLockMap> LfgLockPartyMap;
+typedef std::map<uint64, uint8> LfgRolesMap;
+typedef std::set<uint64> LfgGuidSet;
+typedef std::map<uint64, uint64> LfgGroupsMap;
+
+std::string ConcatenateDungeons(LfgDungeonSet const& dungeons);
+std::string GetRolesString(uint8 roles);
+std::string GetStateString(LfgState state);
 
 #endif
