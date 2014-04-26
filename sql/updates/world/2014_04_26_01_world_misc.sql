@@ -614,4 +614,7 @@ INSERT INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`
 -- delete wrong npc loot
 DELETE FROM creature_loot_template WHERE entry=7168;
 
--- update for a large amount of npc 
+-- fixing rong equip for npc
+-- http://www.wowhead.com/npc=708
+UPDATE creature_template SET equipment_id=0 WHERE entry=708; 
+DELETE FROM creature_equip_template WHERE entry=708;
