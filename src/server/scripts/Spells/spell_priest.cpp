@@ -1404,6 +1404,38 @@ class spell_pri_spirit_of_redemption : public SpellScriptLoader
         }
 };
 
+// Guardian Spirit
+class spell_pri_chakra : public SpellScriptLoader
+{
+    public:
+        spell_pri_chakra() : SpellScriptLoader("spell_pri_chakra") { }
+
+        class spell_pri_chakra_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_pri_chakra_AuraScript);
+
+            void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+            {
+                if (GetCaster())
+                {
+                    // Revelations
+                    if (!GetCaster()->HasAura(88627))
+                        amount = 88625;
+                }
+            }
+
+            void Register()
+            {
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pri_chakra_AuraScript::CalculateAmount, EFFECT_2, SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_pri_chakra_AuraScript();
+        }
+};
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_glyph_of_prayer_of_healing();
@@ -1437,5 +1469,6 @@ void AddSC_priest_spell_scripts()
     new spell_pri_fear();
     new spell_pri_friendly_dispel();
     new spell_pri_spirit_of_redemption_form();
-    new spell_pri_spirit_of_redemption();	
+    new spell_pri_spirit_of_redemption();
+    new spell_pri_chakra();
 }
