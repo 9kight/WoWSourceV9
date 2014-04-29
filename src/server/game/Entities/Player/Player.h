@@ -1168,7 +1168,7 @@ private:
     void _RewardGuildXP(Player* player);
     void _RewardReputation(Player* player, float rate);
     void _RewardOnKill(Player* player, float rate);
-
+    void _RewardCurrency(Player* player);
     void _RewardKillCredit(Player* player);
     void _RewardPlayer(Player* player, bool isDungeon);
     void _RewardGroup();
@@ -2281,6 +2281,7 @@ class Player : public Unit, public GridObject<Player>
         ReputationMgr const& GetReputationMgr() const { return *m_reputationMgr; }
         ReputationRank GetReputationRank(uint32 faction_id) const;
         void RewardOnKill(Unit *victim, float rate);
+        void RewardCurrency(Unit* victim);
         void RewardReputation(Quest const* quest);
 
         int32 CalculateReputationGain(ReputationSource source, uint32 creatureOrQuestLevel, int32 rep, int32 faction, bool noQuestBonus = false);

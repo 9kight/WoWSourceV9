@@ -564,6 +564,12 @@ inline void KillRewarder::_RewardOnKill(Player* player, float rate)
     player->RewardOnKill(_victim, rate);
 }
 
+inline void KillRewarder::_RewardCurrency(Player* player)
+{
+    // 4.3.2 Give currency
+    // Even dead players and corpses are rewarded.
+    player->RewardCurrency(_victim);
+}
 inline void KillRewarder::_RewardKillCredit(Player* player)
 {
     // 4.4. Give kill credit (player must not be in group, or he must be alive or without corpse).
@@ -6936,6 +6942,9 @@ void Player::SendMovieStart(uint32 MovieId)
     SendDirectMessage(&data);
 }
 
+
+
+
 void Player::CheckAreaExploreAndOutdoor()
 {
     if (!isAlive())
@@ -7966,6 +7975,7 @@ uint32 Player::GetArenaTeamIdFromDB(uint64 guid, uint8 type)
     if (sInfoMgr->GetCharInfo(GUID_LOPART(guid), info))
         return info.ArenaTeam[ArenaTeam::GetSlotByType(type)];
 
+
     return 0;
 }
 
@@ -8017,6 +8027,7 @@ uint32 Player::GetLevelFromDB(uint64 guid)
     InfoCharEntry info;
     if (sInfoMgr->GetCharInfo(GUID_LOPART(guid), info))
         return info.Level;
+
 
     return 0;
 }
@@ -17375,6 +17386,9 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
 
     GetArcheologyMgr().LoadArcheologyDigSites(guid);
 
+
+
+
     // overwrite possible wrong/corrupted guid
     SetUInt64Value(OBJECT_FIELD_GUID, MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER));
 
@@ -19711,6 +19725,9 @@ void Player::SaveToDB(bool create /*=false*/)
     CharacterDatabase.CommitTransaction(trans);
     GetArcheologyMgr().SaveArcheology();
 
+
+
+
 }
 
 // fast save function for item/money cheating preventing - save only inventory and money state
@@ -20803,6 +20820,7 @@ void Player::RemovePet(Pet* pet, PetSlot mode, bool returnreagent, bool logout)
                 break;
         }
     }*/
+
 
     // only if current pet in slot
     pet->SavePet(mode, logout);
@@ -22123,6 +22141,9 @@ bool Player::BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uin
             if (iece->RequirementFlags & (ITEM_EXT_COST_CURRENCY_REQ_IS_SEASON_EARNED_1 << i))
                 continue; 
 
+
+
+
             ModifyCurrency(iece->RequiredCurrency[i], -int32(iece->RequiredCurrencyCount[i]) * stacks, false, true);
         }
     }
@@ -22448,6 +22469,7 @@ void Player::ModifySpellCooldown(uint32 spellId, int32 cooldown)
     SpellCooldowns::iterator itr = m_spellCooldowns.find(spellId);
     if (itr == m_spellCooldowns.end())
         return;
+
 
     time_t now = time(NULL);
     if (itr->second.end + (cooldown / IN_MILLISECONDS) > now)
@@ -23019,6 +23041,7 @@ void Player::InitPrimaryProfessions()
 void Player::ModifyMoney(int64 d)
 {
     sScriptMgr->OnPlayerMoneyChanged(this, d);
+
 
     if (d < 0)
         SetMoney (GetMoney() > uint64(-d) ? GetMoney() + d : 0);
@@ -26378,6 +26401,7 @@ void Player::UpdateSpecCount(uint8 count)
     SendTalentsInfoData(false);
 }
 
+
 void Player::ActivateSpec(uint8 spec)
 {
     if (GetActiveSpec() == spec)
@@ -27417,6 +27441,7 @@ PetData* Player::GetPetDatabySlot(uint8 slot)
     for (Stable::iterator itr = m_Stables.begin(); itr != m_Stables.end(); ++itr)
         if (itr->second->slot == slot)
             return itr->second;
+
 
     return NULL;
 }
