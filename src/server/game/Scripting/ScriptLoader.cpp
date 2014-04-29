@@ -451,6 +451,7 @@ void AddSC_dustwallow_marsh();
 void AddSC_felwood();
 void AddSC_feralas();
 void AddSC_moonglade();
+void AddSC_molten_front();
 void AddSC_mulgore();
 void AddSC_orgrimmar();
 void AddSC_silithus();
@@ -1236,6 +1237,7 @@ void AddKalimdorScripts()
     AddSC_felwood();
     AddSC_feralas();
     AddSC_moonglade();
+	AddSC_molten_front();
     AddSC_mulgore();
     AddSC_orgrimmar();
     AddSC_silithus();
