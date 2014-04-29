@@ -37,7 +37,7 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `zone`, `area`, `spawnMask`, `pha
 (293608, 300246, 638, 0, 0, 1, 4, -1674.09, 1348.42, 15.2845, 0.0996814, 0, 0, 0.0498201, 0.998758, 300, 0, 1);
 
 
-DELETE FROM script_texts WHERE entry = 35907;
+DELETE FROM creature_text WHERE entry = 35907;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES 
 (35907, 0, 0, 'Help! Up here!', 14, 0, 100, 0, 0, 20921, 'Krennan Yell for Hel'),
 (35907, 1, 0, 'Thank you! I owe you my life.', 12, 0, 100, 1, 0, 20922, 'Saved Krennan Aranas');
