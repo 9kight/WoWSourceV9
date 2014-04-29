@@ -1945,152 +1945,172 @@ public:
     };
 };
 
-enum GreyPaths
-{
-    PATH_THERE              = 3590700,
-    PATH_BACK               = 3590701,
-};
-
 /*######
 ## npc_king_greymanes_horse
 ######*/
+
 class npc_king_greymanes_horse : public CreatureScript
 {
-    struct npc_king_greymanes_horseAI : public ScriptedAI
-    {
-        npc_king_greymanes_horseAI(Creature* creature) : ScriptedAI(creature) {}
-
-        void Reset()
-        {
-            me->SetReactState(REACT_PASSIVE);
-            there = true;
-            playerGUID = 0;
-            krennanGUID = 0;
-        }
-
-        void EnterCombat(Unit *) { }
-
-        void PassengerBoarded(Unit* who, int8 seatId, bool apply)
-        {
-            if (apply)
-            {
-                if (seatId == 0) // player
-                {
-                    who->ToPlayer()->SetClientControl(me, 0); // hack
-
-                    playerGUID = who->GetGUID();
-                    who->CastSpell(who, SPELL_QUEST_DETECTION, true);
-                    me->GetMotionMaster()->Initialize();
-                    me->GetMotionMaster()->MovePath(PATH_THERE, false);
-                }
-                else if (seatId == 1) // krennan
-                {
-                    if (Player * player = me->GetPlayer(*me, playerGUID))
-                        player->KilledMonsterCredit(NPC_KRENNAN);
-                    krennanGUID = who->GetGUID();
-                    me->GetMotionMaster()->Initialize();
-                    me->GetMotionMaster()->MovePath(PATH_BACK, false);
-                }
-            }
-            else
-                if (Creature * krennan = me->GetCreature(*me, krennanGUID))
-                    krennan->DespawnOrUnsummon(5000);
-        }
-
-        void MovementInform(uint32 type, uint32 Id)
-        {
-            if (type == POINT_MOTION_TYPE)
-            {
-                if (Id == 0)
-                {
-                    there = false;
-                    Talk(0, playerGUID);
-                    if (Creature * krennan = me->FindNearestCreature(NPC_KRENNAN, 30.0f))
-                        krennan->AI()->Talk(0);
-                }
-            }
-            else if (type == WAYPOINT_MOTION_TYPE)
-            {
-                if (there)
-                {
-                    if (Id == 4)
-                    {
-                        me->GetMotionMaster()->Clear();
-                        me->GetMotionMaster()->MoveIdle();
-                        me->GetMotionMaster()->MoveJump(-1676.737427f, 1345.307495f, 15.135159f, 15.0f, 15.0f);
-                    }
-                }
-                else
-                    if (Id == 7)
-                        if (Vehicle * veh = me->GetVehicleKit())
-                            veh->RemoveAllPassengers();
-            }
-        }
-
-        void UpdateAI(const uint32) { }
-
-    private:
-        bool there;
-        uint64 playerGUID;
-        uint64 krennanGUID;
-    };
-
 public:
     npc_king_greymanes_horse() : CreatureScript("npc_king_greymanes_horse") { }
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_king_greymanes_horseAI(creature);
+        return new npc_king_greymanes_horseAI (creature);
     }
+
+    struct npc_king_greymanes_horseAI : public npc_escortAI
+    {
+        npc_king_greymanes_horseAI(Creature* creature) : npc_escortAI(creature) {}
+
+        uint32 krennansay;
+        bool PlayerOn, KrennanOn;
+
+        void AttackStart(Unit* /*who*/) {}
+        void EnterCombat(Unit* /*who*/) {}
+        void EnterEvadeMode() {}
+
+        void Reset()
+        {
+             krennansay     = 500;//Check every 500ms initially
+             PlayerOn       = false;
+             KrennanOn      = false;
+        }
+
+        void PassengerBoarded(Unit* who, int8 /*seatId*/, bool apply)
+        {
+            if (who->GetTypeId() == TYPEID_PLAYER)
+            {
+                PlayerOn = true;
+                if (apply)
+                {
+                    Start(false, true, who->GetGUID());
+                }
+            }
+            else if (who->GetTypeId() == TYPEID_UNIT)
+            {
+                KrennanOn = true;
+                SetEscortPaused(false);
+            }
+        }
+
+        void WaypointReached(uint32 i)
+        {
+            Player* player = GetPlayerForEscort();
+
+            switch(i)
+            {
+                case 5:
+                    Talk(SAY_GREYMANE_HORSE, player->GetGUID());
+                    me->GetMotionMaster()->MoveJump(-1679.089f, 1348.42f, 15.31f, 25.0f, 15.0f);
+                    if (me->GetVehicleKit()->HasEmptySeat(1))
+                    {
+                        SetEscortPaused(true);
+                        break;
+                    }
+                    else
+                    break;
+                case 12:
+                    player->ExitVehicle();
+                    player->SetClientControl(me, 1);
+                    break;
+            }
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            if (Player* player = GetPlayerForEscort())
+               player->FailQuest(QUEST_SAVE_KRENNAN_ARANAS);
+        }
+
+        void OnCharmed(bool /*apply*/)
+        {
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            npc_escortAI::UpdateAI(diff);
+            Player* player = GetPlayerForEscort();
+
+            if (PlayerOn)
+            {
+                player->SetClientControl(me, 0);
+                PlayerOn = false;
+            }
+
+            if (KrennanOn) // Do Not yell for help after krennan is on
+                return;
+
+            if (krennansay <=diff)
+            {
+                if (Creature* krennan = me->FindNearestCreature(NPC_KRENNAN_ARANAS_TREE, 70.0f, true))
+                {
+                    krennan->AI()->Talk(SAY_NPC_KRENNAN_ARANAS_TREE, player->GetGUID());
+                    krennansay = urand(4000,7000);//Repeat every 4 to 7 seconds
+                }
+            }
+            else
+                krennansay -= diff;
+        }
+    };
 };
 
 /*######
 ## npc_krennan_aranas_c2
 ######*/
+
 class npc_krennan_aranas_c2 : public CreatureScript
 {
 public:
     npc_krennan_aranas_c2() : CreatureScript("npc_krennan_aranas_c2") { }
 
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_krennan_aranas_c2AI(creature);
+    }
+
     struct npc_krennan_aranas_c2AI : public ScriptedAI
     {
         npc_krennan_aranas_c2AI(Creature* creature) : ScriptedAI(creature) {}
 
+        bool Say, Move, Cast, KrennanDead;
+        uint32 SayTimer;
+
         void AttackStart(Unit* /*who*/) {}
         void EnterCombat(Unit* /*who*/) {}
         void EnterEvadeMode() {}
-		
-        bool Say;
-        bool Move;
-        bool Cast;
-        bool KrennanDead;
-        uint32 SayTimer;		
 
         void Reset()
         {
-            Say = false;
-            Move = true;
-            Cast = true;
-            KrennanDead = false;
-            SayTimer = 500;
+            Say             = false;
+            Move            = true;
+            Cast            = true;
+            KrennanDead     = false;
+            SayTimer        = 500;
         }
 
         void UpdateAI(const uint32 diff)
         {
-            if (Creature *krennan = me->FindNearestCreature(35753, 50))
+            if (Creature* krennan = me->FindNearestCreature(NPC_KRENNAN_ARANAS_TREE, 50.0f))
+            {
                 if (!KrennanDead)
                 {
-                    krennan->DespawnOrUnsummon();
+                    krennan->DespawnOrUnsummon(0);
                     KrennanDead = true;
                 }
+            }
 
-            if (Creature *horse = me->FindNearestCreature(35905, 20.0f))
+            if (Creature* horse = me->FindNearestCreature(NPC_GREYMANE_HORSE_P4, 20.0f))//Jump onto horse in seat 2
             {
                 if (Cast)
+                {
                     DoCast(horse, 84275, true);
+                }
 
                 if (me->HasAura(84275))
+                {
                     Cast = false;
+                }
             }
 
             if (!me->HasAura(84275) && Move)
@@ -2103,19 +2123,14 @@ public:
 
             if (Say && SayTimer <= diff)
             {
+                Talk(SAY_KRENNAN_C2);
                 me->DespawnOrUnsummon(6000);
                 Say = false;
             }
             else
                 SayTimer -= diff;
         }
-
     };
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_krennan_aranas_c2AI(creature);
-    }
 };
 
 /*######

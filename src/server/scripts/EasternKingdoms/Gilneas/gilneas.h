@@ -50,7 +50,8 @@ enum CreatureIds
     NPC_WORGEN_RUNT_C1                                = 35188, // Quest - By the skin of his teeth spawns
     NPC_WORGEN_RUNT_C2                                = 35456, // Quest - By the skin of his teeth spawns
 	NPC_COMMANDEERED_CANNON                           = 35914,
-	NPC_KRENNAN                                       = 35753
+	NPC_KRENNAN_ARANAS_TREE                           = 35753,
+	NPC_GREYMANE_HORSE_P4                             = 35905
 };
 
 enum QuestIds
@@ -148,11 +149,12 @@ enum NpcTextIds
     SAY_CITIZEN_4b                                     = -1638014,
     SAY_CITIZEN_5b                                     = -1638015,
 
-    YELL_KRENNAN_C1                                    = -1999973,
-    SAY_KRENNAN_C2                                     = -1999972,
-    SAY_GREYMANE_HORSE                                 = -1999971,
+    YELL_KRENNAN_C1                                    = 0,
+    SAY_KRENNAN_C2                                     = 1,
+    SAY_GREYMANE_HORSE                                 = 0,
     SAY_CROWLEY_HORSE_1                                = 0,
-    SAY_CROWLEY_HORSE_2                                = 1
+    SAY_CROWLEY_HORSE_2                                = 1,
+	SAY_NPC_KRENNAN_ARANAS_TREE                        = 0
 };
 
 enum SoundIds
