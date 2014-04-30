@@ -6942,9 +6942,6 @@ void Player::SendMovieStart(uint32 MovieId)
     SendDirectMessage(&data);
 }
 
-
-
-
 void Player::CheckAreaExploreAndOutdoor()
 {
     if (!isAlive())
@@ -7141,6 +7138,41 @@ void Player::RewardOnKill (Unit *victim, float rate)
 
     RewardOnKillEntry const* Rew = sObjectMgr->GetRewardOnKillEntry(victim->ToCreature()->GetCreatureTemplate()->Entry);
 
+    RewardOnKillEntry const* addRew = NULL;
+
+    // All mob in level 85 dungeons give championing Rewutation && All bosses give guild Rewutation
+    if (!Rew)
+    {
+        if (Map* map = victim->GetMap())
+        {
+            if (map->IsDungeon())
+            {
+                // Dungeon & Raid trashes
+                if (victim->getLevel() >= 82 && victim->GetMaxHealth() >= 45000)
+                {
+                    if (!map->IsHeroic())
+                        Rew = sObjectMgr->GetRewardOnKillEntry(42696);
+                    else
+                        Rew = sObjectMgr->GetRewardOnKillEntry(49667);
+                }
+
+                // Dungeon & Raid Bosses 
+                if (victim->getLevel() >= 86 && victim->GetMaxHealth() >= 2000000)
+                {
+                    if (!map->IsHeroic())
+                        Rew = sObjectMgr->GetRewardOnKillEntry(43296);
+                    else
+                        Rew = sObjectMgr->GetRewardOnKillEntry(47775);
+
+                    if (!map->IsHeroic())
+                        addRew = sObjectMgr->GetRewardOnKillEntry(43438);
+                    else
+                        addRew = sObjectMgr->GetRewardOnKillEntry(49642);
+                }
+            }
+        }
+    }
+
     if (!Rew)
         return;
 
@@ -7160,6 +7192,13 @@ void Player::RewardOnKill (Unit *victim, float rate)
     }
 
     uint32 team = GetTeam();
+
+    // Skip Guild rep from championing if we are in a guild group
+    if (Rew->RepFaction1 == 1168 || Rew->RepFaction2 == 1168)
+    {
+        if (GetGroup() && GetGroup()->IsGuildGroup(GetGuildId()))
+            ChampioningFaction = 0;
+    }
 
     if (Rew->RepFaction1 && (!Rew->TeamDependent || team == ALLIANCE))
     {
@@ -7183,6 +7222,31 @@ void Player::RewardOnKill (Unit *victim, float rate)
             GetReputationMgr().ModifyReputation(factionEntry2, donerep2);
     }
 
+    // Give Additional Rep
+    if (addRew)
+    {
+
+        if (addRew->RepFaction1)
+        {
+            int32 donerep1 = CalculateReputationGain(REPUTATION_SOURCE_KILL, victim->getLevel(), addRew->RepValue1, addRew->RepFaction1);
+            donerep1 = int32(donerep1 * rate);
+            FactionEntry const* factionEntry1 = sFactionStore.LookupEntry(addRew->RepFaction1);
+            uint32 current_reputation_rank1 = GetReputationMgr().GetRank(factionEntry1);
+            if (factionEntry1 && current_reputation_rank1 <= addRew->ReputationMaxCap1)
+                GetReputationMgr().ModifyReputation(factionEntry1, donerep1);
+        }
+
+        if (addRew->RepFaction2)
+        {
+            int32 donerep2 = CalculateReputationGain(REPUTATION_SOURCE_KILL, victim->getLevel(), addRew->RepValue2, addRew->RepFaction2);
+            donerep2 = int32(donerep2 * rate);
+            FactionEntry const* factionEntry2 = sFactionStore.LookupEntry(addRew->RepFaction2);
+            uint32 current_reputation_rank2 = GetReputationMgr().GetRank(factionEntry2);
+            if (factionEntry2 && current_reputation_rank2 <= addRew->ReputationMaxCap2)
+                GetReputationMgr().ModifyReputation(factionEntry2, donerep2);
+        }
+    }
+	
     if (Rew->CurrencyId1 && Rew->CurrencyCount1)
     {
         ModifyCurrency(Rew->CurrencyId1, Rew->CurrencyCount1);
@@ -7196,8 +7260,10 @@ void Player::RewardOnKill (Unit *victim, float rate)
     if (Rew->CurrencyId3 && Rew->CurrencyCount3)
     {
         ModifyCurrency(Rew->CurrencyId3, Rew->CurrencyCount3);
-    }
+    }	
+	
 }
+
 
 // Calculate how many reputation points player gain with the quest
 void Player::RewardReputation(Quest const* quest)
@@ -7239,6 +7305,20 @@ void Player::RewardReputation(Quest const* quest)
 
         if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(quest->RewardFactionId[i]))
             GetReputationMgr().ModifyReputation(factionEntry, rep);
+
+			// Give guild rep on completed quest
+        if (Guild * pGuild = sGuildMgr->GetGuildById(GetGuildId()))
+        {
+            if (uint32 exp = quest->XPValue(this))
+            {
+                uint32 gRep = exp / 450;
+                if (gRep <= 0)
+                    gRep = 1;
+
+                if (FactionEntry const* guildEntry = sFactionStore.LookupEntry(1168))
+                    GetReputationMgr().ModifyReputation(guildEntry, gRep);
+            }
+        } 
     }
 }
 
@@ -7452,6 +7532,7 @@ void Player::_LoadCurrency(PreparedQueryResult result)
         cur.weekCount = fields[1].GetUInt32();
         cur.totalCount = fields[2].GetUInt32();
         cur.weekCap = fields[3].GetUInt32(); // GetCurrencyWeekCap(currency);
+
 
         // load total conquest cap. should be after insert.
         if (currency->Category == CURRENCY_CATEGORY_META_CONQUEST)
@@ -7974,7 +8055,6 @@ uint32 Player::GetArenaTeamIdFromDB(uint64 guid, uint8 type)
     InfoCharEntry info;
     if (sInfoMgr->GetCharInfo(GUID_LOPART(guid), info))
         return info.ArenaTeam[ArenaTeam::GetSlotByType(type)];
-
 
     return 0;
 }
@@ -17386,9 +17466,6 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
 
     GetArcheologyMgr().LoadArcheologyDigSites(guid);
 
-
-
-
     // overwrite possible wrong/corrupted guid
     SetUInt64Value(OBJECT_FIELD_GUID, MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER));
 
@@ -19724,6 +19801,7 @@ void Player::SaveToDB(bool create /*=false*/)
 
     CharacterDatabase.CommitTransaction(trans);
     GetArcheologyMgr().SaveArcheology();
+
 
 
 
@@ -22141,9 +22219,6 @@ bool Player::BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uin
             if (iece->RequirementFlags & (ITEM_EXT_COST_CURRENCY_REQ_IS_SEASON_EARNED_1 << i))
                 continue; 
 
-
-
-
             ModifyCurrency(iece->RequiredCurrency[i], -int32(iece->RequiredCurrencyCount[i]) * stacks, false, true);
         }
     }
@@ -22469,7 +22544,6 @@ void Player::ModifySpellCooldown(uint32 spellId, int32 cooldown)
     SpellCooldowns::iterator itr = m_spellCooldowns.find(spellId);
     if (itr == m_spellCooldowns.end())
         return;
-
 
     time_t now = time(NULL);
     if (itr->second.end + (cooldown / IN_MILLISECONDS) > now)
@@ -23041,7 +23115,6 @@ void Player::InitPrimaryProfessions()
 void Player::ModifyMoney(int64 d)
 {
     sScriptMgr->OnPlayerMoneyChanged(this, d);
-
 
     if (d < 0)
         SetMoney (GetMoney() > uint64(-d) ? GetMoney() + d : 0);
@@ -26400,7 +26473,6 @@ void Player::UpdateSpecCount(uint8 count)
 
     SendTalentsInfoData(false);
 }
-
 
 void Player::ActivateSpec(uint8 spec)
 {
