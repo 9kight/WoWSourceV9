@@ -314,11 +314,11 @@ INSERT INTO `gossip_menu` (`entry`, `text_id`) VALUES
 (10393, 14428); -- 33956
 -- Archivum system npc (dummy only used for texts)
 DELETE FROM `creature` WHERE `id` IN(33874,33956,33957,33235);
-INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
-(NULL, 33874, 603, 3, 1, 0, 0, 1435.724, 118.9184, 424.9822, 0, 7200, 0, 0, 0, 0, 0, 0, 0, 0), -- 33874 (Area: 0)
-(NULL, 33235, 603, 3, 1, 0, 1, 1554.95, 142.51, 427.274, 3.6136, 7200, 5, 0, 0, 0, 1, 0, 0, 0),
-(NULL, 33956, 603, 1, 1, 0, 1, 1556.939, 144.098, 427.3084, 4.043797, 7200, 5, 0, 0, 0, 1, 0, 0, 0), -- 33956 (Area: 0) (possible waypoints or random movement)
-(NULL, 33957, 603, 2, 1, 0, 1, 1556.939, 144.098, 427.3084, 4.043797, 7200, 5, 0, 0, 0, 1, 0, 0, 0); -- 33956 (Area: 0) (possible waypoints or random movement)
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(NULL, 33874, 603, 3, 1, 0, 0, 1435.724, 118.9184, 424.9822, 0, 7200, 0, 0, 0, 0, 0, 0, 0), -- 33874 (Area: 0)
+(NULL, 33235, 603, 3, 1, 0, 1, 1554.95, 142.51, 427.274, 3.6136, 7200, 5, 0, 0, 1, 0, 0, 0),
+(NULL, 33956, 603, 1, 1, 0, 1, 1556.939, 144.098, 427.3084, 4.043797, 7200, 5, 0, 0, 1, 0, 0, 0), -- 33956 (Area: 0) (possible waypoints or random movement)
+(NULL, 33957, 603, 2, 1, 0, 1, 1556.939, 144.098, 427.3084, 4.043797, 7200, 5, 0, 0, 1, 0, 0, 0); -- 33956 (Area: 0) (possible waypoints or random movement)
 -- Archivum Console script
 UPDATE `gameobject_template` SET `AIName`='SmartGameObjectAI' WHERE `entry`=194555;
 DELETE FROM `smart_scripts` WHERE `entryorguid`=194555 AND `source_type`=1;
@@ -616,5 +616,5 @@ DELETE FROM creature_loot_template WHERE entry=7168;
 
 -- fixing wrong equip for npc
 -- http://www.wowhead.com/npc=708
---UPDATE creature_template SET equipment_id=0 WHERE entry=708;
+UPDATE creature SET equipment_id=0 WHERE id=708;
 DELETE FROM creature_equip_template WHERE entry=708;

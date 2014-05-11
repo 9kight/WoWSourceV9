@@ -222,15 +222,12 @@ INSERT INTO `npc_vendor` VALUES ('45294', '15', '2880', '0', '0', '0', '1');
 INSERT INTO `npc_vendor` VALUES ('45294', '16', '4399', '0', '0', '0', '1');
 INSERT INTO `npc_vendor` VALUES ('45294', '17', '4361', '0', '0', '0', '1');
 
-UPDATE creature_template SET equipment_id=0 WHERE entry=3820;
-DELETE FROM creature_equip_template WHERE entry=3820;
 UPDATE creature SET equipment_id=0 WHERE id=3820;
+DELETE FROM creature_equip_template WHERE entry=3820;
 
-UPDATE creature_template SET equipment_id=0 WHERE entry=3821;
 DELETE FROM creature_equip_template WHERE entry=3821;
 UPDATE creature SET equipment_id=0 WHERE id=3821;
 
-UPDATE creature_template SET equipment_id=0 WHERE entry=3819;
 DELETE FROM creature_equip_template WHERE entry=3819;
 UPDATE creature SET equipment_id=0 WHERE id=3819;
 

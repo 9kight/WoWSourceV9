@@ -1,7 +1,7 @@
 -- duplicates
 DELETE FROM gameobject WHERE guid IN (254377,254372);
 
--- fix rong  requireds to quests  below
+-- fix wrong required to quests below
 UPDATE quest_template SET RequiredNpcOrGoCount1=1  WHERE id=25303;
 UPDATE quest_template SET RequiredNpcOrGoCount2=1  WHERE id=25303;
 UPDATE quest_template SET RequiredNpcOrGoCount3=1  WHERE id=25303;
@@ -16,10 +16,10 @@ UPDATE creature_template SET npcflag=0 WHERE entry=14401;
 UPDATE creature_template SET npcflag=0 WHERE entry=21493;
 UPDATE creature_template SET npcflag=4096 WHERE entry=45363;
 
--- rong loot for non existed object
+-- wrong loot for non existed object
 DELETE FROM gameobject_loot_template WHERE entry=24611;
 
--- rong  mincount
+-- wrong mincount
 UPDATE skinning_loot_template SET mincountOrRef=1 WHERE entry=43981 AND item=52976;
 UPDATE skinning_loot_template SET mincountOrRef=1 WHERE entry=43981 AND item=67495;
 UPDATE skinning_loot_template SET mincountOrRef=1 WHERE entry=43981 AND item=52977;
@@ -91,7 +91,7 @@ UPDATE creature_template_addon SET auras=81376 WHERE entry IN (47479,47485);
 -- autocomplete
 UPDATE quest_template SET Flags=524288,SpecialFlags=4 WHERE Id=24814;
 
--- wrong npc is spawned
+-- wwrong npc is spawned
 UPDATE creature SET id=38003 WHERE id=38560; 
 
 -- was auto
@@ -1768,7 +1768,7 @@ INSERT INTO `gameobject` VALUES (261082, 1731, 1, 0,  0, 1, 1, 1267.47, -4690.71
 INSERT INTO `gameobject` VALUES (261083, 1731, 1, 0,  0, 1, 1, 1251.9, -4682.65, 16.1451, 5.7092, 0, 0, 0.283069, -0.9591, 300, 0, 1);
 INSERT INTO `gameobject` VALUES (261084, 1731, 1, 0,  0, 1, 1, 1234.36, -4622.16, 20.7293, 5.47751, 0, 0, 0.39203, -0.919953, 300, 0, 1);
 
--- wrong display id in quest
+-- wwrong display id in quest
 update quest_template set QuestGiverPortrait=6809 where Id=13946;
 
 -- additional killcredit
@@ -1826,8 +1826,8 @@ INSERT INTO `npc_vendor` VALUES ('44333', '0', '63388', '0', '0', '0', '1');
 INSERT INTO `npc_vendor` VALUES ('44333', '1', '4565', '0', '0', '0', '1');
 INSERT INTO `npc_vendor` VALUES ('44333', '3', '64670', '0', '0', '0', '1');
 
--- rong stats
-DELETE FROM `creature_template` WHERE `entry`=44839;
+-- wrong stats
+DELETE FROM `creature_template` WHERE `entry`=44289;
 INSERT INTO `creature_template` ( `entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES 
 ( 44289, 0, 0, 0, 0, 0, 32230, 0, 0, 0, "Abyssion", "", "", 0, 82, 82, 2, 2257, 2257, 0, 1.0, 1.14286, 1.0, 1, 488, 642, 0, 782, 7.5, 2000, 2000, 2, 0, 0, 0, 0, 0, 0, 0, 488, 642, 782, 2, 0, 44289, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", 0, 7, 105.0, 9.0, 1.0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, "", "13623");
 
@@ -2799,10 +2799,10 @@ UPDATE quest_template SET RequiredRaces=946 WHERE Id=28526;
 UPDATE creature SET position_x=-7425.685,position_y=-1505.944,position_z=-270.3277 WHERE guid=74373;
 UPDATE creature SET position_x=-7495.525,position_y=-1426.859,position_z=-267.1799 WHERE guid=74347;
 
--- wrong portrait
+-- wwrong portrait
 UPDATE quest_template SET QuestGiverPortrait=7841 WHERE Id=24742;
 
--- wrong position
+-- wwrong position
 UPDATE creature SET position_x=-7546.367,position_y=-1502.348,position_z=-267.013 WHERE guid=105802;
 UPDATE creature SET position_x=-7537.812,position_y=-1409.131,position_z=-271.9866 WHERE guid=74346;
 UPDATE creature SET position_x=-7557.994,position_y=-1471.29,position_z=-269.1265 WHERE guid=74250;
@@ -2810,7 +2810,7 @@ UPDATE creature SET position_x=-7557.994,position_y=-1471.29,position_z=-269.126
 -- set random movement
 update creature set spawndist=10,MovementType=1 where id in (6499,6510,6557,9162,9163,9600);
  
--- wrong questchance
+-- wwrong questchance
 update creature_loot_template set ChanceOrQuestChance=-100 where entry=6510 and item=11316;
 
 -- quest 13919 A Trip to the Moonwell
@@ -3360,7 +3360,7 @@ INSERT INTO `gameobject`  VALUES (284380, 189978, 571, 0, 0, 1, 1, 1682.92, -603
 INSERT INTO `gameobject`  VALUES (284381, 189978, 571, 0, 0, 1, 1, 1535.74, -5933.29, 272.452, 0.131865, 0, 0, 0.0658847, 0.997827, 300, 0, 1);
 INSERT INTO `gameobject`  VALUES (284382, 189978, 571, 0, 0, 1, 1, 299.608, -5933.65, 172.001, 0.999729, 0, 0, 0.479307, 0.877647, 300, 0, 1);
 
--- rong loot
+-- wrong loot
 DELETE FROM `skinning_loot_template` WHERE entry='43981';
 INSERT INTO `skinning_loot_template` VALUES ('43981', '52977', '50', '1', '0', '1', '1');
 INSERT INTO `skinning_loot_template` VALUES ('43981', '52976', '49', '1', '0', '1', '1');
