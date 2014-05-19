@@ -600,6 +600,99 @@ public:
     };
 };
 
+enum Xariona 
+{
+ SPELL_TWILIGHT_BREATH        = 93544, 
+ SPELL_UNLEASHED_MAGIC        = 93556,
+ SPELL_TWILIGHT_FISSURE       = 93546,
+ SPELL_TWILIGHT_ZONE          = 93553,
+ SPELL_TWILIGHT_BUFFET        = 93551,
+
+ EVENT_TWILIGHT_BUFFET        = 1,
+ EVENT_TWILIGHT_FISSURE       = 2,
+ EVENT_TWILIGHT_ZONE          = 3,
+ EVENT_UNLEASHED_MAGIC        = 4,
+ 
+};
+
+class npc_xariona : public CreatureScript
+{
+public:
+    npc_xariona() : CreatureScript("npc_xariona") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_xarionaAI (creature);
+    }
+
+    struct npc_xarionaAI : public ScriptedAI
+    {
+        npc_xarionaAI(Creature* creature) : ScriptedAI(creature){}
+		
+        EventMap events;
+
+        void Reset() 
+        {
+            events.Reset();
+
+        }		
+		
+        void EnterCombat(Unit* /*Ent*/)
+        {				
+			events.ScheduleEvent(EVENT_TWILIGHT_BUFFET, 20000);
+			events.ScheduleEvent(EVENT_TWILIGHT_FISSURE, 23000);
+            events.ScheduleEvent(EVENT_TWILIGHT_ZONE, 30000);
+			events.ScheduleEvent(EVENT_UNLEASHED_MAGIC, 66000);
+		}
+		
+        void UpdateAI(const uint32 diff)
+        {
+				
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+           while (uint32 eventId = events.ExecuteEvent())
+            {
+               switch (eventId)
+               {
+
+				case EVENT_TWILIGHT_BUFFET:
+					if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))					    
+					    DoCast(SPELL_TWILIGHT_BUFFET);
+						events.ScheduleEvent(EVENT_TWILIGHT_BUFFET, 20000);
+                        break;
+
+				case EVENT_TWILIGHT_FISSURE:
+					if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))					    
+                        DoCast(SPELL_TWILIGHT_FISSURE);
+						events.ScheduleEvent(EVENT_TWILIGHT_FISSURE, 23000);
+                        break;						
+
+                    case EVENT_TWILIGHT_ZONE:
+					if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                       DoCast(me, SPELL_TWILIGHT_ZONE);
+					   events.ScheduleEvent(EVENT_TWILIGHT_ZONE, 30000);
+                        break;	
+						
+				case EVENT_UNLEASHED_MAGIC:
+					if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))					    
+                        DoCast(SPELL_TWILIGHT_BREATH);
+						DoCast(SPELL_UNLEASHED_MAGIC);
+						events.ScheduleEvent(EVENT_UNLEASHED_MAGIC, 66000);
+                        break;
+						
+					default:
+                       break;
+				}
+			}
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
 void AddSC_deepholm()
 {
     new npc_elemental_energy_quest();
@@ -611,5 +704,6 @@ void AddSC_deepholm()
     new npc_flint_oremantle();
     new npc_boden_the_imposing();
     new npc_ricket_ticker();
-    new npc_stonefathers_banner();    
+    new npc_stonefathers_banner();
+    new npc_xariona();     
 }
