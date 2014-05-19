@@ -783,40 +783,6 @@ public:
     }
 };
 
-class gob_sabotage_gobelin : public GameObjectScript
-{
-public:
-    gob_sabotage_gobelin() : GameObjectScript("gob_sabotage_gobelin") { }
-
-    bool OnGossipHello(Player* player, GameObject* go)
-    {
-        if (player->GetQuestStatus(14125) == QUEST_STATUS_INCOMPLETE)
-        {
-            Creature* F = go->FindNearestCreature(850000, 10);
-            if (go->GetEntry() == 201735)
-            {
-                player->KilledMonsterCredit(201735);
-                if (F)
-                    go->CastSpell(F, 70226);
-            }
-            else if (go->GetEntry() == 201733)
-            {
-                player->KilledMonsterCredit(201733);
-                if (F)
-                    go->CastSpell(F, 70236);
-            }
-            else if (go->GetEntry() == 201734)
-            {
-                player->KilledMonsterCredit(201734);
-                if (F)
-                    go->CastSpell(F, 70250);
-            }
-            return true;
-        }
-        return true;
-    }
-};
-
 class npc_robot_gob : public CreatureScript
 {
 public:
@@ -2107,7 +2073,6 @@ void AddSC_kezan()
     new gob_canon_gobelin();
     new npc_robot_gob();
     new gob_control_gobelin();
-    new gob_sabotage_gobelin();
     new npc_galaw();
     new npc_sumkaja_gob();
     new npc_meteor_gob();

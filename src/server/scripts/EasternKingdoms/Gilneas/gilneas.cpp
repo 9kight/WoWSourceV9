@@ -338,115 +338,6 @@ public:
 };
 
 /*######
-## go_merchant_square_door
-######*/
-class go_merchant_square_door : public GameObjectScript
-{
-public:
-    go_merchant_square_door() : GameObjectScript("go_merchant_square_door") {}
-
-    struct go_merchant_square_doorAI : public GameObjectAI
-    {
-        go_merchant_square_doorAI(GameObject* gameobject) : GameObjectAI(gameobject)
-        {
-            x = 0; y = 0; z = 0; wx = 0; wy = 0; angle = 0;
-            opened = false;
-            spawnKind = 0;
-            DoorTimer = 1000;
-            playerGUID = 0;
-        }
-
-        void UpdateAI(uint32 diff)
-        {
-            if (opened)
-            {
-                if (tQuestCredit <= diff)
-                {
-                    opened = false;
-
-                    if (Player *player = Player::GetPlayer(*go, playerGUID))
-                        player->CastedCreatureOrGO(195327, 0, 0);
-
-                    if (spawnKind == 3)
-                    {
-                        if (Creature* spawnedCreature = go->SummonCreature(NPC_RAMPAGING_WORGEN_2, wx, wy, z, angle, TEMPSUMMON_TIMED_DESPAWN, SUMMON1_TTL))
-                        {
-                            spawnedCreature->SetPhaseMask(6, 1);
-                            spawnedCreature->SetReactState(REACT_AGGRESSIVE);
-                            if (Player *player = Player::GetPlayer(*go, playerGUID))
-                                spawnedCreature->AI()->AttackStart(player);
-                        }
-                    }
-                }
-                else tQuestCredit -= diff;
-            }
-            if (DoorTimer <= diff)
-            {
-                if (go->GetGoState() == GO_STATE_ACTIVE)
-                    go->SetGoState(GO_STATE_READY);
-                if (Creature *worgen = go->FindNearestCreature(NPC_RAMPAGING_WORGEN_2, 10))
-                    worgen->DespawnOrUnsummon();
-                DoorTimer = DOOR_TIMER;
-            }
-            else
-                DoorTimer -= diff;
-        }
-
-        bool GossipHello(Player* player)
-        {
-            if (player->GetQuestStatus(QUEST_EVAC_MERC_SQUA) == QUEST_STATUS_INCOMPLETE && go->GetGoState() == GO_STATE_READY)
-            {
-                playerGUID          = player->GetGUID();
-                opened           = true;
-                tQuestCredit     = 2500;
-                go->SetGoState(GO_STATE_ACTIVE);
-                DoorTimer = DOOR_TIMER;
-                spawnKind = urand(1, 3);
-                angle = go->GetOrientation();
-                x = go->GetPositionX() - cos(angle) * 2;
-                y = go->GetPositionY() - sin(angle) * 2;
-                z = go->GetPositionZ();
-                wx = x - cos(angle) * 2;
-                wy = y - sin(angle) * 2;
-
-                if (spawnKind < 3)
-                {
-                    if (Creature* spawnedCreature = go->SummonCreature(NPC_FRIGHTENED_CITIZEN_1, x, y, z, angle, TEMPSUMMON_MANUAL_DESPAWN))
-                    {
-                        spawnedCreature->SetPhaseMask(6, 1);
-                        spawnedCreature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
-                        spawnedCreature->GetMotionMaster()->MovePoint(42, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
-                    }
-                }
-                else
-                {
-                    if (Creature* spawnedCreature = go->SummonCreature(NPC_FRIGHTENED_CITIZEN_2, x, y, z, angle, TEMPSUMMON_MANUAL_DESPAWN))
-                    {
-                        spawnedCreature->SetPhaseMask(6, 1);
-                        spawnedCreature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
-                        spawnedCreature->GetMotionMaster()->MovePoint(42, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
-                    }
-                }
-                return true;
-            }
-            return false;
-        }
-
-    private:
-        float x, y, z, wx, wy, angle, tQuestCredit;
-        bool opened;
-        uint8 spawnKind;
-        uint64 playerGUID;
-        uint32 DoorTimer;
-    };
-
-    GameObjectAI* GetAI(GameObject* gameobject) const
-    {
-        return new go_merchant_square_doorAI(gameobject);
-    }
-};
-
-/*######
 ## npc_mariam_spellwalker
 ######*/
 class npc_mariam_spellwalker : public CreatureScript
@@ -4073,7 +3964,6 @@ void AddSC_gilneas()
     new npc_prince_liam_greymane_phase2();
     new npc_rampaging_worgen();
     new npc_rampaging_worgen2();
-    new go_merchant_square_door();
     new npc_sergeant_cleese();
 	new npc_josiah_avery();
     new npc_josiah_avery_trigger();
