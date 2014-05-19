@@ -718,20 +718,20 @@ public:
         void Reset() 
         {
             events.Reset();
-			tSay = DELAY_SAY_HAETHEN_KAUL; // Reset timer
-			cSay = 1;                      // Start from 1
+            tSay = DELAY_SAY_HAETHEN_KAUL; // Reset timer
+            cSay = 1;                      // Start from 1
 			
         }
 		
         void EnterCombat(Unit* /*Ent*/)
         {
-			Talk(SAY_AGGRO);
+            Talk(SAY_AGGRO);
 			DoCast(SPELL_EARTHBOLT);
 			
 			events.ScheduleEvent(EVENT_EARTHBOLT, urand(5000,10000));
             events.ScheduleEvent(EVENT_AIRBOLT, urand(10000,11000));
-			events.ScheduleEvent(EVENT_SLOW, urand(10000,11000));
-			events.ScheduleEvent(EVENT_FIREBOLT, urand(10000,11000));
+            events.ScheduleEvent(EVENT_SLOW, urand(10000,11000));
+            events.ScheduleEvent(EVENT_FIREBOLT, urand(10000,11000));
             events.ScheduleEvent(EVENT_WATERBOLT, 1000);
 		}
 
@@ -756,22 +756,22 @@ public:
            {			
               switch (cSay)
                     {
-         			  default:
+                       default:
                         case 1:
-                             Talk(SAY_INTRO);
-							 cSay++;
-                            break;
+                        Talk(SAY_INTRO);
+                        cSay++;
+                        break;
                         case 2:
-                             Talk(SAY_INTRO);
-                            cSay = 1; // Reset to 1
-							break;
+                        Talk(SAY_INTRO);
+                        cSay = 1; // Reset to 
+                        break;
 					}		
 							
                     tSay = DELAY_SAY_HAETHEN_KAUL; // Reset the timer
 			}
                  else
                 {
-                    tSay -= diff;
+                  tSay -= diff;
                 } 			
                 return;
         }
@@ -789,35 +789,35 @@ public:
                 switch (eventId)
                 {
                     case EVENT_EARTHBOLT:
-					if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                         DoCast(SPELL_EARTHBOLT);
-						events.ScheduleEvent(EVENT_EARTHBOLT, 1500);
+                        events.ScheduleEvent(EVENT_EARTHBOLT, 1500);
                         break;				
 
                     case EVENT_AIRBOLT:
-					if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                         DoCast(SPELL_AIRBOT);
 						Talk(SAY_AIR);
-						events.ScheduleEvent(EVENT_AIRBOLT, 11000);
+                        events.ScheduleEvent(EVENT_AIRBOLT, 11000);
                         break;
 																		
                     case EVENT_SLOW:
                         DoCast(EVENT_SLOW);
-						events.ScheduleEvent(EVENT_SLOW, urand(111000, 113000));
+                        events.ScheduleEvent(EVENT_SLOW, urand(111000, 113000));
                         break;
 
                     case EVENT_FIREBOLT:
-					if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                         DoCast(SPELL_FIREBOLT);
 						Talk(SAY_FIRE);
-						events.ScheduleEvent(EVENT_FIREBOLT, 11000);
+                        events.ScheduleEvent(EVENT_FIREBOLT, 11000);
                         break;	
 
                     case EVENT_WATERBOLT:
-					if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                         DoCast(SPELL_WATERBOLT);
 					    Talk(SAY_WATER);						
-						events.ScheduleEvent(EVENT_WATERBOLT, 11000);
+                        events.ScheduleEvent(EVENT_WATERBOLT, 11000);
                         break;							
 						
 					default:
