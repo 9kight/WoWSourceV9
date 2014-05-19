@@ -693,6 +693,143 @@ public:
     };
 };
 
+class npc_haethen_kaul : public CreatureScript
+{
+enum
+    {
+        DELAY_SAY_HAETHEN_KAUL  = 20000
+    };
+public:
+    npc_haethen_kaul() : CreatureScript("npc_haethen_kaul") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_haethen_kaulAI (creature);
+    }
+
+    struct npc_haethen_kaulAI : public ScriptedAI
+    {
+        npc_haethen_kaulAI(Creature* creature) : ScriptedAI(creature){}
+		
+        EventMap events;
+        uint32 tSay; // Time left for say
+        uint32 cSay; // Current Say
+		
+        void Reset() 
+        {
+            events.Reset();
+			tSay = DELAY_SAY_HAETHEN_KAUL; // Reset timer
+			cSay = 1;                      // Start from 1
+			
+        }
+		
+        void EnterCombat(Unit* /*Ent*/)
+        {
+			Talk(SAY_AGGRO);
+			DoCast(SPELL_EARTHBOLT);
+			
+			events.ScheduleEvent(EVENT_EARTHBOLT, urand(5000,10000));
+            events.ScheduleEvent(EVENT_AIRBOLT, urand(10000,11000));
+			events.ScheduleEvent(EVENT_SLOW, urand(10000,11000));
+			events.ScheduleEvent(EVENT_FIREBOLT, urand(10000,11000));
+            events.ScheduleEvent(EVENT_WATERBOLT, 1000);
+		}
+
+        void JustDied(Unit* /*Kill*/)
+        {
+				
+        }		
+		
+        void KilledUnit(Unit* /*victim*/)
+        {
+            
+        }		
+		
+        void UpdateAI(const uint32 diff)
+        {
+		
+        //Out of combat
+       if (!me->GetVictim())           
+	  {
+          //Timed say
+          if (tSay <= diff)
+           {			
+              switch (cSay)
+                    {
+         			  default:
+                        case 1:
+                             Talk(SAY_INTRO);
+							 cSay++;
+                            break;
+                        case 2:
+                             Talk(SAY_INTRO);
+                            cSay = 1; // Reset to 1
+							break;
+					}		
+							
+                    tSay = DELAY_SAY_HAETHEN_KAUL; // Reset the timer
+			}
+                 else
+                {
+                    tSay -= diff;
+                } 			
+                return;
+        }
+		
+            if (!UpdateVictim())
+                return;
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            events.Update(diff);
+            
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_EARTHBOLT:
+					if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                        DoCast(SPELL_EARTHBOLT);
+						events.ScheduleEvent(EVENT_EARTHBOLT, 1500);
+                        break;				
+
+                    case EVENT_AIRBOLT:
+					if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                        DoCast(SPELL_AIRBOT);
+						Talk(SAY_AIR);
+						events.ScheduleEvent(EVENT_AIRBOLT, 11000);
+                        break;
+																		
+                    case EVENT_SLOW:
+                        DoCast(EVENT_SLOW);
+						events.ScheduleEvent(EVENT_SLOW, urand(111000, 113000));
+                        break;
+
+                    case EVENT_FIREBOLT:
+					if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                        DoCast(SPELL_FIREBOLT);
+						Talk(SAY_FIRE);
+						events.ScheduleEvent(EVENT_FIREBOLT, 11000);
+                        break;	
+
+                    case EVENT_WATERBOLT:
+					if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                        DoCast(SPELL_WATERBOLT);
+					    Talk(SAY_WATER);						
+						events.ScheduleEvent(EVENT_WATERBOLT, 11000);
+                        break;							
+						
+					default:
+                       break;
+				}
+			}			
+			
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
 void AddSC_deepholm()
 {
     new npc_elemental_energy_quest();
@@ -705,5 +842,6 @@ void AddSC_deepholm()
     new npc_boden_the_imposing();
     new npc_ricket_ticker();
     new npc_stonefathers_banner();
-    new npc_xariona();     
+    new npc_xariona();
+    new npc_haethen_kaul();	
 }
