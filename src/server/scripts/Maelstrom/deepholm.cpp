@@ -639,10 +639,10 @@ public:
 		
         void EnterCombat(Unit* /*Ent*/)
         {				
-			events.ScheduleEvent(EVENT_TWILIGHT_BUFFET, 20000);
-			events.ScheduleEvent(EVENT_TWILIGHT_FISSURE, 23000);
+            events.ScheduleEvent(EVENT_TWILIGHT_BUFFET, 20000);
+            events.ScheduleEvent(EVENT_TWILIGHT_FISSURE, 23000);
             events.ScheduleEvent(EVENT_TWILIGHT_ZONE, 30000);
-			events.ScheduleEvent(EVENT_UNLEASHED_MAGIC, 66000);
+            events.ScheduleEvent(EVENT_UNLEASHED_MAGIC, 66000);
 		}
 		
         void UpdateAI(const uint32 diff)
@@ -665,22 +665,22 @@ public:
                         break;
 
 				case EVENT_TWILIGHT_FISSURE:
-					if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))					    
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))					    
                         DoCast(SPELL_TWILIGHT_FISSURE);
-						events.ScheduleEvent(EVENT_TWILIGHT_FISSURE, 23000);
+                        events.ScheduleEvent(EVENT_TWILIGHT_FISSURE, 23000);
                         break;						
 
                     case EVENT_TWILIGHT_ZONE:
-					if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                       if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                        DoCast(me, SPELL_TWILIGHT_ZONE);
-					   events.ScheduleEvent(EVENT_TWILIGHT_ZONE, 30000);
+                       events.ScheduleEvent(EVENT_TWILIGHT_ZONE, 30000);
                         break;	
 						
 				case EVENT_UNLEASHED_MAGIC:
-					if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))					    
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))					    
                         DoCast(SPELL_TWILIGHT_BREATH);
-						DoCast(SPELL_UNLEASHED_MAGIC);
-						events.ScheduleEvent(EVENT_UNLEASHED_MAGIC, 66000);
+                        DoCast(SPELL_UNLEASHED_MAGIC);
+                        events.ScheduleEvent(EVENT_UNLEASHED_MAGIC, 66000);
                         break;
 						
 					default:
@@ -728,7 +728,7 @@ public:
             Talk(SAY_AGGRO);
 			DoCast(SPELL_EARTHBOLT);
 			
-			events.ScheduleEvent(EVENT_EARTHBOLT, urand(5000,10000));
+            events.ScheduleEvent(EVENT_EARTHBOLT, urand(5000,10000));
             events.ScheduleEvent(EVENT_AIRBOLT, urand(10000,11000));
             events.ScheduleEvent(EVENT_SLOW, urand(10000,11000));
             events.ScheduleEvent(EVENT_FIREBOLT, urand(10000,11000));
