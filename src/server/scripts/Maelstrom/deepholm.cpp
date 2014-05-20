@@ -701,11 +701,11 @@ public:
   SPELL_FIREBOLT           = 83821,
   SPELL_WATERBOLT          = 83820,
  
-  EVENT_EVENT_EARTHBOLT       = 1,
-  EVENT_EVENT_AIRBOLT         = 2,
-  EVENT_EVENT_SLOW            = 3,
-  EVENT_EVENT_FIREBOLT        = 4,
-  EVENT_EVENT_WATERBOLT       = 5,
+  EVENT_EARTHBOLT       = 1,
+  EVENT_AIRBOLT         = 2,
+  EVENT_SLOW            = 3,
+  EVENT_FIREBOLT        = 4,
+  EVENT_WATERBOLT       = 5,
   
   SAY_AGGRO                   = 1,
   SAY_INTRO                   = 0,
