@@ -693,7 +693,7 @@ public:
     };
 };
 
- enum Haethen
+enum Haethen
  {
   SPELL_EARTHBOLT          = 83799, 
   SPELL_AIRBOLT            = 83822,
@@ -818,13 +818,13 @@ public:
 
                     case EVENT_AIRBOLT:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                        DoCast(SPELL_AIRBOT);
+                        DoCast(SPELL_AIRBOLT);
 						Talk(SAY_AIR);
                         events.ScheduleEvent(EVENT_AIRBOLT, 11000);
                         break;
 																		
                     case EVENT_SLOW:
-                        DoCast(EVENT_SLOW);
+                        DoCast(SPELL_SLOW);
                         events.ScheduleEvent(EVENT_SLOW, urand(111000, 113000));
                         break;
 
@@ -850,7 +850,7 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-};
+}; 
 
 void AddSC_deepholm()
 {
