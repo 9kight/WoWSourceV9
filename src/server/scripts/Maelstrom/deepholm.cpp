@@ -693,6 +693,28 @@ public:
     };
 };
 
+ enum Haethen
+ {
+  SPELL_EARTHBOLT          = 83799, 
+  SPELL_AIRBOLT            = 83822,
+  SPELL_SLOW               = 79880,
+  SPELL_FIREBOLT           = 83821,
+  SPELL_WATERBOLT          = 83820,
+ 
+  EVENT_EVENT_EARTHBOLT       = 1,
+  EVENT_EVENT_AIRBOLT         = 2,
+  EVENT_EVENT_SLOW            = 3,
+  EVENT_EVENT_FIREBOLT        = 4,
+  EVENT_EVENT_WATERBOLT       = 5,
+  
+  SAY_AGGRO                   = 1,
+  SAY_INTRO                   = 0,
+  SAY_AIR                     = 3,
+  SAY_FIRE                    = 2,
+  SAY_WATER                   = 4,
+  
+ };
+
 class npc_haethen_kaul : public CreatureScript
 {
 enum
