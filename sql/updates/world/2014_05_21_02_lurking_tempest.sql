@@ -1,0 +1,1 @@
+UPDATE creature_template SET scriptname = "npc_lurking_tempest" WHERE entry = 45704;

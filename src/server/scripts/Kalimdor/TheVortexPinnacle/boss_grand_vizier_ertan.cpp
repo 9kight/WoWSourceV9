@@ -108,7 +108,7 @@ class boss_grand_vizier_ertan : public CreatureScript
             void EnterCombat(Unit* /*who*/)
             {
                 _EnterCombat();
-                me->CastSpell(me, SPELL_STORMS_EDGE, true);
+				DoCast(SPELL_STORMS_EDGE);
                 Talk(SAY_AGGRO);
                 instance->SetData(DATA_GRAND_VIZIER_ERTAN, IN_PROGRESS);
                 GetCreatureListWithEntryInGrid(vortexList, me, NPC_CYCLONE, 200.0f);
@@ -205,7 +205,7 @@ class boss_grand_vizier_ertan : public CreatureScript
                             events.ScheduleEvent(EVENT_LIGHTNING_BOLT, 2000);
                             break;
                         case EVENT_SUMMON_TEMPEST:
-                            me->CastSpell(me, SPELL_SUMMON_TEMPEST, true);
+                            DoCast(SPELL_SUMMON_TEMPEST);
                             events.ScheduleEvent(EVENT_SUMMON_TEMPEST, urand(30000, 40000));
                             break;
                         case EVENT_CYCLONE_SHIELD:
@@ -342,8 +342,6 @@ class spell_ertan_storms_edge_knockback : public SpellScriptLoader
             return new spell_ertan_storms_edge_knockback_AuraScript();
         }
 };
-
-/* UPDATE creature_template SET scriptname = "npc_lurking_tempest" WHERE entry = 45704; */
 
 class npc_lurking_tempest : public CreatureScript
 {
