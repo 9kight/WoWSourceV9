@@ -74,5 +74,5 @@ INSERT INTO `smart_scripts` VALUES ('38738', '0', '0', '1', '19', '0', '100', '0
 UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='38738');
 
 -- For shamans players gobblins need phase reset npc 
-DELETE FROM creature WHERE id=289464;
+DELETE FROM creature WHERE guid=289464;
 INSERT INTO `creature` VALUES ('289464', '383870', '1', '14', '374', '1', '39938', '0', '1', '1439.68', '-5010.09', '11.6439', '4.57699', '300', '0', '0', '149', '359', '0', '0', '0', '0');
