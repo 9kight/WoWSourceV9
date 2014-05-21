@@ -42,6 +42,9 @@ enum GrandVizierErtan
     SPELL_SUMMON_TEMPEST            = 86340,
     SPELL_VORTEX_VISUAL             = 86267,
 
+    SPELL_LURK                      = 85467,
+    SPELL_TEMPEST_LIGHTING_BOLT     = 92776,
+
     // NPCs
     NPC_CYCLONE                     = 46007,
 
@@ -340,10 +343,73 @@ class spell_ertan_storms_edge_knockback : public SpellScriptLoader
         }
 };
 
+/* UPDATE creature_template SET scriptname = "npc_lurking_tempest" WHERE entry = 45704; */
+
+class npc_lurking_tempest : public CreatureScript
+{
+public:
+    npc_lurking_tempest() : CreatureScript("npc_lurking_tempest") { }
+
+    struct npc_lurking_tempestAI : public ScriptedAI
+    {
+        npc_lurking_tempestAI(Creature* creature) : ScriptedAI(creature)
+        {
+            me->SetReactState(REACT_PASSIVE);
+            instance = me->GetInstanceScript();
+            DoCastAOE(SPELL_LURK);
+
+            if (Unit* Boss = me->FindNearestCreature(BOSS_GRAND_VIZIER_ERTAN, 100.0f))
+            {
+                BossGUID = Boss->GetGUID();            
+                me->SetTarget(BossGUID);
+            }
+
+            Boo = urand(1000, 4000);
+        }
+
+        InstanceScript* instance;
+        uint32 Boo;
+        uint64 BossGUID;
+
+        void IsSummonedBy(Unit* summoner)
+        {
+            me->RemoveAllAuras();
+        }
+
+        void UpdateAI(uint32 const diff)
+        {
+            if (Boo <= diff)
+            {
+                if (Unit* target = SelectTarget(SELECT_TARGET_NEAREST, 0, 40.0f, true))
+                {
+                    if (target->isInFrontInMap(me, 40.0f))
+                        DoCastAOE(SPELL_LURK);
+                    else
+                    {
+                        me->RemoveAurasDueToSpell(SPELL_LURK);
+                        DoCast(target, SPELL_TEMPEST_LIGHTING_BOLT); 
+                    }
+                }
+                Boo = urand(1000, 4000);
+            }
+            else
+                Boo -= diff;
+        }
+
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_lurking_tempestAI(creature);
+    }
+};
+
 void AddSC_boss_grand_vizier_ertan()
 {
     new boss_grand_vizier_ertan();
     new spell_ertan_storms_edge();
     new spell_ertan_storms_edge_triggered();
     new spell_ertan_storms_edge_knockback();
+
+    new npc_lurking_tempest();
 };
