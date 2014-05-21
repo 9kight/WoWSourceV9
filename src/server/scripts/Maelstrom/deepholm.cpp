@@ -696,10 +696,10 @@ public:
 enum Haethen
  {
   SPELL_EARTHBOLT          = 83799, 
-  SPELL_AIRBOLT            = 83822,
-  SPELL_SLOW               = 79880,
-  SPELL_FIREBOLT           = 83821,
-  SPELL_WATERBOLT          = 83820,
+  SPELL_AIRBOLT            = 83791,
+  SPELL_SLOW               = 18266,
+  SPELL_FIREBOLT           = 83794,
+  SPELL_WATERBOLT          = 83795,
  
   EVENT_EARTHBOLT       = 1,
   EVENT_AIRBOLT         = 2,
@@ -742,7 +742,6 @@ public:
             events.Reset();
             tSay = DELAY_SAY_HAETHEN_KAUL; // Reset timer
             cSay = 1;                      // Start from 1
-			
         }
 		
         void EnterCombat(Unit* /*Ent*/)
