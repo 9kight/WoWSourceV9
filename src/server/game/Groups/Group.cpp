@@ -555,7 +555,7 @@ bool Group::RemoveMember(uint64 guid, const RemoveMethod &method /*= GROUP_REMOV
         return m_memberSlots.size();
 
     // remove member and change leader (if need) only if strong more 2 members _before_ member remove (BG/BF allow 1 member group)
-    if (GetMembersCount() > ((isBGGroup() || isLFGGroup() || isBFGroup()) ? 1u : 2u))
+    if (GetMembersCount() > ((isBGGroup() /*|| isLFGGroup()*/ || isBFGroup()) ? 1u : 2u))
     {
         Player* player = ObjectAccessor::FindPlayer(guid);
         if (player)
