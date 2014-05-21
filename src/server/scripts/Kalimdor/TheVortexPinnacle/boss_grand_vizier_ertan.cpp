@@ -108,7 +108,7 @@ class boss_grand_vizier_ertan : public CreatureScript
             void EnterCombat(Unit* /*who*/)
             {
                 _EnterCombat();
-				DoCast(SPELL_STORMS_EDGE);
+                DoCast(SPELL_STORMS_EDGE);
                 Talk(SAY_AGGRO);
                 instance->SetData(DATA_GRAND_VIZIER_ERTAN, IN_PROGRESS);
                 GetCreatureListWithEntryInGrid(vortexList, me, NPC_CYCLONE, 200.0f);
