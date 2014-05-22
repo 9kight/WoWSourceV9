@@ -1,0 +1,3 @@
+-- Hunter trainer with no spells to teach player fix http://www.wowhead.com/npc=26325
+DELETE FROM npc_trainer WHERE entry=26325;
+INSERT INTO `npc_trainer` VALUES (26325, -200003, 0, 0, 0, 0);
