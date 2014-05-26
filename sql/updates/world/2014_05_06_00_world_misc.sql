@@ -491,7 +491,7 @@ DELETE FROM creature_equip_template WHERE entry=850;
 -- UPDATE creature_template SET equipment_id=0 WHERE entry=346;
 UPDATE creature SET equipment_id=0 WHERE id=346;
 DELETE FROM creature_equip_template WHERE entry=346;
-UPDATE creature_template SET equipment_id=0 WHERE entry=3085;
+-- UPDATE creature_template SET equipment_id=0 WHERE entry=3085;
 UPDATE creature SET equipment_id=0 WHERE id=3085;
 DELETE FROM creature_equip_template WHERE entry=3085;
 -- UPDATE creature_template SET equipment_id=0 WHERE entry=3086;

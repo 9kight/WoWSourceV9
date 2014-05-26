@@ -279,7 +279,7 @@ DELETE FROM creature_text WHERE entry=39194;
 INSERT INTO `creature_text` VALUES ('39194', '0', '0', 'You\'re not supposed to be here! You\'re dead!', '14', '0', '100', '0', '0', '0', 'say');
 
 -- equipment for http://www.wowhead.com/npc=36422
-UPDATE `creature_template` SET `equipment_id`='36422' WHERE entry=36422;
+-- UPDATE `creature_template` SET `equipment_id`='36422' WHERE entry=36422;
 DELETE FROM creature_template_addon WHERE entry=36422;
 INSERT INTO `creature_template_addon` VALUES ('36422', '0', '0', '0', '2', '214', null);
 
