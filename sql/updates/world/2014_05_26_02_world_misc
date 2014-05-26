@@ -33,12 +33,13 @@ DELETE FROM creature_questrelation WHERE id=50039;
 UPDATE creature_template SET equipment_id=0 WHERE entry=295;
 DELETE FROM creature_equip_template WHERE entry=295;
 
--- missing emote from thoose guides fishers inside stormwind
-INSERT INTO `creature_addon` VALUES ('29714', '0', '0', '0', '1', '379', 'null');
-INSERT INTO `creature_addon` VALUES ('55266', '0', '0', '0', '1', '379', 'null');
-INSERT INTO `creature_addon` VALUES ('55248', '0', '0', '0', '1', '379', 'null');
-INSERT INTO `creature_addon` VALUES ('29715', '0', '0', '0', '1', '379', 'null');
-INSERT INTO `creature_addon` VALUES ('30309', '0', '0', '0', '1', '379', 'null');
-INSERT INTO `creature_addon` VALUES ('29788', '0', '0', '0', '1', '379', 'null');
-INSERT INTO `creature_addon` VALUES ('30172', '0', '0', '0', '1', '379', 'null');
-INSERT INTO `creature_addon` VALUES ('30035', '0', '0', '0', '1', '379', 'null');
+-- missing emote from thoose guide
+DELETE FROM creature_addon WHERE guid IN (29714,55266,55248,29715,30309,29788,30172,30035);
+INSERT INTO `creature_addon` VALUES ('30309', '0', '0', '0', '1', '379', null);
+INSERT INTO `creature_addon` VALUES ('29788', '0', '0', '0', '1', '379', null);
+INSERT INTO `creature_addon` VALUES ('29714', '0', '0', '0', '1', '379', null);
+INSERT INTO `creature_addon` VALUES ('55266', '0', '0', '0', '1', '379', null);
+INSERT INTO `creature_addon` VALUES ('55248', '0', '0', '0', '1', '379', null);
+INSERT INTO `creature_addon` VALUES ('29715', '0', '0', '0', '1', '379', null);
+INSERT INTO `creature_addon` VALUES ('30172', '0', '0', '0', '1', '379', null);
+INSERT INTO `creature_addon` VALUES ('30035', '0', '0', '0', '1', '379', null);
