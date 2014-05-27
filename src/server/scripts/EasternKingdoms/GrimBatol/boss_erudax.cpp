@@ -8,7 +8,9 @@ enum Yells
     SAY_SUMMON                                = 2,
     SAY_SHADOW_GALE                           = 3,
     SAY_GALE                                  = 4,
-    EMOTE_KILLED                              = 5
+    EMOTE_KILLED                              = 5,
+    SAY_SHADOW_GALE_ANNOUNCE                  = 6,
+    SAY_TWILIGHT_CORRUPTION_ANNOUNCE          = 7
 };
 
 enum Spells
@@ -121,6 +123,7 @@ public:
                     Talk(1);
                 if (Creature *FacelessPortalStalker = Unit::GetCreature(*me, FacelessPortalStalkerGUID))
                     FacelessPortalStalker->GetAI()->DoCast(FacelessPortalStalker, SPELL_TWILIGHT_PORTAL_VISUAL, true);
+					Talk(SAY_TWILIGHT_CORRUPTION_ANNOUNCE);
                 events.ScheduleEvent(EVENT_REMOVE_TWILIGHT_PORTAL, 7000);
                 if (Creature *FacelessPortalStalker = Unit::GetCreature(*me, FacelessPortalStalkerGUID))
                     FacelessPortalStalker->GetAI()->DoCast(FacelessPortalStalker,SPELL_SPAWN_FACELESS,true);
@@ -203,6 +206,7 @@ public:
             switch (summon->GetEntry())
             {
                 case NPC_SHADOW_GALE_STALKER:
+                    Talk(SAY_SHADOW_GALE_ANNOUNCE);
                     summon->CastSpell(summon, SPELL_SHADOW_GALE_SPEED_TRIGGER, false);
                     me->CastSpell(summon, SPELL_SHADOW_GALE, false);
                     ShouldSummonAdds = true;
