@@ -43,3 +43,6 @@ INSERT INTO `creature_addon` VALUES ('55248', '0', '0', '0', '1', '379', null);
 INSERT INTO `creature_addon` VALUES ('29715', '0', '0', '0', '1', '379', null);
 INSERT INTO `creature_addon` VALUES ('30172', '0', '0', '0', '1', '379', null);
 INSERT INTO `creature_addon` VALUES ('30035', '0', '0', '0', '1', '379', null);
+
+-- wrong model id
+UPDATE `creature_template` SET `modelid1`='37566', `modelid2`='0', `modelid3`='0', `modelid4`='0' WHERE (`entry`='16520');
