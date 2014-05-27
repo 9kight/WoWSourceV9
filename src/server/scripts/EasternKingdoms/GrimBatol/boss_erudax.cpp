@@ -3,12 +3,12 @@
 
 enum Yells
 {
-    SAY_AGGRO       = 0,
-    SAY_DEATH       = 1,
-    SAY_SUMMON      = 2,
-    SAY_SHADOW_GALE = 3,
-    SAY_GALE        = 4,
-    EMOTE_KILLED    = 5
+    SAY_AGGRO                                 = 0,
+    SAY_DEATH                                 = 1,
+    SAY_SUMMON                                = 2,
+    SAY_SHADOW_GALE                           = 3,
+    SAY_GALE                                  = 4,
+    EMOTE_KILLED                              = 5
 };
 
 enum Spells
@@ -25,36 +25,36 @@ enum Spells
     SPELL_SIPHON                              = 75755,
     SPELL_SUMMON_TWILIGHT_HATCHLINGS          = 91058,
     SPELL_SHADOW_GALE_SPEED                   = 75694,
-    SPELL_SUMMON_SHADOWGALE_TRIGGER           = 75655,
+    SPELL_SUMMON_SHADOWGALE_TRIGGER           = 75655
 };
 
 enum Events
 {
-    EVENT_NONE,
-    EVENT_ENFEEBLING_BLOW,
-    EVENT_SHADOW_GALE,
-    EVENT_SUMMON_FACELESS,
-    EVENT_REMOVE_TWILIGHT_PORTAL,
-    EVENT_CAST_SHIELD_OF_NIGHTMARE_DELAY,
-    EVENT_BINDING_SHADOWS,
-    EVENT_TRIGGER_GALE_CHECK_PLAYERS,
-    EVENT_SIPHON,
-    EVENT_TARGET_EGG,
-    EVENT_UMBRAL,
+    EVENT_NONE                               = 1,
+    EVENT_ENFEEBLING_BLOW                    = 2,
+    EVENT_SHADOW_GALE                        = 3,
+    EVENT_SUMMON_FACELESS                    = 4,
+    EVENT_REMOVE_TWILIGHT_PORTAL             = 5,
+    EVENT_CAST_SHIELD_OF_NIGHTMARE_DELAY     = 6,
+    EVENT_BINDING_SHADOWS                    = 7,
+    EVENT_TRIGGER_GALE_CHECK_PLAYERS         = 8,
+    EVENT_SIPHON                             = 9,
+    EVENT_TARGET_EGG                         = 10,
+    EVENT_UMBRAL                             = 11
 };
 
 enum Points
 {
-    POINT_FACELESS_IS_AT_AN_EGG = 1,
-    POINT_ERUDAX_IS_AT_STALKER  = 2,
+    POINT_FACELESS_IS_AT_AN_EGG              = 1,
+    POINT_ERUDAX_IS_AT_STALKER               = 2
 };
 
 enum achievements {
     //    instance->DoCompleteAchievement(
-    ACHIEVEMENT_GRIMBATOL = 4840,
-    ACHIEVEMENT_GRIMBATOL_HEROIC = 5062,
-    ACHIEVEMENT_WITHOUT_CORRUPTION = 5298,
-    ACHIEVEMENT_GRIMBATOL_GUILD_GROUP = 5138,
+    ACHIEVEMENT_GRIMBATOL                    = 4840,
+    ACHIEVEMENT_GRIMBATOL_HEROIC             = 5062,
+    ACHIEVEMENT_WITHOUT_CORRUPTION           = 5298,
+    ACHIEVEMENT_GRIMBATOL_GUILD_GROUP        = 5138
 };
 
 
