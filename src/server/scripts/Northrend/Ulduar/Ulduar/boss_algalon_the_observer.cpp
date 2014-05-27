@@ -182,7 +182,6 @@ enum EncounterPhases
 enum AchievmentInfo
 {
     EVENT_ID_SUPERMASSIVE_START = 21697,
-    DATA_HAS_FED_ON_TEARS       = 30043005,
 };
 
 
@@ -373,11 +372,6 @@ class boss_algalon_the_observer : public CreatureScript
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                         break;
                 }
-            }
-
-            uint32 GetData(uint32 type) const
-            {
-                return type == DATA_HAS_FED_ON_TEARS ? _fedOnTears : 1;
             }
 
             void EnterCombat(Unit* /*target*/)
@@ -1341,17 +1335,6 @@ class spell_algalon_supermassive_fail : public SpellScriptLoader
         }
 };
 
-class achievement_he_feeds_on_your_tears : public AchievementCriteriaScript
-{
-    public:
-        achievement_he_feeds_on_your_tears() : AchievementCriteriaScript("achievement_he_feeds_on_your_tears") { }
-
-        bool OnCheck(Player* /*source*/, Unit* target)
-        {
-            return !target->GetAI()->GetData(DATA_HAS_FED_ON_TEARS);
-        }
-};
-
 void AddSC_boss_algalon_the_observer()
 {
     new boss_algalon_the_observer();
@@ -1368,5 +1351,4 @@ void AddSC_boss_algalon_the_observer()
     new spell_algalon_cosmic_smash();
     new spell_algalon_cosmic_smash_damage();
     new spell_algalon_supermassive_fail();
-    new achievement_he_feeds_on_your_tears();
 }
