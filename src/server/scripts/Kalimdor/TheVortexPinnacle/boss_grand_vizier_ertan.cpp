@@ -6,6 +6,7 @@
 * Comments:
 */
 
+#include "ScriptMgr.h"
 #include "the_vortex_pinnacle.h"
 
 enum Texts
@@ -121,14 +122,15 @@ public:
             BossAI::KilledUnit(killed);
         }
 
-        void JustDied(Unit* killer)
+        void JustDied(Unit* /*who*/)
         {
             Talk(SAY_DEATH);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->DespawnCreaturesInArea(NPC_LURKING_TEMPEST, 120.0f);
             me->DespawnCreaturesInArea(NPC_CYCLONE_SHIELD, 120.0f);
 
-            BossAI::JustDied(killer);
+            Creature * Slipstream = me->SummonCreature(45455, -765.79f, -44.01f, 641.91f, 4.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+            Slipstream->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
         }
 
         void UpdateAI(uint32 const diff)
