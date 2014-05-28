@@ -3984,6 +3984,59 @@ class spell_gen_luck_of_the_draw : public SpellScriptLoader
         }
 };
 
+// Forged Fury (trinket)
+class spell_gen_forged_fury: public SpellScriptLoader 
+{
+public:
+        spell_gen_forged_fury() : SpellScriptLoader("spell_gen_forged_fury") { }
+
+        class spell_gen_forged_fury_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_gen_forged_fury_SpellScript)
+
+            SpellCastResult CheckRequirement()
+            {
+                if (Unit* caster = GetCaster()) 
+                {
+                    if (Aura* rawFury = caster->GetAura(91832))
+                    {
+                        //Check if there are any dots on the target
+                        if (rawFury->GetStackAmount() >= 5)
+                            return SPELL_CAST_OK;
+                    }
+
+                }
+                return SPELL_FAILED_NO_POWER;
+            }
+            
+            void BeforeEffect(SpellEffIndex /*effIndex*/) 
+            {
+                Unit* caster = GetCaster();
+                Unit* target = GetHitUnit();
+
+                if (!target)
+                    return;
+
+                if (!caster)
+                    return;
+
+                caster->RemoveAurasDueToSpell(91832);
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_gen_forged_fury_SpellScript::CheckRequirement);
+                OnEffectHitTarget += SpellEffectFn(spell_gen_forged_fury_SpellScript::BeforeEffect, EFFECT_0, SPELL_EFFECT_APPLY_AURA); 
+            }
+        };
+
+        SpellScript *GetSpellScript() const
+        {
+            return new spell_gen_forged_fury_SpellScript();
+        }
+};
+
+
 // Apparatus of Khaz'goroth (trinket)
 class spell_gen_blessing_of_khazgoroth: public SpellScriptLoader 
 {
@@ -4199,6 +4252,7 @@ void AddSC_generic_spell_scripts()
     new spell_gen_scales_of_life();
     new spell_gen_apparatus_of_khaz();
     new spell_gen_luck_of_the_draw();
-	new spell_gen_blessing_of_khazgoroth();
-	new spell_gen_tipping_of_scales();
+    new spell_gen_forged_fury();
+    new spell_gen_blessing_of_khazgoroth();
+    new spell_gen_tipping_of_scales();
 }
