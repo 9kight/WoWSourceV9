@@ -260,7 +260,7 @@ public:
             count = 0;
         }
 
-		void UpdateAI(uint32 const diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;
@@ -404,7 +404,7 @@ public:
             _events.ScheduleEvent(EVENT_EARTHS_VENGEANCE_DROP, urand(2000, 4000));
         }
 
-		void UpdateAI(uint32 const diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;
