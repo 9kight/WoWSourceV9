@@ -558,37 +558,37 @@ struct Position
         return fmod(o, 2.0f * static_cast<float>(M_PI));
     }
 
-	void Add(Position a)
-	{
-		m_positionX += a.GetPositionX();
-		m_positionY += a.GetPositionY();
-		m_positionZ += a.GetPositionZ();
-	}
+    void Add(Position a)
+    {
+        m_positionX += a.GetPositionX();
+        m_positionY += a.GetPositionY();
+        m_positionZ += a.GetPositionZ();
+    }
 
-	void Subtract(Position a)
-	{
-		m_positionX -= a.GetPositionX();
-		m_positionY -= a.GetPositionY();
-		m_positionZ -= a.GetPositionZ();
-	}
+    void Subtract(Position a)
+    {
+        m_positionX -= a.GetPositionX();
+        m_positionY -= a.GetPositionY();
+        m_positionZ -= a.GetPositionZ();
+    }
 
-	void Scale(float s)
-	{
-		m_positionX *= s;
-		m_positionY *= s;
-		m_positionZ *= s;
-	}
+    void Scale(float s)
+    {
+        m_positionX *= s;
+        m_positionY *= s;
+        m_positionZ *= s;
+    }
 
-	void RelocatePolar(float angle, float radius)
-	{
-		m_positionX += radius * std::cos(angle);
-		m_positionY += radius * std::sin(angle);
-	}
+    void RelocatePolar(float angle, float radius)
+    {
+        m_positionX += radius * std::cos(angle);
+        m_positionY += radius * std::sin(angle);
+    }
 
-	static float sign(Position &p1, Position &p2, Position &p3)
-	{
-		return (p1.GetPositionX() - p3.GetPositionX()) * (p2.GetPositionY() - p3.GetPositionY()) - (p2.GetPositionX() - p3.GetPositionX()) * (p1.GetPositionY() - p3.GetPositionY());
-	}
+    static float sign(Position &p1, Position &p2, Position &p3)
+    {
+        return (p1.GetPositionX() - p3.GetPositionX()) * (p2.GetPositionY() - p3.GetPositionY()) - (p2.GetPositionX() - p3.GetPositionX()) * (p1.GetPositionY() - p3.GetPositionY());
+    }
 };
 ByteBuffer& operator>>(ByteBuffer& buf, Position::PositionXYZOStreamer const& streamer);
 ByteBuffer& operator<<(ByteBuffer& buf, Position::PositionXYZStreamer const& streamer);
@@ -902,7 +902,7 @@ class WorldObject : public Object, public WorldLocation
 
         GameObject* SummonGameObject(uint32 entry, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 respawnTime);
         Creature*   SummonTrigger(float x, float y, float z, float ang, uint32 dur, CreatureAI* (*GetAI)(Creature*) = NULL);
-		void SummonCreatureGroup(uint8 group, std::list<TempSummon*>* list = NULL);
+        void SummonCreatureGroup(uint8 group, std::list<TempSummon*>* list = NULL);
 
         Creature*   FindNearestCreature(uint32 entry, float range, bool alive = true) const;
         GameObject* FindNearestGameObject(uint32 entry, float range) const;
