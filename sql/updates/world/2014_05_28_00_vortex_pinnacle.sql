@@ -9,11 +9,10 @@ UPDATE creature_template SET unit_flags = 0x4  WHERE Entry = 45704; -- Lurking Z
 REPLACE INTO creature_template_addon (entry, auras) VALUES
 (46007, '86267');
 
-DELETE FROM spell_script_names WHERE ScriptName IN ('spell_lurk_search', 'spell_storms_edge_aura', 'spell_storms_edge_periodic', 'spell_storms_edge_pull', 'spell_storms_edge_knockback', 'spell_storms_edge');
-DELETE FROM spell_script_names WHERE spell_id IN (85291, 86295, 86284, 86329, 86311, 86299);
+DELETE FROM spell_script_names WHERE ScriptName IN ('spell_storms_edge_aura', 'spell_storms_edge_periodic', 'spell_storms_edge_pull', 'spell_storms_edge_knockback', 'spell_storms_edge');
+DELETE FROM spell_script_names WHERE spell_id IN (86295, 86284, 86329, 86311, 86299);
 
 INSERT INTO spell_script_names VALUES
-(85291, 'spell_lurk_search'),
 (86295, 'spell_storms_edge_aura'),
 (86284, 'spell_storms_edge_periodic'),
 (86329, 'spell_storms_edge_pull'),
