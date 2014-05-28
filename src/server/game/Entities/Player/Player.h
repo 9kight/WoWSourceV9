@@ -2155,6 +2155,24 @@ class Player : public Unit, public GridObject<Player>
         void UpdateRangedHitChances();
         void UpdateSpellHitChances();
         void UpdateMastery();
+		
+        float GetBaseMasteryPoints() const
+        {
+            switch(GetPrimaryTalentTree(GetActiveSpec()))
+            {
+                case TALENT_TREE_MAGE_FIRE:
+                    return 7.86f;
+                case TALENT_TREE_MAGE_FROST:
+                case TALENT_TREE_WARRIOR_FURY:
+                    return 2.0f;
+                default:
+                    return 8.0f;
+            }
+        }
+        float GetMasteryPoints() const {return GetBaseMasteryPoints() + CalculateMasteryFromMasteryRating(m_baseRatingValue[CR_MASTERY]);}
+        float CalculateMasteryFromMasteryRating(int32 curr_rating) const {return float(curr_rating * 0.0055779569892473f);}
+        int32 CalculateMasteryRatingFromMastery(float curr_mastery) {return int32(curr_mastery / 0.0055779569892473f);}
+		
         bool IsMasteryLearned();
 
         void UpdateAllSpellCritChances();

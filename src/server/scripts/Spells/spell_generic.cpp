@@ -3984,6 +3984,118 @@ class spell_gen_luck_of_the_draw : public SpellScriptLoader
         }
 };
 
+// Apparatus of Khaz'goroth (trinket)
+class spell_gen_blessing_of_khazgoroth: public SpellScriptLoader 
+{
+public:
+        spell_gen_blessing_of_khazgoroth() : SpellScriptLoader("spell_gen_blessing_of_khazgoroth") { }
+
+        class spell_gen_blessing_of_khazgoroth_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_gen_blessing_of_khazgoroth_SpellScript)
+
+            void BeforeEffect(SpellEffIndex /*effIndex*/) 
+            {
+                Unit* caster = GetCaster();
+
+                if (!caster)
+                    return;
+
+                if (!caster->ToPlayer())
+                    return;
+
+                if (Aura* titanPower = caster->GetAura(96923))
+                {
+                    uint8 stacks = titanPower->GetStackAmount();
+                    uint32 triggeredSpell = 0;
+                    int32 amount = stacks * 508;
+
+                    float mastery = caster->ToPlayer()->CalculateMasteryRatingFromMastery(caster->ToPlayer()->GetMasteryPoints() - 8.0f);
+                    float crit    = float(caster->ToPlayer()->GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_CRIT_MELEE));                    
+                    float haste   = float(caster->ToPlayer()->GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_HASTE_MELEE));
+
+                    float stat = 0.0f;
+                    if (mastery > stat)
+                    {
+                        stat = mastery;
+                        triggeredSpell = 96929;
+                    }
+
+                    if (crit > stat)
+                    {
+                        stat = crit;
+                        triggeredSpell = 96928;
+                    }
+
+                    if (haste > stat)
+                    {
+                        stat = haste;
+                        triggeredSpell = 96927;
+                    }
+
+                    if (triggeredSpell != 0)
+                        caster->CastCustomSpell(caster, triggeredSpell, &amount, NULL, NULL, true);
+                }
+
+                caster->RemoveAurasDueToSpell(96923);
+            }
+
+            void Register()
+            {
+                OnEffectLaunch += SpellEffectFn(spell_gen_blessing_of_khazgoroth_SpellScript::BeforeEffect, EFFECT_0, SPELL_EFFECT_DUMMY); 
+            }
+        };
+
+        SpellScript *GetSpellScript() const
+        {
+            return new spell_gen_blessing_of_khazgoroth_SpellScript();
+        }
+};
+
+// Scales of Life (trinket)
+class spell_gen_tipping_of_scales : public SpellScriptLoader 
+{
+public:
+        spell_gen_tipping_of_scales() : SpellScriptLoader("spell_gen_tipping_of_scales") { }
+
+        class spell_gen_tipping_of_scales_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_gen_tipping_of_scales_SpellScript)
+
+            SpellCastResult CheckRequirement()
+            {
+                if (Unit* caster = GetCaster()) 
+                {
+                    if (caster->HasAura(96881))
+                        return SPELL_CAST_OK;
+                }
+                return SPELL_FAILED_NO_POWER;
+            }
+            
+            void BeforeEffect(SpellEffIndex /*effIndex*/) 
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Aura* buff = caster->GetAura(96881))
+                        SetHitHeal(buff->GetEffect(0)->GetAmount());
+                    
+                    caster->RemoveAurasDueToSpell(96881);
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_gen_tipping_of_scales_SpellScript::CheckRequirement);
+                OnEffectHitTarget += SpellEffectFn(spell_gen_tipping_of_scales_SpellScript::BeforeEffect, EFFECT_0, SPELL_EFFECT_HEAL); 
+            }
+        };
+
+        SpellScript *GetSpellScript() const
+        {
+            return new spell_gen_tipping_of_scales_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -4087,4 +4199,6 @@ void AddSC_generic_spell_scripts()
     new spell_gen_scales_of_life();
     new spell_gen_apparatus_of_khaz();
     new spell_gen_luck_of_the_draw();
+	new spell_gen_blessing_of_khazgoroth();
+	new spell_gen_tipping_of_scales();
 }
