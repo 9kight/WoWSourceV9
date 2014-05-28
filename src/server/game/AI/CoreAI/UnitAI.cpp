@@ -194,6 +194,28 @@ void UnitAI::DoCastAOE(uint32 spellId, bool triggered)
     me->CastSpell((Unit*)NULL, spellId, triggered);
 }
 
+void UnitAI::DoCastDelayed(Unit* victim, uint32 spellId, uint32 delay, bool triggered)
+{
+	struct DelayedCast : public BasicEvent
+	{
+		DelayedCast(Unit *caster, Unit *target, uint32 spellId, bool triggered) : BasicEvent(),
+		_caster(caster), _target(target), _spellId(spellId), _triggered(triggered) {}
+
+		bool Execute(uint64, uint32)
+		{
+			_caster->CastSpell(_target, _spellId, _triggered);
+			return true;
+		}
+
+		Unit *_caster;
+		Unit *_target;
+		uint32 _spellId;
+		bool _triggered;
+	};
+
+	me->m_Events.AddEvent(new DelayedCast(me, victim, spellId, triggered), me->m_Events.CalculateTime(delay));
+}
+
 void UnitAI::DoCastRandom(uint32 spellId, float dist, bool triggered, int32 aura, uint32 position)
 {
     if (me->HasUnitState(UNIT_STATE_CASTING) && !triggered)

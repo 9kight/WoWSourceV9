@@ -557,6 +557,38 @@ struct Position
         }
         return fmod(o, 2.0f * static_cast<float>(M_PI));
     }
+
+	void Add(Position a)
+	{
+		m_positionX += a.GetPositionX();
+		m_positionY += a.GetPositionY();
+		m_positionZ += a.GetPositionZ();
+	}
+
+	void Subtract(Position a)
+	{
+		m_positionX -= a.GetPositionX();
+		m_positionY -= a.GetPositionY();
+		m_positionZ -= a.GetPositionZ();
+	}
+
+	void Scale(float s)
+	{
+		m_positionX *= s;
+		m_positionY *= s;
+		m_positionZ *= s;
+	}
+
+	void RelocatePolar(float angle, float radius)
+	{
+		m_positionX += radius * std::cos(angle);
+		m_positionY += radius * std::sin(angle);
+	}
+
+	static float sign(Position &p1, Position &p2, Position &p3)
+	{
+		return (p1.GetPositionX() - p3.GetPositionX()) * (p2.GetPositionY() - p3.GetPositionY()) - (p2.GetPositionX() - p3.GetPositionX()) * (p1.GetPositionY() - p3.GetPositionY());
+	}
 };
 ByteBuffer& operator>>(ByteBuffer& buf, Position::PositionXYZOStreamer const& streamer);
 ByteBuffer& operator<<(ByteBuffer& buf, Position::PositionXYZStreamer const& streamer);
