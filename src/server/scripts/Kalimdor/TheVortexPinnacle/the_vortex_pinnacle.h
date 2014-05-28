@@ -69,7 +69,7 @@ enum CreatureIds
     NPC_GROUNDING_FIELD         = 47000,
     NPC_UNSTABLE_GROUNDING_FIELD= 46492,
     NPC_STORM_TARGET            = 46387,
-	NPC_CYCLONE_SHIELD          = 46007,
+    NPC_CYCLONE_SHIELD          = 46007,
 
     // Various NPCs
     NPC_GOLDEN_ORB              = 51157, /*Heroic Mode*/
