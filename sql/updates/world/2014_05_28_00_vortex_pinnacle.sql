@@ -1,6 +1,8 @@
 -- Grand Vizier Ertan
 UPDATE creature_template SET scriptname = "boss_grand_vizier_ertan", ainame = "" WHERE entry = 43878;
 
+UPDATE creature_template SET scriptname = "npc_cyclone_shield", ainame = "" WHERE entry = 46007;
+
 DELETE FROM creature WHERE id = 46007;
 
 UPDATE creature_template SET faction_H = 16, faction_A = 16, speed_walk = 1.2, speed_run = 0.4286 WHERE Entry = 46007; -- Storms Edge
