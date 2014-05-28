@@ -754,6 +754,7 @@ void AddSC_boss_erudax();
 void AddSC_boss_forgemaster_throngus();
 void AddSC_boss_general_umbriss();
 void AddSC_mob_trash_grim_batol();
+void AddSC_grimbatol();
 
 // Events
 void AddSC_event_childrens_week();
@@ -1076,6 +1077,7 @@ void AddEasternKingdomsScripts()
     AddSC_boss_forgemaster_throngus();
     AddSC_boss_general_umbriss();
     AddSC_mob_trash_grim_batol();
+	AddSC_grimbatol();
 
     //AddSC_alterac_mountains();
     AddSC_elwynn_forest();
