@@ -283,11 +283,11 @@ class UnitAura : public Aura
         void FillTargetMap(std::map<Unit*, uint8> & targets, Unit* caster);
 
         // Allow Apply Aura Handler to modify and access m_AuraDRGroup
-        void SetDiminishGroup(DiminishingGroup group) { m_AuraDRGroup = group; }
-        DiminishingGroup GetDiminishGroup() const { return m_AuraDRGroup; }
+        void SetDiminishGroup(DiminishingGroup group) { m_AuraDRGroups.push_back(group); }
+        std::list<DiminishingGroup> const& GetDiminishGroups() { return m_AuraDRGroups; }
 
     private:
-        DiminishingGroup m_AuraDRGroup:8;               // Diminishing
+        std::list<DiminishingGroup> m_AuraDRGroups;               // Diminishing
 };
 
 class DynObjAura : public Aura
