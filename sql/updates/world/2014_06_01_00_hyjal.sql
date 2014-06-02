@@ -119,17 +119,17 @@ DELETE FROM smart_scripts WHERE entryorguid IN (41112);
 INSERT INTO `smart_scripts` VALUES (41112, 0, 1, 2, 2, 0, 100, 0, 20, 30, 0, 0, 2, 35, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, '30% healt remain change faction');
 INSERT INTO `smart_scripts` VALUES (41112, 0, 2, 0, 61, 0, 100, 0, 0, 0, 0, 0, 33, 41169, 0, 0, 0, 0, 0, 21, 15, 0, 0, 0, 0, 0, 0, 'credit');
 INSERT INTO `smart_scripts` VALUES (41112, 0, 3, 4, 62, 0, 100, 0, 41112,0,0,0,33, 41170, 1, 0, 0, 0, 0, 21, 2, 0, 0, 0, 0, 0, 0, 'credit');
-INSERT INTO `smart_scripts` VALUES (41112, 0, 4, 5, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Chiude gossip');
+INSERT INTO `smart_scripts` VALUES (41112, 0, 4, 5, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Closes Gossip');
 INSERT INTO `smart_scripts` VALUES (41112, 0, 5, 0, 61, 0, 100, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,'Frase');
 
 UPDATE `creature_template` SET `gossip_menu_id`='41112' WHERE (`entry`='41112');
 
-delete from gossip_menu_option where menu_id = 41112;
-insert into gossip_menu_option (menu_id,id,option_text,option_id,npc_option_npcflag) values
+delete from gossip_menu_option WHERE menu_id = 41112;
+INSERT INTO gossip_menu_option (menu_id,id,option_text,option_id,npc_option_npcflag) VALUES
 (41112,0,"Who? who are you giving the eggs to?",1,1);
 
 DELETE FROM `creature_text` WHERE (`entry`='41112') AND (`groupid`='1') AND (`id`='0');
-insert into `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) values
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
 ('41112','1','0','Ok OK .. her name is Sandriq! ','12','0','100','0','0','0','Life party');
 
 UPDATE `creature_template` SET `Health_mod`='13.54', `minlevel`='81', `maxlevel`='81', `npcflag`='1' WHERE (`entry`='41112');
@@ -208,7 +208,7 @@ INSERT INTO `creature` VALUES (null, 341737, 1, 0, 0, 1, 1, 0, 0, 4663.82, -3686
 DELETE FROM smart_scripts WHERE entryorguid IN (341737) AND source_type = 0;
 INSERT INTO `smart_scripts` VALUES (341737, 0, 1, 0, 1, 0, 100, 0, 0, 0, 0, 0, 62, 1, 0, 0, 0, 0, 0, 17, 0, 2, 0, 4677.80, -3673.00, 696.47, 0.709, 'portal down');
 
--- PORTALE The Crucible Flame > The Scorched Plain 
+-- PORTALE The Crucible Flame > The Scorched Plain
 DELETE FROM `creature_template` WHERE (`entry`='341738');
 INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `exp_unk`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `speed_swim`, `speed_fly`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `type_flags2`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `currencyId`, `currencyCount`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Health_mod`, `Mana_mod`, `Mana_mod_extra`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (341738, 0, 0, 0, 0, 1126, 15880, 0, 0, 0, 'Portal OUT', NULL, NULL, 0, 1, 1, 0, 0, 35, 35, 0, 1, 1.14286, 1, 1, 1, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 33555200, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1024, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 'SmartAI', 0, 3, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 128, '', 15595);
 
@@ -249,7 +249,7 @@ DELETE FROM `creature_loot_template` WHERE (`entry`='39619') AND (`item`='52685'
 INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`) VALUES ('39619', '52685', '-93');
 UPDATE `creature_template` SET `lootid`='39619' WHERE (`entry`='39619');
 
--- Quest 25224 In Bloom 
+-- Quest 25224 In Bloom
 DELETE FROM `gameobject` WHERE (`id`='202619');
 INSERT INTO `gameobject` VALUES (null, 202619, 1, 0, 0, 1, 1, 4385.63, -4342.21, 901.289, 4.42974, 0, 0, 0.799658, -0.600456, 300, 0, 1);
 INSERT INTO `gameobject` VALUES (null, 202619, 1, 0, 0, 1, 1, 4343.72, -4382.42, 900.986, 3.93887, 0, 0, 0.92159, -0.388165, 300, 0, 1);
@@ -309,133 +309,135 @@ DELETE FROM `gossip_menu_option` WHERE (`menu_id`='39607');
 DELETE FROM `gossip_menu_option` WHERE (`menu_id`='39608');
 DELETE FROM `gossip_menu_option` WHERE (`menu_id`='39609');
 DELETE FROM `gossip_menu_option` WHERE (`menu_id`='39610');
-insert into gossip_menu_option (menu_id,id,option_text,option_id,npc_option_npcflag,action_menu_id) values
-(39601,0,"Ulduar si trova nelle Northrend.",1,1,39602),
-(39601,1,"Ulduar si trova a Kalimdor.",1,1,0),
 
-(39602,0,"I Blood Elf sono Ally. ",1,1,0),
-(39602,1,"I Blood Elf sono Orda. ",1,1,39603),
+INSERT INTO gossip_menu_option (menu_id,id,option_text,option_id,npc_option_npcflag,action_menu_id) VALUES
+(39601,0,"Ulduar is in Northrend.",1,1,39602),
+(39601,1,"Ulduar is located in Kalimdor.",1,1,0),
 
-(39603,0,"Un Warrior pu� contare sul suo pet.",1,1,0),
-(39603,1,"Un Hunter pu� contare sul suo pet.",1,1,39604),
+(39602,0,"The Blood Elf are Ally. ",1,1,0),
+(39602,1,"I Blood Elf are Horde. ",1,1,39603),
 
-(39604,0,"Il Warlock usa la spada a due mani",1,1,0),
-(39604,1,"Il Death Kight usa la spada a due mani",1,1,39605),
+(39603,0,"A Warrior can count on your pet.",1,1,0),
+(39603,1,"A Hunter can count on your pet.",1,1,39604),
 
-(39605,0,"La resilence � una stat PVE",1,1,0),
-(39605,1,"La resilence � una stat PVP",1,1,39606),
+(39604,0,"The Warlock uses the two-handed sword",1,1,0),
+(39604,1,"The Death Kight uses the two-handed sword",1,1,39605),
 
-(39606,0,"Il caster usa le spell a distanza",1,1,39607),
-(39606,1,"Il caster usa il danno bianco ",1,1,0),
+(39605,0,"Resilience is a PVE stat",1,1,0),
+(39605,1,"Resilience is a PVE stat",1,1,39606),
 
-(39607,0,"Cataclysm � la terza espansione",1,1,39608),
-(39607,1,"Cataclysm � la quarta espansione",1,1,0),
+(39606,0,"The caster uses the spell at a distance",1,1,39607),
+(39606,1,"The caster uses the white damage",1,1,0),
 
-(39608,0,"Arathi Basin � un Battleground",1,1,39609),
-(39608,1,"Arathi Basin � una Istance",1,1,0),
+(39607,0,"Cataclysm the third expansion",1,1,39608),
+(39607,1,"The fourth expansion Cataclysm",1,1,0),
 
-(39609,0,"L'Orda � la fazione pi� forte",1,1,39610),
-(39609,1,"L'Alleanza � la fazione pi� forte",1,1,39610),
+(39608,0,"Arathi Basin is a Battleground",1,1,39609),
+(39608,1,"Arathi Basin is a Istance",1,1,0),
 
-(39610,0,"Ambush � una spell del Paladino",1,1,0),
-(39610,1,"Ambush � una spell del Rogue",1,1,0);
--- Prima Domanda
+(39609,0,"The Horde faction is stronger",1,1,39610),
+(39609,1,"The Alliance faction is stronger",1,1,39610),
+
+(39610,0,"Ambush is a spell from Paladin",1,1,0),
+(39610,1,"Ambush is a spell from Rogue",1,1,0);
+
+-- First Question
 DELETE FROM smart_scripts WHERE entryorguid IN (39601) AND source_type = 0;
 INSERT INTO smart_scripts (entryorguid, source_type, id, link, event_type, event_phase_mask, event_chance, event_flags, event_param1, event_param2, event_param3, event_param4, action_type, action_param1, action_param2, action_param3, action_param4, action_param5, action_param6, target_type, target_param1, target_param2, target_param3, target_x, target_y, target_z, target_o, COMMENT) VALUES
 (39601, 0, 1, 2, 62, 0, 100, 0, 39601, 0, 0, 0, 33, 39824, 0, 0, 0, 0, 0, 21, 6, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
-(39601, 0, 2, 3, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Risposta Esatta"),
-(39601, 0, 3, 4, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Chiude gossip"),
+(39601, 0, 2, 3, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Exact Answer"),
+(39601, 0, 3, 4, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
 (39601, 0, 22, 23, 62, 0, 100, 0, 39601, 1, 0, 0, 5, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
-(39601, 0, 23, 24, 61, 0, 100, 0, 0, 0, 0, 0, 1, 10, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Risposta Errata"),
-(39601, 0, 24, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Chiude gossip"),
+(39601, 0, 23, 24, 61, 0, 100, 0, 0, 0, 0, 0, 1, 10, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Correct Answer"),
+(39601, 0, 24, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
--- Seconda Domanda
+-- Second Question
 (39601, 0, 4, 5, 62, 0, 100, 0, 39602, 1, 0, 0, 33, 39824, 0, 0, 0, 0, 0, 21, 6, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
-(39601, 0, 5, 6, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Risposta Esatta"),
-(39601, 0, 6, 7, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Chiude gossip"),
+(39601, 0, 5, 6, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Exact Answer"),
+(39601, 0, 6, 7, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
 (39601, 0, 25, 26, 62, 0, 100, 0, 39602, 0, 0, 0, 5, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
-(39601, 0, 26, 27, 61, 0, 100, 0, 0, 0, 0, 0, 1, 10, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Risposta Errata"),
-(39601, 0, 27, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Chiude gossip"),
+(39601, 0, 26, 27, 61, 0, 100, 0, 0, 0, 0, 0, 1, 10, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Correct Answer"),
+(39601, 0, 27, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
--- Terza Domanda
+-- Third Question
 (39601, 0, 7, 8, 62, 0, 100, 0, 39603, 1, 0, 0, 33, 39824, 0, 0, 0, 0, 0, 21, 6, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
-(39601, 0, 8, 9, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Risposta Esatta"),
-(39601, 0, 9, 10, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Chiude gossip"),
+(39601, 0, 8, 9, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Exact Answer"),
+(39601, 0, 9, 10, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
 (39601, 0, 28, 29, 62, 0, 100, 0, 39603, 0, 0, 0, 5, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
-(39601, 0, 29, 30, 61, 0, 100, 0, 0, 0, 0, 0, 1, 10, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Risposta Errata"),
-(39601, 0, 30, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Chiude gossip"),
+(39601, 0, 29, 30, 61, 0, 100, 0, 0, 0, 0, 0, 1, 10, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Correct Answer"),
+(39601, 0, 30, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
--- Quarta Domanda
+-- The four Question
 (39601, 0, 10, 11, 62, 0, 100, 0, 39604, 1, 0, 0, 33, 39824, 0, 0, 0, 0, 0, 21, 6, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
-(39601, 0, 11, 12, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Risposta Esatta"),
-(39601, 0, 12, 13, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Chiude gossip"),
+(39601, 0, 11, 12, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Exact Answer"),
+(39601, 0, 12, 13, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
 (39601, 0, 31, 32, 62, 0, 100, 0, 39604, 0, 0, 0, 5, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
-(39601, 0, 32, 33, 61, 0, 100, 0, 0, 0, 0, 0, 1, 10, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Risposta Errata"),
-(39601, 0, 33, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Chiude gossip"),
+(39601, 0, 32, 33, 61, 0, 100, 0, 0, 0, 0, 0, 1, 10, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Correct Answer"),
+(39601, 0, 33, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
--- Quinta Domanda
+-- the five Question
 (39601, 0, 13, 14, 62, 0, 100, 0, 39605, 1, 0, 0, 33, 39824, 0, 0, 0, 0, 0, 21, 6, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
-(39601, 0, 14, 15, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Risposta Esatta"),
-(39601, 0, 15, 16, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Chiude gossip"),
+(39601, 0, 14, 15, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Exact Answer"),
+(39601, 0, 15, 16, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
 (39601, 0, 34, 35, 62, 0, 100, 0, 39605, 0, 0, 0, 5, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
-(39601, 0, 35, 36, 61, 0, 100, 0, 0, 0, 0, 0, 1, 10, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Risposta Errata"),
-(39601, 0, 36, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Chiude gossip"),
+(39601, 0, 35, 36, 61, 0, 100, 0, 0, 0, 0, 0, 1, 10, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Correct Answer"),
+(39601, 0, 36, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
--- Sesta Domanda
+-- the six Question
 (39601, 0, 16, 17, 62, 0, 100, 0, 39606, 0, 0, 0, 33, 39824, 0, 0, 0, 0, 0, 21, 6, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
-(39601, 0, 17, 18, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Risposta Esatta"),
-(39601, 0, 18, 19, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Chiude gossip"),
+(39601, 0, 17, 18, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Exact Answer"),
+(39601, 0, 18, 19, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
 (39601, 0, 37, 38, 62, 0, 100, 0, 39606, 1, 0, 0, 5, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
-(39601, 0, 38, 39, 61, 0, 100, 0, 0, 0, 0, 0, 1, 10, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Risposta Errata"),
-(39601, 0, 39, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Chiude gossip"),
+(39601, 0, 38, 39, 61, 0, 100, 0, 0, 0, 0, 0, 1, 10, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Correct Answer"),
+(39601, 0, 39, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
--- Settima Domanda
+-- the seven Question
 (39601, 0, 19, 20, 62, 0, 100, 0, 39607, 0, 0, 0, 33, 39824, 0, 0, 0, 0, 0, 21, 6, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
-(39601, 0, 20, 21, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Risposta Esatta"),
-(39601, 0, 21, 43, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Chiude gossip"),
+(39601, 0, 20, 21, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Exact Answer"),
+(39601, 0, 21, 43, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
 (39601, 0, 40, 41, 62, 0, 100, 0, 39607, 1, 0, 0, 5, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
-(39601, 0, 41, 42, 61, 0, 100, 0, 0, 0, 0, 0, 1, 10, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Risposta Errata"),
-(39601, 0, 42, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Chiude gossip"),
+(39601, 0, 41, 42, 61, 0, 100, 0, 0, 0, 0, 0, 1, 10, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Correct Answer"),
+(39601, 0, 42, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
--- Ottava Domanda
+-- the 8 Question
 (39601, 0, 43, 44, 62, 0, 100, 0, 39608, 0, 0, 0, 33, 39824, 0, 0, 0, 0, 0, 21, 6, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
-(39601, 0, 44, 45, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Risposta Esatta"),
-(39601, 0, 45, 50, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Chiude gossip"),
+(39601, 0, 44, 45, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Exact Answer"),
+(39601, 0, 45, 50, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
 (39601, 0, 46, 47, 62, 0, 100, 0, 39608, 1, 0, 0, 5, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
-(39601, 0, 47, 48, 61, 0, 100, 0, 0, 0, 0, 0, 1, 10, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Risposta Errata"),
-(39601, 0, 48, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Chiude gossip"),
+(39601, 0, 47, 48, 61, 0, 100, 0, 0, 0, 0, 0, 1, 10, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Correct Answer"),
+(39601, 0, 48, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
--- Nona Domanda
+-- the nine Question
 (39601, 0, 50, 51, 62, 0, 100, 0, 39609, 0, 0, 0, 33, 39824, 0, 0, 0, 0, 0, 21, 6, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
-(39601, 0, 51, 52, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Risposta Esatta"),
-(39601, 0, 52, 56, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Chiude gossip"),
+(39601, 0, 51, 52, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Exact Answer"),
+(39601, 0, 52, 56, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
 (39601, 0, 53, 54, 62, 0, 100, 0, 39609, 1, 0, 0, 33, 39824, 0, 0, 0, 0, 0, 21, 6, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
-(39601, 0, 54, 55, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Risposta Esatta"),
-(39601, 0, 55, 56, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Chiude gossip"),
+(39601, 0, 54, 55, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Exact Answer"),
+(39601, 0, 55, 56, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
--- Decima Domanda
+-- the 10 Question
 (39601, 0, 56, 57, 62, 0, 100, 0, 39610, 1, 0, 0, 33, 39824, 0, 0, 0, 0, 0, 21, 6, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
-(39601, 0, 57, 58, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Risposta Esatta"),
-(39601, 0, 58, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Chiude gossip"),
+(39601, 0, 57, 58, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Exact Answer"),
+(39601, 0, 58, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
 (39601, 0, 59, 60, 62, 0, 100, 0, 39610, 0, 0, 0, 5, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
-(39601, 0, 60, 61, 61, 0, 100, 0, 0, 0, 0, 0, 1, 10, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Risposta Errata"),
-(39601, 0, 61, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Chiude gossip");
+(39601, 0, 60, 61, 61, 0, 100, 0, 0, 0, 0, 0, 1, 10, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Correct Answer"),
+(39601, 0, 61, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip");
 
 DELETE FROM `creature_text` WHERE (`entry`='39601') AND (`groupid`='1');
 DELETE FROM `creature_text` WHERE (`entry`='39601') AND (`groupid`='10');
-insert into `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) values
-('39601','1','0','Risposta Esatta!  ','12','0','100','0','0','0','Life party'),
-('39601','10','0','Risposta Errata!.   ','12','0','100','0','0','0','Life party');
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+('39601','1','0','Exact Answer! ','12','0','100','0','0','0','Life party'),
+('39601','10','0','Correct Answer!. ','12','0','100','0','0','0','Life party');
 
 UPDATE `creature_template` SET `Health_mod`='13.54', `minlevel`='81', `maxlevel`='81', `npcflag`='1', `unit_flags`='768' WHERE (`entry`='39601');
 
@@ -508,9 +510,9 @@ INSERT INTO `smart_scripts` VALUES (401850, 0, 1, 0, 8, 0, 100, 0, 62464, 0, 0, 
 
 DELETE FROM `creature_text` WHERE (`entry`='40185') AND (`groupid`='1');
 DELETE FROM `creature_text` WHERE (`entry`='40185') AND (`groupid`='2');
-insert into `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) values
-('40185','1','0','Yeah! Great! Bravo!  ','12','0','100','0','0','0','Life party'),
-('40185','2','0','You are the Best!!!   ','12','0','100','0','0','0','Life party');
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+('40185','1','0','Yeah! Great! Bravo! ','12','0','100','0','0','0','Life party'),
+('40185','2','0','You are the Best!!! ','12','0','100','0','0','0','Life party');
 
 DELETE FROM `gameobject` WHERE (`id`='202996');
 INSERT INTO `gameobject` VALUES (null, 202996, 1, 0, 0, 1, 1, 4742.6, -4971.83, 907.439, 1.66787, 0, 0, 0.740583, 0.671965, 300, 0, 1);
@@ -593,17 +595,17 @@ INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`) VA
 UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='40409');
 DELETE FROM smart_scripts WHERE entryorguid IN (40409);
 INSERT INTO `smart_scripts` VALUES (40409, 0, 1, 2, 62, 0, 100, 0, 40409, 0, 0, 0, 2, 14, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'change faction');
-INSERT INTO `smart_scripts` VALUES (40409, 0, 2, 5, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Chiude gossip');
+INSERT INTO `smart_scripts` VALUES (40409, 0, 2, 5, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Closes Gossip');
 INSERT INTO `smart_scripts` VALUES (40409, 0, 5, 0, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,'Frase');
 
 UPDATE `creature_template` SET `gossip_menu_id`='40409' WHERE (`entry`='40409');
 
-delete from gossip_menu_option where menu_id = 40409;
-insert into gossip_menu_option (menu_id,id,option_text,option_id,npc_option_npcflag) values
+delete from gossip_menu_option WHERE menu_id = 40409;
+INSERT INTO gossip_menu_option (menu_id,id,option_text,option_id,npc_option_npcflag) VALUES
 (40409,0,"Instructor Devoran sends a contender against your raptor",1,1);
 
 DELETE FROM `creature_text` WHERE (`entry`='40409') AND (`groupid`='1') AND (`id`='0');
-insert into `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) values
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
 ('40409','1','0','ARRRRRRRGHHH ','12','0','100','0','0','0','Life party');
 
 -- Quest 25294 Walking the Dog CHAIN TIMELINE FIX
@@ -640,7 +642,7 @@ INSERT INTO `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`) 
 DELETE FROM `gameobject_loot_template` WHERE (`entry`='25297') AND (`item`='52725');
 INSERT INTO `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`) VALUES ('25297', '52725', '-100');
 
--- Quest 25308 Seeds of Discord 
+-- Quest 25308 Seeds of Discord
 DELETE FROM `gameobject` WHERE (`id`='203091');
 INSERT INTO `gameobject` VALUES (null, 203091, 1, 0, 0, 1, 1, 4830.16, -4220.04, 894.183, 4.9662, 0, 0, 0.611927, -0.790914, 300, 0, 1);
 
@@ -648,7 +650,7 @@ UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='40489');
 DELETE FROM smart_scripts WHERE entryorguid IN (40489);
 INSERT INTO `smart_scripts` VALUES (40489, 0, 1, 2, 62, 0, 100, 0, 40489, 0, 0, 0, 11, 62464, 0, 0, 0, 0, 0, 19, 40491, 50, 0, 0, 0, 0, 0, 'change faction');
 INSERT INTO `smart_scripts` VALUES (40489, 0, 2, 5, 61, 0, 100, 0, 0, 0, 0, 0, 46, 40, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Exit from house');
-INSERT INTO `smart_scripts` VALUES (40489, 0, 5, 6, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Chiude gossip');
+INSERT INTO `smart_scripts` VALUES (40489, 0, 5, 6, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Closes Gossip');
 INSERT INTO `smart_scripts` VALUES (40489, 0, 6, 0, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,'Frase');
 
 UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='40491');
@@ -657,13 +659,13 @@ INSERT INTO `smart_scripts` VALUES (40491, 0, 1, 0, 8, 0, 100, 0, 62464, 0, 0, 0
 
 UPDATE `creature_template` SET `gossip_menu_id`='40489' WHERE (`entry`='40489');
 
-delete from gossip_menu_option where menu_id = 40489;
-insert into gossip_menu_option (menu_id,id,option_text,option_id,npc_option_npcflag) values
+delete from gossip_menu_option WHERE menu_id = 40489;
+INSERT INTO gossip_menu_option (menu_id,id,option_text,option_id,npc_option_npcflag) VALUES
 (40489,0,"Boss, one of boys is causing some trouble outside",1,1);
 
 DELETE FROM `creature_text` WHERE (`entry`='40489') AND (`groupid`='1') AND (`id`='0');
-insert into `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) values
-('40489','1','0','What? I ll show that pipsqueak!  ','12','0','100','0','0','0','Life party');
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+('40489','1','0','What? I ll show that pipsqueak! ','12','0','100','0','0','0','Life party');
 
 DELETE FROM `creature` WHERE (`id`='40491');
 INSERT INTO `creature` VALUES (null, 40491, 1, 0, 0, 1, 1, 0, 0, 4819.36, -4172.49, 897.531, 4.39677, 300, 0, 0, 74374, 0, 0, 0, 0, 0);
@@ -692,13 +694,13 @@ INSERT INTO `creature_template_addon` VALUES (41499, 0, 0, 7, 1, 0, '');
 UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='41499');
 DELETE FROM smart_scripts WHERE entryorguid IN (41499);
 INSERT INTO `smart_scripts` VALUES (41499, 0, 1, 2, 62, 0, 100, 0, 41499, 0, 0, 0, 33, 41510, 0, 0, 0, 0, 0, 21, 5, 0, 0, 0, 0, 0, 0, 'Credit');
-INSERT INTO `smart_scripts` VALUES (41499, 0, 2, 6, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Chiude gossip');
+INSERT INTO `smart_scripts` VALUES (41499, 0, 2, 6, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Closes Gossip');
 INSERT INTO `smart_scripts` VALUES (41499, 0, 6, 0, 61, 0, 100, 0, 0, 0, 0, 0, 41, 3, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'despawn');
 
 UPDATE `creature_template` SET `gossip_menu_id`='41499' WHERE (`entry`='41499');
 
-delete from gossip_menu_option where menu_id = 41499;
-insert into gossip_menu_option (menu_id,id,option_text,option_id,npc_option_npcflag) values
+delete from gossip_menu_option WHERE menu_id = 41499;
+INSERT INTO gossip_menu_option (menu_id,id,option_text,option_id,npc_option_npcflag) VALUES
 (41499,0,"On Your feet, soldier. The anchients are with us, and the mountain is healed!",1,1);
 
 -- Quest 25901 Hyjal Recycling Program
@@ -723,7 +725,7 @@ INSERT INTO `gameobject` VALUES (null, 203310, 1, 0, 0, 1, 65534, 4591.28, -3390
 INSERT INTO `gameobject` VALUES (null, 203310, 1, 0, 0, 1, 65534, 4624.86, -3392.14, 1017.04, 6.13944, 0, 0, 0.0718127, -0.997418, 300, 0, 1);
 UPDATE `creature_template` SET `faction_A`='14', `faction_H`='14' WHERE (`entry`='41501');
 
--- PORTALE The Flamewake  > The Firelands Hatchery
+-- PORTALE The Flamewake > The Firelands Hatchery
 DELETE FROM `creature_template` WHERE (`entry`='341739');
 INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `exp_unk`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `speed_swim`, `speed_fly`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `type_flags2`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `currencyId`, `currencyCount`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Health_mod`, `Mana_mod`, `Mana_mod_extra`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (341739, 0, 0, 0, 0, 1126, 15880, 0, 0, 0, 'Portal IN', NULL, NULL, 0, 1, 1, 0, 0, 35, 35, 0, 1, 1.14286, 1, 1, 1, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 33555200, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1024, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 'SmartAI', 0, 3, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 128, '', 15595);
 
@@ -736,7 +738,7 @@ INSERT INTO `creature` VALUES (null, 341739, 1, 0, 0, 1, 1, 0, 0, 4546.85, -2592
 DELETE FROM smart_scripts WHERE entryorguid IN (341739) AND source_type = 0;
 INSERT INTO `smart_scripts` VALUES (341739, 0, 1, 0, 1, 0, 100, 0, 0, 0, 0, 0, 62, 1, 0, 0, 0, 0, 0, 17, 0, 2, 0, 4565.89, -2582.68, 829.7, 0.948, 'portal down');
 
--- PORTALE The Firelands Hatchery > The Flamewake 
+-- PORTALE The Firelands Hatchery > The Flamewake
 DELETE FROM `creature_template` WHERE (`entry`='341740');
 INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `exp_unk`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `speed_swim`, `speed_fly`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `type_flags2`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `currencyId`, `currencyCount`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Health_mod`, `Mana_mod`, `Mana_mod_extra`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (341740, 0, 0, 0, 0, 1126, 15880, 0, 0, 0, 'Portal OUT', NULL, NULL, 0, 1, 1, 0, 0, 35, 35, 0, 1, 1.14286, 1, 1, 1, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 33555200, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1024, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 'SmartAI', 0, 3, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 128, '', 15595);
 
@@ -822,12 +824,12 @@ INSERT INTO `creature` VALUES (null, 39835, 1, 0, 0, 1, 1, 0, 0, 4815.87, -2355.
 UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='40757');
 DELETE FROM smart_scripts WHERE entryorguid IN (40757);
 INSERT INTO `smart_scripts` VALUES (40757, 0, 3, 4, 62, 0, 100, 0, 40757,0,0,0,12, 40723, 6, 60, 0, 0, 0, 8, 0, 0, 0, 4798.56, -2475, 685.85, 3.512, 'summon gryphon');
-INSERT INTO `smart_scripts` VALUES (40757, 0, 4, 5, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Chiude gossip');
+INSERT INTO `smart_scripts` VALUES (40757, 0, 4, 5, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Closes Gossip');
 
 UPDATE `creature_template` SET `gossip_menu_id`='40757', `npcflag`='1' WHERE (`entry`='40757');
 
-delete from gossip_menu_option where menu_id = 40757;
-insert into gossip_menu_option (menu_id,id,option_text,option_id,npc_option_npcflag) values
+delete from gossip_menu_option WHERE menu_id = 40757;
+INSERT INTO gossip_menu_option (menu_id,id,option_text,option_id,npc_option_npcflag) VALUES
 (40757,0,"Please give me another gryphon",1,1);
 UPDATE `creature_template` SET `mindmg`='14000', `maxdmg`='15000' WHERE (`entry`='40723');
 
@@ -1038,18 +1040,18 @@ UPDATE `quest_template` SET `Flags`='0' WHERE (`Id`='29437');
 UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='38917');
 DELETE FROM smart_scripts WHERE entryorguid IN (38917);
 INSERT INTO `smart_scripts` VALUES (38917, 0, 1, 2, 62, 0, 100, 0, 38917, 0, 0, 0, 2, 14, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'change faction');
-INSERT INTO `smart_scripts` VALUES (38917, 0, 2, 5, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Chiude gossip');
+INSERT INTO `smart_scripts` VALUES (38917, 0, 2, 5, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Closes Gossip');
 INSERT INTO `smart_scripts` VALUES (38917, 0, 5, 0, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,'Frase');
 
 UPDATE `quest_template` SET `RequiredRaces`='946' WHERE (`Id`='29437');
 UPDATE `creature_template` SET `gossip_menu_id`='38917' WHERE (`entry`='38917');
 
-delete from gossip_menu_option where menu_id = 38917;
-insert into gossip_menu_option (menu_id,id,option_text,option_id,npc_option_npcflag) values
+delete from gossip_menu_option WHERE menu_id = 38917;
+INSERT INTO gossip_menu_option (menu_id,id,option_text,option_id,npc_option_npcflag) VALUES
 (38917,0,"You turned Fandral Staghelm over the twilight's hammer. Why have you betrayed the dragonflights",1,1);
 
 DELETE FROM `creature_text` WHERE (`entry`='38917') AND (`groupid`='1') AND (`id`='0');
-insert into `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) values
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
 ('38917','1','0','No, NO! I didn t betray the dragonflights. We were all betrayed. Ysera was lost in a dream while this whole world come undone. ','12','0','100','0','0','0','Life party');
 
 DELETE FROM `conditions` WHERE (`ConditionValue1`='29437');
@@ -1184,7 +1186,7 @@ DELETE FROM `gameobject` WHERE (`id`='204580');
 INSERT INTO `gameobject` VALUES (null, 204580, 1, 0, 0, 1, 1, 5103.02, -2052.92, 1275.42, 2.12965, 0, 0, 0.874705, 0.484656, 300, 0, 1);
 
 -- Quest 25332 Get Me Outta Here!
-UPDATE creature_template SET ainame = "SmartAI"  WHERE entry IN (39640);
+UPDATE creature_template SET ainame = "SmartAI" WHERE entry IN (39640);
 UPDATE `creature_template` SET `unit_flags`='0' WHERE (`entry`='39640');
 UPDATE `creature_template` SET `type_flags`='0' WHERE (`entry`='39640');
 
@@ -1194,7 +1196,7 @@ INSERT INTO `smart_scripts` VALUES (39640, 0, 1, 0, 19, 0, 100, 0, 25332, 0, 0, 
 DELETE FROM `creature_template_addon` WHERE (`entry`='39797');
 INSERT INTO `creature_template_addon` VALUES (39797, 0, 0, 0, 0, 0, '58506');
 UPDATE `creature_template` SET `Health_mod`='13.54', `minlevel`='81', `maxlevel`='81' WHERE (`entry`='39797');
-UPDATE creature_template SET ainame = "SmartAI"  WHERE entry IN (39797);
+UPDATE creature_template SET ainame = "SmartAI" WHERE entry IN (39797);
 DELETE FROM smart_scripts WHERE entryorguid IN (39797) AND source_type = 0;
 INSERT INTO smart_scripts (entryorguid, source_type, id, link, event_type, event_phase_mask, event_chance, event_flags, event_param1, event_param2, event_param3, event_param4, action_type, action_param1, action_param2, action_param3, action_param4, action_param5, action_param6, target_type, target_param1, target_param2, target_param3, target_x, target_y, target_z, target_o, COMMENT) VALUES
 (39797,0,1,0,54,0,100,0,0,0,0,0,12, 39642, 6, 60, 0, 0, 0, 8, 0, 0, 0, 5052.27, -2088.01, 1276.99, 3.171, 'Summon mob'),
@@ -1291,17 +1293,17 @@ UPDATE `gameobject_template` SET `faction`='35', `flags`='0' WHERE (`entry`='202
 UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='39644');
 DELETE FROM smart_scripts WHERE entryorguid IN (39644);
 INSERT INTO `smart_scripts` VALUES (39644, 0, 1, 2, 62, 0, 100, 0, 39644, 0, 0, 0, 33, 39719, 0, 0, 0, 0, 0, 21, 5, 0, 0, 0, 0, 0, 0, 'credit');
-INSERT INTO `smart_scripts` VALUES (39644, 0, 2, 5, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Chiude gossip');
+INSERT INTO `smart_scripts` VALUES (39644, 0, 2, 5, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Closes Gossip');
 INSERT INTO `smart_scripts` VALUES (39644, 0, 5, 6, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,'Frase');
 INSERT INTO `smart_scripts` VALUES (39644, 0, 6, 0, 61, 0, 100, 0, 0, 0, 0, 0, 41, 3, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Force despawn');
 UPDATE `creature_template` SET `gossip_menu_id`='39644' WHERE (`entry`='39644');
 
-delete from gossip_menu_option where menu_id = 39644;
-insert into gossip_menu_option (menu_id,id,option_text,option_id,npc_option_npcflag) values
+delete from gossip_menu_option WHERE menu_id = 39644;
+INSERT INTO gossip_menu_option (menu_id,id,option_text,option_id,npc_option_npcflag) VALUES
 (39644,0,"Administer the drought",1,1);
 
 DELETE FROM `creature_text` WHERE (`entry`='39644') AND (`groupid`='1') AND (`id`='0');
-insert into `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) values
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
 ('39644','1','0','Wha-What? Where am I? I ve got to get out of here! ','12','0','100','0','0','0','Life party');
 
 DELETE FROM `conditions` WHERE (`ConditionValue1`='25298');
@@ -1460,17 +1462,17 @@ DELETE FROM `creature` WHERE (`id`='40056');
 UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='39933');
 DELETE FROM smart_scripts WHERE entryorguid IN (39933);
 INSERT INTO `smart_scripts` VALUES (39933, 0, 3, 4, 62, 0, 100, 0, 39933,0,0,0,33, 40056, 0, 0, 0, 0, 0, 21, 2, 0, 0, 0, 0, 0, 0, 'credit');
-INSERT INTO `smart_scripts` VALUES (39933, 0, 4, 5, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Chiude gossip');
+INSERT INTO `smart_scripts` VALUES (39933, 0, 4, 5, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Closes Gossip');
 INSERT INTO `smart_scripts` VALUES (39933, 0, 5, 0, 61, 0, 100, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,'Frase');
 
 UPDATE `creature_template` SET `gossip_menu_id`='39933' WHERE (`entry`='39933');
 
-delete from gossip_menu_option where menu_id = 39933;
-insert into gossip_menu_option (menu_id,id,option_text,option_id,npc_option_npcflag) values
+delete from gossip_menu_option WHERE menu_id = 39933;
+INSERT INTO gossip_menu_option (menu_id,id,option_text,option_id,npc_option_npcflag) VALUES
 (39933,0,"Will you help us to defeat them?",1,1);
 
 DELETE FROM `creature_text` WHERE (`entry`='39933') AND (`groupid`='1') AND (`id`='0');
-insert into `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) values
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
 ('39933','1','0','Madness. Chaos. Much as I thrill to see the titans work undone. I do wish to remain alive when the master returns. I will help you. ','12','0','100','0','0','0','Life party');
 
 DELETE FROM `conditions` WHERE (`ConditionValue1`='25404');
@@ -1509,17 +1511,17 @@ INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`) VA
 UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='39928');
 DELETE FROM smart_scripts WHERE entryorguid IN (39928);
 INSERT INTO `smart_scripts` VALUES (39928, 0, 3, 4, 62, 0, 100, 0, 39928,0,0,0,33, 40056, 0, 0, 0, 0, 0, 21, 3, 0, 0, 0, 0, 0, 0, 'credit');
-INSERT INTO `smart_scripts` VALUES (39928, 0, 4, 5, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Chiude gossip');
+INSERT INTO `smart_scripts` VALUES (39928, 0, 4, 5, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Closes Gossip');
 INSERT INTO `smart_scripts` VALUES (39928, 0, 5, 0, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,'Frase');
 
 UPDATE `creature_template` SET `gossip_menu_id`='39928' WHERE (`entry`='39928');
 
-delete from gossip_menu_option where menu_id = 39928;
-insert into gossip_menu_option (menu_id,id,option_text,option_id,npc_option_npcflag) values
+delete from gossip_menu_option WHERE menu_id = 39928;
+INSERT INTO gossip_menu_option (menu_id,id,option_text,option_id,npc_option_npcflag) VALUES
 (39928,0,"What? Blackhorn helped you combat the inferno but escaped in the process? That crafty weasel!",1,1);
 
 DELETE FROM `creature_text` WHERE (`entry`='39928') AND (`groupid`='1') AND (`id`='0');
-insert into `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) values
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
 ('39928','1','0','It s not your fault. He d probably been plotting this the moment he saw the flames begin creeping up the mountain. We ll have to deal with him later. . ','12','0','100','0','0','0','Life party');
 
 DELETE FROM `conditions` WHERE (`ConditionValue1`='29066');
