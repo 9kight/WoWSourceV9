@@ -156,7 +156,6 @@ INSERT INTO `spell_linked_spell` VALUES (77288, 77308, 0, 0, 'summon egg');
 UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='41224');
 DELETE FROM smart_scripts WHERE entryorguid IN (41224);
 INSERT INTO `smart_scripts` VALUES (41224, 0, 1, 0, 54, 0, 100, 0, 0, 0, 0, 0, 33, 41218, 0, 0, 0, 0, 0, 21, 15, 0, 0, 0, 0, 0, 0, 'credit');
-UPDATE `gameobject_template` SET `data1`='25764', `data12`='203208' WHERE (`entry`='203208');
 UPDATE `creature_template` SET `faction_A`='14', `faction_H`='14' WHERE (`entry`='41226');
 
 -- Quest 25740 Fact-Finding Mission CHAIN TIMELINE FIX
@@ -178,8 +177,6 @@ INSERT INTO `gameobject` VALUES (null, 203197, 1, 0, 0, 1, 1, 4031.14, -2269.67,
 INSERT INTO `gameobject` VALUES (null, 203197, 1, 0, 0, 1, 1, 3989.21, -2213.65, 1132.05, 6.21267, 0, 0, 0.0352511, -0.999379, 300, 0, 1);
 INSERT INTO `gameobject` VALUES (null, 203197, 1, 0, 0, 1, 1, 4041.63, -2277.41, 1134.97, 3.65227, 0, 0, 0.967577, -0.252575, 300, 0, 1);
 UPDATE `gameobject_template` SET `data7`='203197', `data8`='25758' WHERE (`entry`='203197');
-DELETE FROM `gameobject_loot_template` WHERE (`entry`='29580') AND (`item`='55809');
-INSERT INTO `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`) VALUES ('29580', '55809', '-100');
 
 -- Quest 25915 The Strength of Tortolla CHAIN TIMELINE FIX
 UPDATE `quest_template` SET `NextQuestIdChain`='25923' WHERE (`Id`='25915');
@@ -242,7 +239,7 @@ INSERT INTO `creature` VALUES (null, 341736, 1, 0, 0, 1, 1, 0, 0, 4498.22, -3730
 INSERT INTO `creature` VALUES (null, 341736, 1, 0, 0, 1, 1, 0, 0, 4464.14, -3715.76, 659.255, 2.56441, 300, 0, 0, 42, 0, 0, 0, 0, 0);
 UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='341736');
 DELETE FROM smart_scripts WHERE entryorguid IN (341736) AND source_type = 0;
-INSERT INTO `smart_scripts` VALUES (341736, 0, 1, 0, 1, 0, 100, 0, 0, 0, 0, 0, 33, 41602, 0, 0, 0, 0, 0, 21, 5, 0, 0, 0, 0, 0, 0, 'credit');
+
 
 -- Quest 25274 Signed in Blood
 DELETE FROM `creature_loot_template` WHERE (`entry`='39619') AND (`item`='52685');
@@ -264,8 +261,6 @@ INSERT INTO `gameobject` VALUES (null, 202619, 1, 0, 0, 1, 1, 4410.36, -4533.15,
 INSERT INTO `gameobject` VALUES (null, 202619, 1, 0, 0, 1, 1, 4491.3, -4527.42, 882.861, 6.10502, 0, 0, 0.0889649, -0.996035, 300, 0, 1);
 INSERT INTO `gameobject` VALUES (null, 202619, 1, 0, 0, 1, 1, 4529.45, -4533.66, 883.24, 4.9777, 0, 0, 0.607368, -0.794421, 300, 0, 1);
 UPDATE `gameobject_template` SET `data7`='202619', `data8`='25224' WHERE (`entry`='202619');
-DELETE FROM `gameobject_loot_template` WHERE (`entry`='28423') AND (`item`='52537');
-INSERT INTO `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`) VALUES ('28423', '52537', '-100');
 
 -- Quest 25291 Twilight Training CHAIN TIMELINE FIX
 UPDATE `quest_template` SET `NextQuestIdChain`='25509' WHERE (`Id`='25291');
@@ -344,7 +339,6 @@ INSERT INTO gossip_menu_option (menu_id,id,option_text,option_id,npc_option_npcf
 -- First Question
 DELETE FROM smart_scripts WHERE entryorguid IN (39601) AND source_type = 0;
 INSERT INTO smart_scripts (entryorguid, source_type, id, link, event_type, event_phase_mask, event_chance, event_flags, event_param1, event_param2, event_param3, event_param4, action_type, action_param1, action_param2, action_param3, action_param4, action_param5, action_param6, target_type, target_param1, target_param2, target_param3, target_x, target_y, target_z, target_o, COMMENT) VALUES
-(39601, 0, 1, 2, 62, 0, 100, 0, 39601, 0, 0, 0, 33, 39824, 0, 0, 0, 0, 0, 21, 6, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
 (39601, 0, 2, 3, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Exact Answer"),
 (39601, 0, 3, 4, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
@@ -353,7 +347,7 @@ INSERT INTO smart_scripts (entryorguid, source_type, id, link, event_type, event
 (39601, 0, 24, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
 -- Second Question
-(39601, 0, 4, 5, 62, 0, 100, 0, 39602, 1, 0, 0, 33, 39824, 0, 0, 0, 0, 0, 21, 6, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
+(39601, 0, 4, 5, 62, 0, 100, 0, 39602, 1, 0, 0, 5, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
 (39601, 0, 5, 6, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Exact Answer"),
 (39601, 0, 6, 7, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
@@ -362,7 +356,7 @@ INSERT INTO smart_scripts (entryorguid, source_type, id, link, event_type, event
 (39601, 0, 27, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
 -- Third Question
-(39601, 0, 7, 8, 62, 0, 100, 0, 39603, 1, 0, 0, 33, 39824, 0, 0, 0, 0, 0, 21, 6, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
+(39601, 0, 7, 8, 62, 0, 100, 0, 39603, 1, 0, 0, 5, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
 (39601, 0, 8, 9, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Exact Answer"),
 (39601, 0, 9, 10, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
@@ -371,7 +365,7 @@ INSERT INTO smart_scripts (entryorguid, source_type, id, link, event_type, event
 (39601, 0, 30, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
 -- The four Question
-(39601, 0, 10, 11, 62, 0, 100, 0, 39604, 1, 0, 0, 33, 39824, 0, 0, 0, 0, 0, 21, 6, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
+(39601, 0, 10, 11, 62, 0, 100, 0, 39604, 1, 0, 0, 5, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
 (39601, 0, 11, 12, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Exact Answer"),
 (39601, 0, 12, 13, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
@@ -380,7 +374,7 @@ INSERT INTO smart_scripts (entryorguid, source_type, id, link, event_type, event
 (39601, 0, 33, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
 -- the five Question
-(39601, 0, 13, 14, 62, 0, 100, 0, 39605, 1, 0, 0, 33, 39824, 0, 0, 0, 0, 0, 21, 6, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
+(39601, 0, 13, 14, 62, 0, 100, 0, 39605, 1, 0, 0, 5, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
 (39601, 0, 14, 15, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Exact Answer"),
 (39601, 0, 15, 16, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
@@ -389,7 +383,7 @@ INSERT INTO smart_scripts (entryorguid, source_type, id, link, event_type, event
 (39601, 0, 36, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
 -- the six Question
-(39601, 0, 16, 17, 62, 0, 100, 0, 39606, 0, 0, 0, 33, 39824, 0, 0, 0, 0, 0, 21, 6, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
+(39601, 0, 16, 17, 62, 0, 100, 0, 39606, 1, 0, 0, 5, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
 (39601, 0, 17, 18, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Exact Answer"),
 (39601, 0, 18, 19, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
@@ -398,7 +392,7 @@ INSERT INTO smart_scripts (entryorguid, source_type, id, link, event_type, event
 (39601, 0, 39, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
 -- the seven Question
-(39601, 0, 19, 20, 62, 0, 100, 0, 39607, 0, 0, 0, 33, 39824, 0, 0, 0, 0, 0, 21, 6, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
+(39601, 0, 19, 20, 62, 0, 100, 0, 39607, 1, 0, 0, 5, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
 (39601, 0, 20, 21, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Exact Answer"),
 (39601, 0, 21, 43, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
@@ -407,7 +401,7 @@ INSERT INTO smart_scripts (entryorguid, source_type, id, link, event_type, event
 (39601, 0, 42, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
 -- the 8 Question
-(39601, 0, 43, 44, 62, 0, 100, 0, 39608, 0, 0, 0, 33, 39824, 0, 0, 0, 0, 0, 21, 6, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
+(39601, 0, 43, 44, 62, 0, 100, 0, 39608, 1, 0, 0, 5, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
 (39601, 0, 44, 45, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Exact Answer"),
 (39601, 0, 45, 50, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
@@ -416,16 +410,16 @@ INSERT INTO smart_scripts (entryorguid, source_type, id, link, event_type, event
 (39601, 0, 48, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
 -- the nine Question
-(39601, 0, 50, 51, 62, 0, 100, 0, 39609, 0, 0, 0, 33, 39824, 0, 0, 0, 0, 0, 21, 6, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
+(39601, 0, 50, 51, 62, 0, 100, 0, 39609, 1, 0, 0, 5, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
 (39601, 0, 51, 52, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Exact Answer"),
 (39601, 0, 52, 56, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
-(39601, 0, 53, 54, 62, 0, 100, 0, 39609, 1, 0, 0, 33, 39824, 0, 0, 0, 0, 0, 21, 6, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
+(39601, 0, 53, 54, 62, 0, 100, 0, 39609, 1, 0, 0, 5, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
 (39601, 0, 54, 55, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Exact Answer"),
 (39601, 0, 55, 56, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
 -- the 10 Question
-(39601, 0, 56, 57, 62, 0, 100, 0, 39610, 1, 0, 0, 33, 39824, 0, 0, 0, 0, 0, 21, 6, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
+(39601, 0, 56, 57, 62, 0, 100, 0, 39610, 1, 0, 0, 5, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'gossip - emote eat'),
 (39601, 0, 57, 58, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0,0,0,0,0,1,0,0,0,0,0,0,0,"Exact Answer"),
 (39601, 0, 58, 0, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,"Closes Gossip"),
 
@@ -635,12 +629,6 @@ DELETE FROM `gameobject` WHERE (`id`='202968');
 INSERT INTO `gameobject` VALUES (null, 202968, 1, 0, 0, 1, 1, 4625.73, -4706.4, 884.156, 4.356, 0, 0, 0.821246, -0.570574, 300, 0, 1);
 DELETE FROM `gameobject` WHERE (`id`='202969');
 INSERT INTO `gameobject` VALUES (null, 202969, 1, 0, 0, 1, 1, 4737.04, -4834.34, 885.375, 6.14671, 0, 0, 0.0681859, -0.997673, 300, 0, 1);
-UPDATE `gameobject_template` SET `data1`='25296', `data7`='202968', `data8`='25296' WHERE (`entry`='202968');
-UPDATE `gameobject_template` SET `data1`='25297', `data7`='202969', `data8`='25296' WHERE (`entry`='202969');
-DELETE FROM `gameobject_loot_template` WHERE (`entry`='25296') AND (`item`='52724');
-INSERT INTO `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`) VALUES ('25296', '52724', '-100');
-DELETE FROM `gameobject_loot_template` WHERE (`entry`='25297') AND (`item`='52725');
-INSERT INTO `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`) VALUES ('25297', '52725', '-100');
 
 -- Quest 25308 Seeds of Discord
 DELETE FROM `gameobject` WHERE (`id`='203091');
@@ -753,9 +741,9 @@ INSERT INTO `smart_scripts` VALUES (341740, 0, 1, 0, 1, 0, 100, 0, 0, 0, 0, 0, 6
 
 -- Quest 25810 The Hatchery Must Burn
 DELETE FROM `creature` WHERE (`id`='40578');
-INSERT INTO `creature` VALUES (null, 40578, 1, 0, 0, 1, 1, 0, 1, 4604.51, -2507.66, 828.686, 3.90995, 300, 0, 0, 44679, 4169, 0, 0, 0, 0);
+INSERT INTO `creature` VALUES (null, 40578, 1, 0, 0, 1, 1, 0, 0, 4604.51, -2507.66, 828.686, 3.90995, 300, 0, 0, 44679, 4169, 0, 0, 0, 0);
 DELETE FROM `creature` WHERE (`id`='40757');
-INSERT INTO `creature` VALUES (null, 40757, 1, 0, 0, 1, 1, 0, 127, 4798.56, -2475.02, 685.842, 3.51234, 300, 0, 0, 44679, 4169, 0, 0, 0, 0);
+INSERT INTO `creature` VALUES (null, 40757, 1, 0, 0, 1, 1, 0, 0, 4798.56, -2475.02, 685.842, 3.51234, 300, 0, 0, 44679, 4169, 0, 0, 0, 0);
 DELETE FROM `creature` WHERE (`id`='40723');
 INSERT INTO `creature` VALUES (null, 40723, 1, 0, 0, 1, 1, 0, 0, 4798.11, -2471.95, 685.738, 3.65371, 300, 0, 0, 30951, 0, 0, 0, 0, 0);
 INSERT INTO `creature` VALUES (null, 40723, 1, 0, 0, 1, 1, 0, 0, 4799.82, -2478.59, 685.886, 3.57517, 300, 0, 0, 30951, 0, 0, 0, 0, 0);
@@ -1203,7 +1191,7 @@ INSERT INTO smart_scripts (entryorguid, source_type, id, link, event_type, event
 (39797,0,2,0,8,0,100,0,62464,0,0,0,41, 3, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Force despawn');
 
 DELETE FROM `creature_template` WHERE (`entry`='341744');
-INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `exp_unk`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `speed_swim`, `speed_fly`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `type_flags2`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Health_mod`, `Mana_mod`, `Mana_mod_extra`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (341744, 0, 0, 0, 0, 1126, 15880, 0, 0, 0, 'bunny credit', NULL, NULL, 0, 1, 1, 0, 0, 0, 35, 35, 1, 1.14286, 1, 1, 1, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 33555200, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1024, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 3, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 128, '', 15595);
+INSERT INTO `creature_template` VALUES ('341744', '0', '0', '0', '0', '1126', '15880', '0', '0', '0', 'bunny credit', null, null, '0', '1', '1', '0', '0', '35', '35', '1', '1', '1.14286', '1', '1', '1', '0', '0', '0', '0', '0', '1', '2000', '2000', '1', '33555200', '2048', '0', '0', '0', '0', '0', '0', '0', '0', '0', '10', '1024', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', null, null, 'SmartAI', '0', '3', '1', '1', '1', '1', '1', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '128', '', '15595');
 
 DELETE FROM `creature_template_addon` WHERE (`entry`='341744');
 INSERT INTO `creature_template_addon` VALUES (341744, 0, 0, 65536, 1, 0, '64573 52855');
@@ -1291,11 +1279,10 @@ UPDATE `gameobject_template` SET `faction`='35', `flags`='0' WHERE (`entry`='202
 
 -- Quest 25298 Free Your Mind, the Rest Follows
 UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='39644');
-DELETE FROM smart_scripts WHERE entryorguid IN (39644);
-INSERT INTO `smart_scripts` VALUES (39644, 0, 1, 2, 62, 0, 100, 0, 39644, 0, 0, 0, 33, 39719, 0, 0, 0, 0, 0, 21, 5, 0, 0, 0, 0, 0, 0, 'credit');
-INSERT INTO `smart_scripts` VALUES (39644, 0, 2, 5, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Closes Gossip');
-INSERT INTO `smart_scripts` VALUES (39644, 0, 5, 6, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,'Frase');
-INSERT INTO `smart_scripts` VALUES (39644, 0, 6, 0, 61, 0, 100, 0, 0, 0, 0, 0, 41, 3, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Force despawn');
+DELETE FROM smart_scripts WHERE entryorguid IN (39644);                 
+INSERT INTO `smart_scripts` VALUES (39644, 0, 1, 5, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Closes Gossip');
+INSERT INTO `smart_scripts` VALUES (39644, 0, 2, 6, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,'Frase');
+INSERT INTO `smart_scripts` VALUES (39644, 0, 3, 0, 61, 0, 100, 0, 0, 0, 0, 0, 41, 3, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Force despawn');
 UPDATE `creature_template` SET `gossip_menu_id`='39644' WHERE (`entry`='39644');
 
 delete from gossip_menu_option WHERE menu_id = 39644;
@@ -1461,7 +1448,6 @@ UPDATE `quest_template` SET `PrevQuestId`='25412' WHERE (`Id`='25428');
 DELETE FROM `creature` WHERE (`id`='40056');
 UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='39933');
 DELETE FROM smart_scripts WHERE entryorguid IN (39933);
-INSERT INTO `smart_scripts` VALUES (39933, 0, 3, 4, 62, 0, 100, 0, 39933,0,0,0,33, 40056, 0, 0, 0, 0, 0, 21, 2, 0, 0, 0, 0, 0, 0, 'credit');
 INSERT INTO `smart_scripts` VALUES (39933, 0, 4, 5, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Closes Gossip');
 INSERT INTO `smart_scripts` VALUES (39933, 0, 5, 0, 61, 0, 100, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,'Frase');
 
@@ -1510,7 +1496,6 @@ INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`) VA
 -- Quest 29066 Good News... and Bad News
 UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='39928');
 DELETE FROM smart_scripts WHERE entryorguid IN (39928);
-INSERT INTO `smart_scripts` VALUES (39928, 0, 3, 4, 62, 0, 100, 0, 39928,0,0,0,33, 40056, 0, 0, 0, 0, 0, 21, 3, 0, 0, 0, 0, 0, 0, 'credit');
 INSERT INTO `smart_scripts` VALUES (39928, 0, 4, 5, 61, 0, 100, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Closes Gossip');
 INSERT INTO `smart_scripts` VALUES (39928, 0, 5, 0, 61, 0, 100, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,'Frase');
 
@@ -1559,3 +1544,20 @@ INSERT INTO `smart_scripts` VALUES (39999, 0, 2, 0, 61, 0, 100, 0, 0, 0, 0, 0, 4
 
 DELETE FROM `creature_template_addon` WHERE (`entry`='39999');
 INSERT INTO `creature_template_addon` VALUES (39999, 0, 0, 7, 0, 0, '');
+
+DELETE FROM `creature_template` WHERE `entry`=56854 LIMIT 1;
+INSERT INTO `creature_template` ( `entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES ( 56854, 0, 0, 0, 0, 0, 29059, 0, 0, 0, "Twilight Elite Dreadblade", "", "", 0, 86, 86, 3, 16, 16, 0, 1.0, 1.14286, 1.0, 1, 2109, 2704, 0, 1, 3.1, 2000, 2000, 1, 32832, 0, 0, 0, 0, 0, 0, 2109, 2704, 1, 4, 72, 56854, 0, 0, 0, 0, 0, 0, 0, 0, 107801, 107797, 107791, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", 0, 3, 126.0, 0.0, 1.0, 0, 0, 0, 0, 0, 0, 0, 186, 1, 56854, 0, 0, "", "15595");
+
+DELETE FROM gameobject_template WHERE entry IN (203288,202619,202968,202969,203197);
+INSERT INTO `gameobject_template` VALUES (202619, 3, 2312, 'Flame Blossom', '', '', '', 0, 0, 1, 52537, 0, 0, 0, 0, 0, 259, 202619, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 13623);
+INSERT INTO `gameobject_template` VALUES (202968, 3, 8704, 'Crate of Scrolls', '', 'Stealing', '', 0, 0, 1, 52724, 0, 0, 0, 0, 0, 1691, 202968, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26365, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 13623);
+INSERT INTO `gameobject_template` VALUES (202969, 3, 222, 'Hyjal Battleplans', '', 'Stealing', '', 0, 0, 1, 52725, 0, 0, 0, 0, 0, 1691, 202969, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26365, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 13623);
+INSERT INTO `gameobject_template` VALUES (203197, 3, 7041, 'Twilight Armor Plate', '', 'Collecting', '', 0, 4, 0.8, 55809, 0, 0, 0, 0, 0, 43, 203197, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 19676, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '0', '', 13623);
+INSERT INTO `gameobject_template` VALUES (203288, 3, 6868, 'Swiftgear Gizmo', '', '', '', 0, 0, 1, 56085, 0, 0, 0, 0, 0, 43, 29627, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 13623);
+
+DELETE FROM gameobject_loot_template WHERE entry IN (29627,202619,202968,202969,203197);
+INSERT INTO `gameobject_loot_template` VALUES (29627, 56085, -100, 1, 0, 1, 1);
+INSERT INTO `gameobject_loot_template` VALUES (202619, 52537, -100, 1, 0, 1, 1);
+INSERT INTO `gameobject_loot_template` VALUES (202968, 52724, -100, 1, 0, 1, 1);
+INSERT INTO `gameobject_loot_template` VALUES (202969, 52725, -100, 1, 0, 1, 1);
+INSERT INTO `gameobject_loot_template` VALUES (203197, 55809, -100, 1, 0, 1, 1);
