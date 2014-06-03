@@ -1,3 +1,5 @@
+-- Credit to naios for share the spawns thx mate
+
 ALTER TABLE `gameobject`
 MODIFY COLUMN `phaseMask` mediumint(8) unsigned NOT NULL DEFAULT '0';
 
