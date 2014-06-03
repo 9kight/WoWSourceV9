@@ -25,6 +25,8 @@ enum Northshire
     NPC_STORMWIND_INFANTRY    = 49869,
     NPC_BROTHER_PAXTON        = 951,
     NPC_INJURED_SOLDIER_DUMMY = 50378,
+	
+    SAY_YELL                  = 1,
 
     SPELL_SPYING              = 92857,
     SPELL_SNEAKING            = 93046,
@@ -39,7 +41,7 @@ enum Northshire
 
     ACTION_HEAL               = 1,
     EVENT_HEALED_1            = 1,
-    EVENT_HEALED_2            = 2
+    EVENT_HEALED_2            = 2	
 };
 
 class npc_stormwind_infantry : public CreatureScript
@@ -47,41 +49,77 @@ class npc_stormwind_infantry : public CreatureScript
 public:
     npc_stormwind_infantry() : CreatureScript("npc_stormwind_infantry") { }
 
-    struct npc_stormwind_infantryAI : public ScriptedAI
-    {
-        npc_stormwind_infantryAI(Creature* creature) : ScriptedAI(creature)
-        {
-            me->HandleEmoteCommand(EMOTE_STATE_READY1H);
-        }
-
-        EventMap events;
-
-        void EnterCombat(Unit * who)
-        {
-            me->AddUnitState(UNIT_STATE_ROOT);
-            me->HandleEmoteCommand(EMOTE_STATE_READY1H);
-        }
-
-        void Reset()
-        {
-            me->HandleEmoteCommand(EMOTE_STATE_READY1H);
-        }
-
-        void DamageTaken(Unit* attacker, uint32& damage)
-        {
-            if (attacker->GetEntry() == NPC_BLACKROCK_BATTLE_WORG && damage >= me->GetHealth())
-                me->SetHealth(me->GetMaxHealth());
-        }
-
-        void UpdateAI(const uint32 diff)
-        {
-            DoMeleeAttackIfReady();
-        }
-    };
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_stormwind_infantryAI (creature);
     }
+
+    struct npc_stormwind_infantryAI : public ScriptedAI
+    {
+        npc_stormwind_infantryAI(Creature* creature) : ScriptedAI(creature) {}
+
+        bool HasATarget;
+		
+		uint32 tYell, SayChance, WillSay;
+
+        void Reset()
+        {
+            HasATarget = false;
+            WillSay     = urand(0,100);
+            SayChance   = 25;			
+            tYell       = urand(10000, 20000);
+        }
+
+        void DamageTaken(Unit* doneBy, uint32& damage)
+        {
+            if (doneBy->ToCreature())
+                if (me->GetHealth() <= damage || me->GetHealthPct() <= 80.0f)
+                    damage = 0;
+        }
+
+        void DamageDealt(Unit* target, uint32& damage, DamageEffectType damageType)
+        {
+            if (target->ToCreature())
+                if (target->GetHealth() <= damage || target->GetHealthPct() <= 70.0f)
+                    damage = 0;
+        }
+
+        void MoveInLineOfSight(Unit* who)
+        {
+            if (who && !HasATarget)
+                if (me->GetDistance(who) < 5.0f)
+                    if (Creature* creature = who->ToCreature())
+                        if (creature->GetEntry() == NPC_BLACKROCK_BATTLE_WORG)
+                            AttackStart(who);
+        }
+
+        void EnterEvadeMode()
+        {
+            HasATarget = false;
+        }
+		
+       void UpdateAI(const uint32 diff)
+           {
+		   
+           if(tYell <= diff)
+               {
+			   
+                  if (WillSay <= SayChance)
+                   {			   
+                     Talk(SAY_YELL);
+                     tYell = urand(10000, 20000);          
+                   }			   
+			      
+			    }
+			   else tYell -= diff;
+
+               if (!UpdateVictim())
+               return;
+            else
+                DoMeleeAttackIfReady();
+			   
+            }
+    };
 };
 
 /*######
