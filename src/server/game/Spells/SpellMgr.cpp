@@ -3140,7 +3140,7 @@ void SpellMgr::LoadSpellCustomAttr()
             case 80380: // Disable Temporarily the Aura Effect "MELEE_SLOW"
                 spellInfo->Effects[1].BasePoints = 0;
                 break;
-            default:
+			    default:
                 break;
         }
 
@@ -4188,6 +4188,13 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 99488:
                 spellInfo->Effects[0].MiscValue |= 16;
                 break;
+			// ISLE OF CONQUEST SPELLS
+           //
+            case 66551: // Teleport
+                spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(13); // 50000yd
+                break;
+          // ENDOF ISLE OF CONQUEST SPELLS
+          //
             default:
                 break;
         }
