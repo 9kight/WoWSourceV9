@@ -57,7 +57,7 @@ UPDATE `creature_template` SET `AIName`='SmartAI' WHERE (`entry`='38120');
 
 -- Add missing object into lost isle to bad is not appear in wowhead Gobblin Banner
 DELETE FROM gameobject WHERE id=202132;
-INSERT INTO `gameobject` VALUES ('NULL', '202132', '648', '4720', '4876', '1', '2048', '680.373', '2028.32', '50.6731', '3.79344', '0', '0', '0.947356', '-0.320183', '300', '0', '1');
+INSERT INTO `gameobject` VALUES (NULL, '202132', '648', '4720', '4876', '1', '2048', '680.373', '2028.32', '50.6731', '3.79344', '0', '0', '0.947356', '-0.320183', '300', '0', '1');
 
 -- add right  requiredments for quest http://www.wowhead.com/quest=24859
 DELETE FROM quest_template WHERE id=24859;

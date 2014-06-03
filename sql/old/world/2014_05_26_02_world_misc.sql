@@ -30,7 +30,7 @@ DELETE FROM creature_questrelation WHERE id=50047;
 DELETE FROM creature_questrelation WHERE id=50039;
 
 -- wrong equipment http://www.wowhead.com/npc=295
-UPDATE creature_template SET equipment_id=0 WHERE entry=295;
+-- UPDATE creature_template SET equipment_id=0 WHERE entry=295;
 DELETE FROM creature_equip_template WHERE entry=295;
 
 -- missing emote from thoose guide

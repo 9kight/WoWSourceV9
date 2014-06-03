@@ -542,7 +542,7 @@ DELETE FROM creature_questrelation WHERE id=38038;
 
 -- add spawn into the pit for http://www.wowhead.com/npc=38142
 DELETE FROM creature WHERE id=38142;
-INSERT INTO `creature` VALUES ('NULL', '38142', '1', '14', '4865', '1', '1', '0', '1', '-1148.26', '-5527.3', '8.10507', '4.85924', '300', '0', '0', '107', '0', '0', '0', '0', '0');
+INSERT INTO `creature` VALUES (NULL, '38142', '1', '14', '4865', '1', '1', '0', '1', '-1148.26', '-5527.3', '8.10507', '4.85924', '300', '0', '0', '107', '0', '0', '0', '0', '0');
 
 -- he was  missing items and he didnt sale nothing http://www.wowhead.com/npc=39031
 DELETE FROM npc_vendor WHERE entry=39031;
