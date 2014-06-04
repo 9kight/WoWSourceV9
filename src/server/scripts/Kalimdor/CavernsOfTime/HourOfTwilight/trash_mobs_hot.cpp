@@ -21,32 +21,33 @@ public:
            uint32 Impale_Timer;
 
        void Reset()
-           {
-               Impale_Timer = 5000;
-            }
+        {
+          Impale_Timer = 5000;
+        }
 
        void UpdateAI(const uint32 diff)
            {
-               if (!UpdateVictim())
+            if (!UpdateVictim())
                return;
 
                if(Impale_Timer<= diff)
                {
-                    DoCast(SPELL_IMPALE);
-                    Impale_Timer = 10000;
-               }else Impale_Timer -= diff;
+                 DoCast(SPELL_IMPALE);
+                 Impale_Timer = 10000;
+                }
+			   else Impale_Timer -= diff;
 
           DoMeleeAttackIfReady();
            }
        };
 
 CreatureAI* GetAI(Creature *pCreature) const
-{
+    {
         return new npc_crystalline_elementalAI(pCreature);
-}
+    }
 };
 
 void AddSC_trash_mobs_hot()
 {
-     new npc_crystalline_elemental();
+   new npc_crystalline_elemental();
 }

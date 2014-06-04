@@ -10,26 +10,26 @@ EndScriptData */
 
 enum eAsira_dawnslayerYells 
 {
-	SAY_AGGRO       = 0,
-	SAY_SMOKE_BOMB  = 1,
-	SAY_KILL        = 2,
-	SAY_DEATH       = 3
+    SAY_AGGRO       = 0,
+    SAY_SMOKE_BOMB  = 1,
+    SAY_KILL        = 2,
+    SAY_DEATH       = 3
 };
 
 enum Spells 
 {
-	SPELL_MARK_OF_SILENCE        = 102726,
-	SPELL_SILENCED               = 103587,
-	SPELL_CHOKING_SMOKE_BOMB     = 103558,
-	SPELL_BLADE_BARRIER          = 103419,
-	LESSER_BLADE_BARRIER         = 103562
+    SPELL_MARK_OF_SILENCE        = 102726,
+    SPELL_SILENCED               = 103587,
+    SPELL_CHOKING_SMOKE_BOMB     = 103558,
+    SPELL_BLADE_BARRIER          = 103419,
+    LESSER_BLADE_BARRIER         = 103562
 };
 
 enum Events 
 {
-	EVENT_MARK_OF_SILENCE,
-	EVENT_CHOKING_SMOKE_BOMB,
-	EVENT_LESSER_BLADE_BARRIER
+    EVENT_MARK_OF_SILENCE,
+    EVENT_CHOKING_SMOKE_BOMB,
+    EVENT_LESSER_BLADE_BARRIER
 };
 
 class boss_asira_dawnslayer : public CreatureScript
@@ -49,22 +49,22 @@ public:
             instance = creature->GetInstanceScript();
         }
 		
-		bool casted;
+        bool casted;
 		
-		uint32 m_uiHealthAmountModifier;
+        uint32 m_uiHealthAmountModifier;
         InstanceScript *instance;
         EventMap events;
 
         void Reset() 
         {
-			casted = false;
-			m_uiHealthAmountModifier = 1;
+            casted = false;
+            m_uiHealthAmountModifier = 1;
             events.Reset();
         }
 
         void JustDied(Unit* /*Kill*/)
         {
-			Talk(SAY_DEATH);
+            Talk(SAY_DEATH);
             if (instance)
             instance->SetData(DATA_ASIRA_EVENT, DONE);
         }
@@ -76,8 +76,8 @@ public:
 		
         void EnterCombat(Unit* /*Ent*/)
         {
-			Talk(SAY_AGGRO);
-			DoCast(SPELL_MARK_OF_SILENCE);
+            Talk(SAY_AGGRO);
+            DoCast(SPELL_MARK_OF_SILENCE);
             events.ScheduleEvent(EVENT_MARK_OF_SILENCE, urand(10000,11000));
             events.ScheduleEvent(EVENT_CHOKING_SMOKE_BOMB, urand(17000,20000));
             DoZoneInCombat();
@@ -101,20 +101,20 @@ public:
                 switch (eventId)
                 {
                     case EVENT_MARK_OF_SILENCE:
-					if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-						DoCast(SPELL_MARK_OF_SILENCE);
-						events.ScheduleEvent(EVENT_MARK_OF_SILENCE, 11000);
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                           DoCast(SPELL_MARK_OF_SILENCE);
+                           events.ScheduleEvent(EVENT_MARK_OF_SILENCE, 11000);
                         break;
     
                     case EVENT_CHOKING_SMOKE_BOMB:
-						Talk(SAY_SMOKE_BOMB);
-					if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                       DoCast(SPELL_CHOKING_SMOKE_BOMB);
-					   events.ScheduleEvent(EVENT_CHOKING_SMOKE_BOMB, 17000);
+                           Talk(SAY_SMOKE_BOMB);
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                           DoCast(SPELL_CHOKING_SMOKE_BOMB);
+                           events.ScheduleEvent(EVENT_CHOKING_SMOKE_BOMB, 17000);
                         break;
 						
                     case EVENT_LESSER_BLADE_BARRIER:
-						 DoCast(me, LESSER_BLADE_BARRIER, true);
+                         DoCast(me, LESSER_BLADE_BARRIER, true);
                         break;					
 																	
 					default:
@@ -125,9 +125,9 @@ public:
             // Health check
             if (HealthBelowPct(30 * m_uiHealthAmountModifier) && !casted)
             {
-				   DoCast(me, SPELL_BLADE_BARRIER);
-				   events.ScheduleEvent(EVENT_LESSER_BLADE_BARRIER, 12000);
-				   casted = true;
+                DoCast(me, SPELL_BLADE_BARRIER);
+                events.ScheduleEvent(EVENT_LESSER_BLADE_BARRIER, 12000);
+                casted = true;
             }			
             DoMeleeAttackIfReady();
         }
