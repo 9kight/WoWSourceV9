@@ -1,5 +1,5 @@
 -- Molten Front Spawn corect sniffed and  mobs health damage faction etc
-SELECT * FROM creature WHERE map=861;
+DELETE FROM creature WHERE map=861;
 INSERT INTO `creature` VALUES (NULL, 52504, 861, 0, 0, 1, 1, 1070, 0, 1186.03, 320.677, 16.4541, 2.82743, 300, 0, 0, 77490, 0, 0, 0, 0, 0);
 INSERT INTO `creature` VALUES (NULL, 53107, 861, 0, 0, 1, 1, 30512, 0, 1184.52, 348.248, 16.7538, 0, 300, 0, 0, 77490, 0, 0, 0, 0, 0);
 INSERT INTO `creature` VALUES (NULL, 54339, 861, 0, 0, 1, 1, 38760, 0, 1207.8, 339.858, 16.4991, 2.51327, 300, 5, 0, 154980, 0, 1, 0, 0, 0);
