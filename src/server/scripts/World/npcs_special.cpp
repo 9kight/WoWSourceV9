@@ -3514,8 +3514,8 @@ public:
         {   
             if(Unit* owner = me->GetOwner())
             {
-                Unit* ownerVictim = owner->getVictim();
-                Unit* meVictim = me->getVictim();
+                Unit* ownerVictim = owner->GetVictim();
+                Unit* meVictim = me->GetVictim();
 
                 // Rune Weapon's target switching only when DK switches
                 if(ownerVictim != meVictim)
