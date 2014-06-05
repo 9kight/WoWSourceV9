@@ -1,3 +1,7 @@
+-- Dancing Rune Weapon damage reduction
+DELETE FROM creature_template_addon WHERE entry=27893;
+INSERT INTO creature_template_addon (entry, path_id, mount, bytes1, bytes2, emote, auras) VALUES (27893, 0, 0, 0, 0, 0, '51906');
+
 DELETE FROM spell_proc_event WHERE entry=49028;
 INSERT INTO `spell_proc_event` VALUES (49028, 0, 0, 0, 0, 0, 65552, 0, 0, 0, 0);
 
