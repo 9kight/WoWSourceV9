@@ -16,8 +16,9 @@
  */
 
 /* ScriptData
+Scripts by Loukie
 SDName: Molten Front
-SD%Complete: 0
+SD%Complete: 20%
 SDComment: Placeholder
 SDCategory: Molten Front
 EndScriptData */
@@ -38,22 +39,26 @@ enum Spells
 enum eEvents
 {
     // npc_pyrelord
-    EVENT_INCINERATE,
-    EVENT_BACKDRAFT,
+    EVENT_INCINERATE           = 1,
+    EVENT_BACKDRAFT            = 2,
     
     //npc_ancient_charhound
-    EVENT_FLAME_LASH,
-    EVENT_LEAPING_BITE,
-    EVENT_SLEEPING_SLEEP,
+    EVENT_FLAME_LASH          = 3,
+    EVENT_LEAPING_BITE        = 4,
+    EVENT_SLEEPING_SLEEP      = 5,
 
     //npc_ancient_charhound	
-	EVENT_INCATFORM,
-	EVENT_PYROBLAST,
-	EVENT_SCORCH,
+	EVENT_INCATFORM           = 6,
+	EVENT_PYROBLAST           = 7,
+	EVENT_SCORCH              = 8,
 	
 	//npc_subterranean_magma_worm
-    EVENT_LAVA_SHOWER,
-	EVENT_BURNING_HUNGER,	
+    EVENT_LAVA_SHOWER         = 9,
+	EVENT_BURNING_HUNGER      = 10,
+
+    EVENT_ONE                 = 11,
+    EVENT_TWO                 = 12,
+    EVENT_THREE	              = 13
 };
 
 /*######
@@ -63,60 +68,56 @@ enum eEvents
 class npc_pyrelord : public CreatureScript
 {
 public:
-    npc_pyrelord() : CreatureScript("npc_pyrelord") { }
+    npc_pyrelord() : CreatureScript("npc_pyrelord") {}
+ 
+       struct npc_pyrelordAI : public ScriptedAI
+       {
+           npc_pyrelordAI(Creature *c): ScriptedAI(c) {}
 
-    CreatureAI* GetAI(Creature* pCreature) const
-    {
+       uint32 spell_2_Timer;
+       uint32 spell_1_Timer;
+
+           void EnterCombat(Unit* pWho)
+           {
+                DoCast(79938);
+           }
+
+       void Reset()
+           {
+             spell_1_Timer = 2000;
+             spell_2_Timer = 6000;
+           }
+
+       void UpdateAI(const uint32 diff)
+           {
+               if (!UpdateVictim())
+               return;
+
+               if(spell_1_Timer <= diff)
+               {
+                   if (!me->IsWithinMeleeRange(me->GetVictim()))
+                   {
+                       DoCast(me->GetVictim(), 79938);
+                       spell_1_Timer = 2000;
+           }
+               }else spell_1_Timer -= diff;
+
+               if(spell_2_Timer <= diff)
+               {
+                   if (!me->IsWithinMeleeRange(me->GetVictim()))
+                   {
+                       DoCast(me->GetVictim(), 98839);
+                       spell_2_Timer = 6000;
+           }
+               }else spell_2_Timer -= diff;
+
+           }
+       };
+
+CreatureAI* GetAI(Creature *pCreature) const
+{
         return new npc_pyrelordAI(pCreature);
-    }
-
-    struct npc_pyrelordAI : public ScriptedAI
-    {
-        npc_pyrelordAI(Creature* c) : ScriptedAI(c)
-        {
-        }
-
-        EventMap events;
-
-        void Reset()
-        {
-            events.Reset();
-        }
-
-        void EnterCombat(Unit* /*who*/)
-        {
-            events.ScheduleEvent(EVENT_INCINERATE, 3000);
-            events.ScheduleEvent(EVENT_BACKDRAFT, 6000);
-        }
-
-        void UpdateAI(const uint32 diff)
-        {
-            if (!UpdateVictim())
-                return;
-
-            events.Update(diff);
-
-            if (me->HasUnitState(UNIT_STATE_CASTING))
-                return;
-
-            while (uint32 eventId = events.ExecuteEvent())
-            {
-                switch(eventId)
-                {
-                    case EVENT_INCINERATE:
-					    if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                            DoCast(pTarget, 79938);
-                        events.RescheduleEvent(EVENT_INCINERATE, 3000);
-                        return;
-                    case EVENT_BACKDRAFT:
-                        if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                            DoCast(pTarget, 98839);
-                        events.RescheduleEvent(EVENT_BACKDRAFT, 6000);
-                        return;
-                }
-            }
-        }
-    };
+}
 };
 
 /*######
@@ -126,67 +127,68 @@ public:
 class npc_ancient_charhound : public CreatureScript
 {
 public:
-    npc_ancient_charhound() : CreatureScript("npc_ancient_charhound") { }
+    npc_ancient_charhound() : CreatureScript("npc_ancient_charhound") {}
+ 
+       struct npc_ancient_charhoundAI : public ScriptedAI
+       {
+           npc_ancient_charhoundAI(Creature *c): ScriptedAI(c) {}
 
-    CreatureAI* GetAI(Creature* pCreature) const
-    {
+       uint32 spell_1_Timer;
+       uint32 spell_2_Timer;
+       uint32 spell_3_Timer;
+
+           void EnterCombat(Unit* pWho)
+           {
+                DoCast(98701);
+           }
+
+       void Reset()
+           {
+             spell_1_Timer = 3000;
+             spell_2_Timer = 6000;
+             spell_3_Timer = 14000;
+           }
+
+       void UpdateAI(const uint32 diff)
+           {
+               if (!UpdateVictim())
+               return;
+
+               if(spell_1_Timer <= diff)
+               {
+                   if (!me->IsWithinMeleeRange(me->GetVictim()))
+                   {
+                       DoCast(me->GetVictim(), 3356);
+                       spell_1_Timer = 3000;
+           }
+               }else spell_1_Timer -= diff;
+
+               if(spell_2_Timer <= diff)
+               {
+                   if (!me->IsWithinMeleeRange(me->GetVictim()))
+                   {
+                       DoCast(me->GetVictim(), 98701);
+                       spell_2_Timer = 6000;
+           }
+               }else spell_2_Timer -= diff;
+
+               if(spell_3_Timer <= diff)
+               {
+                   if (!me->IsWithinMeleeRange(me->GetVictim()))
+                   {
+                       DoCast(me->GetVictim(), 42648);
+                       spell_3_Timer = 14000;
+           }
+               }else spell_3_Timer -= diff;			   
+           
+		   DoMeleeAttackIfReady();
+           }
+       };
+
+CreatureAI* GetAI(Creature *pCreature) const
+{
         return new npc_ancient_charhoundAI(pCreature);
-    }
-
-    struct npc_ancient_charhoundAI : public ScriptedAI
-    {
-        npc_ancient_charhoundAI(Creature* c) : ScriptedAI(c)
-        {
-        }
-
-        EventMap events;
-
-        void Reset()
-        {
-            events.Reset();
-        }
-
-        void EnterCombat(Unit* /*who*/)
-        {
-            events.ScheduleEvent(EVENT_FLAME_LASH, 3000);
-            events.ScheduleEvent(EVENT_LEAPING_BITE, 6000);
-			events.ScheduleEvent(EVENT_SLEEPING_SLEEP, 14000);
-        }
-
-        void UpdateAI(const uint32 diff)
-        {
-            if (!UpdateVictim())
-                return;
-
-            events.Update(diff);
-
-            if (me->HasUnitState(UNIT_STATE_CASTING))
-                return;
-
-            while (uint32 eventId = events.ExecuteEvent())
-            {
-                switch(eventId)
-                {
-                    case EVENT_FLAME_LASH:
-					if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                        DoCast(pTarget, 3356);
-                        events.RescheduleEvent(EVENT_FLAME_LASH, 3000);
-                        return;
-                    case EVENT_LEAPING_BITE:
-                        if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                            DoCast(pTarget, 98701);
-                        events.RescheduleEvent(EVENT_LEAPING_BITE, 6000);
-                        return;
-                    case EVENT_SLEEPING_SLEEP:
-                        if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                            DoCast(pTarget, 42648);
-                        events.RescheduleEvent(EVENT_SLEEPING_SLEEP, 14000);
-                        return;						
-                }
-            }
-          DoMeleeAttackIfReady();			
-        }
-    };
+}
 };
 
 /*######
@@ -240,7 +242,6 @@ public:
                     case EVENT_INCATFORM:
                         DoCast(me, 97678);
 					    events.ScheduleEvent(EVENT_PYROBLAST, 3000);
-			            events.ScheduleEvent(EVENT_SCORCH, 6000);
                         return;
                     case EVENT_PYROBLAST:
                         if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
@@ -322,10 +323,81 @@ public:
     };
 };
 
+/*######
+# npc_ancient_firelord - 53864
+######*/
+
+class npc_ancient_firelord : public CreatureScript
+{
+public:
+    npc_ancient_firelord() : CreatureScript("npc_ancient_firelord") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ancient_firelordAI(pCreature);
+    }
+
+    struct npc_ancient_firelordAI : public ScriptedAI
+    {
+        npc_ancient_firelordAI(Creature* c) : ScriptedAI(c)
+        {
+        }
+
+        EventMap events;
+
+        void Reset()
+        {
+            events.Reset();
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            events.ScheduleEvent(EVENT_ONE, 4000);
+            events.ScheduleEvent(EVENT_TWO, 6000);
+			events.ScheduleEvent(EVENT_THREE, 9000);
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch(eventId)
+                {
+                    case EVENT_ONE:
+                        if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                        DoCast(pTarget, 100270);
+					    events.ScheduleEvent(EVENT_ONE, 4000);
+                        return;
+                    case EVENT_TWO:
+                        if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                            DoCast(pTarget, 100267);
+                            events.ScheduleEvent(EVENT_TWO, 6000);
+                        return;
+                    case EVENT_THREE:
+                        if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                            DoCast(pTarget, 100378);
+                            events.ScheduleEvent(EVENT_THREE, 9000);
+                        return;							
+                }
+            }
+          DoMeleeAttackIfReady();			
+        }
+    };
+};
+
 void AddSC_molten_front()
 {
   new npc_pyrelord();
   new npc_ancient_charhound();
   new npc_druid_of_the_flame();
   new npc_subterranean_magma_worm();
+  new npc_ancient_firelord();
 }
