@@ -4,3 +4,15 @@ INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entr
 (54339, 0, 0, 0, 0, 0, 38760, 0, 0, 0, 'Ancient Charhound', '', '', 0, 85, 85, 3, 0, 2279, 2279, 0, 1, 1.14286, 1, 1.14286, 1, 0, 1233, 2007, 0, 0, 4.2, 2000, 2000, 1, 32832, 2048, 4, 0, 0, 0, 0, 0, 0, 0, 0, 4, 8, 0, 54339, 0, 0, 0, 0, 0, 0, 0, 0, 3356, 98701, 42648, 0, 0, 0, 0, 0, 0, 0, 8, 8, NULL, NULL, '', 0, 3, 1, 1.51403, 1, 1, 1, 0, 69816, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'npc_ancient_charhound', 15595),
 (52683, 0, 0, 0, 0, 0, 38030, 0, 0, 0, 'Pyrelord', '', '', 0, 85, 85, 3, 0, 2234, 2234, 0, 1.55556, 1.14286, 1.55556, 1.14286, 1, 1, 0, 0, 0, 0, 1, 2000, 2000, 2, 32768, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 98839, 79938, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, '', 0, 3, 1, 4, 4, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'npc_pyrelord', 15595);
 
+-- Boss High Priestess Azil
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES 
+(42333, 1, 0, 'The world will be reborn in flames!', 14, 0, 100, 0, 0, 21634, ''),
+(42333, 2, 0, 'For my death, countless more will fall. The burden is now yours to bear.', 14, 0, 100, 0, 0, 21633, ''),
+(42333, 3, 0, 'A sacrifice for you, master.', 14, 0, 100, 0, 0, 21635, ''),
+(42333, 4, 0, 'Witness the power bestowed upon me by Deathwing! Feel the fury of earth!', 14, 0, 100, 0, 0, 21628, ''),
+
+-- Boss Ozruk
+(42188, 1, 0, 'None may pass into the World\'s Heart!', 14, 0, 100, 0, 0, 21919, ''),
+(42188, 2, 0, 'Break yourselves upon my body. Feel the strength of the earth!', 14, 0, 100, 0, 0, 21921, ''),
+(42188, 3, 0, 'The cycle is complete.', 14, 0, 100, 0, 0, 21920, ''),
+(42188, 4, 0, 'A protector has fallen. The World\'s Heart lies exposed!', 14, 0, 100, 0, 0, 21922, '');

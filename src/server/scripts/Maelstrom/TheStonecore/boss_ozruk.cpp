@@ -35,19 +35,20 @@ enum Spells
 enum Events
 {
     EVENT_BULWARK               = 1,
-    EVENT_GROUND_SLAM,
-    EVENT_GROUND_SLAM_END,
-    EVENT_SHATTER,
-    EVENT_PARALYZE,
-    EVENT_SPIKE_SHIELD
+    EVENT_GROUND_SLAM           = 2,
+    EVENT_GROUND_SLAM_END       = 3,
+    EVENT_SHATTER               = 4,
+    EVENT_PARALYZE              = 5,
+    EVENT_SPIKE_SHIELD          = 6
 };
 
 enum Quotes
 {
-    SAY_AGGRO,
-    SAY_DEATH,
-    SAY_SLAY,
-    SAY_SHIELD
+    SAY_AGGRO                   = 1,
+    SAY_SHIELD                  = 2,
+    SAY_SLAY                    = 3,
+	SAY_DEATH                   = 4
+    
 };
 
 class boss_ozruk : public CreatureScript

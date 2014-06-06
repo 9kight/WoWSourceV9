@@ -56,20 +56,20 @@ enum Spells
 enum Events
 {
     EVENT_CURSE_OF_BLOOD            = 1,
-    EVENT_FORCE_GRIP,
-    EVENT_SEISMIC_SHARD,
-    EVENT_SEISMIC_SHARD_THROW,
-    EVENT_SHIELD_PHASE_END,
-    EVENT_GRAVITY_WELL,
-    EVENT_ENERGY_SHIELD,
-    EVENT_ENERGY_SHIELD_END,
-    EVENT_ADDS_SUMMON,
+    EVENT_FORCE_GRIP                = 2,
+    EVENT_SEISMIC_SHARD             = 3,
+    EVENT_SEISMIC_SHARD_THROW       = 4,
+    EVENT_SHIELD_PHASE_END          = 5,
+    EVENT_GRAVITY_WELL              = 6,
+    EVENT_ENERGY_SHIELD             = 7,
+    EVENT_ENERGY_SHIELD_END         = 8,
+    EVENT_ADDS_SUMMON               = 9,
 };
 
 enum Phases
 {
     PHASE_NORMAL                    = 1,
-    PHASE_SHIELD
+    PHASE_SHIELD                    = 2
 };
 
 enum Misc
@@ -82,10 +82,10 @@ enum Misc
 
 enum Quotes
 {
-    SAY_AGGRO,
-    SAY_DEATH,
-    SAY_SLAY,
-    SAY_SHIELD,
+    SAY_AGGRO                       = 1,
+    SAY_DEATH                       = 2,
+    SAY_SLAY                        = 3,
+    SAY_SHIELD                      = 4
 };
 
 static const Position summonPos[2] =

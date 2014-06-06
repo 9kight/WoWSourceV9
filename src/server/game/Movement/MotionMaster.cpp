@@ -398,7 +398,7 @@ void MotionMaster::MoveJump(float x, float y, float z, float speedXY, float spee
     init.SetParabolic(max_height, 0);
     init.SetVelocity(speedXY);
     init.Launch();
-    Mutate(new EffectMovementGenerator(id), MOTION_SLOT_ACTIVE);
+    Mutate(new EffectMovementGenerator(id), MOTION_SLOT_CONTROLLED);
 }
 
 // Perfect for Knockback visuals to specific locations - Unit maintains original orientation throughout movement
