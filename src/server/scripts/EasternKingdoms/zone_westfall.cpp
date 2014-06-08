@@ -238,6 +238,8 @@ public:
                                                 {
                                                     if (Creature* two = me->FindNearestCreature(42405, 200.0f, true))
                                                     {
+                                                        me->SummonCreature(42558, -9854.51f, 1274.6f, 40.8704f, 2.04631f);
+                                                        me->SummonCreature(42560, -9854.66f, 1276.48f, 40.8834f, 3.36577f);													
                                                         two->SetVisible(false);
                                                     }
                                                 }
