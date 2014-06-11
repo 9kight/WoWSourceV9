@@ -351,16 +351,6 @@ void MotionMaster::MoveTakeoff(uint32 id, Position const& pos)
     Mutate(new EffectMovementGenerator(id), MOTION_SLOT_ACTIVE);
 }
 
-void MotionMaster::MoveForward(float distance, float zDiff)
-{
-    if (_owner->GetTypeId() == TYPEID_PLAYER)
-        return;
-
-    float x, y, z;
-    _owner->GetClosePoint(x, y, z, DEFAULT_WORLD_OBJECT_SIZE, distance);
-    _owner->GetMotionMaster()->MovePoint(1, x, y, z+zDiff);
-}
-
 void MotionMaster::MoveKnockbackFrom(float srcX, float srcY, float speedXY, float speedZ)
 {
     //this function may make players fall below map
@@ -475,6 +465,7 @@ void MotionMaster::MoveCharge(float x, float y, float z, float speed, uint32 id,
     if (Impl[MOTION_SLOT_CONTROLLED] && Impl[MOTION_SLOT_CONTROLLED]->GetMovementGeneratorType() != DISTRACT_MOTION_TYPE)
         return;
 
+    _owner->AddUnitState(UNIT_STATE_CHARGING);
     if (_owner->GetTypeId() == TYPEID_PLAYER)
     {
         sLog->outDebug(LOG_FILTER_GENERAL, "Player (GUID: %u) charge point (X: %f Y: %f Z: %f)", _owner->GetGUIDLow(), x, y, z);

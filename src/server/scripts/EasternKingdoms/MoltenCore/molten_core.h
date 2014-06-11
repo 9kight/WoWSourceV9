@@ -38,7 +38,6 @@ enum Actions
 {
     ACTION_START_RAGNAROS       = 0,
     ACTION_START_RAGNAROS_ALT   = 1,
-    ACTION_MAJORDOMO_ALT_SETUP  = 2
 };
 
 Position const RagnarosTelePos   = {829.159f, -815.773f, -228.972f, 5.30500f};
@@ -57,7 +56,7 @@ enum Creatures
     NPC_MAJORDOMO_EXECUTUS          = 12018,
     NPC_RAGNAROS                    = 11502,
     NPC_FLAMEWAKER_HEALER           = 11663,
-    NPC_FLAMEWAKER_ELITE            = 11664
+    NPC_FLAMEWAKER_ELITE            = 11664,
 };
 
 enum GameObjects

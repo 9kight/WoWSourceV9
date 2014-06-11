@@ -62,374 +62,86 @@ class DistanceSelector
         uint32 const _distance;
 };
 
-class npc_sanitron500 : public CreatureScript
+class npc_sanotron_500 : public CreatureScript
 {
-public: npc_sanitron500() : CreatureScript("npc_sanitron500") { }
+public:
+    npc_sanotron_500() : CreatureScript("npc_sanotron_500") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    struct npc_sanotron_500AI : public npc_escortAI
     {
-        return new npc_sanitron500AI(pCreature);
-    }
-	
-    struct npc_sanitron500AI : public ScriptedAI
-    {
-        npc_sanitron500AI(Creature *c) : ScriptedAI(c) {}
-
-        bool EventStarted;
-
-        uint8 Phase;
-        uint32 PhaseTime;
-        uint64 PlayerGuid;
+        npc_sanotron_500AI(Creature* creature) : npc_escortAI(creature) {}
 
         void Reset()
         {
-            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
-            me->GetMotionMaster()->MoveTargetedHome();
-            Phase = 0;
-            PlayerGuid = 0;
-            EventStarted = false;
+            Position const& pos = me->GetHomePosition();
+            me->NearTeleportTo(pos.m_positionX, pos.m_positionY, pos.m_positionZ, pos.m_orientation);
         }
 
-        void SpellHit(Unit* pPlayer, const SpellInfo* pSpell)
+        void PassengerBoarded(Unit* who, int8 /*seatId*/, bool apply)
         {
-            if(pSpell->Id == 86106)
-            {
-                PlayerGuid = pPlayer->GetGUID();
-                if(pPlayer->isAlive())
-                {
-                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
-                    pPlayer->EnterVehicle(me, 0);
-                }
-                EventStarted = true;
-                PhaseTime = 1000;
-            }
-        }
-
-        void SearchForTrigger(Unit* target, uint32 triggerEntry, uint32 SpellID, bool ArcRequirement)
-        {
-            Player* pPlayer = me->GetPlayer(*me, PlayerGuid);
-
-            std::list<Unit*> SearchedTriggers;
-            Trinity::AllCreaturesOfEntryInRange u_check(target, triggerEntry, 100.0f);
-            Trinity::UnitListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher(target, SearchedTriggers, u_check);
-            target->VisitNearbyObject(100.0f, searcher);
-
-            if(SearchedTriggers.empty())
+            if (who->GetTypeId() != TYPEID_PLAYER || !apply)
                 return;
 
-            for (std::list<Unit*>::const_iterator iter = SearchedTriggers.begin(); iter != SearchedTriggers.end(); ++iter)
-            {
-                if(ArcRequirement)
-                {
-                    if((*iter)->HasInArc(M_PI/3, me))
-                        (*iter)->CastSpell(target, SpellID, true);
-
-                } else (*iter)->CastSpell(target, SpellID, true);
-            } SearchedTriggers.clear();
+            Start(false, true, who->GetGUID());
+            Talk(SAY_CONTAMINATION_START);
         }
 
-        void UpdateAI(const uint32 diff)
+        void OnCharmed(bool /*apply*/) {}
+
+        void WaypointReached(uint32 point)
         {
-            if(Player* pPlayer = me->GetPlayer(*me, PlayerGuid))
+            Player* player = GetPlayerForEscort();
+
+            switch(point)
             {
-                if(PhaseTime <= diff)
-                {
-                    switch(Phase)
-                    {
-                        case 0:
-                        {
-                            me->MonsterSay("Commencing decontamination sequence...", 0, 0);
-                            me->GetMotionMaster()->MoveForward(7.5f, 3.5f);
-                            Phase++;
-                            PhaseTime = 4000;
-                            break;
-                        }
-                        case 1: SearchForTrigger(pPlayer, 46165, 86075, true); Phase++; PhaseTime = 2000; break;
-                        case 2: me->GetMotionMaster()->MoveForward(9.0f, -1.5f); Phase++; PhaseTime = 2000; break;
-                        case 3: SearchForTrigger(pPlayer, 46208, 86080, false); pPlayer->CastSpell(pPlayer, 86084, true); Phase++; PhaseTime = 5000; break;
-                        case 4: me->GetMotionMaster()->MoveForward(8.0f, 1.0f); Phase++; PhaseTime = 5000; break;
-                        case 5: SearchForTrigger(pPlayer, 46165, 86086, true); Phase++; PhaseTime = 5000; break;
-                        case 6: me->MonsterSay("Decontamination complete. Standby for delivery.", 0, 0); Phase++; PhaseTime = 1000; break;
-                        case 7: me->GetMotionMaster()->MoveForward(6.0f, 0.0f);  Phase++; PhaseTime = 2000; break;
-                        case 8: me->MonsterSay("Warning, system overload. Malfunction imminent!", 0, 0); Phase++; PhaseTime = 3000; break;
-                        case 9: pPlayer->ExitVehicle(); Reset(); break;
-                        default: break;
-                    }
-                } else PhaseTime -= diff;
+            case 2:
+                HandleStop(NPC_DECONTAMINATION_BUNNY, 10, SPELL_DECONTAMINATION_STAGE_1);
+                break;
+            case 3:
+                TechnicanTalk(SAY_UGH_NOT_THIS);
+                HandleStop(NPC_CLEAN_CANNON, 35, SPELL_CLEAN_CANNON_CLEAN_BURST);
+                me->CastSpell(player, SPELL_DECONTAMINATION_STAGE_2, true);
+                player->RemoveAura(SPELL_IRRADIATED);
+                break;
+            case 4:
+                Talk(SAY_CONTAMINATION_3);
+                HandleStop(NPC_DECONTAMINATION_BUNNY, 10, SPELL_DECONTAMINATION_STAGE_3);
+                break;
+            case 5:
+                Talk(SAY_CONTAMINATION_OVERLOAD);
+                DoCast(SPELL_EXPLOSION);
+                me->DespawnOrUnsummon(1500);
+                TechnicanTalk(SAY_OH_NO);
+                break;
             }
+        }
+
+    private:
+        void HandleStop(uint32 const entry, uint32 const distance, uint32 const spellId)
+        {
+            Player* player = GetPlayerForEscort();
+            if (!player)
+                return;
+
+            std::list<Creature*> creatures;
+            GetCreatureListWithEntryInGrid(creatures, me, entry, float(distance + 3));
+            creatures.remove_if(DistanceSelector(me, distance));
+
+            for (std::list<Creature*>::const_iterator itr = creatures.begin(); itr != creatures.end(); ++itr)
+                (*itr)->CastSpell(player, spellId, true);
+        }
+
+        void TechnicanTalk(uint32 const groupId)
+        {
+            if (Creature* technican = me->FindNearestCreature(NPC_SAFE_TECHNICAN, 20.f))
+                technican->AI()->Talk(groupId);
         }
     };
 
-};
-
-float CrushcogAddPlace[4][4] =
-{
-    //X          Y          Z        O
-    {-5250.250f, 130.0f, 394.269f, 4.50f}, //2nd from left
-    {-5239.800f, 128.200f, 394.500f, 4.26f}, //1st from left
-    {-5245.937f, 105.853f, 392.336f, 1.75f},
-    {-5255.550f, 106.500f, 392.402f, 1.60f}
-};
-
-uint32 RayType[] = {80098, 80110, 80148};
-#define GOSSIP_ITEM_START "I'm ready to start the assault."
-
-class npc_MekkaTorque : public CreatureScript
-{
-public:
-    npc_MekkaTorque() : CreatureScript("npc_MekkaTorque") { }
-
-    bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+    CreatureAI* GetAI(Creature* creature) const
     {
-        if(!CAST_AI(npc_MekkaTorque::npc_MekkaTorqueAI, pCreature->AI())->EventStartedPart1)
-        {
-            if (pPlayer->GetQuestStatus(26364) == QUEST_STATUS_INCOMPLETE)
-                if(Creature* pHelper = pCreature->FindNearestCreature(42852, 20.0f, true))
-                    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_START, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
-
-            pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
-
-            return true;
-        }
-        return false;
+        return new npc_sanotron_500AI (creature);
     }
-
-    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
-    {
-        pPlayer->PlayerTalkClass->ClearMenus();
-        if (uiAction == GOSSIP_ACTION_INFO_DEF)
-        {
-            pPlayer->CLOSE_GOSSIP_MENU();
-            CAST_AI(npc_MekkaTorque::npc_MekkaTorqueAI, pCreature->AI())->EventStartedPart1 = true;
-            CAST_AI(npc_MekkaTorque::npc_MekkaTorqueAI, pCreature->AI())->PlayerGuid = pPlayer->GetGUID();
-        }
-        return true;
-    }
-
-    CreatureAI* GetAI(Creature* pCreature) const
-    {
-        return new npc_MekkaTorqueAI(pCreature);
-    }
-
-struct npc_MekkaTorqueAI : public ScriptedAI
-{
-    npc_MekkaTorqueAI(Creature *c) : ScriptedAI(c) {}
-
-    bool EventStartedPart1;
-    bool EventStartedPart2;
-    bool AttackPhase;
-    uint8 Phase;
-    uint32 Timer;
-    uint64 PlayerGuid;
-
-    void Reset()
-    {
-        Phase = 0;
-        PlayerGuid = 0;
-        EventStartedPart1 = false;
-        EventStartedPart2 = false;
-        AttackPhase = false;
-        Timer = 5000;
-
-        me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-    }
-
-    void SummonCrushcogAndHisAdds()
-    {
-        if(Creature* pC = me->SummonCreature(42839, -5246.240f, 119.70f, 394.33f, 3.02f, TEMPSUMMON_MANUAL_DESPAWN, 30000))
-        {
-            pC->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            pC->SetReactState(REACT_PASSIVE);
-
-            for(int i = 0; i < 4; i++)
-                pC->SummonCreature(42294, CrushcogAddPlace[i][0], CrushcogAddPlace[i][1], CrushcogAddPlace[i][2], CrushcogAddPlace[i][3], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 15000);
-        }
-    };
-
-    void AddRemoveFlagsFromAdds()
-    {
-        std::list<Creature*> CrushcogAdds;
-        GetCreatureListWithEntryInGrid(CrushcogAdds, me, 42294, 150.0f);
-
-        if(AttackPhase)
-        {
-            for (std::list<Creature*>::iterator itr = CrushcogAdds.begin(); itr != CrushcogAdds.end(); ++itr)
-            {
-                (*itr)->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                (*itr)->SetReactState(REACT_AGGRESSIVE);
-                (*itr)->CombatStart(me, true);
-                (*itr)->Attack(me, true);
-            }
-        }
-        else
-        {
-            for (std::list<Creature*>::iterator itr = CrushcogAdds.begin(); itr != CrushcogAdds.end(); ++itr)
-            {
-                (*itr)->SetReactState(REACT_PASSIVE);
-                (*itr)->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            }
-        }
-    }
-
-    void RemoveCrushcogAdds()
-    {
-        std::list<Creature*> CrushcogAddsRemove;
-        GetCreatureListWithEntryInGrid(CrushcogAddsRemove, me, 42294, 60.0f);
-        for (std::list<Creature*>::iterator itr = CrushcogAddsRemove.begin(); itr != CrushcogAddsRemove.end(); ++itr)
-            (*itr)->DespawnOrUnsummon();
-    }
-
-    void AddQuestComplete()
-    {
-        std::list<Player*> players;
-        Trinity::AnyPlayerInObjectRangeCheck checker(me, 35.0f);
-        Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, players, checker);
-        me->VisitNearbyWorldObject(35.0f, searcher);
-
-        for (std::list<Player*>::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-            (*itr)->CastSpell((*itr), 79931, true);
-    }
-
-    void UpdateAI(const uint32 diff)
-    {
-        DoMeleeAttackIfReady();
-
-        if(Timer < diff)
-        {
-            if(EventStartedPart1)
-            {
-                me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                if(Player* pPlayer = me->GetPlayer(*me, PlayerGuid))
-                if(Creature* pCreature = me->FindNearestCreature(42852, 8.0f, true))
-                {
-                    switch(Phase)
-                    {
-                        case 0: me->MonsterSay("Mekgineer Thermaplugg refuses to acknowledge that his defeat is imminent! He has sent Razlo Crushcog to prevent us from rebuilding our beloved Gnomeregan!", 0, 0); Timer = 5000; Phase++; break;
-                        case 1: me->MonsterSay("But $N has thwarted his plans at every turn, and the dwarves of Ironforge stand with us!", 0, PlayerGuid); Timer = 5000; Phase++; break;
-                        case 2: me->MonsterSay("Let's send him crawling back to his master in defeat!", 0, 0); Timer = 3000; Phase++; break;
-                        case 3:
-                        {
-                            me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
-                            pCreature->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
-                            pCreature->MonsterSay("Aye, let's teach this addle-brained gnome a lesson!", 0, 0);
-                            Timer = 500; Phase++;
-                        } break;
-                        case 4:
-                        {
-                            me->GetMotionMaster()->MovePoint(1, -5294.91f, 134.433f, 386.11f);
-                            pCreature->GetMotionMaster()->MovePoint(2, -5291.88f, 138.85f, 386.11f);
-                            SummonCrushcogAndHisAdds();
-                            Timer = 10000;
-                            Phase++;
-                        } break;
-                        case 5: AddRemoveFlagsFromAdds(); Phase++; Timer = 250; break;
-                        case 6:
-                        {
-                            me->GetMotionMaster()->MovePoint(1, -5261.2f, 119.33f, 393.79f);
-                            pCreature->GetMotionMaster()->MovePoint(2, -5260.88f, 123.25f, 393.88f);
-                            Timer = 16000;
-                            Phase++;
-                        } break;
-                        case 7: EventStartedPart1 = false; EventStartedPart2 = true; Phase = 8; break;
-                        default: break;
-                    }
-                }
-            }
-            if(EventStartedPart2)
-            {
-                if(Player* pPlayer = me->GetPlayer(*me, PlayerGuid))
-                if(Creature* pCreature = me->FindNearestCreature(42852, 40.0f, true))
-                if(Creature* pCrushcog = me->FindNearestCreature(42839, 40.0f, true))
-                {
-                    switch(Phase)
-                    {
-                        case 8: pCrushcog->MonsterSay("You! How did you escape detection by my sentry-bots?", 0, 0); Timer = 3000; Phase++; break;
-                        case 9: pCrushcog->MonsterSay("No matter! My guardians and I will make short work of you. To arms, men!", 0, 0); Timer = 2000; Phase++; break;
-                        case 10: AttackPhase = true; Phase++; Timer = 250; break;
-                        case 11:
-                        {
-                            AddRemoveFlagsFromAdds();
-                            pCrushcog->MonsterSay("You will never defeat the true sons of Gnomergan", 0, 0);
-                            pCrushcog->SetReactState(REACT_AGGRESSIVE);
-                            pCrushcog->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                            pCrushcog->CombatStart(me, true);
-                            me->Attack(pCrushcog, true);
-                            Phase = 12;
-                        } break;
-                        default: break;
-                    }
-                    if(pCrushcog)
-                        Timer = 7000;
-                }
-                if(Creature* pCreature = me->FindNearestCreature(42852, 40.0f, true))
-                if(Creature* pCrushcog = me->FindNearestCreature(42839, 40.0f, false))
-                {
-                    switch(Phase)
-                    {
-                        case 12:
-                        {
-                            RemoveCrushcogAdds();
-                            pCreature->MonsterSay("That'll teach you to mess with the might of Ironforge and Gnomeregan!", 0, 0);
-                            Timer = 1500; Phase++;
-                        } break;
-                        case 13: me->MonsterSay("We've done it! We're victorious!", 0, 0); Timer = 4500; Phase++; break;
-                        case 14: me->MonsterSay("With Crushcog defeated. Thermaplugg is sure to be quaking in his mechano-tank, and rightly so. You're next Thermaplugg. You're next!", 0, 0); Phase++; Timer = 4000; break;
-                        case 15:
-                        {
-                            AddQuestComplete();
-                            me->GetMotionMaster()->MovePoint(1, -5261.2f, 119.33f, 393.79f);
-                            pCreature->GetMotionMaster()->MovePoint(2, -5260.88f, 123.25f, 393.88f);
-                            Phase++;
-                            Timer = 16000;
-                        }
-                        case 16:
-                        {
-                            me->GetMotionMaster()->MoveTargetedHome();
-                            pCreature->GetMotionMaster()->MoveTargetedHome();
-                            me->AI()->Reset();
-                            pCreature->AI()->Reset();
-                        } break;
-                        default: break;
-                    }
-                }
-                if(Creature* pCrushcog = me->FindNearestCreature(42839, 10.0f, true))
-                if(Creature* pRayTarget = me->FindNearestCreature(42929, 50.0f, true))
-                {
-                    //Niestety Spelle jeszcze niedzia?aj? wiec work-around
-                    //me->CastSpell(pRayTarget, RayType[urand(0,3)], true);
-                    me->MonsterYell("Mekkatorque-Ray!", 0, 0);
-
-                    std::list<Unit*> BeamTarget;
-                    Trinity::AnyUnitInObjectRangeCheck checker(me, 15);
-                    Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, BeamTarget, checker);
-                    me->VisitNearbyWorldObject(15.0f, searcher);
-
-                    for (std::list<Unit*>::iterator itr = BeamTarget.begin(); itr != BeamTarget.end(); ++itr)
-                    {
-                        if((*itr)->GetTypeId() == TYPEID_PLAYER)
-                            return;
-
-                        me->CastSpell((*itr), RayType[urand(0,3)], true);
-                        me->DealDamage((*itr), ((*itr)->GetHealth()*0.15), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-                    }
-                    me->CastSpell(pCrushcog, RayType[urand(0,3)], true);
-                    me->DealDamage(pCrushcog, (pCrushcog->GetHealth()*0.15), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-                    pRayTarget->DespawnOrUnsummon();
-                }
-            //I know it's imposible but...
-                if(Creature* pCreature = me->FindNearestCreature(42852, 40.0f, false))
-                    me->AI()->Reset();
-
-                if(me->isDead())
-                {
-                    Creature* pCreature = me->FindNearestCreature(42852, 40.0f, false);
-                    if(pCreature)
-                        pCreature->AI()->Reset();
-                }
-            }
-        } else Timer -= diff;
-    }
-    };
 };
 
 enum Misc
@@ -634,117 +346,13 @@ public:
 
 };
 
-/*######
-## npc_ultrasafe_personnel_launcher
-######*/
- 
-enum eultasafeplData 
-{
-    USPLQUEST        = 25839,
-    SPELL_USPL       = 77393,
-    SPELL_USPLBUFF   = 80381,
-};
-class npc_ultrasafe_personnel_launcher: public CreatureScript {
-public:
-    npc_ultrasafe_personnel_launcher() :
-            CreatureScript("npc_ultrasafe_personnel_launcher") {
-    }
- 
-    CreatureAI* GetAI(Creature* creature) const {
-        return new npc_ultrasafe_personnel_launcherAI(creature);
-    }
- 
-    struct npc_ultrasafe_personnel_launcherAI: public ScriptedAI {
-        npc_ultrasafe_personnel_launcherAI(Creature* c) :
-                ScriptedAI(c) {
-        }
- 
-    void Reset()
-    {
-        me->CastSpell(me, SPELL_USPLBUFF, true);
-    }
-   
-    void UpdateAI(const uint32 /*diff*/)
-    {
-        if (me->IsVehicle() && me->GetVehicleKit())
-        {
-            Unit* unit = me->GetVehicleKit()->GetPassenger(0);
-            if (unit)
-            {   
-                unit->ToPlayer()->ExitVehicle();
-                unit->ToPlayer()->SetOrientation(3.95f);
-                unit->ToPlayer()->CastSpell(unit,SPELL_USPL,true);
-            }
-        }
- 
-    }
- 
-    };
-};
-
-/*######
-## npc_stolen_ram
-######*/
-
-enum
-{
-    CREDIT_RAMS_ON_THE_LAM       = 43064,
-    QUEST_RAMS_ON_THE_LAM        = 25905
-};
-
-class npc_stolen_ram : public CreatureScript
-{
-public:
-    npc_stolen_ram() : CreatureScript("npc_stolen_ram") { }
-
-    struct npc_stolen_ramAI : public ScriptedAI
-    {
-        npc_stolen_ramAI(Creature *c) : ScriptedAI(c) 
-        
-        { 
-            whistle = false;
-        }
-
-        bool whistle;
-
-        void Reset()
-        {
-            whistle = false;
-        }
-
-        void ReceiveEmote(Player* player, uint32 emote)
-        {
-            if (emote==TEXT_EMOTE_WHISTLE && whistle == false && player->IsWithinDistInMap(me,20.00f))
-            {
-                if (player->GetQuestStatus(QUEST_RAMS_ON_THE_LAM) == QUEST_STATUS_INCOMPLETE)
-                {
-                    player->KilledMonsterCredit(CREDIT_RAMS_ON_THE_LAM,0);
-                    me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
-                    me->SetSpeed(MOVE_RUN, 1.0f, true);
-                    me->GetMotionMaster()->MoveChase(player);
-                    me->DespawnOrUnsummon(3000);
-                    whistle = true;
-                }
-            }
-        }
-    };
-
-    CreatureAI *GetAI(Creature *creature) const
-    {
-        return new npc_stolen_ramAI(creature);
-    }
-};
-
 void AddSC_dun_morogh()
 {
-    new npc_sanitron500();
-	new npc_MekkaTorque();
+    new npc_sanotron_500();
     new npc_coldridge_defender();
     new npc_rockjaw_defender();
     new npc_gs_9x_multi_bot();
     new npc_nevin_twistwrench();
     new npc_kelsey_steelspark();
     new npc_engineer_grindspark();
-	new npc_ultrasafe_personnel_launcher();
-	new npc_stolen_ram();
 }
