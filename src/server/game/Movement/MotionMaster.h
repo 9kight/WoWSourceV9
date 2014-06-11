@@ -174,6 +174,7 @@ class MotionMaster //: private std::stack<MovementGenerator *>
         void MovePoint(uint32 id, Position const& pos, bool generatePath = true)
             { MovePoint(id, pos.m_positionX, pos.m_positionY, pos.m_positionZ, generatePath); }
         void MovePoint(uint32 id, float x, float y, float z, bool generatePath = true);
+		void MoveForward(float distance, float zDiff);
         // These two movement types should only be used with creatures having landing/takeoff animations
         void MoveLand(uint32 id, Position const& pos);
         void MoveTakeoff(uint32 id, Position const& pos);

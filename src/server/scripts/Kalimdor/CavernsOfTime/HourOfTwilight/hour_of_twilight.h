@@ -6,6 +6,7 @@ enum Data
      DATA_ARCURION_EVENT,
      DATA_ASIRA_EVENT,
      DATA_ARCHBISHOP_EVENT,
+	 DATA_PRE_ARCURION_EVENT
 };
 
 enum Data64 
@@ -13,6 +14,7 @@ enum Data64
      DATA_ASIRA,
      DATA_ARCURION,
      DATA_ARCHBISHOP,
+	 DATA_PRE_ARCURION
 };
 
 enum CreatureIds 
@@ -24,10 +26,13 @@ enum CreatureIds
     BOSS_ARCHBISHOP  = 54938,
 	
     //Thrall
+	NPC_THRALL_ARCURION = 54548,
     NPC_THRALL       = 54971,
+	NPC_THRALL_2     = 55779,
 	
     //Trash
-    NPC_FROZEN_SERVITOR = 54555
+    NPC_FROZEN_SERVITOR = 54555,
+	NPC_FROZEN_ELMENTAL = 55559
 };
 
 #endif

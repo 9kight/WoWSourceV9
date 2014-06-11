@@ -2,8 +2,8 @@
 #define __REVISION_H__
  #define _HASH                      "@rev_hash@"
  #define _DATE                      "@rev_date@"
- #define VER_COMPANYNAME_STR        "WoWSource Developers"
- #define VER_LEGALCOPYRIGHT_STR     "(c)2011-2014 WoWSource"
+ #define VER_COMPANYNAME_STR        "CTWUG-WOW_4.3.4 Developers"
+ #define VER_LEGALCOPYRIGHT_STR     "(c)2011-2014 CTWUG-WOW_4.3.4"
  #define VER_FILEVERSION            0,0,0
  #define VER_FILEVERSION_STR        "@rev_date@ (@rev_hash@)"
  #define VER_PRODUCTVERSION         VER_FILEVERSION

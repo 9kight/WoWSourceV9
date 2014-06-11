@@ -49,7 +49,7 @@ enum Spells
     SPELL_BLAST_WAVE        = 20229,
     SPELL_AEGIS_OF_RAGNAROS = 20620,
     SPELL_TELEPORT          = 20618,
-    SPELL_SUMMON_RAGNAROS   = 19774,
+    SPELL_SUMMON_RAGNAROS   = 19774
 };
 
 #define GOSSIP_HELLO 4995
@@ -64,7 +64,7 @@ enum Events
 
     EVENT_OUTRO_1           = 5,
     EVENT_OUTRO_2           = 6,
-    EVENT_OUTRO_3           = 7,
+    EVENT_OUTRO_3           = 7
 };
 
 class boss_majordomo : public CreatureScript
@@ -106,11 +106,12 @@ class boss_majordomo : public CreatureScript
                     if (!me->FindNearestCreature(NPC_FLAMEWAKER_HEALER, 100.0f) && !me->FindNearestCreature(NPC_FLAMEWAKER_ELITE, 100.0f))
                     {
                         instance->UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, me->GetEntry(), me);
+                        //instance->SetData(DATA_SHANNOX_EVENT, DONE);
                         me->setFaction(35);
                         me->AI()->EnterEvadeMode();
                         Talk(SAY_DEFEAT);
                         _JustDied();
-                        events.ScheduleEvent(EVENT_OUTRO_1, 32000);
+                        events.ScheduleEvent(EVENT_OUTRO_1, 10000);
                         return;
                     }
 
@@ -157,8 +158,17 @@ class boss_majordomo : public CreatureScript
                         switch (eventId)
                         {
                             case EVENT_OUTRO_1:
+                                {
+								DoCast(19484);
                                 me->NearTeleportTo(RagnarosTelePos.GetPositionX(), RagnarosTelePos.GetPositionY(), RagnarosTelePos.GetPositionZ(), RagnarosTelePos.GetOrientation());
+                                if (Creature* newmajordomo = me->SummonCreature(me->GetEntry(),
+                                                                            RagnarosTelePos.GetPositionX(),
+                                                                            RagnarosTelePos.GetPositionY(),
+                                                                            RagnarosTelePos.GetPositionZ(),
+                                                                            RagnarosTelePos.GetOrientation()))
+                                    newmajordomo->GetAI()->DoAction(ACTION_MAJORDOMO_ALT_SETUP);
                                 me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                                }
                                 break;
                             case EVENT_OUTRO_2:
                                 if (instance)
@@ -184,6 +194,11 @@ class boss_majordomo : public CreatureScript
                     events.ScheduleEvent(EVENT_OUTRO_3, 24000);
                 }
                 else if (action == ACTION_START_RAGNAROS_ALT)
+                {
+                    me->setFaction(35);
+                    me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                }
+                else if (action == ACTION_MAJORDOMO_ALT_SETUP)
                 {
                     me->setFaction(35);
                     me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
