@@ -95,8 +95,6 @@ bool WaypointMovementGenerator<Creature>::StartMove(Creature* creature)
     if (Stopped())
         return true;
 
-bool transportPath = creature->HasUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY) && creature->GetTransGUID();		
-		
     if (m_isArrivalDone)
     {
         if ((i_currentNode == i_path->size() - 1) && !repeating) // If that's our last waypoint
@@ -152,11 +150,6 @@ bool WaypointMovementGenerator<Creature>::DoUpdate(Creature* creature, uint32 di
     }
     else
     {
-
-        // Set home position at place on waypoint movement.
-        if (!creature->HasUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY) || !creature->GetTransGUID())
-            creature->SetHomePosition(creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation());
-	
         if (creature->IsStopped())
             Stop(STOP_TIME_FOR_PLAYER);
         else if (creature->movespline->Finalized())
