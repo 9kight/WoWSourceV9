@@ -1,9 +1,28 @@
+/*
+ * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #define _CRT_SECURE_NO_DEPRECATE
 
 #include <stdio.h>
 #include <deque>
 #include <list>
 #include <cstdlib>
+#include <cstring>
 
 #ifdef _WIN32
 #include "direct.h"
@@ -92,8 +111,17 @@ uint32 const Builds[] = {13164, 13205, 13287, 13329, 13596, 13623, 13914, 14007,
 #define LAST_DBC_IN_DATA_BUILD 13623    // after this build mpqs with dbc are back to locale folder
 #define NEW_BASE_SET_BUILD  15211
 
-char* const Locales[] = {"enGB", "enUS", "deDE", "esES", "frFR", "koKR", "zhCN", "zhTW", "enCN", "enTW", "esMX", "ruRU"};
-TCHAR* const LocalesT[] =
+char const* Locales[] =
+{
+    "enGB", "enUS",
+    "deDE", "esES",
+    "frFR", "koKR",
+    "zhCN", "zhTW",
+    "enCN", "enTW",
+    "esMX", "ruRU"
+};
+
+TCHAR const* LocalesT[] =
 {
     _T("enGB"), _T("enUS"),
     _T("deDE"), _T("esES"),
@@ -107,6 +135,12 @@ TCHAR* const LocalesT[] =
 
 void CreateDir(std::string const& path)
 {
+    if (chdir(path.c_str()) == 0)
+    {
+            chdir("../");
+            return;
+    }
+
 #ifdef _WIN32
     _mkdir(path.c_str());
 #else
@@ -126,7 +160,7 @@ bool FileExists(TCHAR const* fileName)
     return false;
 }
 
-void Usage(char* prg)
+void Usage(char const* prg)
 {
     printf(
         "Usage:\n"\
@@ -135,12 +169,12 @@ void Usage(char* prg)
         "-o set output path\n"\
         "-e extract only MAP(1)/DBC(2) - standard: both(3)\n"\
         "-f height stored as int (less map size but lost some accuracy) 1 by default\n"\
-        "-b target build (default %u)"\
+        "-b target build (default %u)\n"\
         "Example: %s -f 0 -i \"c:\\games\\game\"", prg, CONF_TargetBuild, prg);
     exit(1);
 }
 
-void HandleArgs(int argc, char * arg[])
+void HandleArgs(int argc, char* arg[])
 {
     for (int c = 1; c < argc; ++c)
     {
@@ -268,7 +302,7 @@ uint32 ReadMapDBC()
     }
 
     SFileCloseFile(dbcFile);
-    printf("Done! (%u maps loaded)\n", map_count);
+    printf("Done! (%u maps loaded)\n", uint32(map_count));
     return map_count;
 }
 
@@ -297,7 +331,7 @@ void ReadAreaTableDBC()
         areas[dbc.getRecord(x).getUInt(0)] = dbc.getRecord(x).getUInt(3);
 
     SFileCloseFile(dbcFile);
-    printf("Done! (%u areas loaded)\n", area_count);
+    printf("Done! (%u areas loaded)\n", uint32(area_count));
 }
 
 void ReadLiquidTypeTableDBC()
@@ -1080,7 +1114,11 @@ void ExtractDBCFiles(int l, bool basicLocale)
             }
 
             filename = foundFile.cFileName;
-            filename = outputPath + filename.substr(filename.rfind('\\'));
+            filename = outputPath + filename.substr(filename.rfind('\\') + 1);
+
+            if (FileExists(filename.c_str()))
+                continue;
+
             if (ExtractFile(dbcFile, filename.c_str()))
                 ++count;
 
@@ -1123,7 +1161,7 @@ void ExtractDB2Files(int l, bool basicLocale)
             }
 
             filename = foundFile.cFileName;
-            filename = outputPath + filename.substr(filename.rfind('\\'));
+            filename = outputPath + filename.substr(filename.rfind('\\') + 1);
             if (ExtractFile(dbcFile, filename.c_str()))
                 ++count;
 
@@ -1144,10 +1182,14 @@ bool LoadLocaleMPQFile(int locale)
     if (!SFileOpenArchive(buff, 0, MPQ_OPEN_READ_ONLY, &LocaleMpq))
     {
         if (GetLastError() != ERROR_PATH_NOT_FOUND)
+        {
+            _tprintf(_T("\nLoading %s locale MPQs\n"), LocalesT[locale]);
             _tprintf(_T("Cannot open archive %s\n"), buff);
+        }
         return false;
     }
 
+    _tprintf(_T("\nLoading %s locale MPQs\n"), LocalesT[locale]);
     char const* prefix = NULL;
     for (int i = 0; Builds[i] && Builds[i] <= CONF_TargetBuild; ++i)
     {
@@ -1174,8 +1216,11 @@ bool LoadLocaleMPQFile(int locale)
                 _tprintf(_T("Cannot open patch archive %s\n"), buff);
             continue;
         }
+        else
+            _tprintf(_T("Loaded %s\n"), buff);
     }
 
+    printf("\n");
     return true;
 }
 
@@ -1183,6 +1228,7 @@ void LoadCommonMPQFiles(uint32 build)
 {
     TCHAR filename[512];
     _stprintf(filename, _T("%s/Data/world.MPQ"), input_path);
+    _tprintf(_T("Loading common MPQ files\n"));
     if (!SFileOpenArchive(filename, 0, MPQ_OPEN_READ_ONLY, &WorldMpq))
     {
         if (GetLastError() != ERROR_PATH_NOT_FOUND)
@@ -1241,12 +1287,13 @@ void LoadCommonMPQFiles(uint32 build)
             _tprintf(_T("Loaded %s\n"), filename);
     }
 
+    printf("\n");
 }
 
 int main(int argc, char * arg[])
 {
     printf("Map & DBC Extractor\n");
-    printf("===================\n\n");
+    printf("===================\n");
 
     HandleArgs(argc, arg);
 
@@ -1275,6 +1322,7 @@ int main(int argc, char * arg[])
             }
 
             printf("Detected client build: %u\n", build);
+            printf("\n");
             break;
         }
 
@@ -1283,10 +1331,12 @@ int main(int argc, char * arg[])
         printf("Detected client build %u for locale %s\n", tempBuild, Locales[i]);
         if (tempBuild > CONF_TargetBuild)
         {
+            SFileCloseArchive(LocaleMpq);
             printf("Base locale-%s.MPQ has build higher than target build (%u > %u), nothing extracted!\n", Locales[i], tempBuild, CONF_TargetBuild);
             continue;
         }
 
+        printf("\n");
         ExtractDBCFiles(i, FirstLocale < 0);
         ExtractDB2Files(i, FirstLocale < 0);
 

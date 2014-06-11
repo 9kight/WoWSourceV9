@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -36,7 +36,7 @@ namespace DisableMgr
 }
 
 #define MMAP_MAGIC 0x4d4d4150   // 'MMAP'
-#define MMAP_VERSION 4
+#define MMAP_VERSION 5
 
 struct MmapTileHeader
 {
@@ -202,7 +202,10 @@ namespace MMAP
         minX = INT_MIN;
         minY = INT_MIN;
 
-        float bmin[3], bmax[3], lmin[3], lmax[3];
+        float bmin[3] = { 0, 0, 0 };
+        float bmax[3] = { 0, 0, 0 };
+        float lmin[3] = { 0, 0, 0 };
+        float lmax[3] = { 0, 0, 0 };
         MeshData meshData;
 
         // make sure we process maps which don't have tiles
@@ -243,11 +246,20 @@ namespace MMAP
         printf("Building mesh from file\n");
         int tileX, tileY, mapId;
         if (fread(&mapId, sizeof(int), 1, file) != 1)
+        {
+            fclose(file);
             return;
+        }
         if (fread(&tileX, sizeof(int), 1, file) != 1)
+        {
+            fclose(file);
             return;
+        }
         if (fread(&tileY, sizeof(int), 1, file) != 1)
+        {
+            fclose(file);
             return;
+        }
 
         dtNavMesh* navMesh = NULL;
         buildNavMesh(mapId, navMesh);
@@ -260,25 +272,45 @@ namespace MMAP
 
         uint32 verticesCount, indicesCount;
         if (fread(&verticesCount, sizeof(uint32), 1, file) != 1)
+        {
+            fclose(file);
             return;
+        }
+
         if (fread(&indicesCount, sizeof(uint32), 1, file) != 1)
+        {
+            fclose(file);
             return;
+        }
 
         float* verts = new float[verticesCount];
         int* inds = new int[indicesCount];
 
         if (fread(verts, sizeof(float), verticesCount, file) != verticesCount)
+        {
+            fclose(file);
+            delete[] verts;
+            delete[] inds;
             return;
+        }
+
         if (fread(inds, sizeof(int), indicesCount, file) != indicesCount)
+        {
+            fclose(file);
+            delete[] verts;
+            delete[] inds;
             return;
+        }
 
         MeshData data;
 
         for (uint32 i = 0; i < verticesCount; ++i)
             data.solidVerts.append(verts[i]);
+        delete[] verts;
 
         for (uint32 i = 0; i < indicesCount; ++i)
             data.solidTris.append(inds[i]);
+        delete[] inds;
 
         TerrainBuilder::cleanVertices(data.solidVerts, data.solidTris);
         // get bounds of current tile
@@ -308,7 +340,9 @@ namespace MMAP
     /**************************************************************************/
     void MapBuilder::buildMap(uint32 mapID)
     {
+#ifndef __APPLE__
         printf("[Thread %u] Building map %03u:\n", uint32(ACE_Thread::self()), mapID);
+#endif
 
         std::set<uint32>* tiles = getTileList(mapID);
 
@@ -518,8 +552,10 @@ namespace MMAP
         config.walkableRadius = m_bigBaseUnit ? 1 : 2;
         config.borderSize = config.walkableRadius + 3;
         config.maxEdgeLen = VERTEX_PER_TILE + 1;        // anything bigger than tileSize
-        config.walkableHeight = m_bigBaseUnit ? 2.5 : 5;
-        config.walkableClimb = m_bigBaseUnit ? 1.5 : 3;   // keep less than walkableHeight
+        config.walkableHeight = m_bigBaseUnit ? 3 : 6;
+        // a value >= 3|6 allows npcs to walk over some fences
+        // a value >= 4|8 allows npcs to walk over all fences
+        config.walkableClimb = m_bigBaseUnit ? 4 : 8;
         config.minRegionArea = rcSqr(60);
         config.mergeRegionArea = rcSqr(50);
         config.maxSimplificationError = 1.8f;           // eliminates most jagged edges (tiny polygons)
@@ -539,19 +575,7 @@ namespace MMAP
 
         // merge per tile poly and detail meshes
         rcPolyMesh** pmmerge = new rcPolyMesh*[TILES_PER_MAP * TILES_PER_MAP];
-        if (!pmmerge)
-        {
-            printf("%s alloc pmmerge FIALED!\n", tileString);
-            return;
-        }
-
         rcPolyMeshDetail** dmmerge = new rcPolyMeshDetail*[TILES_PER_MAP * TILES_PER_MAP];
-        if (!dmmerge)
-        {
-            printf("%s alloc dmmerge FIALED!\n", tileString);
-            return;
-        }
-
         int nmerge = 0;
         // build all tiles
         for (int y = 0; y < TILES_PER_MAP; ++y)
@@ -646,12 +670,9 @@ namespace MMAP
                 rcFreeContourSet(tile.cset);
                 tile.cset = NULL;
 
-                if (tile.pmesh)
-                {
-                    pmmerge[nmerge] = tile.pmesh;
-                    dmmerge[nmerge] = tile.dmesh;
-                    nmerge++;
-                }
+                pmmerge[nmerge] = tile.pmesh;
+                dmmerge[nmerge] = tile.dmesh;
+                nmerge++;
             }
         }
 
@@ -659,6 +680,9 @@ namespace MMAP
         if (!iv.polyMesh)
         {
             printf("%s alloc iv.polyMesh FIALED!\n", tileString);
+            delete[] pmmerge;
+            delete[] dmmerge;
+            delete[] tiles;
             return;
         }
         rcMergePolyMeshes(m_rcContext, pmmerge, nmerge, *iv.polyMesh);
@@ -667,6 +691,9 @@ namespace MMAP
         if (!iv.polyMeshDetail)
         {
             printf("%s alloc m_dmesh FIALED!\n", tileString);
+            delete[] pmmerge;
+            delete[] dmmerge;
+            delete[] tiles;
             return;
         }
         rcMergePolyMeshDetails(m_rcContext, dmmerge, nmerge, *iv.polyMeshDetail);
@@ -674,7 +701,6 @@ namespace MMAP
         // free things up
         delete[] pmmerge;
         delete[] dmmerge;
-
         delete[] tiles;
 
         // set polygons as walkable
@@ -716,8 +742,8 @@ namespace MMAP
         params.cs = config.cs;
         params.ch = config.ch;
         params.tileLayer = 0;
-        params.buildBvTree = true; 
- 
+        params.buildBvTree = true;
+
         // will hold final navmesh
         unsigned char* navData = NULL;
         int navDataSize = 0;

@@ -1,6 +1,25 @@
+/*
+ * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #define _CRT_SECURE_NO_DEPRECATE
 
 #include "adt.h"
+#include <cstring>
 
 // Helper
 int holetab_h[4] = {0x1111, 0x2222, 0x4444, 0x8888};
@@ -51,7 +70,7 @@ bool ADT_file::prepareLoadedData()
         return false;
 
     // Check and prepare MHDR
-    a_grid = (adt_MHDR *)(GetData()+8+version->size);
+    a_grid = (adt_MHDR*)(GetData()+8+version->size);
     if (!a_grid->prepareLoadedData())
         return false;
 
@@ -63,7 +82,7 @@ bool ADT_file::prepareLoadedData()
     {
         uint32 header = *(uint32*)ptr;
         uint32 size = *(uint32*)(ptr + 4);
-        if (header == 'MCNK')
+        if (header == MCNKMagic.fcc)
         {
             cells[mcnk_count / ADT_CELLS_PER_GRID][mcnk_count % ADT_CELLS_PER_GRID] = (adt_MCNK*)ptr;
             ++mcnk_count;
