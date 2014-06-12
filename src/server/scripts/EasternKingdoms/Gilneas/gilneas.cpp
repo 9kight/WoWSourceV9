@@ -2149,6 +2149,7 @@ public:
 /*######
 ## npc_crowley_horse
 ######*/
+
 class npc_crowley_horse : public CreatureScript
 {
 public:
@@ -2175,64 +2176,46 @@ public:
 
         void PassengerBoarded(Unit* who, int8 /*seatId*/, bool apply)
         {
-            if (!apply)
-                me->DespawnOrUnsummon();
-        }
-
-        void MovementInform(uint32 type, uint32 point)
-        {
-            npc_escortAI::MovementInform(type, point);
-
-            if (type == EFFECT_MOTION_TYPE)
-                SetEscortPaused(false);
+            if (who->GetTypeId() == TYPEID_PLAYER)
+            {
+                if (apply)
+                {
+                    Start(false, true, who->GetGUID());
+                }
+            }
         }
 
         void WaypointReached(uint32 i)
         {
             Player* player = GetPlayerForEscort();
-            if (!player)
-            {
-                me->DespawnOrUnsummon();
-                return;
-            }
-            Creature *crowley = NULL;
-            if (me->GetVehicleKit())
-                if (me->GetVehicleKit()->GetPassenger(1))
-                    if (me->GetVehicleKit()->GetPassenger(1)->GetTypeId() == TYPEID_UNIT)
-                        crowley = me->GetVehicleKit()->GetPassenger(1)->ToCreature();
+            Creature* crowley = me->FindNearestCreature(NPC_DARIUS_CROWLEY, 5, true);
 
             switch(i)
             {
-                case 0:
-                    SetEscortPaused(true);
+                case 1:
                     player->SetClientControl(me, 0);
-                    if (crowley)
-                        crowley->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    crowley->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     me->GetMotionMaster()->MoveJump(-1714.02f, 1666.37f, 20.57f, 25.0f, 15.0f);
                     break;
-                case 3:
-                    if (crowley)
-                        crowley->AI()->Talk(0);
-                    break;
-                case 9:
-                    SetEscortPaused(true);
-                    me->GetMotionMaster()->MoveJump(-1571.32f, 1710.58f, 20.49f, 25.0f, 15.0f);
+                case 4:
+                    crowley->AI()->Talk(SAY_CROWLEY_HORSE_1);
                     break;
                 case 10:
-                    if (crowley)
-                        crowley->AI()->Talk(1);
+                    me->GetMotionMaster()->MoveJump(-1571.32f, 1710.58f, 20.49f, 25.0f, 15.0f);
                     break;
-                case 15:
-                    if (crowley)
-                        crowley->AI()->Talk(1);
+                case 11:
+                    crowley->AI()->Talk(SAY_CROWLEY_HORSE_2);
                     break;
-                case 19:
+                case 16:
+                    crowley->AI()->Talk(SAY_CROWLEY_HORSE_2);
+                    break;
+                case 20:
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     me->getThreatManager().resetAllAggro();
                     player->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     player->getThreatManager().resetAllAggro();
                     break;
-                case 20:
+                case 21:
                     player->SetClientControl(me, 1);
                     player->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     player->ExitVehicle();
@@ -2256,16 +2239,16 @@ public:
 
             if (!CrowleySpawn)
             {
-                 DoCast(SPELL_SUMMON_CROWLEY);
-                 if (Creature *crowley = me->FindNearestCreature(NPC_DARIUS_CROWLEY, 5, true))
-                 {
-                     CrowleySpawn = true;
-                 }
+                DoCast(SPELL_SUMMON_CROWLEY);
+                if (Creature* crowley = me->FindNearestCreature(NPC_DARIUS_CROWLEY, 5, true))
+                {
+                    CrowleySpawn = true;
+                }
             }
 
             if (CrowleySpawn && !CrowleyOn)
             {
-                Creature *crowley = me->FindNearestCreature(NPC_DARIUS_CROWLEY, 5, true);
+                Creature* crowley = me->FindNearestCreature(NPC_DARIUS_CROWLEY, 5, true);
                 crowley->CastSpell(me, SPELL_RIDE_HORSE, true);//Mount Crowley in seat 1
                 CrowleyOn = true;
             }
