@@ -217,12 +217,14 @@ public:
         void JustDied(Unit* /*killer*/)
         {
             Talk(SAY_DEATH);
+			DespawnGameobjects(209596, 100.0f);
         }
 
         void EnterEvadeMode()
         {
             events.Reset();
             summons.DespawnAll();
+			DespawnGameobjects(209596, 100.0f);
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetObjectScale(1);
             _Reset();
