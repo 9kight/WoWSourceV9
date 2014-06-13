@@ -528,7 +528,7 @@ public:
                         case 8: General->MonsterSay("We're taking him into custody in the name of King Varian Wrynn.", 0, NULL); m_uiPhaseTimer = 4000; phase = 9; break;
                         case 9: me->MonsterSay("Nooooo...", 0, NULL); m_uiPhaseTimer = 4000; phase = 10; break;
                         case 10: General->MonsterSay("Take us to the Stockades, Andromath.", 0, NULL); m_uiPhaseTimer = 4000; phase = 11; break;
-                                //General->SetFacing(6.08f);
+                                General->SetOrientation(6.08f);
                         case 11:
                         {
                             General->CastSpell(General,64446,true);
