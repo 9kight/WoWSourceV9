@@ -956,57 +956,78 @@ class spell_pal_righteous_defense : public SpellScriptLoader
         }
 };
 
+// 85256 - Templar's Verdict
 class spell_pal_templar_s_verdict : public SpellScriptLoader
 {
-    class script_impl : public SpellScript
+public:
+    spell_pal_templar_s_verdict() : SpellScriptLoader("spell_pal_templar_s_verdict") { }
+
+    class spell_pal_templar_s_verdict_SpellScript : public SpellScript
     {
-        PrepareSpellScript(script_impl);
+        PrepareSpellScript(spell_pal_templar_s_verdict_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellEntry*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_DIVINE_PURPOSE_PROC))
+                return false;
+
+            return true;
+        }
 
         bool Load()
         {
-            return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+            if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
+                return false;
+
+            if (GetCaster()->ToPlayer()->getClass() != CLASS_PALADIN)
+                return false;
+
+            return true;
         }
 
-        void ChangeDamage(SpellEffIndex)
-        {                
-            Player* const caster = GetCaster()->ToPlayer();
-            int32 multiplier = 0;
-
-            switch (caster->GetHolyPoints())
-            {
-                case 1:
-                    multiplier = 30;
-                    break;
-                case 2:
-                    multiplier = 90;
-                    break;
-                case 3:
-                    multiplier = 235;
-                    break;
-            }
-
+        void ChangeDamage(SpellEffIndex /*effIndex*/)
+        {
+            Unit* caster = GetCaster();
             int32 damage = GetHitDamage();
-            int32 const bonus = AddPct(damage, multiplier);
-            SetHitDamage(bonus);
+            if (Unit* target = GetHitUnit())
+            {
+                caster->SpellDamageBonusDone(GetHitUnit(), GetSpellInfo(), damage, SPELL_DIRECT_DAMAGE);
+                damage = target->SpellDamageBonusTaken(GetSpellInfo(), damage, SPELL_DIRECT_DAMAGE, 1, caster->GetGUID());;
+
+                if (caster->HasAura(SPELL_PALADIN_DIVINE_PURPOSE_PROC))
+                    damage *= 7.5;  // 7.5*30% = 225%
+                else
+                {
+                    switch (caster->GetPower(POWER_HOLY_POWER))
+                    {
+                    case 1: // 1 Holy Power
+                        damage = damage;
+                        break;
+                    case 2: // 2 Holy Power
+                        damage *= 3;    // 3*30 = 90%
+                        break;
+                    case 3: // 3 Holy Power
+                        damage *= 7.5;  // 7.5*30% = 225%
+                        break;
+                    }
+                }
+            }
+            
+            SetHitDamage(damage);
         }
 
         void Register()
         {
-            OnEffectHitTarget += SpellEffectFn(script_impl::ChangeDamage, EFFECT_0, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
+            OnEffectHitTarget += SpellEffectFn(spell_pal_templar_s_verdict_SpellScript::ChangeDamage, EFFECT_0, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
         }
     };
 
-public:
-    spell_pal_templar_s_verdict()
-        : SpellScriptLoader("spell_pal_templar_s_verdict")
-    {
-    }
-
     SpellScript* GetSpellScript() const
     {
-        return new script_impl();
+        return new spell_pal_templar_s_verdict_SpellScript();
     }
 };
+
 
 class spell_pal_shield_of_the_righteous : public SpellScriptLoader
 {

@@ -129,7 +129,7 @@ int Master::Run()
 
     sLog->outInfo(LOG_FILTER_WORLDSERVER, "WoWSource 2013-2014");
     sLog->outInfo(LOG_FILTER_WORLDSERVER, "Visit our forum www.wowsource.info");
-    sLog->outInfo(LOG_FILTER_WORLDSERVER, "Oficial WoWSource v8 patch 4.3.4");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "WoWSource V9 Cataclysm 4.3.4");
 
     /// worldserver PID file creation
     std::string pidfile = ConfigMgr::GetStringDefault("PidFile", "");

@@ -1055,7 +1055,7 @@ BeepAtStart = 1
 #        Example:     "Welcome to John\'s Server@This server runs on Trinity Core."
 #        Default:     "Welcome to a Trinity Core server."
 
-Motd = "Welcome to Oficial version 8 of WoWSource 4.3.4."
+Motd = "WoWSource V9 for Cataclysm 4.3.4."
 
 #
 #    Server.LoginInfo

@@ -7,7 +7,7 @@
  *
  * Copyright (C) 2011 - 2013 ArkCORE <http://www.arkania.net/>
  *
- * Copyright (C) 2013 - 2014 SteathCORE <http://www.wowsource.info/>
+ * Copyright (C) 2013 - 2014 WoWSource <http://www.wowsource.info/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

@@ -410,8 +410,8 @@ void World::LoadConfigSettings(bool reload)
     }
 
     ///- Read the player limit and the Message of the day from the config file
-    SetPlayerAmountLimit(ConfigMgr::GetIntDefault("PlayerLimit", 5));
-    SetMotd(ConfigMgr::GetStringDefault("Motd", "Welcome to WoWSource Version 8."));
+    SetPlayerAmountLimit(ConfigMgr::GetIntDefault("PlayerLimit", 1000));
+    SetMotd(ConfigMgr::GetStringDefault("Motd", "Welcome to WoWSource V9."));
 
     ///- Read ticket system setting from the config file
     m_bool_configs[CONFIG_ALLOW_TICKETS] = ConfigMgr::GetBoolDefault("AllowTickets", true);

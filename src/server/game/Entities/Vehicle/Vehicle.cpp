@@ -61,10 +61,8 @@ Vehicle::~Vehicle()
 {
     /// @Uninstall must be called before this.
     ASSERT(_status == STATUS_UNINSTALLING);
-    //    for (SeatMap::const_iterator itr = Seats.begin(); itr != Seats.end(); ++itr)
-    {
-        //        ASSERT(!itr->second.Passenger);
-    }
+    for (SeatMap::const_iterator itr = Seats.begin(); itr != Seats.end(); ++itr)
+        ASSERT(!itr->second.Passenger);
 }
 
 /**
