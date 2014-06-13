@@ -116,12 +116,12 @@ public:
                 return;
             if (SoulCorruption_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_SOUL_CORRUPTION);
+                DoCast(me->GetVictim(), SPELL_SOUL_CORRUPTION);
                 SoulCorruption_Timer = rand()%4000+15000; //gotta confirm Timers
             } else SoulCorruption_Timer-=diff;
             if (CreatureOfNightmare_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_CREATURE_OF_NIGHTMARE);
+                DoCast(me->GetVictim(), SPELL_CREATURE_OF_NIGHTMARE);
                 CreatureOfNightmare_Timer = 45000; //gotta confirm Timers
             } else CreatureOfNightmare_Timer-=diff;
             DoMeleeAttackIfReady();
@@ -210,7 +210,7 @@ public:
         }
         void JustDied(Unit* /*pKiller*/)
         {
-            me->ForcedDespawn(4000);
+            me->DespawnOrUnsummon(4000);
             me->SetRespawnTime(10);
         }
         void UpdateAI(const uint32 diff)
@@ -226,7 +226,7 @@ public:
 
             if (me->HasReactState(REACT_AGGRESSIVE) && Timer <= diff)
             {
-                me->CastSpell(me->getVictim(),3106,true);
+                me->CastSpell(me->GetVictim(),3106,true);
                 Timer = 5000;
             }
             else Timer -= diff;
@@ -262,7 +262,7 @@ class npc_stalvan : public CreatureScript
             {
                 me->RestoreFaction();
                 me->GetMotionMaster()->MoveTargetedHome();
-                me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
                 me->SetReactState(REACT_PASSIVE);
                 Step = 0;
                 StepTimer = 3000;
@@ -288,7 +288,7 @@ class npc_stalvan : public CreatureScript
                         case 6: 
                         {
                             me->SetReactState(REACT_AGGRESSIVE);
-                            me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                            me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
                             Step++;
                         } break;
                         default: break;
@@ -365,7 +365,7 @@ class npc_tobias : public CreatureScript
                             {
                                 me->GetMotionMaster()->MoveCharge(-10362.98f, -1220.066f, 39.45f, 15.0f);
                                 me->SetFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_QUESTGIVER);
-                                me->ForcedDespawn(6000);
+                                me->DespawnOrUnsummon(6000);
                             }break;
                             default: break;
                         }
@@ -490,7 +490,7 @@ public:
                                 pPlayer->CastSpell(pPlayer,SPELL_STUNNING_POUNCE,true);
                                 pPlayer->AreaExploredOrEventHappens(26717);
                                 me->GetMotionMaster()->MoveCharge(-11124.71f, -499.84f, 34.95f, 8.0f);
-                                me->ForcedDespawn(5000);
+                                me->DespawnOrUnsummon(5000);
                             } break;
                         }else StunningPounceTimer -= uiDiff;
                         default: break;
@@ -549,7 +549,7 @@ class npc_lurking_potion : public CreatureScript
                 if (pSpell->Id == SPELL_HARRIS_AMPULE && caster->GetTypeId() == TYPEID_PLAYER && HealthBelowPct(25))
                 {
                     caster->ToPlayer()->KilledMonsterCredit(43860,0);
-                    me->ForcedDespawn(2500);
+                    me->DespawnOrUnsummon(2500);
                 }
             }
             void UpdateAI(const uint32 uiDiff)
@@ -561,7 +561,6 @@ class npc_lurking_potion : public CreatureScript
                         if(!bCast)
                         {
                             me->CastSpell(pPlayer,81957,true);
-                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_PASSIVE);
                             me->Attack(pPlayer,true);
                             bCast=true;
                         }
@@ -664,7 +663,7 @@ class npc_oliver_harris : public CreatureScript
                             case 3: Jitters->MonsterSay("I...I can't",0,0); TalkEventTimer=2000; Phase++; break;
                             case 4: Worgen->MonsterSay("Jitters...",0,0); TalkEventTimer=1000; Phase++; break;
                             case 5: me->MonsterSay("Damn it, Jitters. I said HOLD!",0,0); me->HandleEmoteCommand(5); TalkEventTimer=3000; Phase++; break;
-                            case 6: Worgen->MonsterYell("JITTERS!",0,0); Worgen->HandleEmoteCommand(53); Worgen->SetFacing(2.3997f,0); TalkEventTimer=4000; Phase++; break;
+                            case 6: Worgen->MonsterYell("JITTERS!",0,0); Worgen->HandleEmoteCommand(53); Worgen->SetOrientation(2.3997f); TalkEventTimer=4000; Phase++; break;
                             case 7: Worgen->MonsterSay("I remember now...it's all your fault!",0,0); Worgen->HandleEmoteCommand(384); Jitters->HandleEmoteCommand(473); TalkEventTimer=4500; Phase++; break;
                             case 8: Worgen->MonsterSay("You brought the worgen to Duskwood! You led the Dark Riders to my farm, and hid while they murdered my family!",0,0); TalkEventTimer=4500; Phase++; break;
                             case 9: Worgen->MonsterYell("Every speak of suffering in my life is YOUR PATHETIC FAULT! I SHOULD KILL YOU!",0,0); TalkEventTimer=9000; Phase++; break;
@@ -672,7 +671,7 @@ class npc_oliver_harris : public CreatureScript
                             case 11: Worgen->MonsterSay("You've got a lot to make up for, Jitters. I won't give you the easy way out.",0,0); TalkEventTimer=2000; Phase++; break;
                             case 12: Worgen->GetMotionMaster()->MovePoint(1,-10761.66f,338.77f,37.82f); TalkEventTimer=6000; Worgen->HandleEmoteCommand(0); Jitters->HandleEmoteCommand(0); Phase++; break;
                             case 13: Worgen->SetFacingToObject(Jitters); me->GetMotionMaster()->MoveTargetedHome(); TalkEventTimer=3000; Phase++; break;
-                            case 14: Jitters->ForcedDespawn(); me->ForcedDespawn(); Worgen->ForcedDespawn(); pPlayer->CastSpell(pPlayer,82288,true); pPlayer->CastSpell(pPlayer,82289,true); pPlayer->KilledMonsterCredit(43969,0); break;
+                            case 14: Jitters->DespawnOrUnsummon(); me->DespawnOrUnsummon(); Worgen->DespawnOrUnsummon(); pPlayer->CastSpell(pPlayer,82288,true); pPlayer->CastSpell(pPlayer,82289,true); pPlayer->KilledMonsterCredit(43969,0); break;
                             default: break;
                         }
                     }
@@ -720,3 +719,4 @@ void AddSC_duskwood()
     new npc_oliver_harris();
     new npc_forlorn_spirit();
 }
+
