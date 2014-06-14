@@ -22,18 +22,18 @@ INSERT INTO `script_waypoint` VALUES
    (2768,19,-2066.41,-2086.21,8.97,6000, ''),
    (2768,20,-2066.41,-2086.21,8.97,2000, '');
 
-DELETE FROM `script_texts` WHERE entry BETWEEN -1000273 AND -1000264;
-INSERT INTO `script_texts` (`npc_entry`, `entry`,`content_default`,`sound`,`type`,`language`,`emote`,`comment`) VALUES
-(2768,-1000264,'Ok, $N. Follow me to the cave where I''ll attempt to harness the power of the rune stone into these goggles.',0,0,0,1,'phizzlethorpe SAY_PROGRESS_1'),
-(2768,-1000265,'I discovered this cave on our first day here. I believe the energy in the stone can be used to our advantage.',0,0,0,1,'phizzlethorpe SAY_PROGRESS_2'),
-(2768,-1000266,'I''ll begin drawing energy from the stone. Your job, $N, is to defend me. This place is cursed... trust me.',0,0,0,1,'phizzlethorpe SAY_PROGRESS_3'),
-(2768,-1000267,'%s begins tinkering with the goggles before the stone.',0,2,0,0,'phizzlethorpe EMOTE_PROGRESS_4'),
-(2768,-1000268,'Help!!! Get these things off me so I can get my work done!',0,0,0,0,'phizzlethorpe SAY_AGGRO'),
-(2768,-1000269,'Almost done! Just a little longer!',0,0,0,1,'phizzlethorpe SAY_PROGRESS_5'),
-(2768,-1000270,'I\'ve done it! I have harnessed the power of the stone into the goggles! Let\'s get out of here!',0,0,0,1,'phizzlethorpe SAY_PROGRESS_6'),
-(2768,-1000271,'Phew! Glad to be back from that creepy cave.',0,0,0,1,'phizzlethorpe SAY_PROGRESS_7'),
-(2768,-1000272,'%s hands one glowing goggles over to Doctor Draxlegauge.',0,2,0,0,'phizzlethorpe EMOTE_PROGRESS_8'),
-(2768,-1000273,'Doctor Draxlegauge will give you further instructions, $N. Many thanks for your help!',0,0,0,1,'phizzlethorpe SAY_PROGRESS_9');
+DELETE FROM `creature_text` WHERE entry = 2768;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES 
+(2768, 0, 0, 'Ok, $N. Follow me to the cave where I\'ll attempt to harness the power of the rune stone into these goggles.', 12, 0, 100, 0, 0, 0, 'Professor Phizzlethorpe - SAY_PROGRESS_1'),
+(2768, 1, 0, 'I discovered this cave on our first day here. I believe the energy in the stone can be used to our advantage.', 12, 0, 100, 0, 0, 0, 'Professor Phizzlethorpe - SAY_PROGRESS_2'),
+(2768, 2, 0, 'I\'ll begin drawing energy from the stone. Your job, $N, is to defend me. This place is cursed... trust me.', 12, 0, 100, 0, 0, 0, 'Professor Phizzlethorpe - SAY_PROGRESS_3'),
+(2768, 3, 0, '%s begins tinkering with the goggles before the stone.', 16, 0, 100, 0, 0, 0, 'Professor Phizzlethorpe - EMOTE_PROGRESS_4'),
+(2768, 4, 0, 'Help!!! Get these things off me so I can get my work done!', 12, 0, 100, 0, 0, 0, 'Professor Phizzlethorpe - SAY_AGGRO'),
+(2768, 5, 0, 'Almost done! Just a little longer!', 12, 0, 100, 0, 0, 0, 'Professor Phizzlethorpe - SAY_PROGRESS_5'),
+(2768, 6, 0, 'I\'ve done it! I have harnessed the power of the stone into the goggles! Let\'s get out of here!', 12, 0, 100, 0, 0, 0, 'Professor Phizzlethorpe - SAY_PROGRESS_6'),
+(2768, 7, 0, 'Phew! Glad to be back from that creepy cave.', 12, 0, 100, 0, 0, 0, 'Professor Phizzlethorpe - SAY_PROGRESS_7'),
+(2768, 8, 0, '%s hands one glowing goggles over to Doctor Draxlegauge.', 16, 0, 100, 0, 0, 0, 'Professor Phizzlethorpe - EMOTE_PROGRESS_8'),
+(2768, 9, 0, 'Doctor Draxlegauge will give you further instructions, $N. Many thanks for your help!', 12, 0, 100, 0, 0, 0, 'Professor Phizzlethorpe - SAY_PROGRESS_9');
 
 DELETE FROM gameobject_questrelation WHERE id=2713;
 INSERT INTO gameobject_questrelation VALUES
@@ -55,16 +55,16 @@ You have fought the undead, struck back against the Horde, and honored the memor
 UPDATE creature_template SET MovementType=2,ScriptName='npc_kinelory' WHERE entry=2713;
 UPDATE creature SET MovementType=2,spawntimesecs=10 WHERE id=2713;
 
-DELETE FROM `script_texts` WHERE entry BETWEEN -1002720 AND -1002713;
-INSERT INTO `script_texts` (`npc_entry`, `entry`,`content_default`,`sound`,`type`,`language`,`emote`,`comment`) VALUES
-(2713,-1002713,'Well then. Let\'s get this started. The longer we\'re here, the more damage the undead could be doing back in Hillsbrad.',0,0,0,1,'npc_kinelory SAY_START'),
-(2713,-1002714,'Alright, this is where we really have to be on our paws. Be ready!',0,0,0,1,'npc_kinelory SAY_POINT_1'),
-(2713,-1002715,'Attack me if you will, but you won\'t stop me from getting back to Quae.',0,0,0,1,'npc_kinelory SAY_ON_AGGRO'),
-(2713,-1002716,'You will never stop the Forsaken, Kinelory. The Dark Lady shall make you suffer.',0,2,0,0,'npc_kinelory SAY_PROFESOR'),
-(2713,-1002717,'Watch my rear! I\'ll see what I can find in all this junk...',0,0,0,0,'npc_kinelory SAY_HOUSE_1'),
-(2713,-1002718,'I bet Quae\'ll think this is important. She\s pretty knowledgeable about those things -- no expert, but knowledgeable.',0,0,0,1,'npc_kinelory SAY_HOUSE_2'),
-(2713,-1002719,'Okay, let\'s get out of here quick quiet! Try and keep up. I\'m going to make a break for it.',0,0,0,1,'npc_kinelory SAY_HOUSE_3'),
-(2713,-1002720,'We made it! Quae, we made it!',0,0,0,1,'npc_kinelory SAY_END');
+DELETE FROM `creature_text` WHERE = 2713;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(2713, 0, 0, 'Well then. Let\\\'s get this started. The longer we\\\'re here, the more damage the undead could be doing back in Hillsbrad.', 12, 0, 100, 1, 0, 0, ''),
+(2713, 1, 0, 'Alright, this is where we really have to be on our paws. Be ready!', 12, 0, 100, 1, 0, 0, ''),
+(2713, 2, 0, 'Attack me if you will, but you won\\\'t stop me from getting back to Quae.', 12, 0, 100, 1, 0, 0, ''),
+(2713, 3, 0, 'You will never stop the Forsaken, Kinelory. The Dark Lady shall make you suffer.', 14, 0, 100, 0, 0, 0, ''),
+(2713, 4, 0, 'Watch my rear! I\\\'ll see what I can find in all this junk...', 12, 0, 100, 1, 0, 0, ''),
+(2713, 5, 0, 'I bet Quae\\\'ll think this is important. She\\s pretty knowledgeable about those things -- no expert, but knowledgeable.', 12, 0, 100, 1, 0, 0, ''),
+(2713, 6, 0, 'Okay, let\\\'s get out of here quick quiet! Try and keep up. I\\\'m going to make a break for it.', 12, 0, 100, 1, 0, 0, '');
+(2713, 7, 0, 'We made it! Quae, we made it!', 12, 0, 100, 1, 0, 0, ''),
 
 
 

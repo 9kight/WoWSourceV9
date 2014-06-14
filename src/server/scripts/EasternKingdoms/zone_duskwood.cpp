@@ -587,7 +587,7 @@ class npc_lurking_potion : public CreatureScript
 enum eCryMoon
 {
     QUEST_CRY_FOR_THE_MOON	= 26760,
-    NPC_OLIVER_HARRIS	    = 43858,
+    NPC_OLIVER_HARRIS	    = 43858, //This is the summend one
     NPC_JITTERS		        = 43859,
     NPC_LUR_WORGEN		    = 43950,
     SPELL_INVISIBILITY_7	= 82288,
@@ -597,31 +597,6 @@ enum eCryMoon
     SPELL_EJECT_PASSENGERS	= 65785,
     SPELL_KILL_CREDIT	    = 82286
 };
-
-/*class npc_cry_for_the_moon : public CreatureScript
-{
-public:
-    npc_cry_for_the_moon() : CreatureScript("npc_cry_for_the_moon") { }
-
-    bool OnQuestAccept(Player* pPlayer, Creature* pCreature, Quest const *pQuest)
-    {
-        if (pQuest->GetQuestId() == QUEST_CRY_FOR_THE_MOON)
-        {
-            pPlayer->RemoveAurasDueToSpell(SPELL_INVISIBILITY_7);
-            pPlayer->RemoveAurasDueToSpell(SPELL_INVISIBILITY_8);
-            CAST_AI(npc_cry_for_the_moon::npc_cry_for_the_moonAI, pCreature->AI())->PlayerGUID = pPlayer->GetGUID();
-
-            if (!pPlayer->FindNearestCreature(NPC_OLIVER_HARRIS, 20.0f, true))
-            {
-                pPlayer->SummonCreature(NPC_JITTERS,-10748.52f,333.62f,37.46f,5.37f,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,90000);
-                pPlayer->SummonCreature(NPC_OLIVER_HARRIS,-10752.87f,338.19f,37.294f,5.48f,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,90000);
-                pPlayer->SummonCreature(NPC_LUR_WORGEN,-10747.40f,332.28f,37.74f,4.48f,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,90000);
-            }
-        }
-        return true;
-    }
-};*/
-
 class npc_oliver_harris : public CreatureScript
 {
     public:
@@ -632,6 +607,24 @@ class npc_oliver_harris : public CreatureScript
             return new npc_oliver_harrisAI (pCreature);
         }
 
+    bool OnQuestAccept(Player* pPlayer, Creature* pCreature, Quest const *pQuest)
+    {
+        if (pQuest->GetQuestId() == QUEST_CRY_FOR_THE_MOON)
+        {
+            pPlayer->RemoveAurasDueToSpell(SPELL_INVISIBILITY_7);
+            pPlayer->RemoveAurasDueToSpell(SPELL_INVISIBILITY_8);
+            CAST_AI(npc_oliver_harris::npc_oliver_harrisAI, pCreature->AI())->PlayerGUID = pPlayer->GetGUID();
+
+            if (!pPlayer->FindNearestCreature(NPC_OLIVER_HARRIS, 20.0f, true))
+            {
+                pPlayer->SummonCreature(NPC_JITTERS,-10748.52f,333.62f,37.46f,5.37f,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,90000);
+                pPlayer->SummonCreature(NPC_OLIVER_HARRIS,-10752.87f,338.19f,37.294f,5.48f,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,90000);//This is the summend one
+                pPlayer->SummonCreature(NPC_LUR_WORGEN,-10747.40f,332.28f,37.74f,4.48f,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,90000);
+            }
+        }
+        return true;
+    }		
+		
         struct npc_oliver_harrisAI : public ScriptedAI
         {
             npc_oliver_harrisAI(Creature* creature) : ScriptedAI(creature) {}
@@ -639,7 +632,8 @@ class npc_oliver_harris : public CreatureScript
             uint8 Phase;
             uint32 TalkEventTimer;
             uint64 PlayerGUID;
-
+            uint64 Harris;
+			
             void Reset()
             {
                 Phase = 0;
@@ -654,24 +648,26 @@ class npc_oliver_harris : public CreatureScript
                     if (Player* pPlayer = me->GetPlayer(*me,PlayerGUID)) 
                     if (Creature* Jitters = me->FindNearestCreature(NPC_JITTERS,20.0f,true))
                     if (Creature* Worgen = me->FindNearestCreature(NPC_LUR_WORGEN,20.0f,true))
+					if (Creature* Harris = me->FindNearestCreature(NPC_OLIVER_HARRIS,20.0f,true))
                     {
                         switch(Phase)
                         {
-                            case 0: me->GetMotionMaster()->MovePoint(0,-10745.14f,331.53f,37.86f); Jitters->HandleEmoteCommand(69); TalkEventTimer=4000; Phase++; break;
-                            case 1: me->MonsterSay("Here we go...",0,0); me->SetFacingToObject(Worgen); me->HandleEmoteCommand(396); TalkEventTimer=3500; Phase++; break;
-                            case 2: me->MonsterSay("It's working. Hold him still ,Jitters.",0,0);me->HandleEmoteCommand(390); TalkEventTimer=2500; Phase++; break;
+                            case 0: Harris->GetMotionMaster()->MovePoint(0,-10745.14f,331.53f,37.86f); Jitters->HandleEmoteCommand(69); TalkEventTimer=4000; Phase++; break;
+                            case 1: Harris->MonsterSay("Here we go...",0,0); Harris->SetFacingToObject(Worgen); Harris->HandleEmoteCommand(396); TalkEventTimer=3500; Phase++; break;
+                            case 2: Harris->MonsterSay("It's working. Hold him still ,Jitters.",0,0);Harris->HandleEmoteCommand(390); TalkEventTimer=2500; Phase++; break;
                             case 3: Jitters->MonsterSay("I...I can't",0,0); TalkEventTimer=2000; Phase++; break;
                             case 4: Worgen->MonsterSay("Jitters...",0,0); TalkEventTimer=1000; Phase++; break;
-                            case 5: me->MonsterSay("Damn it, Jitters. I said HOLD!",0,0); me->HandleEmoteCommand(5); TalkEventTimer=3000; Phase++; break;
+                            case 5: Harris->MonsterSay("Damn it, Jitters. I said HOLD!",0,0); Harris->HandleEmoteCommand(5); TalkEventTimer=3000; Phase++; break;
                             case 6: Worgen->MonsterYell("JITTERS!",0,0); Worgen->HandleEmoteCommand(53); Worgen->SetOrientation(2.3997f); TalkEventTimer=4000; Phase++; break;
                             case 7: Worgen->MonsterSay("I remember now...it's all your fault!",0,0); Worgen->HandleEmoteCommand(384); Jitters->HandleEmoteCommand(473); TalkEventTimer=4500; Phase++; break;
                             case 8: Worgen->MonsterSay("You brought the worgen to Duskwood! You led the Dark Riders to my farm, and hid while they murdered my family!",0,0); TalkEventTimer=4500; Phase++; break;
                             case 9: Worgen->MonsterYell("Every speak of suffering in my life is YOUR PATHETIC FAULT! I SHOULD KILL YOU!",0,0); TalkEventTimer=9000; Phase++; break;
-                            case 10: me->MonsterSay("Letting him go is the only thing that's going to separateyou from the beasts now, my friend.",0,0); TalkEventTimer=1500; Phase++; break;
+                            case 10: Harris->MonsterSay("Letting him go is the only thing that's going to separateyou from the beasts now, my friend.",0,0); TalkEventTimer=1500; Phase++; break;
                             case 11: Worgen->MonsterSay("You've got a lot to make up for, Jitters. I won't give you the easy way out.",0,0); TalkEventTimer=2000; Phase++; break;
                             case 12: Worgen->GetMotionMaster()->MovePoint(1,-10761.66f,338.77f,37.82f); TalkEventTimer=6000; Worgen->HandleEmoteCommand(0); Jitters->HandleEmoteCommand(0); Phase++; break;
-                            case 13: Worgen->SetFacingToObject(Jitters); me->GetMotionMaster()->MoveTargetedHome(); TalkEventTimer=3000; Phase++; break;
-                            case 14: Jitters->DespawnOrUnsummon(); me->DespawnOrUnsummon(); Worgen->DespawnOrUnsummon(); pPlayer->CastSpell(pPlayer,82288,true); pPlayer->CastSpell(pPlayer,82289,true); pPlayer->KilledMonsterCredit(43969,0); break;
+                            case 13: Worgen->SetFacingToObject(Jitters); Harris->GetMotionMaster()->MoveTargetedHome(); TalkEventTimer=3000; Phase++; break;
+                            case 14: Jitters->DespawnOrUnsummon(); Harris->DespawnOrUnsummon(); Worgen->DespawnOrUnsummon(); pPlayer->CastSpell(pPlayer,82288,true); pPlayer->CastSpell(pPlayer,82289,true); pPlayer->KilledMonsterCredit(43969,0); 
+							break;
                             default: break;
                         }
                     }

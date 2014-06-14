@@ -38,16 +38,16 @@ EndContentData */
 
 enum eEnums
 {
-    SAY_PROGRESS_1          = -1000264,
-    SAY_PROGRESS_2          = -1000265,
-    SAY_PROGRESS_3          = -1000266,
-    EMOTE_PROGRESS_4        = -1000267,
-    SAY_AGGRO               = -1000268,
-    SAY_PROGRESS_5          = -1000269,
-    SAY_PROGRESS_6          = -1000270,
-    SAY_PROGRESS_7          = -1000271,
-    EMOTE_PROGRESS_8        = -1000272,
-    SAY_PROGRESS_9          = -1000273,
+    SAY_PROGRESS_1          = 0,
+    SAY_PROGRESS_2          = 1,
+    SAY_PROGRESS_3          = 2,
+    EMOTE_PROGRESS_4        = 3,
+    SAY_AGGRO               = 4,
+    SAY_PROGRESS_5          = 5,
+    SAY_PROGRESS_6          = 6,
+    SAY_PROGRESS_7          = 7,
+    EMOTE_PROGRESS_8        = 8,
+    SAY_PROGRESS_9          = 9,
 
     QUEST_SUNKEN_TREASURE   = 665,
     QUEST_GOOGLE_BOGGLE     = 26050,
@@ -73,24 +73,24 @@ class npc_professor_phizzlethorpe : public CreatureScript
 
                 switch (PointId)
                 {
-                case 4:DoScriptText(SAY_PROGRESS_2, me, player);break;
-                case 5:DoScriptText(SAY_PROGRESS_3, me, player);break;
-                case 8:DoScriptText(EMOTE_PROGRESS_4, me);break;
+                case 4:Talk(SAY_PROGRESS_2);break;
+                case 5:Talk(SAY_PROGRESS_3);break;
+                case 8:Talk(EMOTE_PROGRESS_4);break;
                 case 9:
                     {
                     me->SummonCreature(MOB_VENGEFUL_SURGE, -2052.96f, -2142.49f, 20.15f, 1.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
                     me->SummonCreature(MOB_VENGEFUL_SURGE, -2052.96f, -2142.49f, 20.15f, 1.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
                     break;
                     }
-                case 10:DoScriptText(SAY_PROGRESS_5, me, player);break;
+                case 10:Talk(SAY_PROGRESS_5);break;
                 case 11:
-                    DoScriptText(SAY_PROGRESS_6, me, player);
+                    Talk(SAY_PROGRESS_6);
                     SetRun();
                     break;
-                case 19:DoScriptText(SAY_PROGRESS_7, me, player); break;
+                case 19:Talk(SAY_PROGRESS_7); break;
                 case 20:
-                    DoScriptText(EMOTE_PROGRESS_8, me);
-                    DoScriptText(SAY_PROGRESS_9, me, player);
+                    Talk(EMOTE_PROGRESS_8);
+                    Talk(SAY_PROGRESS_9);
                     if (player)
                         CAST_PLR(player)->GroupEventHappens(QUEST_GOOGLE_BOGGLE, me);
                     break;
@@ -104,7 +104,7 @@ class npc_professor_phizzlethorpe : public CreatureScript
 
             void EnterCombat(Unit* /*who*/)
             {
-                DoScriptText(SAY_AGGRO, me);
+                Talk(SAY_AGGRO);
             }
 
             void UpdateAI(const uint32 diff)
@@ -122,7 +122,7 @@ class npc_professor_phizzlethorpe : public CreatureScript
         {
             if (quest->GetQuestId() == QUEST_GOOGLE_BOGGLE)
             {
-                DoScriptText(SAY_PROGRESS_1, creature, player);
+                creature->AI()->Talk(SAY_PROGRESS_1);
                 if (npc_escortAI* escortAI = CAST_AI(npc_professor_phizzlethorpeAI, (creature->AI())))
                     escortAI->Start(false, false, player->GetGUID(), quest);
 
@@ -310,14 +310,14 @@ public:
 
 enum eKinelory
 {
-    SAY_START		= -1002713,
-    SAY_POINT_1     = -1002714,
-    SAY_ON_AGGRO    = -1002715,
-    SAY_PROFESOR    = -1002716,
-    SAY_HOUSE_1     = -1002717,
-    SAY_HOUSE_2     = -1002718,
-    SAY_HOUSE_3		= -1002719,
-    SAY_END			= -1002720,
+    SAY_START		= 0,
+    SAY_POINT_1     = 1,
+    SAY_ON_AGGRO    = 2,
+    SAY_PROFESOR    = 3,
+    SAY_HOUSE_1     = 4,
+    SAY_HOUSE_2     = 5,
+    SAY_HOUSE_3		= 6,
+    SAY_END			= 7,
 
     QUEST_KINELORY_STRIKES     = 26116,
     NPC_HAMMERFALL_GRUNT       = 2619
@@ -346,7 +346,7 @@ class npc_kinelory : public CreatureScript
 
                 switch(uiPointId)
                 {
-                case 9:DoScriptText(SAY_POINT_1, me, pPlayer);break;
+                case 9:Talk(SAY_POINT_1);break;
                 case 10:
                 {
                     me->SummonCreature(NPC_HAMMERFALL_GRUNT, -1459.62f, -3019.78f, 11.8f, 5.08f, TEMPSUMMON_CORPSE_DESPAWN, 0);
@@ -367,12 +367,12 @@ class npc_kinelory : public CreatureScript
                     }
                     break;
                 }              
-                case 14:DoScriptText(SAY_HOUSE_1, me, pPlayer);break;
-                case 15:DoScriptText(SAY_HOUSE_2, me, pPlayer); break;
-                case 16:DoScriptText(SAY_HOUSE_3, me, pPlayer); break;
+                case 14:Talk(SAY_HOUSE_1);break;
+                case 15:Talk(SAY_HOUSE_2); break;
+                case 16:Talk(SAY_HOUSE_3); break;
                 case 17:SetRun(); break;
                 case 27:
-                    DoScriptText(SAY_END, me, pPlayer);
+                    Talk(SAY_END);
                     if (pPlayer)
                         CAST_PLR(pPlayer)->GroupEventHappens(QUEST_KINELORY_STRIKES, me);
                     Reset();
@@ -387,7 +387,7 @@ class npc_kinelory : public CreatureScript
 
             void EnterCombat(Unit* /*pWho*/)
             {
-                DoScriptText(SAY_ON_AGGRO, me);
+                Talk(SAY_ON_AGGRO);
             }
 
             void UpdateAI(const uint32 diff)
@@ -405,7 +405,7 @@ class npc_kinelory : public CreatureScript
         {
             if (quest->GetQuestId() == QUEST_KINELORY_STRIKES)
             {
-                DoScriptText(SAY_START, creature, player);
+                creature->AI()->Talk(SAY_START);
                 if (npc_escortAI* pEscortAI = CAST_AI(npc_kineloryAI, (creature->AI())))
                     pEscortAI->Start(false, false, player->GetGUID(), quest);
             }
