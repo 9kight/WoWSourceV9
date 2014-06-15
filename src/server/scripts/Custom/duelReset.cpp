@@ -34,7 +34,7 @@ class DuelResetCooldown : public PlayerScript
     void OnDuelEnd(Player* winner, Player* loser, DuelCompleteType type)
     {
         // reset cooldowns in Elewynn Forest and Durotar
-        if ((ConfigMgr::GetBoolDefault("DuelResetCooldown.Enable", true)) && 
+        if ((ConfigMgr::GetIntDefault("DuelResetCooldown.Enable", 1)) && 
         (winner->GetAreaId() == (ConfigMgr::GetIntDefault("DuelReset.Area.One", NULL)) || winner->GetAreaId() == (ConfigMgr::GetIntDefault("DuelReset.Area.Two", NULL))))
         {
             winner->ResetAllPowers();
