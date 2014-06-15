@@ -28,6 +28,7 @@
 #    CUSTOM SERVER OPTIONS
 #    LOGGING SYSTEM SETTINGS
 #    CURRENCIES SETTINGS
+#    CUSTOM CONTENT WOW-SOURCES SETTINGS
 #
 ###################################################################################################
 
@@ -3017,7 +3018,7 @@ Currency.ConquestPointsArenaReward = 180
 
 #
 ###################################################################################################
-
+                            CUSTOM CONTENT WOW-SOURCES SETTINGS
 ###################################################################################################
 # ALLOW ZONE AND AREA VALUES CORRECTION AT STARTUP FOR GAMEOBJECT AND CREATURE TABLES
 #
@@ -3112,3 +3113,21 @@ Cronjobs.Enabled = 1
 Cronjobs.Execute.Interval = 5
 
 ###########################################################
+
+###########################################################
+#   Duel Reset Settings
+#
+#    DuelResetCooldown.Enabled
+#        Description: activates cooldown reset for duels.
+#        Default:     0 - (Disable)
+#                     1 - (Enable)
+
+DuelResetCooldown.Enable = 0
+
+#   Duel Area allowed
+#        Description: Set the id of the area.
+#        Deafult:     NULL - (Disabled)
+#                     AREAID - (Enabled) (Exemple 5) use .gps ingame to know area.
+                      
+DuelReset.Area.One = NULL                        
+DuelReset.Area.Two = NULL                
