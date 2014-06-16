@@ -574,6 +574,8 @@ class npc_lurking_potion : public CreatureScript
                                 me->AttackStop();
                                 me->SetReactState(REACT_PASSIVE);
                                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+								pPlayer->KilledMonsterCredit(43860,0);// Hack since the spell hit not working
+                                me->DespawnOrUnsummon(2500);
                                 bSay=true;
                             }
                         }				
