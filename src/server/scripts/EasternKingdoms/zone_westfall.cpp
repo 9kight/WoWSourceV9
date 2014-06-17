@@ -787,6 +787,7 @@ public:
 enum eShadowy2
 {
     QUEST_THE_DAWNING_OF_NEW_DAY = 26297,
+    QUEST_A_VISION_OF_THE_PAST   = 26320,
     NPC_SHADOWY2 = 42680,
     NPC_TRIGGER2 = 43515,
     NPC_LISTENER = 42383
@@ -897,6 +898,15 @@ public:
                     StartSpeech();
                 }
             }
+			else
+            if (who->ToPlayer()->GetQuestStatus(QUEST_A_VISION_OF_THE_PAST) == QUEST_STATUS_INCOMPLETE)
+            {
+                if (who->IsWithinDistInMap(me, 2.0f) && !bSummoned)
+                {
+                    PlayerGUID = who->GetGUID();
+                    me->MonsterTextEmote("Follow the trail of homeless to the Deadmines dungeon entrance.", NULL, true);
+                }
+            }	
         }
 
         void StartSpeech()
