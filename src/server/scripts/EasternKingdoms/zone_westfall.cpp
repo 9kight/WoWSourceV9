@@ -1336,22 +1336,23 @@ class npc_rise_br : public CreatureScript
     public:
     npc_rise_br() : CreatureScript("npc_rise_br") {}
 
+        CreatureAI* GetAI(Creature* Creature) const
+        {
+            return new npc_rise_brAI (Creature);
+        }	
+	
     bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
     {
         if (quest->GetQuestId() == QUEST_RISE_OF_THE_BROTHERHOOD)
         {
+            CAST_AI(npc_rise_br::npc_rise_brAI, creature->AI())->PlayerGUID = player->GetGUID();
+			
             if(!(CAST_AI(npc_rise_br::npc_rise_brAI, creature->AI())->EventStarted))
             {
                 CAST_AI(npc_rise_br::npc_rise_brAI, creature->AI())->EventStarted = true;
-                CAST_AI(npc_rise_br::npc_rise_brAI, creature->AI())->PlayerGUID = player->GetGUID();
             }
         }
         return true;
-    }
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_rise_brAI (creature);
     }
 
     struct npc_rise_brAI : public ScriptedAI
