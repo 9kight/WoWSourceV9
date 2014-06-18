@@ -787,6 +787,7 @@ public:
 enum eShadowy2
 {
     QUEST_THE_DAWNING_OF_NEW_DAY = 26297,
+    QUEST_A_VISION_OF_THE_PAST   = 26320,
     NPC_SHADOWY2 = 42680,
     NPC_TRIGGER2 = 43515,
     NPC_LISTENER = 42383
@@ -897,6 +898,15 @@ public:
                     StartSpeech();
                 }
             }
+			else
+            if (who->ToPlayer()->GetQuestStatus(QUEST_A_VISION_OF_THE_PAST) == QUEST_STATUS_INCOMPLETE)
+            {
+                if (who->IsWithinDistInMap(me, 2.0f) && !bSummoned)
+                {
+                    PlayerGUID = who->GetGUID();
+                    me->MonsterTextEmote("Follow the trail of homeless to the Deadmines dungeon entrance.", NULL, true);
+                }
+            }	
         }
 
         void StartSpeech()
@@ -1294,54 +1304,55 @@ public:
 
 enum eEnd
 {
-    SPELL_TRANSFORM_HUMAN = 79745,
-    SPELL_ADMIRAL_HAT = 79750,
-    SPELL_TRANSFORM_VANEESA = 79709,
-    SPELL_SUMMON_BLACKGUARD = 79712,
-    SPELL_TIED_UP_GOOD_GUYS = 79723,
-    SPELL_TIED_UP_VISUAL = 79724,
-    SPELL_DEFIAS_FINALE_EVENT = 79758,
-    SPELL_SUMMON_GLUBTOK = 79762,
-    SPELL_SUMMON_HELIX = 79763,
-    SPELL_TOSS_TORCH = 79778,
-    SPELL_TOSS_TORCH_TRIGGER = 79779,
-    SPELL_SMOKE = 67690,
-    SPELL_HIT_ME = 65600,
+    SPELL_TRANSFORM_HUMAN         = 79745,
+    SPELL_ADMIRAL_HAT             = 79750,
+    SPELL_TRANSFORM_VANEESA       = 79709,
+    SPELL_SUMMON_BLACKGUARD       = 79712,
+    SPELL_TIED_UP_GOOD_GUYS       = 79723,
+    SPELL_TIED_UP_VISUAL          = 79724,
+    SPELL_DEFIAS_FINALE_EVENT     = 79758,
+    SPELL_SUMMON_GLUBTOK          = 79762,
+    SPELL_SUMMON_HELIX            = 79763,
+    SPELL_TOSS_TORCH              = 79778,
+    SPELL_TOSS_TORCH_TRIGGER      = 79779,
+    SPELL_SMOKE                   = 67690,
+    SPELL_HIT_ME                  = 65600,
 
-    NPC_HOPE = 42575,
-    NPC_GRYAN = 42750,
-    NPC_RIPSNARL = 42635, // 42748
-    NPC_INVESTIGATOR = 42745,
-    NPC_INVESTIGATOR3 = 46614,
-    NPC_THIEF = 42769,
-    NPC_GUARD = 878,
-    NPC_HORATIO2 = 42744,
-    NPC_DANUVIN = 821,
+    NPC_HOPE                      = 42575,
+    NPC_GRYAN                     = 42750,
+    NPC_RIPSNARL                  = 42635, // 42748
+    NPC_INVESTIGATOR              = 42745,
+    NPC_INVESTIGATOR3             = 46614,
+    NPC_THIEF                     = 42769,
+    NPC_GUARD                     = 878,
+    NPC_HORATIO2                  = 42744,
+    NPC_DANUVIN                   = 821,
 
     QUEST_RISE_OF_THE_BROTHERHOOD = 26322
 };
 
 class npc_rise_br : public CreatureScript
 {
-public:
+    public:
     npc_rise_br() : CreatureScript("npc_rise_br") {}
 
+        CreatureAI* GetAI(Creature* Creature) const
+        {
+            return new npc_rise_brAI (Creature);
+        }	
+	
     bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
     {
         if (quest->GetQuestId() == QUEST_RISE_OF_THE_BROTHERHOOD)
         {
+            CAST_AI(npc_rise_br::npc_rise_brAI, creature->AI())->PlayerGUID = player->GetGUID();
+			
             if(!(CAST_AI(npc_rise_br::npc_rise_brAI, creature->AI())->EventStarted))
             {
                 CAST_AI(npc_rise_br::npc_rise_brAI, creature->AI())->EventStarted = true;
-                CAST_AI(npc_rise_br::npc_rise_brAI, creature->AI())->PlayerGUID = player->GetGUID();
             }
         }
         return true;
-    }
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_rise_brAI (creature);
     }
 
     struct npc_rise_brAI : public ScriptedAI
@@ -1420,93 +1431,93 @@ public:
         void SummonBrotherHood()
         {
             if (Creature* Thief1 = me->SummonCreature(NPC_THIEF,-10500.37f, 1042.65f, 60.51f, 3.06f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 100000))
-                if (Creature* Thief2 = me->SummonCreature(NPC_THIEF,-10500.99f, 1046.73f, 60.517f, 3.29f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 100000))
-                    if (Creature* Thief3 = me->SummonCreature(NPC_THIEF,-10505.202f, 1040.46f, 60.51f, 1.88f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 100000))
-                        if (Creature* Thief4 = me->SummonCreature(NPC_THIEF,-10507.89f, 1039.52f, 60.51f, 1.95f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 100000))
-                            if (Creature* Thief5 = me->SummonCreature(NPC_THIEF,-10513.54f, 1038.66f, 60.51f, 0.51f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 100000))
-                                if (Creature* Thief6 = me->SummonCreature(NPC_THIEF,-10514.930f, 1042.012f, 60.51f, 0.399f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 100000))
-                                    if (Creature* Thief7 = me->SummonCreature(NPC_THIEF,-10516.797f, 1048.61f, 59.95f, 5.32f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 100000))
-                                        if (Creature* Thief8 = me->SummonCreature(NPC_THIEF,-10514.032f, 1049.80f, 59.92f, 5.11f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 100000))
-                                            if (Creature* Thief9 = me->SummonCreature(NPC_THIEF,-10509.012f, 1051.92f, 59.85f, 5.11f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 100000))
-                                                if (Creature* Thief10 = me->SummonCreature(NPC_THIEF,-10504.77f, 1053.57f, 59.86f, 4.84f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 100000))
-                                                    if (Creature* Glubtok4 = me->SummonCreature(42755,-10506.12f, 1053.13f, 59.10f, 4.92f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000))
-                                                        if (Creature* Helix2 = me->SummonCreature(42753,-10509.368f, 1057.28f, 57.86f, 4.95f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000))
-                                                        {
-                                                            Thief1GUID = Thief1->GetGUID();
-                                                            Thief2GUID = Thief2->GetGUID();
-                                                            Thief3GUID = Thief3->GetGUID();
-                                                            Thief4GUID = Thief4->GetGUID();
-                                                            Thief5GUID = Thief5->GetGUID();
-                                                            Thief6GUID = Thief6->GetGUID();
-                                                            Thief7GUID = Thief7->GetGUID();
-                                                            Thief8GUID = Thief8->GetGUID();
-                                                            Thief9GUID = Thief9->GetGUID();
-                                                            Thief10GUID = Thief10->GetGUID();
-                                                        }
+            if (Creature* Thief2 = me->SummonCreature(NPC_THIEF,-10500.99f, 1046.73f, 60.517f, 3.29f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 100000))
+            if (Creature* Thief3 = me->SummonCreature(NPC_THIEF,-10505.202f, 1040.46f, 60.51f, 1.88f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 100000))
+            if (Creature* Thief4 = me->SummonCreature(NPC_THIEF,-10507.89f, 1039.52f, 60.51f, 1.95f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 100000))
+            if (Creature* Thief5 = me->SummonCreature(NPC_THIEF,-10513.54f, 1038.66f, 60.51f, 0.51f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 100000))
+            if (Creature* Thief6 = me->SummonCreature(NPC_THIEF,-10514.930f, 1042.012f, 60.51f, 0.399f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 100000))
+            if (Creature* Thief7 = me->SummonCreature(NPC_THIEF,-10516.797f, 1048.61f, 59.95f, 5.32f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 100000))
+            if (Creature* Thief8 = me->SummonCreature(NPC_THIEF,-10514.032f, 1049.80f, 59.92f, 5.11f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 100000))
+            if (Creature* Thief9 = me->SummonCreature(NPC_THIEF,-10509.012f, 1051.92f, 59.85f, 5.11f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 100000))
+            if (Creature* Thief10 = me->SummonCreature(NPC_THIEF,-10504.77f, 1053.57f, 59.86f, 4.84f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 100000))
+            if (Creature* Glubtok4 = me->SummonCreature(42755,-10506.12f, 1053.13f, 59.10f, 4.92f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000))
+            if (Creature* Helix2 = me->SummonCreature(42753,-10509.368f, 1057.28f, 57.86f, 4.95f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000))
+            {
+                Thief1GUID = Thief1->GetGUID();
+                Thief2GUID = Thief2->GetGUID();
+                Thief3GUID = Thief3->GetGUID();
+                Thief4GUID = Thief4->GetGUID();
+                Thief5GUID = Thief5->GetGUID();
+                Thief6GUID = Thief6->GetGUID();
+                Thief7GUID = Thief7->GetGUID();
+                Thief8GUID = Thief8->GetGUID();
+                Thief9GUID = Thief9->GetGUID();
+                Thief10GUID = Thief10->GetGUID();
+            }
         }
 
         void RemoveStun()
         {
             if (Creature* Horatio = me->FindNearestCreature(NPC_HORATIO2, 50.0f, true))
-                if (Creature* Danuvin = me->FindNearestCreature(NPC_DANUVIN, 50.0f, true))
-                    if (Creature* Guard = me->FindNearestCreature(NPC_GUARD, 50.0f, true))
-                        if (Creature* Investigator = me->FindNearestCreature(NPC_INVESTIGATOR, 50.0f, true))
-                            if (Creature* Investigator2 = me->FindNearestCreature(NPC_INVESTIGATOR3, 50.0f, true))
-                            {
-                                Horatio->RemoveAurasDueToSpell(79724);
-                                Danuvin->RemoveAurasDueToSpell(79724);
-                                Guard->RemoveAurasDueToSpell(79724);
-                                Investigator->RemoveAurasDueToSpell(79724);
-                                Investigator2->RemoveAurasDueToSpell(79724);
-                            }
+            if (Creature* Danuvin = me->FindNearestCreature(NPC_DANUVIN, 50.0f, true))
+            if (Creature* Guard = me->FindNearestCreature(NPC_GUARD, 50.0f, true))
+            if (Creature* Investigator = me->FindNearestCreature(NPC_INVESTIGATOR, 50.0f, true))
+            if (Creature* Investigator2 = me->FindNearestCreature(NPC_INVESTIGATOR3, 50.0f, true))
+            {
+                Horatio->RemoveAurasDueToSpell(79724);
+                Danuvin->RemoveAurasDueToSpell(79724);
+                Guard->RemoveAurasDueToSpell(79724);
+                Investigator->RemoveAurasDueToSpell(79724);
+                Investigator2->RemoveAurasDueToSpell(79724);
+            }
         }
 
         void DoStun()
         {
             if (Creature* Horatio = me->FindNearestCreature(NPC_HORATIO2, 50.0f, true))
-                if (Creature* Danuvin = me->FindNearestCreature(NPC_DANUVIN, 50.0f, true))
-                    if (Creature* Guard = me->FindNearestCreature(NPC_GUARD, 50.0f, true))
-                        if (Creature* Investigator = me->FindNearestCreature(NPC_INVESTIGATOR, 50.0f, true))
-                            if (Creature* Investigator2 = me->FindNearestCreature(NPC_INVESTIGATOR3, 50.0f, true))
-                            {
-                                Horatio->CastSpell(Horatio, 79724, true);
-                                Danuvin->CastSpell(Danuvin, 79724, true);
-                                Guard->CastSpell(Guard, 79724, true);
-                                Investigator->CastSpell(Investigator, 79724, true);
-                                Investigator2->CastSpell(Investigator2, 79724, true);
-                            }
+            if (Creature* Danuvin = me->FindNearestCreature(NPC_DANUVIN, 50.0f, true))
+            if (Creature* Guard = me->FindNearestCreature(NPC_GUARD, 50.0f, true))
+            if (Creature* Investigator = me->FindNearestCreature(NPC_INVESTIGATOR, 50.0f, true))
+            if (Creature* Investigator2 = me->FindNearestCreature(NPC_INVESTIGATOR3, 50.0f, true))
+            {
+                Horatio->CastSpell(Horatio, 79724, true);
+                Danuvin->CastSpell(Danuvin, 79724, true);
+                Guard->CastSpell(Guard, 79724, true);
+                Investigator->CastSpell(Investigator, 79724, true);
+                Investigator2->CastSpell(Investigator2, 79724, true);
+            }
         }
 
         void SummonFireTrigger()
         {
             if (Creature* Fire1 = me->SummonCreature(45937,-10507.5f, 1050.6f, 60.5189f, 3.06f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 50000))
-                if (Creature* Fire2 = me->SummonCreature(45937,-10502.0f, 1051.81f, 67.7637f, 3.29f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 50000))
-                    if (Creature* Fire3 = me->SummonCreature(45937,-10504.9f, 1038.74f, 68.2617f, 1.88f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 50000))
-                        if (Creature* Fire4 = me->SummonCreature(45937,-10507.4f, 1039.3f, 68.1306f, 1.95f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 50000))
-                            if (Creature* Fire5 = me->SummonCreature(45937,-10512.0f, 1040.95f, 60.5179f, 0.51f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 50000))
-                                if (Creature* Fire6 = me->SummonCreature(45937,-10516.2f, 1043.94f, 70.1173f, 0.399f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 50000))
-                                    if (Creature* Fire7 = me->SummonCreature(45937,-10501.6f, 1039.39f, 71.2453f, 5.32f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 50000))
-                                        if (Creature* Fire8 = me->SummonCreature(45937,-10520.0f, 1053.13f, 57.8726f, 5.11f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 50000))
-                                            if (Creature* Fire9 = me->SummonCreature(45937,-10504.0f, 1063.19f, 56.481f, 5.11f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 50000))
-                                                if (Creature* Fire10 = me->SummonCreature(45937,-10492.4f, 1048.5f, 67.612f, 4.84f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 50000))
-                                                    if (Creature* Fire11 = me->SummonCreature(45937,-10503.8f, 1033.96f, 60.6086f, 4.92f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 50000))
-                                                        if (Creature* Fire12 = me->SummonCreature(45937,-10502.4f, 1037.98f, 102.67f, 4.95f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 50000))
-                                                            if (Creature* Fire13 = me->SummonCreature(45937,-10528.7f, 1038.45f, 56.4513f, 4.95f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 50000))
-                                                            {
-                                                                Fire1GUID = Fire1->GetGUID();
-                                                                Fire2GUID = Fire2->GetGUID();
-                                                                Fire3GUID = Fire3->GetGUID();
-                                                                Fire4GUID = Fire4->GetGUID();
-                                                                Fire5GUID = Fire5->GetGUID();
-                                                                Fire6GUID = Fire6->GetGUID();
-                                                                Fire7GUID = Fire7->GetGUID();
-                                                                Fire8GUID = Fire8->GetGUID();
-                                                                Fire9GUID = Fire9->GetGUID();
-                                                                Fire10GUID = Fire10->GetGUID();
-                                                                Fire11GUID = Fire11->GetGUID();
-                                                                Fire12GUID = Fire12->GetGUID();
-                                                                Fire13GUID = Fire13->GetGUID();
-                                                            }
+            if (Creature* Fire2 = me->SummonCreature(45937,-10502.0f, 1051.81f, 67.7637f, 3.29f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 50000))
+            if (Creature* Fire3 = me->SummonCreature(45937,-10504.9f, 1038.74f, 68.2617f, 1.88f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 50000))
+            if (Creature* Fire4 = me->SummonCreature(45937,-10507.4f, 1039.3f, 68.1306f, 1.95f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 50000))
+            if (Creature* Fire5 = me->SummonCreature(45937,-10512.0f, 1040.95f, 60.5179f, 0.51f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 50000))
+            if (Creature* Fire6 = me->SummonCreature(45937,-10516.2f, 1043.94f, 70.1173f, 0.399f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 50000))
+            if (Creature* Fire7 = me->SummonCreature(45937,-10501.6f, 1039.39f, 71.2453f, 5.32f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 50000))
+            if (Creature* Fire8 = me->SummonCreature(45937,-10520.0f, 1053.13f, 57.8726f, 5.11f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 50000))
+            if (Creature* Fire9 = me->SummonCreature(45937,-10504.0f, 1063.19f, 56.481f, 5.11f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 50000))
+            if (Creature* Fire10 = me->SummonCreature(45937,-10492.4f, 1048.5f, 67.612f, 4.84f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 50000))
+            if (Creature* Fire11 = me->SummonCreature(45937,-10503.8f, 1033.96f, 60.6086f, 4.92f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 50000))
+            if (Creature* Fire12 = me->SummonCreature(45937,-10502.4f, 1037.98f, 102.67f, 4.95f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 50000))
+            if (Creature* Fire13 = me->SummonCreature(45937,-10528.7f, 1038.45f, 56.4513f, 4.95f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 50000))
+            {
+                Fire1GUID = Fire1->GetGUID();
+                Fire2GUID = Fire2->GetGUID();
+                Fire3GUID = Fire3->GetGUID();
+                Fire4GUID = Fire4->GetGUID();
+                Fire5GUID = Fire5->GetGUID();
+                Fire6GUID = Fire6->GetGUID();
+                Fire7GUID = Fire7->GetGUID();
+                Fire8GUID = Fire8->GetGUID();
+                Fire9GUID = Fire9->GetGUID();
+                Fire10GUID = Fire10->GetGUID();
+                Fire11GUID = Fire11->GetGUID();
+                Fire12GUID = Fire12->GetGUID();
+                Fire13GUID = Fire13->GetGUID();
+            }
         }
 
         void UpdateAI(const uint32 diff)
@@ -1516,234 +1527,234 @@ public:
                 if (EventTimer < diff)
                 {
                     if (Player* player = me->GetPlayer(*me, PlayerGUID))
-                        if (Creature* Hope = me->FindNearestCreature(NPC_HOPE, 50.0f, true))
-                            if (Creature* Ripsnarl = me->FindNearestCreature(NPC_RIPSNARL, 50.0f, true))
-                                if (Creature* Horatio = me->FindNearestCreature(NPC_HORATIO2, 50.0f, true))
-                                    if (Creature* Danuvin = me->FindNearestCreature(NPC_DANUVIN, 50.0f, true))
-                                        if (Creature* Guard = me->FindNearestCreature(NPC_GUARD, 50.0f, true))
-                                            if (Creature* Investigator = me->FindNearestCreature(NPC_INVESTIGATOR, 50.0f, true))
-                                                if (Creature* Investigator2 = me->FindNearestCreature(NPC_INVESTIGATOR3, 50.0f, true))
-                                                {
-                                                    switch (Phase)
-                                                    {
-                                                    case 0:
-                                                        {
-                                                            me->MonsterSay("I don't like this, $N. Stay alert!", 0, 0);
-                                                            EventTimer = 4000;
-                                                            Phase++;
-                                                            break;
-                                                        }
-                                                    case 1:
-                                                        {
-                                                            me->SetFacingToObject(Hope);
-                                                            Hope->SetWalk(true);
-                                                            Hope->GetMotionMaster()->MovePoint(0, -10507.65f, 1042.81f, 60.51f);
-                                                            EventTimer = 8000;
-                                                            Phase++;
-                                                            break;
-                                                        }
-                                                    case 2:
-                                                        {
-                                                            Hope->MonsterSay("You bastards will burn for what you did.",0, 0);
-                                                            EventTimer = 4000;
-                                                            Phase++;
-                                                            break;
-                                                        }
-                                                    case 3:
-                                                        {
-                                                            me->MonsterSay("Hope! What...", 0, 0);
-                                                            EventTimer = 1500;
-                                                            Phase++;
-                                                            break;
-                                                        }
-                                                    case 4:
-                                                        {
-                                                            Hope->MonsterSay("Hope? Is that what I was supposed fell when I saw my father decapitated by your henchmen?", 0, 0);
-                                                            EventTimer = 12000;
-                                                            Phase++;
-                                                            break;
-                                                        }
-                                                    case 5:
-                                                        {
-                                                            Hope->MonsterSay("Hope is a cruel joke, played upon us by a harsh and uncaring world. There is no Hope, there is only Vanessa, Vanessa VanCleef.", 0, 0);
-                                                            EventTimer = 9500;
-                                                            Phase++;
-                                                            break;
-                                                        }
-                                                    case 6:
-                                                        {
-                                                            Hope->CastSpell(Hope, SPELL_TRANSFORM_VANEESA, true);
-                                                            EventTimer = 2500;
-                                                            Phase++;
-                                                            break;
-                                                        }
-                                                    case 7:
-                                                        {
-                                                            Hope->MonsterYell("RISE UP BROTHERHOOD! THE DAWNING DAY IS UPON US!", 0, 0);
-                                                            SummonBrotherHood();
-                                                            EventTimer = 4000;
-                                                            Phase++;
-                                                            break;
-                                                        }
-                                                    case 8:
-                                                        {
-                                                            Hope->MonsterSay("Tie them up.", 0, 0);
-                                                            EventTimer = 1500;
-                                                            Phase++;
-                                                            break;
-                                                        }
-                                                    case 9:
-                                                        {
-                                                            DoCast(me, 79724);
-                                                            DoStun();
-                                                            EventTimer = 6000;
-                                                            Phase++;
-                                                            break;
-                                                        }
-                                                    case 10:
-                                                        {
-                                                            Hope->GetMotionMaster()->MovePoint(1, -10512.36f, 1044.36f, 60.518f);
-                                                            EventTimer = 3000;
-                                                            Phase++;
-                                                            break;
-                                                        }
-                                                    case 11:
-                                                        {
-                                                            Hope->CastSpell(Hope, SPELL_HIT_ME, true);
-                                                            EventTimer = 1500;
-                                                            Phase++;
-                                                            break;
-                                                        }
-                                                    case 12:
-                                                        {
-                                                            Ripsnarl->CastSpell(Ripsnarl, SPELL_TRANSFORM_HUMAN, true);
-                                                            Hope->MonsterSay("Admiral, your hat.", 0, 0);
-                                                            EventTimer = 4000;
-                                                            Phase++;
-                                                            break;
-                                                        }
-                                                    case 13:
-                                                        {
-                                                            Ripsnarl->MonsterSay("Thank you, my dear.", 0, 0);
-                                                            Ripsnarl->CastSpell(Ripsnarl, SPELL_ADMIRAL_HAT, true);
-                                                            EventTimer = 4000;
-                                                            Phase++;
-                                                            break;
-                                                        }
-                                                    case 14:
-                                                        {
-                                                            Ripsnarl->SetWalk(true);
-                                                            Ripsnarl->GetMotionMaster()->MovePoint(2, -10513.41f, 1041.11f, 60.518f);
-                                                            EventTimer = 2500;
-                                                            Phase++;
-                                                            break;
-                                                        }
-                                                    case 15:
-                                                        {
-                                                            Ripsnarl->GetMotionMaster()->MovePoint(3, -10511.34f, 1042.46f, 60.5172f);
-                                                            EventTimer = 1500;
-                                                            Phase++;
-                                                            break;
-                                                        }
-                                                    case 16:
-                                                        {
-                                                            Hope->SetFacingToObject(player);
-                                                            Hope->MonsterSay("And you, $N. I will spare your life. You have done much to help our cause, albeit unwittingly, but the next time we meet it will be as enemies.", 0, 0);
-                                                            Ripsnarl->GetMotionMaster()->MovePoint(4, -10516.64f, 1064.78f, 55.362f);
-                                                            EventTimer = 8000;
-                                                            Phase++;
-                                                            break;
-                                                        }
-                                                    case 17:
-                                                        {
-                                                            Ripsnarl->SetFacingToObject(me);
-                                                            Hope->GetMotionMaster()->MovePoint(5, -10513.37f, 1056.48f, 57.605f);
-                                                            me->MonsterSay("Why'd you have the Furlbrows killed?", 0, 0);
-                                                            EventTimer = 4500;
-                                                            Phase++;
-                                                            break;
-                                                        }
-                                                    case 18:
-                                                        {
-                                                            Hope->SetFacingToObject(me);
-                                                            Hope->MonsterSay("I had no choice, lieutenant. They recognized me. The only people in the world who even knew I existed, recognized my face from when I was an infant.", 0, 0);
-                                                            EventTimer = 7000;
-                                                            Phase++;
-                                                            break;
-                                                        }
-                                                    case 19:
-                                                        {
-                                                            Hope->MonsterSay("I took no pleasure in their deaths.", 0, 0);
-                                                            SummonFireTrigger();
-                                                            EventTimer = 5000;
-                                                            Phase++;
-                                                            break;
-                                                        }
-                                                    case 20:
-                                                        {
-                                                            Hope->MonsterYell("Leave nothing but ashes in your wake, brothers! Burn Sentinel Hill in the ground!", 0, 0);
-                                                            EventTimer = 4000;
-                                                            Phase++;
-                                                            break;
-                                                        }
-                                                    case 21:
-                                                        {
-                                                            me->MonsterSay("$N, get to Stormwind. Tell King Wrynn everything, EVERYTHING! GO NOW!", 0, 0);
-                                                            Hope->GetMotionMaster()->MovePoint(6, -10518.38f, 1067.99f, 54.84f);
-                                                            Ripsnarl->SetFacingToObject(Hope);
+                    if (Creature* Hope = me->FindNearestCreature(NPC_HOPE, 50.0f, true))
+                    if (Creature* Ripsnarl = me->FindNearestCreature(NPC_RIPSNARL, 50.0f, true))
+                    if (Creature* Horatio = me->FindNearestCreature(NPC_HORATIO2, 50.0f, true))
+                    if (Creature* Danuvin = me->FindNearestCreature(NPC_DANUVIN, 50.0f, true))
+                    if (Creature* Guard = me->FindNearestCreature(NPC_GUARD, 50.0f, true))
+                    if (Creature* Investigator = me->FindNearestCreature(NPC_INVESTIGATOR, 50.0f, true))
+                    if (Creature* Investigator2 = me->FindNearestCreature(NPC_INVESTIGATOR3, 50.0f, true))
+                    {
+                        switch (Phase)
+                        {
+                            case 0:
+                            {
+                                me->MonsterSay("I don't like this, $N. Stay alert!", 0, 0);
+                                EventTimer = 4000;
+                                Phase++;
+                                break;
+                            }
+                            case 1:
+                            {
+                                me->SetFacingToObject(Hope);
+                                Hope->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                                Hope->GetMotionMaster()->MovePoint(0, -10507.65f, 1042.81f, 60.51f);
+                                EventTimer = 8000;
+                                Phase++;
+                                break;
+                            }
+                            case 2:
+                            {
+                                Hope->MonsterSay("You bastards will burn for what you did.",0, 0);
+                                EventTimer = 4000;
+                                Phase++;
+                                break;
+                            }
+                            case 3:
+                            {
+                                me->MonsterSay("Hope! What...", 0, 0);
+                                EventTimer = 1500;
+                                Phase++;
+                                break;
+                            }
+                            case 4:
+                            {
+                                Hope->MonsterSay("Hope? Is that what I was supposed fell when I saw my father decapitated by your henchmen?", 0, 0);
+                                EventTimer = 12000;
+                                Phase++;
+                                break;
+                            }
+                            case 5:
+                            {
+                                Hope->MonsterSay("Hope is a cruel joke, played upon us by a harsh and uncaring world. There is no Hope, there is only Vanessa, Vanessa VanCleef.", 0, 0);
+                                EventTimer = 9500;
+                                Phase++;
+                                break;
+                            }
+                            case 6:
+                            {
+                                Hope->CastSpell(Hope, SPELL_TRANSFORM_VANEESA, true);
+                                EventTimer = 2500;
+                                Phase++;
+                                break;
+                            }
+                            case 7:
+                            {
+                                Hope->MonsterYell("RISE UP BROTHERHOOD! THE DAWNING DAY IS UPON US!", 0, 0);
+                                SummonBrotherHood();
+                                EventTimer = 4000;
+                                Phase++;
+                                break;
+                            }
+                            case 8:
+                            {
+                                Hope->MonsterSay("Tie them up.", 0, 0);
+                                EventTimer = 1500;
+                                Phase++;
+                                break;
+                            }
+                            case 9:
+                            {
+                                DoCast(me, 79724);
+                                DoStun();
+                                EventTimer = 6000;
+                                Phase++;
+                                break;
+                            }
+                            case 10:
+                            {
+                                Hope->GetMotionMaster()->MovePoint(1, -10512.36f, 1044.36f, 60.518f);
+                                EventTimer = 3000;
+                                Phase++;
+                                break;
+                            }
+                            case 11:
+                            {
+                                Hope->CastSpell(Hope, SPELL_HIT_ME, true);
+                                EventTimer = 1500;
+                                Phase++;
+                                break;
+                            }
+                            case 12:
+                            {
+                                Ripsnarl->CastSpell(Ripsnarl, SPELL_TRANSFORM_HUMAN, true);
+                                Hope->MonsterSay("Admiral, your hat.", 0, 0);
+                                EventTimer = 4000;
+                                Phase++;
+                                break;
+                            }
+                            case 13:
+                            {
+                                Ripsnarl->MonsterSay("Thank you, my dear.", 0, 0);
+                                Ripsnarl->CastSpell(Ripsnarl, SPELL_ADMIRAL_HAT, true);
+                                EventTimer = 4000;
+                                Phase++;
+                                break;
+                            }
+                            case 14:
+                            {
+                                Ripsnarl->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                                Ripsnarl->GetMotionMaster()->MovePoint(2, -10513.41f, 1041.11f, 60.518f);
+                                EventTimer = 2500;
+                                Phase++;
+                                break;
+                            }
+                            case 15:
+                            {
+                                Ripsnarl->GetMotionMaster()->MovePoint(3, -10511.34f, 1042.46f, 60.5172f);
+                                EventTimer = 1500;
+                                Phase++;
+                                break;
+                            }
+                            case 16:
+                            {
+                                Hope->SetFacingToObject(player);
+                                Hope->MonsterSay("And you, $N. I will spare your life. You have done much to help our cause, albeit unwittingly, but the next time we meet it will be as enemies.", 0, 0);
+                                Ripsnarl->GetMotionMaster()->MovePoint(4, -10516.64f, 1064.78f, 55.362f);
+                                EventTimer = 8000;
+                                Phase++;
+                                break;
+                            }
+                            case 17:
+                            {
+                                Ripsnarl->SetFacingToObject(me);
+                                Hope->GetMotionMaster()->MovePoint(5, -10513.37f, 1056.48f, 57.605f);
+                                me->MonsterSay("Why'd you have the Furlbrows killed?", 0, 0);
+                                EventTimer = 4500;
+                                Phase++;
+                                break;
+                            }
+                            case 18:
+                            {
+                                Hope->SetFacingToObject(me);
+                                Hope->MonsterSay("I had no choice, lieutenant. They recognized me. The only people in the world who even knew I existed, recognized my face from when I was an infant.", 0, 0);
+                                EventTimer = 7000;
+                                Phase++;
+                                break;
+                            }
+                            case 19:
+                            {
+                                Hope->MonsterSay("I took no pleasure in their deaths.", 0, 0);
+                                SummonFireTrigger();
+                                EventTimer = 5000;
+                                Phase++;
+                                break;
+                            }
+                            case 20:
+                            {
+                                Hope->MonsterYell("Leave nothing but ashes in your wake, brothers! Burn Sentinel Hill in the ground!", 0, 0);
+                                EventTimer = 4000;
+                                Phase++;
+                                break;
+                            }
+                            case 21:
+                            {
+                                me->MonsterSay("$N, get to Stormwind. Tell King Wrynn everything, EVERYTHING! GO NOW!", 0, 0);
+                                Hope->GetMotionMaster()->MovePoint(6, -10518.38f, 1067.99f, 54.84f);
+                                Ripsnarl->SetFacingToObject(Hope);
 
-                                                            if (Creature* Helix2 = me->FindNearestCreature(42753, 30.0f, true))
-                                                            {
-                                                                Helix2->SetWalk(true);
-                                                                Helix2->GetMotionMaster()->MovePoint(7, -10520.01f, 1062.31f, 55.386f);
-                                                            }
+                                if (Creature* Helix2 = me->FindNearestCreature(42753, 30.0f, true))
+                                {
+                                    Helix2->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                                    Helix2->GetMotionMaster()->MovePoint(7, -10520.01f, 1062.31f, 55.386f);
+                                }
 
-                                                            if (Creature* Glubtok4 = me->FindNearestCreature(42755, 30.0f, true))
-                                                            {
-                                                                Glubtok4->SetWalk(true);
-                                                                Glubtok4->GetMotionMaster()->MovePoint(8, -10511.79f, 1065.78f, 55.085f);
-                                                            }
+                                if (Creature* Glubtok4 = me->FindNearestCreature(42755, 30.0f, true))
+                                {
+                                    Glubtok4->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                                    Glubtok4->GetMotionMaster()->MovePoint(8, -10511.79f, 1065.78f, 55.085f);
+                                }
 
-                                                            std::list<Player*> players;
+                                std::list<Player*> players;
 
-                                                            Trinity::AnyPlayerInObjectRangeCheck checker(me, 50.0f);
-                                                            Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, players, checker);
-                                                            me->VisitNearbyWorldObject(50.0f, searcher);
+                                Trinity::AnyPlayerInObjectRangeCheck checker(me, 50.0f);
+                                Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, players, checker);
+                                me->VisitNearbyWorldObject(50.0f, searcher);
 
-                                                            for (std::list<Player*>::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                                                                (*itr)->GroupEventHappens(26322, me);
+                                for (std::list<Player*>::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                                    (*itr)->GroupEventHappens(26322, me);
 
-                                                            EventTimer = 40000;
-                                                            Phase++;
-                                                            break;
-                                                        }
-                                                    case 22:
-                                                        {
-                                                            me->GetMotionMaster()->MoveTargetedHome();
-                                                            Hope->GetMotionMaster()->MoveTargetedHome();
-                                                            Hope->RemoveAurasDueToSpell(79709);
-                                                            Ripsnarl->GetMotionMaster()->MoveTargetedHome();
-                                                            Ripsnarl->RemoveAurasDueToSpell(79745);
-                                                            Ripsnarl->RemoveAurasDueToSpell(79750);
-                                                            me->AI()->Reset();
-                                                            RemoveStun();
-                                                            EventTimer = 100;
-                                                            if (Creature* Helix2 = me->FindNearestCreature(42753, 40.0f, true))
-                                                            {
-                                                                Helix2->DespawnOrUnsummon();
-                                                            }
+                                EventTimer = 40000;
+                                Phase++;
+                                break;
+                            }
+                            case 22:
+                            {
+                                me->GetMotionMaster()->MoveTargetedHome();
+                                Hope->GetMotionMaster()->MoveTargetedHome();
+                                Hope->RemoveAurasDueToSpell(79709);
+                                Ripsnarl->GetMotionMaster()->MoveTargetedHome();
+                                Ripsnarl->RemoveAurasDueToSpell(79745);
+                                Ripsnarl->RemoveAurasDueToSpell(79750);
+                                me->AI()->Reset();
+                                RemoveStun();
+                                EventTimer = 100;
+                                if (Creature* Helix2 = me->FindNearestCreature(42753, 40.0f, true))
+                                {
+                                    Helix2->DespawnOrUnsummon();
+                                }
 
-                                                            if (Creature* Glubtok4 = me->FindNearestCreature(42755, 40.0f, true))
-                                                            {
-                                                                Glubtok4->DespawnOrUnsummon();
-                                                            }
-                                                            Phase++;
-                                                        }
-                                                        break;
-                                                    default:
-                                                        break;
-                                                    }
-                                                }
+                                if (Creature* Glubtok4 = me->FindNearestCreature(42755, 40.0f, true))
+                                {
+                                    Glubtok4->DespawnOrUnsummon();
+                                }
+                                Phase++;
+                            }
+                            break;
+                            default:
+                            break;
+                        }
+                    }
                 }
                 else EventTimer -= diff;
             }
