@@ -55,7 +55,7 @@ You have fought the undead, struck back against the Horde, and honored the memor
 UPDATE creature_template SET MovementType=2,ScriptName='npc_kinelory' WHERE entry=2713;
 UPDATE creature SET MovementType=2,spawntimesecs=10 WHERE id=2713;
 
-DELETE FROM `creature_text` WHERE = 2713;
+DELETE FROM `creature_text` WHERE `entry` = 2713;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
 (2713, 0, 0, 'Well then. Let\\\'s get this started. The longer we\\\'re here, the more damage the undead could be doing back in Hillsbrad.', 12, 0, 100, 1, 0, 0, ''),
 (2713, 1, 0, 'Alright, this is where we really have to be on our paws. Be ready!', 12, 0, 100, 1, 0, 0, ''),
@@ -63,10 +63,8 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (2713, 3, 0, 'You will never stop the Forsaken, Kinelory. The Dark Lady shall make you suffer.', 14, 0, 100, 0, 0, 0, ''),
 (2713, 4, 0, 'Watch my rear! I\\\'ll see what I can find in all this junk...', 12, 0, 100, 1, 0, 0, ''),
 (2713, 5, 0, 'I bet Quae\\\'ll think this is important. She\\s pretty knowledgeable about those things -- no expert, but knowledgeable.', 12, 0, 100, 1, 0, 0, ''),
-(2713, 6, 0, 'Okay, let\\\'s get out of here quick quiet! Try and keep up. I\\\'m going to make a break for it.', 12, 0, 100, 1, 0, 0, '');
-(2713, 7, 0, 'We made it! Quae, we made it!', 12, 0, 100, 1, 0, 0, ''),
-
-
+(2713, 6, 0, 'Okay, let\\\'s get out of here quick quiet! Try and keep up. I\\\'m going to make a break for it.', 12, 0, 100, 1, 0, 0, ''),
+(2713, 7, 0, 'We made it! Quae, we made it!', 12, 0, 100, 1, 0, 0, '');
 
 DELETE FROM `script_waypoint` WHERE `entry`=2713;
 INSERT INTO `script_waypoint` VALUES
