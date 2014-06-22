@@ -1245,6 +1245,16 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
 {
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
+		
+    switch (m_spellInfo->SpellFamilyName)
+
+    {
+       case SPELLFAMILY_ROGUE:
+       // Smoke Bomb
+       if (m_spellInfo->Id == 76577)
+       if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+          unitTarget->CastSpell(unitTarget, 88611, true);
+    }		
 
     if (!m_spellAura || !unitTarget)
         return;

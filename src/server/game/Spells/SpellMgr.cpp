@@ -4195,6 +4195,11 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
           // ENDOF ISLE OF CONQUEST SPELLS
           //
+            case 88611: // Smoke bomb Aura
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(28);
+                spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(14);
+                spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_INTERFERE_TARGETTING;
+                break;
             default:
                 break;
         }
