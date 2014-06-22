@@ -80,11 +80,11 @@ LogsDir = "logs"
 #    WorldDatabaseInfo
 #    CharacterDatabaseInfo
 #        Description: Database connection settings for the world server.
-#        Example:     "hostname;port;username;password;database"
-#                     ".;somenumber;username;password;database" - (Use named pipes on Windows
+#        Example:     "hostname;port;username;ascent;database"
+#                     ".;somenumber;username;ascent;database" - (Use named pipes on Windows
 #                                                                 "enable-named-pipe" to [mysqld]
 #                                                                 section my.ini)
-#                     ".;/path/to/unix_socket;username;password;database" - (use Unix sockets on
+#                     ".;/path/to/unix_socket;username;ascent;database" - (use Unix sockets on
 #                                                                           Unix/Linux)
 #        Default:     "127.0.0.1;3306;root;ascent;auth"       - (LoginDatabaseInfo)
 #                     "127.0.0.1;3306;root;ascent;world"      - (WorldDatabaseInfo)
@@ -186,6 +186,7 @@ Compression = 1
 
 PlayerLimit = 1000
 
+
 #
 #    SaveRespawnTimeImmediately
 #        Description: Save respawn time for creatures at death and gameobjects at use/open.
@@ -278,7 +279,7 @@ PlayerSave.Stats.SaveOnlyOnLogout = 1
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-mmap.enablePathFinding = 0
+mmap.enablePathFinding = 1
 
 #
 #    vmap.enableLOS
@@ -1056,7 +1057,7 @@ BeepAtStart = 1
 #        Example:     "Welcome to John\'s Server@This server runs on Trinity Core."
 #        Default:     "Welcome to a Trinity Core server."
 
-Motd = "WoWSource V9 for Cataclysm 4.3.4."
+Motd = "This Is WoWSource V9"
 
 #
 #    Server.LoginInfo
@@ -1819,8 +1820,8 @@ Rate.Drop.Item.ReferencedAmount = 1
 #                     1 - (Rate.XP.Quest)
 #                     1 - (Rate.XP.Explore)
 
-Rate.XP.Kill    = 1
-Rate.XP.Quest   = 1
+Rate.XP.Kill    = 2
+Rate.XP.Quest   = 3
 Rate.XP.Explore = 1
 
 #
@@ -2321,7 +2322,7 @@ Arena.AutoDistributeInterval = 7
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-Arena.QueueAnnouncer.Enable = 0
+Arena.QueueAnnouncer.Enable = 1
 
 #
 #    Arena.ArenaSeason.ID
@@ -2606,7 +2607,7 @@ Guild.AllowMultipleGuildMaster = 0
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-ShowKickInWorld = 0
+ShowKickInWorld = 1
 
 #
 #     RecordUpdateTimeDiffInterval
@@ -3018,7 +3019,8 @@ Currency.ConquestPointsArenaReward = 180
 
 #
 ###################################################################################################
-                            CUSTOM CONTENT WOW-SOURCES SETTINGS
+#                           CUSTOM CONTENT WOW-SOURCES SETTINGS                                   #
+#                                                                                                 #
 ###################################################################################################
 # ALLOW ZONE AND AREA VALUES CORRECTION AT STARTUP FOR GAMEOBJECT AND CREATURE TABLES
 #
@@ -3122,7 +3124,7 @@ Cronjobs.Execute.Interval = 5
 #        Default:     0 - (Disable)
 #                     1 - (Enable)
 
-DuelResetCooldown.Enable = 0
+DuelResetCooldown.Enable = 1
 
 #   Duel Area allowed
 #        Description: Set the id of the area.

@@ -2324,7 +2324,9 @@ class npc_fungal_growth_two : public CreatureScript
 enum eTrainingDummy
 {
     NPC_ADVANCED_TARGET_DUMMY                  = 2674,
-    NPC_TARGET_DUMMY                           = 2673
+    NPC_TARGET_DUMMY                           = 2673,
+    EVENT_TD_CHECK_COMBAT                      = 1,
+    EVENT_TD_DESPAWN                           = 2
 };
 
 class npc_training_dummy : public CreatureScript
@@ -2332,26 +2334,27 @@ class npc_training_dummy : public CreatureScript
 public:
     npc_training_dummy() : CreatureScript("npc_training_dummy") { }
 
-    struct npc_training_dummyAI : Scripted_NoMovementAI
+    struct npc_training_dummyAI : ScriptedAI
     {
-        npc_training_dummyAI(Creature* creature) : Scripted_NoMovementAI(creature)
+        npc_training_dummyAI(Creature* creature) : ScriptedAI(creature)
         {
-            entry = creature->GetEntry();
+            SetCombatMovement(false);
         }
 
-        uint32 entry;
-        uint32 resetTimer;
-        uint32 despawnTimer;
+        EventMap _events;
+        std::tr1::unordered_map<uint64, time_t> _damageTimes;
 
         void Reset()
         {
             me->SetControlled(true, UNIT_STATE_STUNNED);//disable rotate
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
-            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);//imune to knock aways like blast wave
 
-            resetTimer = 5000;
-            despawnTimer = 15000;
+            _events.Reset();
+            _damageTimes.clear();
+            if (me->GetEntry() != NPC_ADVANCED_TARGET_DUMMY && me->GetEntry() != NPC_TARGET_DUMMY)
+                _events.ScheduleEvent(EVENT_TD_CHECK_COMBAT, 1000);
+            else
+                _events.ScheduleEvent(EVENT_TD_DESPAWN, 15000);
         }
 
         void EnterEvadeMode()
@@ -2362,37 +2365,56 @@ public:
             Reset();
         }
 
-        void DamageTaken(Unit* /*doneBy*/, uint32& damage)
+        void DamageTaken(Unit* doneBy, uint32& damage)
         {
-            resetTimer = 5000;
+            me->AddThreat(doneBy, float(damage)); // just to create threat reference
+            _damageTimes[doneBy->GetGUID()] = time(NULL);
             damage = 0;
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void UpdateAI(uint32 diff)
         {
-            if (entry != NPC_ADVANCED_TARGET_DUMMY && entry != NPC_TARGET_DUMMY)
-                return;
-        }
-
-        void UpdateAI(uint32 const diff)
-        {
-            if (!UpdateVictim())
+            if (!me->isInCombat())
                 return;
 
             if (!me->HasUnitState(UNIT_STATE_STUNNED))
                 me->SetControlled(true, UNIT_STATE_STUNNED);//disable rotate
 
-            if (entry != NPC_ADVANCED_TARGET_DUMMY && entry != NPC_TARGET_DUMMY)
-                return;
-            else
+            _events.Update(diff);
+
+            if (uint32 eventId = _events.ExecuteEvent())
             {
-                if (despawnTimer <= diff)
-                    me->DespawnOrUnsummon();
-                else
-                    despawnTimer -= diff;
+                switch (eventId)
+                {
+                    case EVENT_TD_CHECK_COMBAT:
+                    {
+                        time_t now = time(NULL);
+                        for (std::tr1::unordered_map<uint64, time_t>::iterator itr = _damageTimes.begin(); itr != _damageTimes.end();)
+                        {
+                            // If unit has not dealt damage to training dummy for 5 seconds, remove him from combat
+                            if (itr->second < now - 5)
+                            {
+                                if (Unit* unit = ObjectAccessor::GetUnit(*me, itr->first))
+                                    unit->getHostileRefManager().deleteReference(me);
+
+                                itr = _damageTimes.erase(itr);
+                            }
+                            else
+                                ++itr;
+                        }
+                        _events.ScheduleEvent(EVENT_TD_CHECK_COMBAT, 1000);
+                        break;
+                    }
+                    case EVENT_TD_DESPAWN:
+                        me->DespawnOrUnsummon(1);
+                        break;
+                    default:
+                        break;
+                }
             }
         }
-        void MoveInLineOfSight(Unit* /*who*/){return;}
+
+        void MoveInLineOfSight(Unit* /*who*/) { }
     };
 
     CreatureAI* GetAI(Creature* creature) const
