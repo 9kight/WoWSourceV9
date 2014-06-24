@@ -41,14 +41,14 @@ void GuildFinderMgr::LoadGuildSettings()
     QueryResult result = CharacterDatabase.Query("SELECT gfgs.guildId, gfgs.availability, gfgs.classRoles, gfgs.interests, gfgs.level, gfgs.listed, gfgs.comment, c.race "
                                                  "FROM guild_finder_guild_settings gfgs "
                                                  "LEFT JOIN guild_member gm ON gm.guildid=gfgs.guildId "
-                                                 "LEFT JOIN characters c ON c.guid = gm.guid");
-
+                                                 "LEFT JOIN characters c ON c.guid = gm.guid LIMIT 1");
+    
     if (!result)
     {
         sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded 0 guild finder guild-related settings. Table `guild_finder_guild_settings` is empty.");
         return;
     }
-
+    
     uint32 count = 0;
     uint32 oldMSTime = getMSTime();
     do
@@ -69,7 +69,7 @@ void GuildFinderMgr::LoadGuildSettings()
 
         LFGuildSettings settings(listed, guildTeam, guildId, classRoles, availability, interests, level, comment);
         _guildSettings[guildId] = settings;
-
+        
         ++count;
     } while (result->NextRow());
 
@@ -82,13 +82,13 @@ void GuildFinderMgr::LoadMembershipRequests()
     //                                                      0         1           2            3           4         5         6
     QueryResult result = CharacterDatabase.Query("SELECT guildId, playerGuid, availability, classRole, interests, comment, submitTime "
                                                  "FROM guild_finder_applicant");
-
+    
     if (!result)
     {
         sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded 0 guild finder membership requests. Table `guild_finder_applicant` is empty.");
         return;
     }
-
+    
     uint32 count = 0;
     uint32 oldMSTime = getMSTime();
     do
@@ -101,11 +101,11 @@ void GuildFinderMgr::LoadMembershipRequests()
         uint8  interests    = fields[4].GetUInt8();
         std::string comment = fields[5].GetString();
         uint32 submitTime   = fields[6].GetUInt32();
-
+        
         MembershipRequest request(playerId, guildId, availability, classRoles, interests, comment, time_t(submitTime));
 
         _membershipRequests[guildId].push_back(request);
-
+        
         ++count;
     } while (result->NextRow());
 
@@ -115,7 +115,7 @@ void GuildFinderMgr::LoadMembershipRequests()
 void GuildFinderMgr::AddMembershipRequest(uint32 guildGuid, MembershipRequest const& request)
 {
     _membershipRequests[guildGuid].push_back(request);
-
+    
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_GUILD_FINDER_APPLICANT);
     stmt->setUInt32(0, request.GetGuildId());
@@ -167,7 +167,7 @@ void GuildFinderMgr::RemoveAllMembershipRequestsFromPlayer(uint32 playerId)
 void GuildFinderMgr::RemoveMembershipRequest(uint32 playerId, uint32 guildId)
 {
     std::vector<MembershipRequest>::iterator itr = _membershipRequests[guildId].begin();
-    for (; itr != _membershipRequests[guildId].end(); ++itr)
+     for (; itr != _membershipRequests[guildId].end(); ++itr)
         if (itr->GetPlayerGUID() == playerId)
             break;
 
@@ -183,6 +183,8 @@ void GuildFinderMgr::RemoveMembershipRequest(uint32 playerId, uint32 guildId)
 
     CharacterDatabase.CommitTransaction(trans);
 
+    _membershipRequests[guildId].erase(itr);
+
     // Notify the applicant his submittion has been removed
     if (Player* player = ObjectAccessor::FindPlayer(MAKE_NEW_GUID(playerId, 0, HIGHGUID_PLAYER)))
         SendMembershipRequestListUpdate(*player);
@@ -190,8 +192,6 @@ void GuildFinderMgr::RemoveMembershipRequest(uint32 playerId, uint32 guildId)
     // Notify the guild master and officers the list changed
     if (Guild* guild = sGuildMgr->GetGuildById(guildId))
         SendApplicantListUpdate(*guild);
-
-    ++itr;
 }
 
 std::list<MembershipRequest> GuildFinderMgr::GetAllMembershipRequestsForPlayer(uint32 playerGuid)
@@ -234,9 +234,6 @@ LFGuildStore GuildFinderMgr::GetGuildsMatchingSetting(LFGuildPlayer& settings, T
     for (LFGuildStore::const_iterator itr = _guildSettings.begin(); itr != _guildSettings.end(); ++itr)
     {
         LFGuildSettings const& guildSettings = itr->second;
-
-        if (guildSettings.IsListed() != 1)
-            continue;
 
         if (guildSettings.GetTeam() != faction)
             continue;
@@ -300,19 +297,18 @@ void GuildFinderMgr::DeleteGuild(uint32 guildId)
         stmt->setUInt32(1, applicant);
         trans->Append(stmt);
 
+        stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GUILD_FINDER_GUILD_SETTINGS);
+        stmt->setUInt32(0, (*itr).GetGuildId());
+        trans->Append(stmt);
+            
         CharacterDatabase.CommitTransaction(trans);
-        _membershipRequests[guildId].erase(itr);
+		
 
         // Notify the applicant his submition has been removed
         if (Player* player = ObjectAccessor::FindPlayer(MAKE_NEW_GUID(applicant, 0, HIGHGUID_PLAYER)))
             SendMembershipRequestListUpdate(*player);
+        ++itr;
     }
-
-    SQLTransaction trans = CharacterDatabase.BeginTransaction();
-    PreparedStatement* stmt = stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GUILD_FINDER_GUILD_SETTINGS);
-    stmt->setUInt32(0, guildId);
-    trans->Append(stmt);
-    CharacterDatabase.CommitTransaction(trans);
 
     _membershipRequests.erase(guildId);
     _guildSettings.erase(guildId);

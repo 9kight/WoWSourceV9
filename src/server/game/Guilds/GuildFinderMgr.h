@@ -22,7 +22,6 @@
 #include "Common.h"
 #include "World.h"
 #include "GuildMgr.h"
-#include "InfoMgr.h"
 
 enum GuildFinderOptionsInterest
 {
@@ -51,8 +50,8 @@ enum GuildFinderOptionsRoles
 
 enum GuildFinderOptionsLevel
 {
-    ANY_FINDER_LEVEL       = 0x1,
-    MAX_FINDER_LEVEL       = 0x2,
+    ANY_FINDER_LEVEL   = 0x1,
+    MAX_FINDER_LEVEL   = 0x2,
     ALL_GUILDFINDER_LEVELS = ANY_FINDER_LEVEL | MAX_FINDER_LEVEL
 };
 
@@ -71,10 +70,10 @@ struct MembershipRequest
         }
 
         MembershipRequest(uint32 playerGUID, uint32 guildId, uint32 availability, uint32 classRoles, uint32 interests, std::string& comment, time_t submitTime) :
-            _playerGUID(playerGUID), _guildId(guildId), _availability(availability), _classRoles(classRoles),
-            _interests(interests), _time(submitTime), _comment(comment) {}
+            _comment(comment), _guildId(guildId), _playerGUID(playerGUID), _availability(availability),
+            _classRoles(classRoles), _interests(interests), _time(submitTime)  {}
         
-        MembershipRequest() : _playerGUID(0), _guildId(0), _availability(0), _classRoles(0),
+          MembershipRequest() : _guildId(0), _playerGUID(0), _availability(0), _classRoles(0),
             _interests(0), _time(time(NULL)) {}
 
         uint32 GetGuildId() const      { return _guildId; }
@@ -82,33 +81,12 @@ struct MembershipRequest
         uint8 GetAvailability() const  { return _availability; }
         uint8 GetClassRoles() const    { return _classRoles; }
         uint8 GetInterests() const     { return _interests; }
-        uint8 GetClass() const
-        {
-            InfoCharEntry info;
-            if (sInfoMgr->GetCharInfo(GetPlayerGUID(), info))
-                return info.Class;
-
-            return 0;
-        }
-        uint8 GetLevel() const
-        {
-            InfoCharEntry info;
-            if (sInfoMgr->GetCharInfo(GetPlayerGUID(), info))
-                return info.Level;
-
-            return 0;
-        }
+        uint8 GetClass() const         { return sWorld->GetCharacterNameData(GetPlayerGUID())->m_class; }
+        uint8 GetLevel() const         { return sWorld->GetCharacterNameData(GetPlayerGUID())->m_level; }
         time_t GetSubmitTime() const   { return _time; }
         time_t GetExpiryTime() const   { return time_t(_time + 30 * 24 * 3600); } // Adding 30 days
         std::string const& GetComment() const { return _comment; }
-        std::string const GetName() const
-        {
-
-            InfoCharEntry info;
-            if (sInfoMgr->GetCharInfo(GetPlayerGUID(), info))
-                return info.Name;
-            return NULL;
-        }
+        std::string const& GetName() const    { return sWorld->GetCharacterNameData(GetPlayerGUID())->m_name; }
     private:
         std::string _comment;
 
@@ -186,14 +164,14 @@ struct LFGuildSettings : public LFGuildPlayer
 
         LFGuildSettings(bool listed, TeamId team) : LFGuildPlayer(), _listed(listed), _team(team) {}
 
-        LFGuildSettings(bool listed, TeamId team, uint32 guid, uint8 role, uint8 availability, uint8 interests, uint8 level) : _listed(listed),
-            LFGuildPlayer(guid, role, availability, interests, level), _team(team) {}
+        LFGuildSettings(bool listed, TeamId team, uint32 guid, uint8 role, uint8 availability, uint8 interests, uint8 level) :
+            LFGuildPlayer(guid, role, availability, interests, level), _listed(listed), _team(team) {}
 
-        LFGuildSettings(bool listed, TeamId team, uint32 guid, uint8 role, uint8 availability, uint8 interests, uint8 level, std::string& comment) : _listed(listed),
-            LFGuildPlayer(guid, role, availability, interests, level, comment), _team(team) {}
+        LFGuildSettings(bool listed, TeamId team, uint32 guid, uint8 role, uint8 availability, uint8 interests, uint8 level, std::string& comment) :
+            LFGuildPlayer(guid, role, availability, interests, level, comment), _listed(listed), _team(team) {}
 
-        LFGuildSettings(LFGuildSettings const& settings) : _listed(settings.IsListed()), _team(settings.GetTeam()),
-            LFGuildPlayer(settings) {}
+        LFGuildSettings(LFGuildSettings const& settings) :
+        LFGuildPlayer(settings), _listed(settings.IsListed()), _team(settings.GetTeam()) {}
 
 
         bool IsListed() const      { return _listed; }
@@ -201,8 +179,8 @@ struct LFGuildSettings : public LFGuildPlayer
 
         TeamId GetTeam() const     { return _team; }
     private:
-        bool _listed;
         TeamId _team;
+        bool _listed;
 };
 
 typedef std::map<uint32 /* guildGuid */, LFGuildSettings> LFGuildStore;
@@ -250,8 +228,9 @@ class GuildFinderMgr
          * @brief Removes all membership request from a player.
          * @param playerId The player's database guid whose application shall be deleted.
          */
-        void RemoveAllMembershipRequestsFromPlayer(uint32 playerId);
 
+        void RemoveAllMembershipRequestsFromPlayer(uint32 playerId);
+		
         /**
          * @brief Removes a membership request to a guild.
          * @param playerId The player's database guid whose application shall be deleted.
@@ -259,9 +238,9 @@ class GuildFinderMgr
          */
         void RemoveMembershipRequest(uint32 playerId, uint32 guildId);
 
-        /// Wipes everything related to a guild. Used when that guild is disbanded
+        /// wipes everything related to a guild. Used when that guild is disbanded
         void DeleteGuild(uint32 guildId);
-
+        
         /**
          * @brief Returns a set of membership requests for a guild
          * @param guildGuid The guild's database guid.
@@ -286,11 +265,9 @@ class GuildFinderMgr
 
         /// Counts the amount of pending membership requests, given the player's db guid.
         uint8 CountRequestsFromPlayer(uint32 playerId);
-
+ 
         void SendApplicantListUpdate(Guild& guild);
         void SendMembershipRequestListUpdate(Player& player);
-
-        void UpdateGuildSettings();
 };
 
 #define sGuildFinderMgr ACE_Singleton<GuildFinderMgr, ACE_Null_Mutex>::instance()

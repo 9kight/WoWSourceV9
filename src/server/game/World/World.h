@@ -570,6 +570,15 @@ struct CliCommandHolder
 
 typedef UNORDERED_MAP<uint32, WorldSession*> SessionMap;
 
+struct CharacterNameData
+{
+    std::string m_name;
+    uint8 m_class;
+    uint8 m_race;
+    uint8 m_gender;
+    uint8 m_level;
+};
+
 /// The World
 class World
 {
@@ -791,6 +800,13 @@ class World
 
         bool isEventKillStart;
 
+       CharacterNameData const* GetCharacterNameData(uint32 guid) const;
+        void AddCharacterNameData(uint32 guid, std::string const& name, uint8 gender, uint8 race, uint8 playerClass, uint8 level);
+        void UpdateCharacterNameData(uint32 guid, std::string const& name, uint8 gender = GENDER_NONE, uint8 race = RACE_NONE);
+        void UpdateCharacterNameDataLevel(uint32 guid, uint8 level);
+        void DeleteCharacterNameData(uint32 guid) { _characterNameDataMap.erase(guid); }
+        bool HasCharacterNameData(uint32 guid) { return _characterNameDataMap.find(guid) != _characterNameDataMap.end(); }
+		 
         uint32 GetCleaningFlags() const { return m_CleaningFlags; }
         void   SetCleaningFlags(uint32 flags) { m_CleaningFlags = flags; }
         void   ResetEventSeasonalQuests(uint16 event_id);
@@ -891,6 +907,9 @@ class World
         std::string m_DBVersion;
 
         std::list<std::string> m_Autobroadcasts;
+		
+        std::map<uint32, CharacterNameData> _characterNameDataMap;
+        void LoadCharacterNameData();
 
         void ProcessQueryCallbacks();
         ACE_Future_Set<PreparedQueryResult> m_realmCharCallbacks;
