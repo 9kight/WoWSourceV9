@@ -1190,34 +1190,6 @@ public:
     }
 };
 
-class spell_pri_holyword_sanctuary: public SpellScriptLoader
-{
-public:
-    spell_pri_holyword_sanctuary() : SpellScriptLoader("spell_pri_holyword_sanctuary") {}
-
-    class spell_pri_holyword_sanctuary_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_pri_holyword_sanctuary_AuraScript);
-
-        void HandlePeriodicTriggerSpell(AuraEffect const* /*aurEff*/)
-        {
-            if (Unit* owner = GetUnitOwner())
-                if (DynamicObject* dyn = owner->GetDynObject(GetId()))
-                    owner->CastSpell(dyn->GetPositionX(), dyn->GetPositionY(), dyn->GetPositionZ(), SPELL_PRIEST_HOLY_WORD_SANCTUARY_TRIGGERED, true);
-        }
-
-        void Register()
-        {
-            OnEffectPeriodic += AuraEffectPeriodicFn(spell_pri_holyword_sanctuary_AuraScript::HandlePeriodicTriggerSpell, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
-        }
-    };
-
-    AuraScript* GetAuraScript() const
-    {
-        return new spell_pri_holyword_sanctuary_AuraScript();
-    }
-};
-
 class spell_pri_holyword_sanctuary_heal : public SpellScriptLoader
 {
     public:
@@ -1529,7 +1501,6 @@ void AddSC_priest_spell_scripts()
     new spell_pri_shadow_orbs();
     new spell_pri_mind_spike();
     new spell_pri_power_word_barrier();
-    new spell_pri_holyword_sanctuary();
     new spell_pri_holyword_sanctuary_heal();
     new spell_pri_cure_disease();
     new spell_pri_inner_fire();
