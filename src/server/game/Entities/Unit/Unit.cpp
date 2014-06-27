@@ -9491,6 +9491,16 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, uint32 absorb, Au
                 AddPct(basepoints0, mastery->GetAmount());
             break;
         }
+        // Chakra: Serenity should proc only on direct heals
+        case 81208:
+        {
+            for (uint32 i = 0; i < MAX_SPELL_EFFECTS; i++)
+            {
+                if (procSpell->Effects[i].Effect == SPELL_EFFECT_HEAL)
+                    return true;
+            }
+            return false;
+        }	
         // Culling the Herd
         case 70893:
         {

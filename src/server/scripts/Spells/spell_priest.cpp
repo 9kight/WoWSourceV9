@@ -53,8 +53,13 @@ enum PriestSpells
     PRIEST_SPELL_SPIRIT_OF_REDEMPTION_FORM          = 27795,
     PRIEST_SPELL_SPIRIT_OF_REDEMPTION_TALENT        = 20711,
     PRIEST_SPELL_SPIRIT_OF_REDEMPTION_ROOT          = 27792,
-    PRIEST_SPELL_SPIRIT_OF_REDEMPTION_SHAPESHIFT    = 27827,	
-
+    PRIEST_SPELL_SPIRIT_OF_REDEMPTION_SHAPESHIFT    = 27827,
+    PRIEST_SPELL_REVELATIONS                        = 88627,
+    PRIEST_SPELL_RENEW                              = 139,
+    PRIEST_SPELL_SANCTUARY_4YD_DUMMY                = 88667,
+    PRIEST_SPELL_SANCTUARY_4YD_HEAL                 = 88668,
+    PRIEST_SPELL_SANCTUARY_8YD_DUMMY                = 88685,
+    PRIEST_SPELL_SANCTUARY_8YD_HEAL                 = 88686,    	
 };
 
 enum PriestSpellIcons
@@ -1404,36 +1409,98 @@ class spell_pri_spirit_of_redemption : public SpellScriptLoader
         }
 };
 
-// Guardian Spirit
-class spell_pri_chakra : public SpellScriptLoader
+// 81208,81206 Chakra: Serenity and Chakra: Sanctuary spell swap supressor
+class spell_pri_chakra_swap_supressor: public SpellScriptLoader
 {
-    public:
-        spell_pri_chakra() : SpellScriptLoader("spell_pri_chakra") { }
+public:
+    spell_pri_chakra_swap_supressor() : SpellScriptLoader("spell_pri_chakra_swap_supressor") {}
 
-        class spell_pri_chakra_AuraScript : public AuraScript
+    class spell_pri_chakra_swap_supressor_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_pri_chakra_swap_supressor_SpellScript);
+
+        void PreventSwapApplicationOnCaster(WorldObject*& target)
         {
-            PrepareAuraScript(spell_pri_chakra_AuraScript);
-
-            void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
-            {
-                if (GetCaster())
-                {
-                    // Revelations
-                    if (!GetCaster()->HasAura(88627))
-                        amount = 88625;
-                }
-            }
-
-            void Register()
-            {
-                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pri_chakra_AuraScript::CalculateAmount, EFFECT_2, SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_pri_chakra_AuraScript();
+            // If the caster has the Revelations talent (88627) The chakra: serenity aura (81208) and the chakra: sanctuary
+            // (81206) swaps the Holy Word: Chastise spell (the one that you learn when you spec into the holy tree)
+            // for a Holy Word: Serenity spell (88684) or a Holy Word: Sanctuary (88684), if the caster doesnt have the
+            // talent, lets just block the swap effect.
+            if (!GetCaster()->HasAura(PRIEST_SPELL_REVELATIONS))
+                target = NULL;
         }
+
+        void Register()
+        {
+            OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_pri_chakra_swap_supressor_SpellScript::PreventSwapApplicationOnCaster, EFFECT_2, TARGET_UNIT_CASTER);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_pri_chakra_swap_supressor_SpellScript();
+    }
+};
+
+// 81585 Chakra: Serenity
+class spell_pri_chakra_serenity_proc : public SpellScriptLoader
+{
+public:
+    spell_pri_chakra_serenity_proc() : SpellScriptLoader("spell_pri_chakra_serenity_proc") {}
+
+    class spell_pri_chakra_serenity_proc_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_pri_chakra_serenity_proc_SpellScript);
+
+        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+        {
+            Unit* target = GetHitUnit();
+
+            if (!target)
+                return;
+
+            if (Aura* renew = target->GetAura(PRIEST_SPELL_RENEW, GetCaster()->GetGUID()))
+                renew->RefreshDuration();
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_pri_chakra_serenity_proc_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_pri_chakra_serenity_proc_SpellScript();
+    }
+};
+
+// 88685 Chakra: Sanctuary
+class spell_pri_chakra_sanctuary_heal: public SpellScriptLoader
+{
+public:
+    spell_pri_chakra_sanctuary_heal() : SpellScriptLoader("spell_pri_chakra_sanctuary_heal") { }
+
+    class spell_pri_chakra_sanctuary_heal_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_pri_chakra_sanctuary_heal_AuraScript);
+
+        void OnTick(AuraEffect const* aurEff)
+        {
+            if (DynamicObject* dynObj = GetCaster()->GetDynObject(88685))
+                if (GetCaster()->GetMapId() == dynObj->GetMapId())
+                    GetCaster()->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), 88686, true);
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_pri_chakra_sanctuary_heal_AuraScript::OnTick, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_pri_chakra_sanctuary_heal_AuraScript();
+    }
 };
 
 void AddSC_priest_spell_scripts()
@@ -1470,5 +1537,7 @@ void AddSC_priest_spell_scripts()
     new spell_pri_friendly_dispel();
     new spell_pri_spirit_of_redemption_form();
     new spell_pri_spirit_of_redemption();
-    new spell_pri_chakra();
+    new spell_pri_chakra_swap_supressor();
+    new spell_pri_chakra_serenity_proc();
+    new spell_pri_chakra_sanctuary_heal();
 }
