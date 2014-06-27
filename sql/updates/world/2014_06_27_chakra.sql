@@ -13,7 +13,7 @@ INSERT INTO `spell_script_names` VALUES
 
 DELETE FROM `spell_linked_spell` WHERE `spell_trigger` IN (81206);
 INSERT INTO `spell_linked_spell` VALUES
-(81206,81207,0,'Chakra:Sanctuary - Renew spellmod link');
+(81206,81207,0,0,'Chakra:Sanctuary - Renew spellmod link');
 
 DELETE FROM `spell_group` WHERE `id` = 1501;
 INSERT INTO `spell_group` VALUES
