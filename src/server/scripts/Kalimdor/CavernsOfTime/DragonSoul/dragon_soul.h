@@ -26,7 +26,7 @@ enum Bosses
 enum Data
 {
     DATA_MORCHOK,
-
+    DATA_BLOOD,
     DATA_DAMAGE_DEATHWING,
     DATA_ATTACK_DEATHWING,
     DATA_KOHCROM_JUMP,
@@ -77,8 +77,15 @@ enum Creatures
     NPC_WING_TENTACLE_2    = 57972,
     NPC_MYTATED_CORRUPTION = 56471,
 
-    NPC_EIENDORMI          = 57288,
-
+    NPC_EIENDORMI                 = 57288,
+    NPC_SPHERE                    = 55334,
+    NPC_EYE_1                     = 55416,
+    NPC_EYE_2                     = 57875,
+    NPC_SCOURGE_1                 = 55417,
+    NPC_SCOURGE_2                 = 57877,
+    NPC_CLAW_1                    = 55418,
+    NPC_CLAW_2                    = 57890,
+    NPC_TENTACLE_TOSS             = 57836,
 
     NPC_FORZEN_BINDIG_CRYSTAL     = 56136,
     NPC_CRYSTAL_CONDUCTOR         = 56165,
