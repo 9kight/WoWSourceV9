@@ -1364,6 +1364,7 @@ bool SpellInfo::IsSingleTarget() const
     switch (GetSpellSpecific())
     {
         case SPELL_SPECIFIC_JUDGEMENT:
+		case SPELL_SPECIFIC_LIFEBLOOM:
             return true;
         default:
             break;
@@ -1402,6 +1403,7 @@ bool SpellInfo::IsSingleTargetWith(SpellInfo const* spellInfo) const
     {
         case SPELL_SPECIFIC_JUDGEMENT:
         case SPELL_SPECIFIC_MAGE_POLYMORPH:
+		case SPELL_SPECIFIC_LIFEBLOOM:
             if (spellInfo->GetSpellSpecific() == spec)
                 return true;
             break;
@@ -2171,6 +2173,13 @@ SpellSpecificType SpellInfo::GetSpellSpecific() const
             }
             break;
         }
+		case SPELLFAMILY_DRUID:
+		{
+            if (Id == 33763)
+                return SPELL_SPECIFIC_LIFEBLOOM;
+		}
+
+		
         case SPELLFAMILY_PALADIN:
         {
             // Collection of all the seal family flags. No other paladin spell has any of those.

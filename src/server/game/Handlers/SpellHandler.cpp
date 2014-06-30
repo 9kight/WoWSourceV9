@@ -416,6 +416,17 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         }
     }
 
+	switch (spellInfo->Id)
+	{
+	   case 33763: // Lifebloom
+		   if (_player->HasAura(33891))
+    		   	if (SpellInfo const* Lifebloom = sSpellMgr->GetSpellInfo(94447))
+				{
+					spellInfo = Lifebloom;
+					spellId = Lifebloom->Id;
+				}
+	}
+
     // Client is resending autoshot cast opcode when other spell is casted during shoot rotation
     // Skip it to prevent "interrupt" message
     if (spellInfo->IsAutoRepeatRangedSpell() && caster->GetCurrentSpell(CURRENT_AUTOREPEAT_SPELL)
