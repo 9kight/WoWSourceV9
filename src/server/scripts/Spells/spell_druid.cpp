@@ -1371,7 +1371,6 @@ class spell_dru_insect_swarm : public SpellScriptLoader
         }
 };
 
-// -33763 - Lifebloom
 class spell_dru_lifebloom : public SpellScriptLoader
 {
     public:
@@ -1401,13 +1400,14 @@ class spell_dru_lifebloom : public SpellScriptLoader
                 int32 healAmount = aurEff->GetAmount();
                 if (Unit* caster = GetCaster())
                 {
-                    healAmount = caster->SpellHealingBonusDone(GetTarget(), GetSpellInfo(), healAmount, DOT, 0);
                     healAmount = caster->SpellHealingBonusDone(GetTarget(), GetSpellInfo(), healAmount, HEAL, stack);
-                    // Gift of the earthmother
-                    if (AuraEffect* earthMother = caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 3186, EFFECT_1))
-                        AddPct(healAmount, earthMother->GetAmount());
+                    healAmount = GetTarget()->SpellHealingBonusTaken(GetSpellInfo(), healAmount, HEAL, stack, GetCasterGUID());
 
                     GetTarget()->CastCustomSpell(GetTarget(), SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, aurEff, GetCasterGUID());
+
+                    // restore mana
+                    int32 returnMana = CalculatePct(caster->GetCreateMana(), GetSpellInfo()->ManaCostPercentage) * stack / 2;
+                    caster->CastCustomSpell(caster, SPELL_DRUID_LIFEBLOOM_ENERGIZE, &returnMana, NULL, NULL, true, NULL, aurEff, GetCasterGUID());
                     return;
                 }
 
@@ -1424,55 +1424,23 @@ class spell_dru_lifebloom : public SpellScriptLoader
                         int32 healAmount = aurEff->GetAmount();
                         if (Unit* caster = GetCaster())
                         {
-                            healAmount = caster->SpellHealingBonusDone(target, GetSpellInfo(), healAmount, DOT, 0);
-                            healAmount = target->SpellHealingBonusDone(caster, GetSpellInfo(), healAmount, HEAL, dispelInfo->GetRemovedCharges());
+                            healAmount = caster->SpellHealingBonusDone(target, GetSpellInfo(), healAmount, HEAL, dispelInfo->GetRemovedCharges());
+                            healAmount = target->SpellHealingBonusTaken(GetSpellInfo(), healAmount, HEAL, dispelInfo->GetRemovedCharges(), GetCasterGUID());
                             target->CastCustomSpell(target, SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, NULL, GetCasterGUID());
+
+                            // restore mana
+                            int32 returnMana = CalculatePct(caster->GetCreateMana(), GetSpellInfo()->ManaCostPercentage) * dispelInfo->GetRemovedCharges() / 2;
+                            caster->CastCustomSpell(caster, SPELL_DRUID_LIFEBLOOM_ENERGIZE, &returnMana, NULL, NULL, true, NULL, NULL, GetCasterGUID());
                             return;
                         }
+
                         target->CastCustomSpell(target, SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, NULL, GetCasterGUID());
                     }
                 }
             }
 
-            void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-            {
-                Unit* caster = GetCaster();
-                if (!caster|| caster->GetTypeId() != TYPEID_PLAYER)
-                    return;
-
-                // Revitalize
-                if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE, SPELLFAMILY_DRUID, 2862, EFFECT_0))
-                    caster->CastSpell(caster, 57669, true);
-
-                // Lifebloom is not limited to targets if Tree of life is active
-                if (caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 2257, EFFECT_1) || !GetAura()->m_needsUnregister)
-                    return;
-
-                Player::appliedAurasList const& auras = caster->ToPlayer()->appliedAuras;
-                ACE_Guard<ACE_Recursive_Thread_Mutex> g(caster->m_appliedAuraMutex);
-                for (Player::appliedAurasList::const_iterator itr = auras.begin(); itr != auras.end();)
-                {
-                    Aura* aura = (*itr);
-                    if (aura == GetAura() || !aura->m_needsUnregister)
-                    {
-                        itr++;
-                        continue;
-                    }
-
-                    if (aura->GetId() == GetId())
-                    {
-                        itr++;
-                        aura->Remove();
-                    }
-                    else
-                        itr++;
-                }
-            }
-            
-
             void Register()
             {
-                AfterEffectApply += AuraEffectApplyFn(spell_dru_lifebloom_AuraScript::HandleApply, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
                 AfterEffectRemove += AuraEffectRemoveFn(spell_dru_lifebloom_AuraScript::AfterRemove, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
                 AfterDispel += AuraDispelFn(spell_dru_lifebloom_AuraScript::HandleDispel);
             }
