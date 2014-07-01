@@ -33,223 +33,35 @@
 #include "Map.h"
 #include "InstanceScript.h"
 
-enum KarEvents
+enum Yells
 {
-    EVENT_SUMMON_ADDS = 1,
-    EVENT_NEAR_PLAYER,
-    EVENT_BEAM,
-    EVENT_SUM_LAVA
-};
+    /*
+     Lord Rhyolith yells: Augh - smooshy little pests, look what you've done!
+     Lord Rhyolith yells: Broken. Mnngghhh... broken...
+     Lord Rhyolith yells: Buuurrrnn!
+     Lord Rhyolith yells: Eons I have slept undisturbed... Now this... Creatures of flesh, now you will BURN!
+     Lord Rhyolith yells: Finished.
+     Lord Rhyolith yells: Graaahh!
+     Lord Rhyolith yells: Hah? Hruumph? Soft little fleshy-things? Here? Nuisances, nuisances!
+     Lord Rhyolith yells: I'll crush you underfoot!
+     Lord Rhyolith yells: Oh you little beasts...
+     Lord Rhyolith yells: Oww now hey.
+     Lord Rhyolith yells: Sear the flesh from their tiny frames.
+     Lord Rhyolith yells: So soft!
+     Lord Rhyolith yells: Squeak, little pest.
+     Lord Rhyolith yells: Stomp now.
+     Lord Rhyolith yells: Succumb to living flame.
+     Lord Rhyolith yells: Uurrghh now you... you infuriate me!
+     */
+   YELL_AGGRO = 0, 
+   YELL_KILLED = 1, 
+   YELL_DIED = 2, 
+   YELL_PHASE2 = 3,
 
-enum KarSpells
-{
-    SUMMON_ELEMENTALS = 99601,
-    SPELL_SOUL_BEAM = 99567,
-    SPELL_SUM_LAVA_SPAWN = 99575
-};
-
-class kar_the_everburning: public CreatureScript
-{
-    public:
-        kar_the_everburning() :
-                CreatureScript("kar_the_everburning")
-        {
-        }
-
-        struct kar_the_everburningAI: public ScriptedAI
-        {
-                kar_the_everburningAI(Creature* creature) :
-                        ScriptedAI(creature), Summons(me)
-                {
-                    SetCombatMovement(false);
-                    me->SetSpeed(MOVE_RUN, 2.0f);
-                }
-
-                void Reset()
-                {
-                    events.Reset();
-                    Summons.DespawnAll();
-                }
-
-                void EnterCombat(Unit* /*who*/)
-                {
-                    events.ScheduleEvent(EVENT_SUMMON_ADDS, 3000);
-                }
-
-                void JustSummoned(Creature* summon)
-                {
-                    Summons.Summon(summon);
-                }
-
-                void UpdateAI(const uint32 diff)
-                {
-                    if (!UpdateVictim())
-                        return;
-
-                    if (Unit* NearPlayer = me->FindNearestPlayer(5.0, true))
-                    {
-                        events.ScheduleEvent(EVENT_NEAR_PLAYER, 1000);
-                        SetCombatMovement(true);
-                    }
-
-                    events.Update(diff);
-
-                    if (me->HasUnitState(UNIT_STATE_CASTING))
-                        return;
-
-                    if (uint32 eventId = events.ExecuteEvent())
-                    {
-                        switch (eventId)
-                        {
-                            case EVENT_SUMMON_ADDS:
-                                me->CastSpell(me->GetPositionX() + urand(0, 10) + urand(-10, 0), me->GetPositionY(),
-                                me->GetPositionZ(), SUMMON_ELEMENTALS, true);
-                                events.ScheduleEvent(EVENT_SUMMON_ADDS, 1200);
-                                break;
-                            case EVENT_NEAR_PLAYER:
-                                me->SetDisableGravity(true);
-                                me->GetMotionMaster()->MovePoint(0, -316.1f, -435.1f, 102.969f);
-                                events.CancelEvent(EVENT_SUMMON_ADDS);
-                                events.ScheduleEvent(EVENT_BEAM, 3000);
-                                events.ScheduleEvent(EVENT_SUM_LAVA, 5000);
-                                break;
-                            case EVENT_BEAM:
-                                DoCastRandom(SPELL_SOUL_BEAM, 40.0f);
-                                events.ScheduleEvent(EVENT_BEAM, 10000);
-                                break;
-                            case EVENT_SUM_LAVA:
-                                DoCast(me, SPELL_SUM_LAVA_SPAWN, false);
-                                events.ScheduleEvent(EVENT_SUM_LAVA, 15000);
-                                break;
-                        }
-                    }
-                    DoMeleeAttackIfReady();
-                }
-            private:
-                EventMap events;
-                SummonList Summons;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new kar_the_everburningAI(creature);
-        }
-};
-
-class mob_kar_combat_stalker: public CreatureScript
-{
-    public:
-        mob_kar_combat_stalker() :
-                CreatureScript("mob_kar_combat_stalker")
-        {
-        }
-
-        struct mob_kar_combat_stalkerAI: public ScriptedAI
-        {
-                mob_kar_combat_stalkerAI(Creature* creature) :
-                        ScriptedAI(creature)
-                {
-                }
-
-                void Reset()
-                {
-                }
-
-                void MoveInLineOfSight(Unit* who)
-                {
-                    if (who && who->GetTypeId() == TYPEID_PLAYER && me->IsValidAttackTarget(who))
-
-                        if (!detect && me->IsWithinDistInMap(who, 10.0f))
-                        {
-                            detect = true;
-                            ScriptedAI::MoveInLineOfSight(who);
-                            if (Creature* kar = me->FindNearestCreature(NPC_KAR_EVERBURNING, 5000.0f, true))
-                                kar->AI()->AttackStart(who);
-                        }
-                }
-
-                void EnterCombat(Unit* /*who*/)
-                {
-                }
-            private:
-                bool detect;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new mob_kar_combat_stalkerAI(creature);
-        }
-};
-
-class Unstable_Pyrelord: public CreatureScript
-{
-    public:
-        Unstable_Pyrelord() :
-                CreatureScript("Unstable_Pyrelord")
-        {
-        }
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new Unstable_PyrelordAI(creature);
-        }
-
-        struct Unstable_PyrelordAI: public ScriptedAI
-        {
-                Unstable_PyrelordAI(Creature* creature) :
-                        ScriptedAI(creature)
-                {
-                    instance = creature->GetInstanceScript();
-                    start = false;
-                    falltimer = 5000;
-                }
-
-                bool start;
-                uint32 falltimer;
-                InstanceScript* instance;
-
-                void Reset()
-                {
-                }
-
-                void EnterCombat(Unit* /*who*/)
-                {
-                }
-
-                void IsSummonedBy(Unit* summoner)
-                {
-                    me->SetReactState(REACT_AGGRESSIVE);
-                    start = true;
-                }
-
-                void UpdateAI(const uint32 diff)
-                {
-                    if (!start)
-                        return;
-
-                    if (falltimer <= diff)
-                    {
-                        me->GetMotionMaster()->MoveFall();
-                        falltimer = 5000;
-                    }
-                    else
-                        falltimer -= diff;
-
-                    if (!UpdateVictim())
-                        me->GetMotionMaster()->MovePoint(1, -167.431f, -307.385f, me->GetPositionZMinusOffset());
-
-                    if (!GetKar())
-                        me->DespawnOrUnsummon();
-
-                    if (UpdateVictim())
-                        DoMeleeAttackIfReady();
-                }
-
-                Creature* GetKar()
-                {
-                    return me->FindNearestCreature(53616, 125.0f, true);
-                }
-        };
+   
+   SAY_EMOTE_SUPERHEATED  = 16,
+   SAY_EMOTE_VOLCANO      = 17,
+   SAY_EMOTE_MAGMA        = 18
 };
 
 enum Spells
@@ -362,19 +174,10 @@ const int timerConcussiveStomp2 = urand(35000, 45000);
 // Spark of Rhyolith
 const int timerInfernalRage = 5000;
 
-// I have all the correct text and sound will fix this later i first want to see if this fix the crash issue
-enum eYells
-{
-   SAY_AGGRO              = 6,
-   SAY_KILLED             = 12,
-   SAY_DIED               = 1,
-   SAY_PHASE2             = 8,
-   
-   SAY_EMOTE_SUPERHEATED  = 16,
-   SAY_EMOTE_VOLCANO      = 17,
-   SAY_EMOTE_MAGMA        = 18
-   
-};
+#define EMOTE_SUPERHEATED       "Lord Rhyolith grows impatient and becomes Superheated!"
+#define EMOTE_VOLCANO           "Lord Rhyolith extinguishes a nearby volcano!"
+#define EMOTE_MAGMA             "Lord Rhyolith reaches towards the magma beyond his platform!"
+#define EMOTE_PHASE2            "Lord Rhyolith loses his Obsidian Armor and is now exposed!"
 
 class boss_lord_rhyolith: public CreatureScript
 {
@@ -405,7 +208,17 @@ class boss_lord_rhyolith: public CreatureScript
                 Phases Phase;
                 EventMap events;
                 SummonList summons;
+                Creature* leftfoot;
+                Creature* rightfoot;
+				bool moving;
 
+            void InitializeAI()
+            {
+                leftfoot  = NULL;
+                rightfoot = NULL;
+				moving = false;
+            } 
+				
                 bool phaseTwo, LeftSet, RightSet, lavaFlow, drinkMagma;
 
                 void SummonAndSetLegsInBoss()
@@ -456,7 +269,6 @@ class boss_lord_rhyolith: public CreatureScript
                     me->GetVehicleKit();
                     SummonAndSetLegsInBoss();
                     instance->SetBossState(DATA_LORD_RHYOLITH, NOT_STARTED);
-
                     _Reset();
                 }
 
@@ -477,11 +289,38 @@ class boss_lord_rhyolith: public CreatureScript
                     Phase = PHASE_0;
                     events.SetPhase(PHASE_0);
 
+                me->SendMovementWalkMode();
+                moving = true;
+                me->SetSpeed(MOVE_WALK,   0.5f, true);
+                me->SetSpeed(MOVE_RUN,    0.5f, true);
+                me->SetWalk(true);
+					
+                leftfoot = me->SummonCreature(NPC_LEFT_LEG,
+                    me->GetPositionX(),
+                    me->GetPositionY(),
+                    me->GetPositionZ() + 12.0f,
+                    0,TEMPSUMMON_MANUAL_DESPAWN);
+                if (leftfoot)
+                {
+                    leftfoot->EnterVehicle(me, 0);
+                    leftfoot->ClearUnitState(UNIT_STATE_ONVEHICLE);
+                }
+                rightfoot = me->SummonCreature(NPC_RIGHT_LEG,
+                    me->GetPositionX(),
+                    me->GetPositionY(),
+                    me->GetPositionZ() + 12.0f,
+                    0,TEMPSUMMON_MANUAL_DESPAWN);
+                if (rightfoot)
+                {
+                    rightfoot->EnterVehicle(me, 1);
+                    rightfoot->ClearUnitState(UNIT_STATE_ONVEHICLE);
+                }
+
                     DoCast(me, SPELL_ORIENTATION_BAR);
 
-                    me->SetSpeed(MOVE_RUN, speedRateLow);
+                    //me->SetSpeed(MOVE_RUN, speedRateLow);
 
-                    Talk(SAY_AGGRO);
+                    Talk(YELL_AGGRO);
                     instance->SetBossState(DATA_LORD_RHYOLITH, IN_PROGRESS);
 
                     Phase = PHASE_1;
@@ -507,21 +346,21 @@ class boss_lord_rhyolith: public CreatureScript
 
                 void KilledUnit(Unit* /*who*/)
                 {
-                    Talk(SAY_KILLED);
+                    Talk(YELL_KILLED);
                 }
 
                 void JustDied(Unit* /*killer*/)
                 {
                     instance->SetBossState(DATA_LORD_RHYOLITH, DONE);
 
-                    Talk(SAY_DIED);
+                    Talk(YELL_DIED);
                     summons.DespawnAll();
 
                     if (GetLeftLeg())
-                        GetLeftLeg()->DisappearAndDie();
+                        GetLeftLeg()->DespawnOrUnsummon();
 
                     if (GetRightLeg())
-                        GetRightLeg()->DisappearAndDie();
+                        GetRightLeg()->DespawnOrUnsummon();
 
                     _JustDied();
                 }
@@ -552,6 +391,11 @@ class boss_lord_rhyolith: public CreatureScript
                 void JustSummoned(Creature *summon)
                 {
                     summons.Summon(summon);
+                   if (summon->GetEntry() == NPC_LEFT_LEG || summon->GetEntry() == NPC_RIGHT_LEG)
+                   {
+                      summon->SetMaxHealth(me->GetMaxHealth() /2);
+                      summon->SetHealth(summon->GetMaxHealth());
+                    }
 
                     switch (summon->GetEntry())
                     {
@@ -672,7 +516,7 @@ class boss_lord_rhyolith: public CreatureScript
                             events.CancelEvent(EVENT_THERMAL_IGNITION2);
                             events.CancelEvent(EVENT_CONCUSSIVE_STOMP_VOLCAN);
 
-                            Talk(SAY_PHASE2);
+                            Talk(YELL_PHASE2);
 
                             me->SetDisplayId(MODEL_PHASE2);
                             me->SetSpeed(MOVE_RUN, speedRateNormal);
@@ -687,12 +531,12 @@ class boss_lord_rhyolith: public CreatureScript
                             if (GetRightLeg())
                             {
                                 GetRightLeg()->RemoveAurasDueToSpell(SPELL_OBSIDIAN_ARMOR);
-                                GetRightLeg()->DisappearAndDie();
+                                GetRightLeg()->DespawnOrUnsummon();
                             }
                             if (GetLeftLeg())
                             {
                                 GetLeftLeg()->RemoveAurasDueToSpell(SPELL_OBSIDIAN_ARMOR);
-                                GetLeftLeg()->DisappearAndDie();
+                                GetLeftLeg()->DespawnOrUnsummon();
                             }
 
                             events.ScheduleEvent(EVENT_UNLEASHED_FLAME, timerUnleashedFlame);
@@ -703,7 +547,7 @@ class boss_lord_rhyolith: public CreatureScript
 
                         if (me->GetPositionZ() <= 100.0f && lavaFlow == false)
                         {
-                            Talk(SAY_EMOTE_MAGMA);
+                            me->MonsterTextEmote(EMOTE_MAGMA, 0, true);
                             lavaFlow = true;
                         }
 
@@ -738,7 +582,7 @@ class boss_lord_rhyolith: public CreatureScript
                                 break;
 
                             case EVENT_SUPERHEATED:
-                                Talk(SAY_EMOTE_SUPERHEATED);
+                                me->MonsterTextEmote(EMOTE_SUPERHEATED, 0, true);
                                 DoCast(me, SPELL_SUPERHEATED);
 
                                 events.ScheduleEvent(EVENT_SUPERHEATED, timerSuperheated);
@@ -1014,6 +858,227 @@ class npc_right_leg: public CreatureScript
         };
 };
 
+enum KarEvents
+{
+    EVENT_SUMMON_ADDS = 1,
+    EVENT_NEAR_PLAYER,
+    EVENT_BEAM,
+    EVENT_SUM_LAVA
+};
+
+enum KarSpells
+{
+    SUMMON_ELEMENTALS = 99601,
+    SPELL_SOUL_BEAM = 99567,
+    SPELL_SUM_LAVA_SPAWN = 99575
+};
+
+// ToDo - FIXME: Spell summon lava spawn, is currently a heavy spam
+
+class kar_the_everburning: public CreatureScript
+{
+    public:
+        kar_the_everburning() :
+                CreatureScript("kar_the_everburning")
+        {
+        }
+
+        struct kar_the_everburningAI: public ScriptedAI
+        {
+                kar_the_everburningAI(Creature* creature) :
+                        ScriptedAI(creature), Summons(me)
+                {
+                    SetCombatMovement(false);
+                    me->SetSpeed(MOVE_RUN, 2.0f);
+                }
+
+                void Reset()
+                {
+                    events.Reset();
+                    Summons.DespawnAll();
+                }
+
+                void EnterCombat(Unit* /*who*/)
+                {
+                    events.ScheduleEvent(EVENT_SUMMON_ADDS, 3000);
+                }
+
+                void JustSummoned(Creature* summon)
+                {
+                    Summons.Summon(summon);
+                }
+
+                void UpdateAI(const uint32 diff)
+                {
+                    if (!UpdateVictim())
+                        return;
+
+                    if (Unit* NearPlayer = me->FindNearestPlayer(5.0, true))
+                    {
+                        events.ScheduleEvent(EVENT_NEAR_PLAYER, 1000);
+                        SetCombatMovement(true);
+                    }
+
+                    events.Update(diff);
+
+                    if (me->HasUnitState(UNIT_STATE_CASTING))
+                        return;
+
+                    if (uint32 eventId = events.ExecuteEvent())
+                    {
+                        switch (eventId)
+                        {
+                            case EVENT_SUMMON_ADDS:
+                                me->CastSpell(me->GetPositionX() + urand(0, 10) + urand(-10, 0), me->GetPositionY(),
+                                me->GetPositionZ(), SUMMON_ELEMENTALS, true);
+                                events.ScheduleEvent(EVENT_SUMMON_ADDS, 1200);
+                                break;
+                            case EVENT_NEAR_PLAYER:
+                                me->SetDisableGravity(true);
+                                me->GetMotionMaster()->MovePoint(0, -316.1f, -435.1f, 102.969f);
+                                events.CancelEvent(EVENT_SUMMON_ADDS);
+                                events.ScheduleEvent(EVENT_BEAM, 3000);
+                                events.ScheduleEvent(EVENT_SUM_LAVA, 5000);
+                                break;
+                            case EVENT_BEAM:
+                                DoCastRandom(SPELL_SOUL_BEAM, 40.0f);
+                                events.ScheduleEvent(EVENT_BEAM, 10000);
+                                break;
+                            case EVENT_SUM_LAVA:
+                                DoCast(me, SPELL_SUM_LAVA_SPAWN, false);
+                                events.ScheduleEvent(EVENT_SUM_LAVA, 15000);
+                                break;
+                        }
+                    }
+                    DoMeleeAttackIfReady();
+                }
+            private:
+                EventMap events;
+                SummonList Summons;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new kar_the_everburningAI(creature);
+        }
+};
+
+class mob_kar_combat_stalker: public CreatureScript
+{
+    public:
+        mob_kar_combat_stalker() :
+                CreatureScript("mob_kar_combat_stalker")
+        {
+        }
+
+        struct mob_kar_combat_stalkerAI: public ScriptedAI
+        {
+                mob_kar_combat_stalkerAI(Creature* creature) :
+                        ScriptedAI(creature)
+                {
+                }
+
+                void Reset()
+                {
+                }
+
+                void MoveInLineOfSight(Unit* who)
+                {
+                    if (who && who->GetTypeId() == TYPEID_PLAYER && me->IsValidAttackTarget(who))
+
+                        if (!detect && me->IsWithinDistInMap(who, 10.0f))
+                        {
+                            detect = true;
+                            ScriptedAI::MoveInLineOfSight(who);
+                            if (Creature* kar = me->FindNearestCreature(NPC_KAR_EVERBURNING, 5000.0f, true))
+                                kar->AI()->AttackStart(who);
+                        }
+                }
+
+                void EnterCombat(Unit* /*who*/)
+                {
+                }
+            private:
+                bool detect;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new mob_kar_combat_stalkerAI(creature);
+        }
+};
+
+class Unstable_Pyrelord: public CreatureScript
+{
+    public:
+        Unstable_Pyrelord() :
+                CreatureScript("Unstable_Pyrelord")
+        {
+        }
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new Unstable_PyrelordAI(creature);
+        }
+
+        struct Unstable_PyrelordAI: public ScriptedAI
+        {
+                Unstable_PyrelordAI(Creature* creature) :
+                        ScriptedAI(creature)
+                {
+                    instance = creature->GetInstanceScript();
+                    start = false;
+                    falltimer = 5000;
+                }
+
+                bool start;
+                uint32 falltimer;
+                InstanceScript* instance;
+
+                void Reset()
+                {
+                }
+
+                void EnterCombat(Unit* /*who*/)
+                {
+                }
+
+                void IsSummonedBy(Unit* summoner)
+                {
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    start = true;
+                }
+
+                void UpdateAI(const uint32 diff)
+                {
+                    if (!start)
+                        return;
+
+                    if (falltimer <= diff)
+                    {
+                        me->GetMotionMaster()->MoveFall();
+                        falltimer = 5000;
+                    }
+                    else
+                        falltimer -= diff;
+
+                    if (!UpdateVictim())
+                        me->GetMotionMaster()->MovePoint(1, -167.431f, -307.385f, me->GetPositionZMinusOffset());
+
+                    if (!GetKar())
+                        me->DespawnOrUnsummon();
+
+                    if (UpdateVictim())
+                        DoMeleeAttackIfReady();
+                }
+
+                Creature* GetKar()
+                {
+                    return me->FindNearestCreature(53616, 125.0f, true);
+                }
+        };
+};
+
 /*######
  ##volcano
  ######*/
@@ -1079,11 +1144,11 @@ class npc_rhyolith_volcano: public CreatureScript
                     if (me->HasUnitState(UNIT_STATE_CASTING))
                         return;
 
-                    if (blow == false && GetRhyo()) 
+                    if (blow == false && GetRhyo()) // blow ? :)))) had to redo this just for fun, see comment below.
                     {
-                        GetRhyo()->AddAura(SPELL_MOLTEN_ARMOR, GetRhyo()); 
+                        GetRhyo()->AddAura(SPELL_MOLTEN_ARMOR, GetRhyo()); // GetRhyo()->GetTarget->IsBitch() ? payForBlowJob : findWhore; There, this suits the blow bool.
 
-                        blow = true; 
+                        blow = true; // !!
 
                         if (Aura * aura = GetRhyo()->GetAura(SPELL_OBSIDIAN_ARMOR))
                         {
@@ -1092,13 +1157,14 @@ class npc_rhyolith_volcano: public CreatureScript
                             if (stack >= 0)
                             {
                                 GetRhyo()->SetAuraStack(SPELL_OBSIDIAN_ARMOR, GetRhyo(), stack);
-                                
+                                //GetRhyo()->SetSpeed(MOVE_RUN, GetRhyo()->GetSpeed(MOVE_RUN) + 0.1f);
+                                //GetRhyo()->SetSpeed(MOVE_WALK, GetRhyo()->GetSpeed(MOVE_WALK) + 0.1f);
                             }
                         }
 
                         if (Creature* rhyolith = GetClosestCreatureWithEntry(me, NPC_RHYOLITH, 150.0f))
                         {
-                            Talk(SAY_EMOTE_VOLCANO);
+                            rhyolith->MonsterTextEmote(EMOTE_VOLCANO, 0, true);
                             rhyolith->SummonCreature(NPC_RHYOLITH_CRATER, me->GetPositionX(), me->GetPositionY(),
                                     me->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN);
                             me->DespawnOrUnsummon();
@@ -1193,7 +1259,7 @@ class npc_rhyolith_crater: public CreatureScript
 
                     switch (summon->GetEntry())
                     {
-                        case 53585: 
+                        case 53585: // this hack for lava tube, because if add it to crater nothing changed(dont know why)
                             if (me->GetDistance(summon) < 0.5f)
                             {
                                 summon->SetObjectScale(2.0f);
@@ -1440,7 +1506,7 @@ class npc_liquid_obsidian: public CreatureScript
                                     return;
                             }
 
-                        me->DisappearAndDie();
+                        me->DespawnOrUnsummon();
                     }
                 }
         };
