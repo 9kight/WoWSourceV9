@@ -1009,6 +1009,8 @@ class WorldSession
     private:
         // private trade methods
         void moveItems(Item* myItems[], Item* hisItems[]);
+		
+        bool CanUseBank(uint64 bankerGUID = 0) const;
 
         // logging helper
         void LogUnexpectedOpcode(WorldPacket* packet, const char* status, const char *reason);
@@ -1057,6 +1059,7 @@ class WorldSession
         bool isRecruiter;
         ACE_Based::LockedQueue<WorldPacket*, ACE_Thread_Mutex> _recvQueue;
         z_stream_s* _compressionStream;
+		uint64 m_currentBankerGUID;
 
         PacketThrottler m_packetThrottler;
 };
