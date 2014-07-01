@@ -118,7 +118,8 @@ WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8
     m_TutorialsChanged(false),
     _filterAddonMessages(false),
     recruiterId(recruiter),
-    isRecruiter(isARecruiter)
+    isRecruiter(isARecruiter),
+    m_currentBankerGUID(0)
 {
     if (sock)
     {
