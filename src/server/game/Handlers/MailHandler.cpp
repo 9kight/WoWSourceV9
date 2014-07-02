@@ -339,10 +339,6 @@ void WorldSession::HandleSendMail(WorldPacket& recvData)
     // If theres is an item, there is a one hour delivery delay if sent to another account's character.
     uint32 deliver_delay = needItemDelay ? sWorld->getIntConfig(CONFIG_MAIL_DELIVERY_DELAY) : 0;
 
-    // don't ask for COD if there are no items
-    if (items_count == 0)
-        COD = 0;
-        
     // will delete item or place to receiver mail list
     draft
         .AddMoney(money)
@@ -365,7 +361,8 @@ void WorldSession::HandleMailMarkAsRead(WorldPacket& recvData)
         return;
 
     Player* player = _player;
-    if (m && m->state != MAIL_STATE_DELETED)
+    Mail* m = player->GetMail(mailId);
+    if (m)
     {
         if (player->unReadMails)
             --player->unReadMails;
@@ -730,7 +727,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket& recvData)
     Player* player = _player;
 
     Mail* m = player->GetMail(mailId);
-    if (!m || (m->body.empty() && !m->mailTemplateId) || m->state == MAIL_STATE_DELETED || m->deliver_time > time(NULL) || (m->checked & MAIL_CHECK_MASK_COPIED))
+    if (!m || (m->body.empty() && !m->mailTemplateId) || m->state == MAIL_STATE_DELETED || m->deliver_time > time(NULL))
     {
         player->SendMailResult(mailId, MAIL_MADE_PERMANENT, MAIL_ERR_INTERNAL_ERROR);
         return;
