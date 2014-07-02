@@ -73,6 +73,46 @@ class spell_item_trigger_spell : public SpellScriptLoader
         }
 };
 
+enum AegisOfPreservation
+{
+    SPELL_AEGIS_HEAL   = 23781
+};
+
+// 23780 - Aegis of Preservation
+class spell_item_aegis_of_preservation : public SpellScriptLoader
+{
+    public:
+        spell_item_aegis_of_preservation() : SpellScriptLoader("spell_item_aegis_of_preservation") { }
+
+        class spell_item_aegis_of_preservation_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_item_aegis_of_preservation_AuraScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/) 
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_AEGIS_HEAL))
+                    return false;
+                return true;
+            }
+
+            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
+            {
+                PreventDefaultAction();
+                GetTarget()->CastSpell(GetTarget(), SPELL_AEGIS_HEAL, true, NULL, aurEff);
+            }
+
+            void Register() 
+            {
+                OnEffectProc += AuraEffectProcFn(spell_item_aegis_of_preservation_AuraScript::HandleProc, EFFECT_1, SPELL_AURA_PROC_TRIGGER_SPELL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const 
+        {
+            return new spell_item_aegis_of_preservation_AuraScript();
+        }
+};
+
 // 26400 - Arcane Shroud
 class spell_item_arcane_shroud : public SpellScriptLoader
 {
@@ -2682,7 +2722,8 @@ void AddSC_item_spell_scripts()
     new spell_item_trigger_spell("spell_item_mechanical_dragonling", SPELL_MECHANICAL_DRAGONLING);
     // 23075 Mithril Mechanical Dragonling
     new spell_item_trigger_spell("spell_item_mithril_mechanical_dragonling", SPELL_MITHRIL_MECHANICAL_DRAGONLING);
-
+	
+    new spell_item_aegis_of_preservation();
     new spell_item_arcane_shroud();
     new spell_item_blessing_of_ancient_kings();
     new spell_item_defibrillate("spell_item_goblin_jumper_cables", 67, SPELL_GOBLIN_JUMPER_CABLES_FAIL);
