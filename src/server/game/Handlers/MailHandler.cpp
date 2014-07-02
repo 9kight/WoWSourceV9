@@ -365,8 +365,7 @@ void WorldSession::HandleMailMarkAsRead(WorldPacket& recvData)
         return;
 
     Player* player = _player;
-    Mail* m = player->GetMail(mailId);
-    if (m)
+    if (m && m->state != MAIL_STATE_DELETED)
     {
         if (player->unReadMails)
             --player->unReadMails;
