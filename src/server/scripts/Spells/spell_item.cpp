@@ -257,6 +257,46 @@ class spell_item_defibrillate : public SpellScriptLoader
         uint32 _failSpell;
 };
 
+enum DesperateDefense
+{
+    SPELL_DESPERATE_RAGE    = 33898
+};
+
+// 33896 - Desperate Defense
+class spell_item_desperate_defense : public SpellScriptLoader
+{
+    public:
+        spell_item_desperate_defense() : SpellScriptLoader("spell_item_desperate_defense") { }
+
+        class spell_item_desperate_defense_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_item_desperate_defense_AuraScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/) 
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_DESPERATE_RAGE))
+                    return false;
+                return true;
+            }
+
+            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
+            {
+                PreventDefaultAction();
+                GetTarget()->CastSpell(GetTarget(), SPELL_DESPERATE_RAGE, true, NULL, aurEff);
+            }
+
+            void Register() 
+            {
+                OnEffectProc += AuraEffectProcFn(spell_item_desperate_defense_AuraScript::HandleProc, EFFECT_2, SPELL_AURA_PROC_TRIGGER_SPELL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const 
+        {
+            return new spell_item_desperate_defense_AuraScript();
+        }
+};
+
 // http://www.wowhead.com/item=6522 Deviate Fish
 // 8063 Deviate Fish
 enum DeviateFishSpells
@@ -2730,6 +2770,7 @@ void AddSC_item_spell_scripts()
     new spell_item_defibrillate("spell_item_goblin_jumper_cables_xl", 50, SPELL_GOBLIN_JUMPER_CABLES_XL_FAIL);
     new spell_item_defibrillate("spell_item_gnomish_army_knife", 33);
     new spell_item_deviate_fish();
+    new spell_item_desperate_defense();
     new spell_item_flask_of_the_north();
     new spell_item_gnomish_death_ray();
     new spell_item_make_a_wish();
