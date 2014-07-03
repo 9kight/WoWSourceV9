@@ -3051,7 +3051,7 @@ bool AchievementMgr<T>::AdditionalRequirementsSatisfied(AchievementCriteriaEntry
                     reqValue = 8128; 
                     break;
 				default:
-					reqValeu = 0;
+					reqValue = 0;
             }
         }
 
