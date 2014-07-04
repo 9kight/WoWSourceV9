@@ -192,6 +192,7 @@ public:
         void Reset()
         {
             _Reset();
+			instance->SetBossState(BOSS_MORCHOK, NOT_STARTED);
             Raid10N = 23400130;
             Raid10H = 13957449;
             Raid25N = 66299996;
@@ -210,12 +211,14 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
+		    instance->SetBossState(BOSS_MORCHOK, IN_PROGRESS);
             Talk(SAY_AGGRO);
             _EnterCombat();
         }
 
         void JustDied(Unit* /*killer*/)
         {
+		    instance->SetBossState(BOSS_MORCHOK, DONE);
             Talk(SAY_DEATH);
 			DespawnGameobjects(209596, 100.0f);
         }
