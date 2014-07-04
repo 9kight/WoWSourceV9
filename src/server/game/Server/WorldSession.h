@@ -123,6 +123,22 @@ enum CharterTypes
 #define DB2_REPLY_SPARSE 2442913102
 #define DB2_REPLY_ITEM   1344507586
 
+enum ChangeDynamicDifficultyResult
+{
+    ERR_DIFFICULTY_CHANGE_COOLDOWN_S                            = 0, // sends the remaining time in seconds to the client
+    ERR_DIFFICULTY_CHANGE_WORLDSTATE                            = 1,
+    ERR_DIFFICULTY_CHANGE_ENCOUNTER                             = 2,
+    ERR_DIFFICULTY_CHANGE_COMBAT                                = 3,
+    ERR_DIFFICULTY_CHANGE_PLAYER_BUSY                           = 4,
+    ERR_DIFFICULTY_CHANGE_UPDATE_TIME                           = 5, // sends the remaining time in time_t
+    ERR_DIFFICULTY_CHANGE_ALREADY_STARTED                       = 6,
+    ERR_DIFFICULTY_CHANGE_UPDATE_MAP_DIFFICULTY_ENTRY           = 7, // sends the ID of MapDifficulty
+    ERR_DIFFICULTY_CHANGE_OTHER_HEROIC_S                        = 8, // sends it when someone is locked for the encounter on heroic, sends the locked player packed guid
+    ERR_DIFFICULTY_CHANGE_HEROIC_INSTANCE_ALREADY_RUNNING       = 9,
+    ERR_DIFFICULTY_DISABLED_IN_LFG                              = 10, 
+    ERR_DIFFICULTY_CHANGE_SUCCESS                               = 11 // sends remaining time in time_t and mapId
+};
+
 //class to deal with packet processing
 //allows to determine if next packet is safe to be processed
 class PacketFilter
@@ -830,6 +846,7 @@ class WorldSession
         void HandleResetInstancesOpcode(WorldPacket& recvData);
         void HandleHearthAndResurrect(WorldPacket& recvData);
         void HandleInstanceLockResponse(WorldPacket& recvPacket);
+        void HandleChangePlayerDifficulty(WorldPacket& recvData);
 
         // Battlefield
         void SendBfInvitePlayerToWar(uint64 guid, uint32 zoneId, uint32 time);
