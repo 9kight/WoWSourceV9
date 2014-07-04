@@ -2126,3 +2126,33 @@ bool GameObject::IsLootAllowedFor(Player const* player) const
 
     return true;
 }
+
+void GameObject::ActivateAnimation(uint32 anim)
+{
+    ObjectGuid guid = GetGUID();
+
+    WorldPacket data(SMSG_GAME_OBJECT_ACTIVATE_ANIM_KIT, 8 + 4);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[6]);
+
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[7]);
+
+    data << uint32(anim);
+
+    SendMessageToSet(&data, true);
+
+    /*used for some spells in deathwing spine - void Spell::EffectActivateObject(SpellEffIndex effIndex)*/
+}
