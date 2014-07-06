@@ -64,6 +64,7 @@ enum CreatureIds
     NPC_SKYFALL                 = 52019,
 
     // Boss' encounter related NPCs
+    NPC_SAFE_ZONE               = 42844,
     NPC_AIR_CURRENT             = 47305,
     NPC_TWISTER                 = 47342,
     NPC_GROUNDING_FIELD         = 47000,

@@ -1,3 +1,11 @@
+/* Copyright (C) WoW Source 4.3.4 */
+
+/* Name: boss_grand_vizier_ertan
+* Progress: 100%
+* Author: Demigodess
+* Comments:
+*/
+
 #include "SpellScript.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
@@ -6,125 +14,112 @@
 #include "GridNotifiersImpl.h"
 #include "the_vortex_pinnacle.h"
 
-enum spells
+enum AltairusSpells
 {
-    SPELL_CHILLING_BREATH               = 88308,
-    SPELL_UPWIND_OF_ALTAIRUS            = 88282,
-    SPELL_DOWNWIND_OF_ALTAIRUS          = 88286,
-    SPELL_TWISTER_AURA                  = 88313,
-    SPELL_LIGHTNING_BLAST               = 88357,
-    SPELL_SAFE_ZONE                     = 88350,
-    SPELL_CALL_THE_WIND_VISUAL          = 88772,
-    SPELL_WIND_OF_ALTAIRUS              = 88244
+    SPELL_CHILLING_BREATH        = 88308, // SPELL_AURA_DUMMY | SPELL_EFFECT_SCHOOL_DAMAGE
+
+    SPELL_SAFE_ZONE              = 88350, // SPELL_EFFECT_APPLY_AREA_AURA_ENEMY
+
+    SPELL_LIGHTNING_BLAST        = 88332, //(+)SPELL_EFFECT_DUMMY
+    SPELL_LIGHTNING_BLAST_DAMAGE = 88357, // +-> SPELL_EFFECT_SCHOOL_DAMAGE
+
+    SPELL_CALL_THE_WIND          = 88276, //(+)SPELL_EFFECT_DUMMY
+    SPELL_CALL_WINDS_VISUAL      = 88772, // +-> SPELL_AURA_DUMMY
+    SPELL_CALL_THE_WIND_PERIODIC = 88244, // +-> + SPELL_AURA_PERIODIC_TRIGGER_SPELL
+    SPELL_UPWIND_OF_ALTAIRUS     = 88282, //     +->(+)SPELL_AURA_MELEE_SLOW | SPELL_AURA_MOD_INCREASE_SPEED
+    SPELL_DOWNWIND_OF_ALTAIRUS   = 88286, //         +-> SPELL_AURA_MELEE_SLOW | SPELL_AURA_MOD_DECREASE_SPEED
+
+    SPELL_TWISTER_AURA           = 88313, // + SPELL_AURA_PERIODIC_TRIGGER_SPELL
+    SPELL_TWISTER_TICK           = 88314, // +-> SPELL_EFFECT_SCHOOL_DAMAGE | SPELL_EFFECT_KNOCK_BACK | SPELL_EFFECT_APPLY_AURA
 };
 
-enum events
+enum AltairusEvents
 {
-    EVENT_CHILLING_BREATH               = 1,
-    EVENT_CALL_THE_WIND                 = 2,
-    EVENT_DOWNWIND_OF_ALTAIRUS          = 3,
-    EVENT_LIGHTNING_BLAST               = 4,
-    EVENT_CALL_THE_WIND_POST            = 5
+    EVENT_CHECK_COWARDICE = 1,
+    EVENT_CHILLING_BREATH,
+    EVENT_CALL_THE_WIND,
+    EVENT_TWISTING_WINDS
 };
 
-enum Texts
+enum AltaiursTimer
 {
-    EMOTE_WINDS                         = 0
+    TIMER_CHECK_COWARDICE      = 1 * IN_MILLISECONDS,
+
+    TIMER_CHILLING_BREATH_INIT = 2 * IN_MILLISECONDS,
+    TIMER_CHILLING_BREATH_MIN  = 10 * IN_MILLISECONDS,
+    TIMER_CHILLING_BREATH_MAX  = 15 * IN_MILLISECONDS,
+
+    TIMER_CALL_THE_WIND_INIT   = 6 * IN_MILLISECONDS,
+    TIMER_CALL_THE_WIND        = 20 * IN_MILLISECONDS,
+    TIMER_DELAY_VISUAL         = 2 * IN_MILLISECONDS,
+
+    TIMER_TWISTING_WINDS_INIT  = 5 * IN_MILLISECONDS,
+    TIMER_TWISTING_WINDS       = 15 * IN_MILLISECONDS
 };
 
-Position const platform = { -1213.83f, 62.99f, 735.2f, 0.0f };
-
-class MoveTornade : public BasicEvent
+enum AltairusCreatureTexts
 {
-public:
-    MoveTornade(Unit* owner) : _owner(owner), _instance(owner->GetInstanceScript())
-    {
-    }
-
-    bool Execute(uint64 execTime, uint32 /*diff*/)
-    {
-        if (!_owner->HasAura(SPELL_TWISTER_AURA))
-            _owner->CastSpell(_owner, SPELL_TWISTER_AURA, true);
-        _owner->m_Events.AddEvent(this, execTime + 1000);
-        return false;
-    }
-
-private:
-    Unit* _owner;
-    InstanceScript* _instance;
+    SAY_WIND_CHANGE = 0,
+    SAY_COWARDICE   = 1
 };
 
+float const SUMMON_RADIUS = 25.0f;
+uint32 const NUM_TWISTERS_PER_SUMMON = 4;
+Position const Center = { -1216.225f, 64.027f, 734.175f, 0.0f };
 
 class boss_altairus : public CreatureScript
 {
 public:
-    boss_altairus() : CreatureScript("boss_altairus")
-    {
-    }
+    boss_altairus() : CreatureScript("boss_altairus") {}
 
     struct boss_altairusAI : public BossAI
     {
-        boss_altairusAI(Creature* creature) : BossAI(creature, BOSS_ALTAIRUS)
-        {
-        }
+        boss_altairusAI(Creature* creature) : BossAI(creature, DATA_ALTAIRUS) { }
 
         void Reset()
         {
-            _Reset();
-            events.ScheduleEvent(EVENT_CALL_THE_WIND, urand(7500, 10000));
-            events.ScheduleEvent(EVENT_CHILLING_BREATH, urand(20000, 30000));
-            events.ScheduleEvent(EVENT_LIGHTNING_BLAST, 1000);
-            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_DOWNWIND_OF_ALTAIRUS);
-            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_UPWIND_OF_ALTAIRUS);
-            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_WIND_OF_ALTAIRUS);
-            me->SetHoverGroundTargetable(true);
-            //            me->SetHover(true);
-            summons.DespawnAll();
+            BossAI::Reset();
+
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            me->DespawnCreaturesInArea(NPC_SAFE_ZONE);
+            me->DespawnCreaturesInArea(NPC_TWISTER);
+
+            std::list<Creature*> targets;
+            GetCreatureListWithEntryInGrid(targets, me, NPC_AIR_CURRENT, 150.0f);
+            for (std::list<Creature*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                (*itr)->RemoveAura(SPELL_CALL_THE_WIND_PERIODIC);
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* who)
         {
-            _EnterCombat();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+
+            Creature *safe_zone = DoSummon(NPC_SAFE_ZONE, Center);
+            safe_zone->CastSpell(safe_zone, SPELL_SAFE_ZONE);
+            safe_zone->SetReactState(REACT_PASSIVE);
+
+            events.ScheduleEvent(EVENT_CHECK_COWARDICE, TIMER_CHECK_COWARDICE);
+            events.ScheduleEvent(EVENT_CHILLING_BREATH, TIMER_CHILLING_BREATH_INIT);
+            events.ScheduleEvent(EVENT_CALL_THE_WIND, TIMER_CALL_THE_WIND_INIT);
+
             if (IsHeroic())
-                SummonTornades();
-        }
+                events.ScheduleEvent(EVENT_TWISTING_WINDS, TIMER_TWISTING_WINDS_INIT);
 
-        void JustReachedHome()
-        {
-            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_DOWNWIND_OF_ALTAIRUS);
-            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_UPWIND_OF_ALTAIRUS);
-            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_WIND_OF_ALTAIRUS);
-        }
-
-        void JustSummoned(Creature* summoned)
-        {
-            switch (summoned->GetEntry())
-            {
-                case NPC_WIND:
-                    summoned->CastSpell(summoned, SPELL_CALL_THE_WIND_VISUAL, true);
-                    break;
-                case NPC_TWISTER:
-                    summoned->SetReactState(REACT_PASSIVE);
-                    summoned->GetMotionMaster()->MoveRandom(10.0f);
-                    summoned->CastSpell(summoned, SPELL_TWISTER_AURA, true);
-                    summoned->m_Events.AddEvent(new MoveTornade(summoned), 1000);
-                    break;
-                default:
-                    break;
-            }
-            summons.Summon(summoned);
+            BossAI::EnterCombat(who);
         }
 
         void JustDied(Unit* /*who*/)
         {
-            _JustDied();
-            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_WIND_OF_ALTAIRUS);
-            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_DOWNWIND_OF_ALTAIRUS);
-            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_UPWIND_OF_ALTAIRUS);
-            summons.DespawnAll();
-            me->SetHover(false);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            me->DespawnCreaturesInArea(NPC_SAFE_ZONE);
+            me->DespawnCreaturesInArea(NPC_TWISTER);
 
-            Creature * Slipstream = me->SummonCreature(NPC_SLIPSTREAM_TWO, -1198.95f, 106.13f, 743.16f, 1.2f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+            std::list<Creature*> targets;
+            GetCreatureListWithEntryInGrid(targets, me, NPC_AIR_CURRENT, 150.0f);
+            for (std::list<Creature*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                (*itr)->RemoveAura(SPELL_CALL_THE_WIND_PERIODIC);
+
+            Creature * Slipstream = me->SummonCreature(45455, -765.79f, -44.01f, 641.91f, 4.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
             Slipstream->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
         }
 
@@ -139,174 +134,206 @@ public:
             {
                 switch (eventId)
                 {
-                    case EVENT_CHILLING_BREATH:
-                        DoCastRandom(SPELL_CHILLING_BREATH, 0.0f);
-                        events.ScheduleEvent(EVENT_CHILLING_BREATH, urand(7500, 12500));
+                    case EVENT_CHECK_COWARDICE:
+                    {
+                        bool cast = false;
+                        Map::PlayerList const &players = me->GetMap()->GetPlayers();
+                        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                        if (Player *player = itr->getSource())
+                        if (!itr->getSource()->HasAura(SPELL_SAFE_ZONE))
+                        {
+                            Talk(SAY_COWARDICE, player->GetGUID());
+                            cast = true;
+                        }
+
+                        if (cast)
+                            DoCastAOE(SPELL_LIGHTNING_BLAST);
+
+                        events.ScheduleEvent(EVENT_CHECK_COWARDICE, TIMER_CHECK_COWARDICE);
                         break;
+                    }
+                    case EVENT_CHILLING_BREATH:
+                    {
+                        if (IsHeroic())
+                            DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true), SPELL_CHILLING_BREATH);
+                        else
+                            DoCastVictim(SPELL_CHILLING_BREATH);
+
+                        events.ScheduleEvent(EVENT_CHILLING_BREATH, urand(TIMER_CHILLING_BREATH_MIN, TIMER_CHILLING_BREATH_MAX));
+                        break;
+                    }
                     case EVENT_CALL_THE_WIND:
                     {
-                        if (Creature *c = me->FindNearestCreature(NPC_WIND, 100))
-                            c->DespawnOrUnsummon();
-                        instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_WIND_OF_ALTAIRUS);
-                        instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_DOWNWIND_OF_ALTAIRUS);
-                        instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_UPWIND_OF_ALTAIRUS);
-                        events.ScheduleEvent(EVENT_CALL_THE_WIND, urand(14000, 19000));
-                        events.ScheduleEvent(EVENT_CALL_THE_WIND_POST, 2000);
+                        DoCastAOE(SPELL_CALL_THE_WIND);
+                        events.ScheduleEvent(EVENT_CALL_THE_WIND, TIMER_CALL_THE_WIND);
                         break;
                     }
-                    case EVENT_CALL_THE_WIND_POST:
+                    case EVENT_TWISTING_WINDS:
                     {
-                        Talk(EMOTE_WINDS);
-                        float orientation = 0.0f;
-                        switch (rand() % 4)
+                        for (uint32 i = 0; i < NUM_TWISTERS_PER_SUMMON; ++i)
                         {
-                            case 0:
-                                orientation = M_PI / 2;
-                                break;
-                            case 1:
-                                orientation = M_PI;
-                                break;
-                            case 2:
-                                orientation = 3 * M_PI / 2;
-                                break;
-                            case 3:
-                                orientation = 2 * M_PI;
-                                break;
-                            default:
-                                orientation = M_PI;
-                                break;
+                            Position pos;
+                            pos.RelocatePolar(frand(0, M_PI * 2), frand(0.0f, SUMMON_RADIUS));
+                            pos.Add(Center);
+
+                            DoSummon(NPC_TWISTER, pos)->GetMotionMaster()->MoveRandom(20.0f);
                         }
-                        me->SummonCreature(NPC_WIND, -1213.83f, 62.99f, 734.2f, orientation, TEMPSUMMON_MANUAL_DESPAWN);
-                        WindOfAltairus();
-                        events.CancelEvent(EVENT_CALL_THE_WIND_POST);
-                        break;
+
+                        events.ScheduleEvent(EVENT_TWISTING_WINDS, TIMER_TWISTING_WINDS);
                     }
-                    case EVENT_LIGHTNING_BLAST:
-                        CheckPlatform();
-                        events.ScheduleEvent(EVENT_LIGHTNING_BLAST, 5000);
-                        break;
-                    default:
-                        break;
                 }
             }
-
             DoMeleeAttackIfReady();
-        }
-
-        void WindOfAltairus()
-        {
-            Map::PlayerList const& playerList = me->GetMap()->GetPlayers();
-            if (!playerList.isEmpty())
-                for (Map::PlayerList::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
-                    if (Player* player = itr->getSource())
-                        player->CastSpell(player, SPELL_WIND_OF_ALTAIRUS, true);
-        }
-
-        void CheckPlatform()
-        {
-            Map::PlayerList const& playerList = me->GetMap()->GetPlayers();
-            if (!playerList.isEmpty())
-                for (Map::PlayerList::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
-                    if (Player* player = itr->getSource())
-                        if (player->GetDistance2d(platform.m_positionX, platform.m_positionY) > 25.0f)
-                            me->CastSpell(player, SPELL_LIGHTNING_BLAST, true);
-        }
-
-        void SummonTornades()
-        {
-            for (int cnt = 0; cnt < 20; cnt++)
-            {
-                Position pos;
-                me->GetRandomPoint(platform, 40, pos);
-                me->SummonCreature(NPC_TWISTER, pos, TEMPSUMMON_MANUAL_DESPAWN);
-            }
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* Creature) const
     {
-        return GetVortexPinnacleAI<boss_altairusAI>(creature);
+        return new boss_altairusAI(Creature);
     }
 };
 
-class spell_wind_of_alth : public SpellScriptLoader
+struct inSafeZone
+{
+    bool operator()(WorldObject *obj)
+    {
+        return obj->ToUnit() && obj->ToUnit()->HasAura(SPELL_SAFE_ZONE);
+    }
+};
+
+class spell_altairus_lightning_blast : public SpellScriptLoader
 {
 public:
-    spell_wind_of_alth() : SpellScriptLoader("spell_wind_of_alth") { }
+    spell_altairus_lightning_blast() : SpellScriptLoader("spell_altairus_lightning_blast") { }
 
-    class spell_wind_of_alth_AuraScript : public AuraScript
+    class spell_altairus_lightning_blastSpellScript : public SpellScript
     {
-        PrepareAuraScript(spell_wind_of_alth_AuraScript);
+        PrepareSpellScript(spell_altairus_lightning_blastSpellScript);
 
-        bool Validate(SpellInfo const* /*spellInfo*/)
+        void FilterTargets(std::list<WorldObject*> &targets)
         {
-            return true;
+            targets.remove_if(inSafeZone());
         }
 
-        void RemovedWrongAuras()
+        void HandleDummy(SpellEffIndex)
         {
-            GetCaster()->RemoveAurasDueToSpell(SPELL_WIND_OF_ALTAIRUS);
-            GetCaster()->RemoveAurasDueToSpell(SPELL_UPWIND_OF_ALTAIRUS);
-            GetCaster()->RemoveAurasDueToSpell(SPELL_DOWNWIND_OF_ALTAIRUS);
-        }
-
-        void HandleEffectPeriodic(AuraEffect const* /*aurEff*/)
-        {
-            PreventDefaultAction();
-            if (!GetCaster())
-                return;
-            if (Creature *c = GetCaster()->FindNearestCreature(42844, 100, true))
-            {
-                if (InstanceScript *instance = c->GetInstanceScript())
-                {
-                    if (instance->GetBossState(BOSS_ALTAIRUS) != IN_PROGRESS)
-                    {
-                        RemovedWrongAuras();
-                        return;
-                    }
-                    if (Creature *wind = instance->instance->GetCreature(instance->GetData64(NPC_WIND)))
-                    {
-                        float windOrientation = wind->GetOrientation();
-                        float orientationDiff = GetCaster()->GetOrientation();
-                        float left_limit = windOrientation - M_PI / 2;
-                        float right_limit = windOrientation + M_PI / 2;
-                        if (orientationDiff >= left_limit && orientationDiff <= right_limit)
-                        {
-                            if (GetCaster()->HasAura(SPELL_UPWIND_OF_ALTAIRUS))
-                                GetCaster()->RemoveAurasDueToSpell(SPELL_UPWIND_OF_ALTAIRUS);
-                            if (!GetCaster()->HasAura(SPELL_DOWNWIND_OF_ALTAIRUS))
-                                GetCaster()->AddAura(SPELL_DOWNWIND_OF_ALTAIRUS, GetCaster());
-                        }
-                        else
-                        {
-                            if (GetCaster()->HasAura(SPELL_DOWNWIND_OF_ALTAIRUS))
-                                GetCaster()->RemoveAurasDueToSpell(SPELL_DOWNWIND_OF_ALTAIRUS);
-                            if (!GetCaster()->HasAura(SPELL_UPWIND_OF_ALTAIRUS))
-                                GetCaster()->AddAura(SPELL_UPWIND_OF_ALTAIRUS, GetCaster());
-                        }
-                    }
-                }
-                else
-                    RemovedWrongAuras();
-            }
-            else
-                RemovedWrongAuras();
+            GetCaster()->CastSpell(GetHitUnit(), SPELL_LIGHTNING_BLAST_DAMAGE, true);
         }
 
         void Register()
         {
-            OnEffectPeriodic += AuraEffectPeriodicFn(spell_wind_of_alth_AuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_altairus_lightning_blastSpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnEffectHitTarget += SpellEffectFn(spell_altairus_lightning_blastSpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
         }
     };
 
-    AuraScript* GetAuraScript() const
+    SpellScript* GetSpellScript() const
     {
-        return new spell_wind_of_alth_AuraScript();
+        return new spell_altairus_lightning_blastSpellScript();
+    }
+};
+
+class spell_call_the_wind : public SpellScriptLoader
+{
+public:
+    spell_call_the_wind() : SpellScriptLoader("spell_call_the_wind") { }
+
+    class spell_call_the_windSpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_call_the_windSpellScript);
+
+        void FilterTargets(std::list<WorldObject*> &targets)
+        {
+            Trinity::Containers::RandomResizeList(targets, 1);
+        }
+
+        void HandleDummy(SpellEffIndex)
+        {
+            std::list<Creature*> targets;
+            GetCreatureListWithEntryInGrid(targets, GetCaster(), NPC_AIR_CURRENT, 150.0f);
+            for (std::list<Creature*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                (*itr)->RemoveAura(SPELL_CALL_THE_WIND_PERIODIC);
+
+            GetHitUnit()->CastSpell(GetHitUnit(), SPELL_CALL_THE_WIND_PERIODIC);
+            uint64 guid = GetCaster()->GetInstanceScript()->GetData64(NPC_SAFE_ZONE);
+            Creature *safe_zone = ObjectAccessor::GetCreature(*GetCaster(), guid);
+            safe_zone->CastWithDelay(TIMER_DELAY_VISUAL, GetHitUnit(), SPELL_CALL_WINDS_VISUAL, false);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_call_the_windSpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+            OnEffectHitTarget += SpellEffectFn(spell_call_the_windSpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_call_the_windSpellScript();
+    }
+};
+
+class spell_upwind_of_altairus : public SpellScriptLoader
+{
+public:
+    spell_upwind_of_altairus() : SpellScriptLoader("spell_upwind_of_altairus") { }
+
+    class spell_upwind_of_altairusSpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_upwind_of_altairusSpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            float altairus_dist = GetCaster()->GetExactDist2d(ObjectAccessor::GetUnit(*GetCaster(), GetCaster()->GetInstanceScript()->GetData64(BOSS_ALTAIRUS)));
+
+            for (std::list<WorldObject*>::iterator itr = targets.begin(); itr != targets.end();)
+            {
+                if (GetCaster()->GetExactDist2d(*itr) > altairus_dist)
+                {
+                    if (Unit *neg_target = (*itr)->ToUnit())
+                    {
+                        neg_target->RemoveAura(SPELL_UPWIND_OF_ALTAIRUS);
+                        neg_target->CastSpell(neg_target, SPELL_DOWNWIND_OF_ALTAIRUS, true);
+                    }
+
+                    targets.erase(itr++);
+                }
+                else
+                {
+                    if (Unit *unit = (*itr)->ToUnit())
+                        unit->RemoveAura(SPELL_DOWNWIND_OF_ALTAIRUS);
+
+                    _targets.push_back(*itr);
+                    ++itr;
+                }
+            }
+        }
+
+        void FillTargets(std::list<WorldObject*>& targets)
+        {
+            targets.clear();
+            targets.merge(_targets);
+        }
+
+        std::list<WorldObject*> _targets;
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_upwind_of_altairusSpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_upwind_of_altairusSpellScript::FillTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENTRY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_upwind_of_altairusSpellScript();
     }
 };
 
 void AddSC_boss_altairus()
 {
-    new boss_altairus();
-    new spell_wind_of_alth();
+    new boss_altairus;
+    new spell_altairus_lightning_blast;
+    new spell_call_the_wind;
+    new spell_upwind_of_altairus;
 }
