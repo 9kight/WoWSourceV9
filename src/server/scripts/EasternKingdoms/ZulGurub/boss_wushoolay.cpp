@@ -133,7 +133,7 @@ class boss_wushoolay : public CreatureScript
                             if (!unit)
                                 unit = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true);
                             if (unit)
-                                DoCast(unit, SPELL_STORM_CHARGE, 120.0f);
+                                DoCast(unit, SPELL_STORM_CHARGE);
                             break;
                         }
                         case EVENT_LIGHTNING_ROD:

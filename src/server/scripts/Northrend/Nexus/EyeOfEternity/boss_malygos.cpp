@@ -445,7 +445,7 @@ public:
             }
         }
 
-        void DoAction(int32 action)
+        void DoAction(int32 const action)
         {
             switch (action)
             {
@@ -752,7 +752,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim() && _phase != PHASE_NOT_STARTED && _phase != PHASE_TWO)
                 return;
@@ -1101,7 +1101,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 /*diff*/)
+        void UpdateAI(uint32 const /*diff*/)
         {
             // When duration of opened riff visual ends, closed one should be cast
             if (!me->HasAura(SPELL_PORTAL_VISUAL_CLOSED) && !me->HasAura(SPELL_PORTAL_OPENED))
@@ -1154,7 +1154,7 @@ public:
                     me->GetMotionMaster()->MoveFollow(malygos, 0.0f, 0.0f);
         }
 
-        void UpdateAI(uint32 /*diff*/)
+        void UpdateAI(uint32 const /*diff*/)
         {
             if (!_instance)
                 return;
@@ -1248,7 +1248,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             _events.Update(diff);
 
@@ -1256,7 +1256,7 @@ public:
                 me->GetMotionMaster()->MovePoint(eventId, MeleeHoverDisksWaypoints[eventId]);
         }
 
-        void DoAction(int32 /*action*/)
+        void DoAction(int32 const /*action*/)
         {
             if (Vehicle* vehicleTemp = me->GetVehicleKit())
                 if (vehicleTemp->GetPassenger(0) && vehicleTemp->GetPassenger(0)->GetTypeId() == TYPEID_PLAYER)
@@ -1336,7 +1336,7 @@ public:
             }
         }
 
-        void DoAction(int32 action)
+        void DoAction(int32 const action)
         {
             if (action < ACTION_DELAYED_DESPAWN)
             {
@@ -1398,14 +1398,14 @@ class npc_nexus_lord : public CreatureScript
             {
             }
 
-            void DoAction(int32 /*action*/)
+            void DoAction(int32 const /*action*/)
             {
                 _events.ScheduleEvent(EVENT_NUKE_DUMMY, 1);
                 _events.ScheduleEvent(EVENT_ARCANE_SHOCK, 2*IN_MILLISECONDS);
                 _events.ScheduleEvent(EVENT_HASTE_BUFF, 12*IN_MILLISECONDS);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim())
                     return;
@@ -1487,7 +1487,7 @@ class npc_scion_of_eternity : public CreatureScript
             {
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 _events.Update(diff);
 
@@ -1542,11 +1542,11 @@ public:
             }
         }
 
-        void UpdateAI (uint32 /*diff*/)
+        void UpdateAI (uint32 const /*diff*/)
         {
         }
 
-        void DoAction(int32 /*action*/)
+        void DoAction(int32 const /*action*/)
         {
             if (Creature* malygos = me->GetMap()->GetCreature(_instance->GetData64(DATA_MALYGOS)))
             {
@@ -1600,7 +1600,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             VehicleAI::UpdateAI(diff);
             _events.Update(diff);

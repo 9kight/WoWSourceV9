@@ -422,7 +422,7 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void DoAction(int32 param) 
+        void DoAction(int32 const param) 
         {
             switch (param)
             {
@@ -901,7 +901,7 @@ public:
             }
         }
 
-        void DoAction(int32 param) 
+        void DoAction(int32 const param) 
         {
             switch (param)
             {
