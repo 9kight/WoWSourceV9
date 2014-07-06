@@ -1,207 +1,305 @@
-/*
- * Copyright (C) 2008 - 2011 TrinityCore <http://www.trinitycore.org/>
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
- 
- /* ScriptData
-SDName: instance_well_of_eternity
-SD%Complete: 0
-SDComment: Placeholder
-SDCategory: Well of Eternity
-EndScriptData */
-
+// 108469
+#include "ScriptPCH.h"
 #include "well_of_eternity.h"
 
-#define ENCOUNTERS 5
+#define MAX_ENCOUNTER 3
 
-class instance_well_of_eternity : public InstanceMapScript 
+static const DoorData doordata[] =
+{
+    {GO_INVISIBLE_FIREWALL_DOOR,    DATA_PEROTHARN, DOOR_TYPE_PASSAGE,  BOUNDARY_NONE},
+    {0,                             0,              DOOR_TYPE_ROOM,     BOUNDARY_NONE},
+};
+
+class instance_well_of_eternity : public InstanceMapScript
 {
 public:
-	instance_well_of_eternity() : InstanceMapScript("instance_well_of_eternity", 939)  
-    { }
+    instance_well_of_eternity() : InstanceMapScript("instance_well_of_eternity", 939) { }
 
-	InstanceScript* GetInstanceScript(InstanceMap* map) const
+    InstanceScript* GetInstanceScript(InstanceMap* map) const
     {
-		return new instance_well_of_eternity_InstanceMapScript(map);
-	}
+        return new instance_well_of_eternity_InstanceMapScript(map);
+    }
 
-	struct instance_well_of_eternity_InstanceMapScript: public InstanceScript
+    struct instance_well_of_eternity_InstanceMapScript : public InstanceScript
     {
-		instance_well_of_eternity_InstanceMapScript(InstanceMap* map) : InstanceScript(map) { }
-
-		uint32 uiEncounter[ENCOUNTERS];
-
-		uint64 uiLegion_demon;//
-		uint64 uiAzshara;
-		uint64 uiPerotharn;
-		uint64 uiMannoroth;
-		uint64 uiVarothen;		
-        
-		void Initialize() 
+        instance_well_of_eternity_InstanceMapScript(Map* map) : InstanceScript(map)
         {
-		    uiLegion_demon = 0;//
-			uiPerotharn = 0;
-			uiAzshara = 0;
-			uiMannoroth = 0;
-			uiVarothen = 0;
+            SetBossNumber(MAX_ENCOUNTER);
+            LoadDoorData(doordata);
 
-			for (uint8 i = 0; i < ENCOUNTERS; ++i)
-				uiEncounter[i] = NOT_STARTED;
-		}
+            uiEventNozdormu = 0;
+            uiEventDemon = 0;
+            uiEventIllidan1 = 0;
 
-		bool IsEncounterInProgress() const 
+            uiPerotharnGUID = 0;
+            uiIllidan2GUID = 0;
+            uiVarothenGUID = 0;
+            uiMannorothGUID = 0;
+
+            uiRoyalCacheGUID = 0;
+            uiMinorCacheGUID = 0;
+            uiCourtyardDoor1GUID = 0;
+            uiLargeFirewallDoorGUID = 0;
+            uiPerotharnDoors.clear();
+            uiAfterPerotharnDoors.clear();
+        }
+
+        void OnCreatureCreate(Creature* pCreature)
         {
-			for (uint8 i = 0; i < ENCOUNTERS; ++i) 
+            switch (pCreature->GetEntry())
             {
-				if (uiEncounter[i] == IN_PROGRESS)
-					return true;
-			}
-			return false;
-		}
+                case NPC_PEROTHARN:
+                    uiPerotharnGUID = pCreature->GetGUID();
+                    break;
+                case NPC_ILLIDAN_2:
+                    uiIllidan2GUID = pCreature->GetGUID();
+                    break;
+                case NPC_VAROTHEN:
+                    uiVarothenGUID = pCreature->GetGUID();
+                    break;
+                case NPC_MANNOROTH:
+                    uiMannorothGUID = pCreature->GetGUID();
+                    break;
+                default:
+                    break;
+            }
+        }
 
-		void OnCreatureCreate(Creature* pCreature) 
+        void OnGameObjectCreate(GameObject* pGo)
         {
-			switch (pCreature->GetEntry())
+            switch (pGo->GetEntry())
             {
-			   case NPC_LEGION_DEMON:
-				    uiLegion_demon = pCreature->GetGUID();
-				    break;            
-			   case BOSS_PEROTHARN:
-				    uiPerotharn = pCreature->GetGUID();
-				    break;
-			    case BOSS_AZSHARA:
-				    uiAzshara = pCreature->GetGUID();
-				    break;
-			    case BOSS_MANNOROTH:
-				    uiMannoroth = pCreature->GetGUID();
-				    break;
-			    case BOSS_VAROTHEN:
-				    uiVarothen = pCreature->GetGUID();
-				    break;					
-			}
-		}
+                case GO_ROYAL_CACHE:
+                    uiRoyalCacheGUID = pGo->GetGUID();
+                    break;
+                case GO_MINOR_CACHE:
+                    uiMinorCacheGUID = pGo->GetGUID();
+                    break;
+                case GO_INVISIBLE_FIREWALL_DOOR:
+                    AddDoor(pGo, true);
+                    break;
+                case GO_COURTYARD_DOOR_1:
+                    uiCourtyardDoor1GUID = pGo->GetGUID();
+                    if (uiEventDemon == DONE)
+                        HandleGameObject(uiCourtyardDoor1GUID, true, pGo);
+                    break;
+                case GO_LARGE_FIREWALL_DOOR:
+                    if (pGo->GetPositionX() <= 3200.0f)
+                    {
+                        uiLargeFirewallDoorGUID = pGo->GetGUID();
+                        if (uiEventDemon == DONE)
+                            HandleGameObject(uiLargeFirewallDoorGUID, true, pGo);
+                    } else
+                    {
+                        uiPerotharnDoors.push_back(pGo->GetGUID());
+                        if (GetBossState(DATA_PEROTHARN) == IN_PROGRESS)
+                            HandleGameObject(pGo->GetGUID(), false, pGo);
+                        else
+                            HandleGameObject(pGo->GetGUID(), true, pGo);
+                    }
+                    break;
+                case GO_SMALL_FIREWALL_DOOR:
+                    if (pGo->GetPositionX() <= 3340.0f)
+                    {
+                        uiPerotharnDoors.push_back(pGo->GetGUID());
+                        if (GetBossState(DATA_PEROTHARN) == IN_PROGRESS)
+                            HandleGameObject(pGo->GetGUID(), false, pGo);
+                        else
+                            HandleGameObject(pGo->GetGUID(), true, pGo);
+                    } else
+                    {
+                        uiAfterPerotharnDoors.push_back(pGo->GetGUID());
+                        if (GetBossState(DATA_PEROTHARN) == DONE)
+                            HandleGameObject(pGo->GetGUID(), true, pGo);
+                        else
+                            HandleGameObject(pGo->GetGUID(), false, pGo);
+                    }
+                    break;
+            }
+        }
 
-		uint64 getData64(uint32 identifier)
+        void SetData(uint32 type, uint32 data)
         {
-			switch (identifier)
+            switch (type)
             {
-			    case DATA_LEGION_DEMON:
-				    return uiLegion_demon;
-			    case DATA_PEROTHARN:
-				    return uiPerotharn;
-			    case DATA_AZSHARA:
-				    return uiAzshara;
-			    case DATA_MANNOROTH:
-				    return uiMannoroth;
-			    case DATA_VAROTHEN:
-				    return uiVarothen;					
-			}
-			return 0;
-		}
+                case DATA_EVENT_NOZDORMU:
+                    uiEventNozdormu = data;
+                    if (data == DONE)
+                        SaveToDB();
+                    break;
+                case DATA_EVENT_DEMON:
+                    uiEventDemon = data;
+                    if (data == DONE)
+                    {
+                        HandleGameObject(uiCourtyardDoor1GUID, true);
+                        HandleGameObject(uiLargeFirewallDoorGUID, true);
+                        SaveToDB();
+                    }
+                    break;
+                case DATA_EVENT_ILLIDAN_1:
+                    uiEventIllidan1 = data;
+                    if (data == DONE)
+                        SaveToDB();
+                    break;
+                default:
+                    break;
+            }
+        }
 
-		void SetData(uint32 type, uint32 data)
+        uint32 GetData(uint32 type) const
         {
-			switch (type)
+            switch (type)
             {
-			    case DATA_LEGION_DEMON:
-				    uiEncounter[0] = data;
-				    break;
-			    case DATA_PEROTHARN:
-				    uiEncounter[1] = data;
-				    break;
-			    case DATA_AZSHARA:
-				    uiEncounter[2] = data;
-				    break;
-			    case DATA_MANNOROTH:
-				    uiEncounter[3] = data;
-				    break;
-			    case DATA_VAROTHEN:
-				    uiEncounter[4] = data;
-				    break;					
-			}
+                case DATA_EVENT_NOZDORMU:
+                    return uiEventNozdormu;
+                case DATA_EVENT_DEMON:
+                    return uiEventDemon;
+                case DATA_EVENT_ILLIDAN_1:
+                    return uiEventIllidan1;
+                default:
+                    return 0;
+            }
+            return 0;
+        }
 
-			if (data == DONE)
-				SaveToDB();
-		}
-
-		uint32 GetData(uint32 type) const
+        uint64 GetData64(uint32 type) const
         {
-			switch (type)
-            {               
-			   case DATA_LEGION_DEMON_EVENT:
-				    return uiEncounter[0];
-			   case DATA_PEROTHARN_EVENT:
-				    return uiEncounter[1];
-			   case DATA_AZSHARA_EVENT:
-				    return uiEncounter[2];
-			   case DATA_MANNOROTH_EVENT:
-				    return uiEncounter[3];
-			    case DATA_VAROTHEN_EVENT:
-				    return uiEncounter[4];					
-			}
-			return 0;
-		}
-
-		std::string GetSaveData() 
-        {
-			OUT_SAVE_INST_DATA;
-
-			std::string str_data;
-			std::ostringstream saveStream;
-			saveStream << "H T" << uiEncounter[0] << " " << uiEncounter[1] << " " << uiEncounter[2] << " " << uiEncounter[3] << " " << uiEncounter[4];
-			str_data = saveStream.str();
-
-			OUT_SAVE_INST_DATA_COMPLETE;
-			return str_data;
-		}
-
-		void Load(const char* in) 
-        {
-			if (!in) 
+            switch (type)
             {
-				OUT_LOAD_INST_DATA_FAIL;
-				return;
-			}
+                case DATA_PEROTHARN:
+                    return uiPerotharnGUID;
+                case DATA_ROYAL_CACHE:
+                    return uiRoyalCacheGUID;
+                case DATA_MINOR_CACHE:
+                    return uiMinorCacheGUID;
+                case DATA_EVENT_ILLIDAN_2:
+                    return uiIllidan2GUID;
+                case DATA_VAROTHEN:
+                    return uiVarothenGUID;
+                case DATA_MANNOROTH:
+                    return uiMannorothGUID;
+                default:
+                    return 0;
+            }
 
-			OUT_LOAD_INST_DATA(in);
+            return 0;
+        }
 
-			char dataHead1, dataHead2;
-			uint16 data0, data1, data2, data3, data4;
+        bool SetBossState(uint32 type, EncounterState state)
+        {
+            if (!InstanceScript::SetBossState(type, state))
+                return false;
 
-			std::istringstream loadStream(in);
-			loadStream >> dataHead1 >> dataHead2 >> data0 >> data1 >> data2 >> data3 >> data4;
-
-			if (dataHead1 == 'H' && dataHead2 == 'T') 
+            if (type == DATA_PEROTHARN)
             {
-				uiEncounter[0] = data0;
-				uiEncounter[1] = data1;
-				uiEncounter[2] = data2;
-				uiEncounter[3] = data3;
-				uiEncounter[4] = data4;			
+                if (state == IN_PROGRESS)
+                {
+                    if (!uiPerotharnDoors.empty())
+                    for (std::vector<uint64>::const_iterator itr = uiPerotharnDoors.begin(); itr != uiPerotharnDoors.end(); ++itr)
+                        HandleGameObject((*itr), false);
+                } else
+                {
+                    if (!uiPerotharnDoors.empty())
+                    for (std::vector<uint64>::const_iterator itr = uiPerotharnDoors.begin(); itr != uiPerotharnDoors.end(); ++itr)
+                        HandleGameObject((*itr), true);
+                }
+                if (state == DONE)
+                {
+                    if (!uiAfterPerotharnDoors.empty())
+                    for (std::vector<uint64>::const_iterator itr = uiAfterPerotharnDoors.begin(); itr != uiAfterPerotharnDoors.end(); ++itr)
+                        HandleGameObject((*itr), true);
+                } else
+                {
+                    if (!uiAfterPerotharnDoors.empty())
+                    for (std::vector<uint64>::const_iterator itr = uiAfterPerotharnDoors.begin(); itr != uiAfterPerotharnDoors.end(); ++itr)
+                        HandleGameObject((*itr), false);
+                }
+            }
 
-				for (uint8 i = 0; i < ENCOUNTERS; ++i)
-					if (uiEncounter[i] == IN_PROGRESS)
-						uiEncounter[i] = NOT_STARTED;
-			} else
-				OUT_LOAD_INST_DATA_FAIL;
+            return true;
+        }
 
-			OUT_LOAD_INST_DATA_COMPLETE;
-		}
-	};
+        std::string GetSaveData()
+        {
+            OUT_SAVE_INST_DATA;
+
+            std::string str_data;
+
+            std::ostringstream saveStream;
+            saveStream << "W o E " << GetBossSaveData()
+                << uiEventNozdormu << " " << uiEventDemon << " " << uiEventIllidan1 << " ";
+
+            str_data = saveStream.str();
+
+            OUT_SAVE_INST_DATA_COMPLETE;
+            return str_data;
+        }
+
+        void Load(const char* in)
+        {
+            if (!in)
+            {
+                OUT_LOAD_INST_DATA_FAIL;
+                return;
+            }
+
+            OUT_LOAD_INST_DATA(in);
+
+            char dataHead1, dataHead2, dataHead3;
+
+            std::istringstream loadStream(in);
+            loadStream >> dataHead1 >> dataHead2 >> dataHead3;
+
+            if (dataHead1 == 'W' && dataHead2 == 'o' && dataHead3 == 'E')
+            {
+                for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                {
+                    uint32 tmpState;
+                    loadStream >> tmpState;
+                    if (tmpState == IN_PROGRESS || tmpState > SPECIAL)
+                        tmpState = NOT_STARTED;
+                    SetBossState(i, EncounterState(tmpState));
+                }
+
+                uint32 tmpEvent1;
+                loadStream >> tmpEvent1;
+                uiEventNozdormu = ((tmpEvent1 != DONE) ? NOT_STARTED : DONE);
+
+                uint32 tmpEvent2;
+                loadStream >> tmpEvent2;
+                uiEventDemon = ((tmpEvent2 != DONE) ? NOT_STARTED : DONE);
+
+                uint32 tmpEvent3;
+                loadStream >> tmpEvent3;
+                uiEventIllidan1 = ((tmpEvent3 != DONE) ? NOT_STARTED : DONE);
+
+
+            } else OUT_LOAD_INST_DATA_FAIL;
+
+            OUT_LOAD_INST_DATA_COMPLETE;
+        }
+
+    private:
+        uint32 uiEventNozdormu;
+        uint32 uiEventDemon;
+        uint32 uiEventIllidan1;
+
+        uint64 uiPerotharnGUID;
+        uint64 uiIllidan2GUID;
+        uint64 uiVarothenGUID;
+        uint64 uiMannorothGUID;
+
+        uint64 uiRoyalCacheGUID;
+        uint64 uiMinorCacheGUID;
+        uint64 uiCourtyardDoor1GUID;
+        uint64 uiLargeFirewallDoorGUID;
+        std::vector<uint64> uiAfterPerotharnDoors;
+        std::vector<uint64> uiPerotharnDoors;
+
+    };
 };
 
 void AddSC_instance_well_of_eternity()
 {
-	new instance_well_of_eternity();	
+    new instance_well_of_eternity();
 }
