@@ -292,6 +292,8 @@ Unit::Unit(bool isWorldObject): WorldObject(isWorldObject)
     lastSpell = NULL;
 
     _procTargetGuid = 0;
+
+    _mount = NULL;
 }
 
 ////////////////////////////////////////////////////////////
@@ -12626,8 +12628,8 @@ void Unit::Dismount()
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT);
 
-    if (Player* thisPlayer = ToPlayer())
-        thisPlayer->SendMovementSetCollisionHeight(thisPlayer->GetCollisionHeight(false));
+    //if (Player* thisPlayer = ToPlayer())
+    //    thisPlayer->SendMovementSetCollisionHeight(thisPlayer->GetCollisionHeight(false));
 
     WorldPacket data(SMSG_DISMOUNT, 8);
     data.appendPackGUID(GetGUID());
@@ -12647,9 +12649,7 @@ void Unit::Dismount()
 
     RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_NOT_MOUNTED);
 
-    // only resummon old pet if the player is already added to a map
-    // this prevents adding a pet to a not created map which would otherwise cause a crash
-    // (it could probably happen when logging in after a previous crash)
+    // enable pet
     if (Player* player = ToPlayer())
     {
         if (Pet* pPet = player->GetPet())
@@ -12658,66 +12658,176 @@ void Unit::Dismount()
                 pPet->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
         }
         else
+        {
             player->ResummonPetTemporaryUnSummonedIfAny();
+        }
     }
+    RemoveAurasByType(SPELL_AURA_MOUNTED);
 }
 
-MountCapabilityEntry const* Unit::GetMountCapability(uint32 mountType) const
+void Unit::SendMountResult(MountResult error)
 {
-    if (!mountType)
-        return NULL;
+    ASSERT(uint32(error) < 0xB);
+    ASSERT(ToPlayer());
 
-    MountTypeEntry const* mountTypeEntry = sMountTypeStore.LookupEntry(mountType);
-    if (!mountTypeEntry)
-        return NULL;
+    WorldPacket data(SMSG_MOUNTRESULT, 4);
+    data << uint32(error);
+    ToPlayer()->SendDirectMessage(&data);
+}
 
-    uint32 zoneId, areaId;
-    GetZoneAndAreaId(zoneId, areaId);
-    uint32 ridingSkill = 5000;
-    if (GetTypeId() == TYPEID_PLAYER)
-        ridingSkill = ToPlayer()->GetSkillValue(SKILL_RIDING);
+void Unit::UpdateMount()
+{
+    MountCapabilityEntry const* newMount = NULL;
+    AuraEffect* effect = NULL;
 
-    for (uint32 i = MAX_MOUNT_CAPABILITIES; i > 0; --i)
+    // First get the mount type
+    MountTypeEntry const* mountType = NULL;
     {
-        MountCapabilityEntry const* mountCapability = sMountCapabilityStore.LookupEntry(mountTypeEntry->MountCapability[i - 1]);
-        if (!mountCapability)
-            continue;
-
-        if (ridingSkill < mountCapability->RequiredRidingSkill)
-            continue;
-
-        if (HasExtraUnitMovementFlag(MOVEMENTFLAG2_FULL_SPEED_PITCHING))
+        AuraEffectList const& auras = GetAuraEffectsByType(SPELL_AURA_MOUNTED);
+        for (AuraEffectList::const_reverse_iterator itr = auras.rbegin(); itr != auras.rend(); ++itr)
         {
-            if (!(mountCapability->Flags & MOUNT_FLAG_CAN_PITCH))
-                continue;
+            AuraEffect* aura = *itr;
+            aura->GetMiscValueB();
+            mountType = sMountTypeStore.LookupEntry(uint32(aura->GetMiscValueB()));
+            if (mountType)
+            {
+                effect = aura;
+                break;
+            }
         }
-        else if (HasUnitMovementFlag(MOVEMENTFLAG_SWIMMING))
-        {
-            if (!(mountCapability->Flags & MOUNT_FLAG_CAN_SWIM))
-                continue;
-        }
-        else if (!(mountCapability->Flags & 0x1))   // unknown flags, checked in 4.2.2 14545 client
-        {
-            if (!(mountCapability->Flags & 0x2))
-                continue;
-        }
-
-        if (mountCapability->RequiredMap != -1 && int32(GetMapId()) != mountCapability->RequiredMap)
-            continue;
-
-        if (mountCapability->RequiredArea && (mountCapability->RequiredArea != zoneId && mountCapability->RequiredArea != areaId))
-            continue;
-
-        if (mountCapability->RequiredAura && !HasAura(mountCapability->RequiredAura))
-            continue;
-
-        if (mountCapability->RequiredSpell && (GetTypeId() != TYPEID_PLAYER || !ToPlayer()->HasSpell(mountCapability->RequiredSpell)))
-            continue;
-
-        return mountCapability;
     }
 
-    return NULL;
+    if (mountType)
+    {
+        uint32 zoneId, topZoneId, areaId;
+        GetZoneAndAreaId(zoneId, areaId);
+        topZoneId = zoneId;
+        while (true)
+        {
+            AreaTableEntry const* zone = GetAreaEntryByAreaID(topZoneId);
+            if (!zone)
+                break;
+            if (zone->zone == 0)
+                break;
+            topZoneId = zone->zone;
+        }
+
+        uint32 ridingSkill = 5000;
+        if (GetTypeId() == TYPEID_PLAYER)
+            ridingSkill = ToPlayer()->GetSkillValue(SKILL_RIDING);
+
+        // Find the currently allowed mount flags
+        uint32 currentMountFlags;
+        {
+            AuraEffectList const& auras = GetAuraEffectsByType(SPELL_AURA_MOD_FLYING_RESTRICTIONS);
+            if (!auras.empty())
+            {
+                currentMountFlags = 0;
+                for (AuraEffectList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+                    currentMountFlags |= (*itr)->GetMiscValue();
+            }
+            else
+            {
+                AreaTableEntry const* entry;
+                entry = GetAreaEntryByAreaID(areaId);
+                if (!entry)
+                    entry = GetAreaEntryByAreaID(zoneId);
+
+                if (entry)
+                    currentMountFlags = entry->mountFlags;
+            }
+        }
+
+        // Find the fitting mount
+        for (uint32 i = MAX_MOUNT_CAPABILITIES-1; i < MAX_MOUNT_CAPABILITIES; --i)
+        {
+            uint32 id = mountType->MountCapability[i];
+            if (!id)
+                continue;
+
+            MountCapabilityEntry const* mountCapability = sMountCapabilityStore.LookupEntry(id);
+            if (!mountCapability)
+                continue;
+
+            if (ridingSkill < mountCapability->RequiredRidingSkill)
+                continue;
+
+            // Flags required to use this mount
+            uint32 reqFlags = mountCapability->Flags;
+
+            if (reqFlags&1 && !(currentMountFlags&1))
+                continue;
+
+            if (reqFlags&2 && !(currentMountFlags&2))
+                continue;
+
+            if (reqFlags&4 && !(currentMountFlags&4))
+                continue;
+
+            if (reqFlags&8 && !(currentMountFlags&8))
+                continue;
+
+            //if (m_movementInfo.HavePitch)  to do
+            //{
+            //    if (!(reqFlags & MOUNT_FLAG_CAN_PITCH))
+            //        continue;
+            //}
+
+            if (HasUnitMovementFlag(MOVEMENTFLAG_SWIMMING))
+            {
+                if (!(reqFlags & MOUNT_FLAG_CAN_SWIM))
+                    continue;
+            }
+
+            if (mountCapability->RequiredMap != -1 && GetMapId() != uint32(mountCapability->RequiredMap))
+                continue;
+
+            if (mountCapability->RequiredArea && (mountCapability->RequiredArea != zoneId && mountCapability->RequiredArea != topZoneId && mountCapability->RequiredArea != areaId))
+                continue;
+
+            if (mountCapability->RequiredAura && !HasAura(mountCapability->RequiredAura))
+                continue;
+
+            if (mountCapability->RequiredSpell && (GetTypeId() != TYPEID_PLAYER || !ToPlayer()->HasSpell(mountCapability->RequiredSpell)))
+                continue;
+
+            newMount = mountCapability;
+            break;
+        }
+    }
+
+    if (_mount != newMount)
+    {
+        uint32 oldSpell = _mount ? _mount->SpeedModSpell : 0;
+        bool oldFlyer = _mount ? (_mount->Flags & 2) : false;
+        uint32 newSpell = newMount ? newMount->SpeedModSpell : 0;
+        bool newFlyer = newMount ? (newMount->Flags & 2) : false;
+
+        // This is required for displaying speeds on aura
+        if (effect)
+            effect->SetAmount(newMount ? newMount->Id : 0);
+
+        if (oldSpell != newSpell)
+        {
+            if (oldSpell)
+                RemoveAurasDueToSpell(oldSpell);
+
+            if (newSpell)
+                CastSpell(this, newSpell, true, NULL, effect);
+        }
+
+        if (oldFlyer != newFlyer)
+            SetCanFly(newFlyer);
+
+        Player* player = ToPlayer();
+        if (!player)
+            player = m_movedPlayer;
+
+        if (player)
+            player->SendMovementCanFlyChange();
+
+        _mount = newMount;
+    }
 }
 
 void Unit::SetInCombatWith(Unit* enemy)
@@ -16943,10 +17053,7 @@ bool Unit::SetCharmedBy(Unit* charmer, CharmType type, AuraApplication const* au
 
     // dismount players when charmed
     if (GetTypeId() == TYPEID_PLAYER)
-        RemoveAurasByType(SPELL_AURA_MOUNTED);
-
-    if (charmer->GetTypeId() == TYPEID_PLAYER)
-        charmer->RemoveAurasByType(SPELL_AURA_MOUNTED);
+        Dismount();
 
     ASSERT(type != CHARM_TYPE_POSSESS || charmer->GetTypeId() == TYPEID_PLAYER);
     ASSERT((type == CHARM_TYPE_VEHICLE) == (IsVehicle() && GetTypeId() != TYPEID_PLAYER));

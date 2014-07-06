@@ -4157,6 +4157,8 @@ void Player::learnSpell(uint32 spell_id, bool dependent)
                 learnSpell(itr2->second, false);
         }
     }
+    // Many mounts depend on learned spells, update right now
+    UpdateMount();
 }
 
 void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
@@ -23353,26 +23355,26 @@ void Player::SendInitialPacketsAfterAddToMap()
             auraList.front()->HandleEffect(this, AURA_EFFECT_HANDLE_SEND_FOR_CLIENT, true);
     }
 
-    if (HasAuraType(SPELL_AURA_MOUNTED))
-    {
-        Unit::AuraEffectList const& auraList = GetAuraEffectsByType(SPELL_AURA_MOUNTED);
-        if (!auraList.empty())
-        {
-            AuraEffect *mountEffect = auraList.front();
-            if (MountCapabilityEntry const* mountCapability = mountEffect->GetBase()->GetUnitOwner()->GetMountCapability(uint32(mountEffect->GetMiscValueB())))
-            {
-                if (mountCapability->Id != mountEffect->GetAmount())
-                {
-                    Unit *target = mountEffect->GetBase()->GetApplicationOfTarget(GetGUID())->GetTarget();
-                    if (MountCapabilityEntry const* oldMountCapability = sMountCapabilityStore.LookupEntry(mountEffect->GetAmount()))
-                        RemoveAurasDueToSpell(oldMountCapability->SpeedModSpell, target->GetGUID());
+    //if (HasAuraType(SPELL_AURA_MOUNTED))
+    //{
+    //    Unit::AuraEffectList const& auraList = GetAuraEffectsByType(SPELL_AURA_MOUNTED);
+    //    if (!auraList.empty())
+    //    {
+    //        AuraEffect *mountEffect = auraList.front();
+    //        if (MountCapabilityEntry const* mountCapability = mountEffect->GetBase()->GetUnitOwner()->GetMountCapability(uint32(mountEffect->GetMiscValueB())))
+    //        {
+    //            if (mountCapability->Id != mountEffect->GetAmount())
+    //            {
+    //                Unit *target = mountEffect->GetBase()->GetApplicationOfTarget(GetGUID())->GetTarget();
+    //                if (MountCapabilityEntry const* oldMountCapability = sMountCapabilityStore.LookupEntry(mountEffect->GetAmount()))
+    //                    RemoveAurasDueToSpell(oldMountCapability->SpeedModSpell, target->GetGUID());
 
-                    CastSpell(target, mountCapability->SpeedModSpell, true);
-                    mountEffect->SetAmount(mountCapability->Id);
-                }
-            }
-        }
-    }
+    //                CastSpell(target, mountCapability->SpeedModSpell, true);
+    //                mountEffect->SetAmount(mountCapability->Id);
+    //            }
+    //        }
+    //    }
+    //}
 
     if (HasAuraType(SPELL_AURA_MOD_STUN))
         SetRooted(true);
@@ -24419,6 +24421,8 @@ void Player::UpdateZoneDependentAuras(uint32 newZone)
 
 void Player::UpdateAreaDependentAuras(uint32 newArea)
 {
+    UpdateMount();
+
     // remove auras from spells with area limitations
     for (AuraMap::iterator iter = m_ownedAuras.begin(); iter != m_ownedAuras.end();)
     {

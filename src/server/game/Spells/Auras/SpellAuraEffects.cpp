@@ -558,13 +558,6 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
         case SPELL_AURA_MANA_SHIELD:
             m_canBeRecalculated = false;
             break;
-        case SPELL_AURA_MOUNTED:
-            if (MountCapabilityEntry const* mountCapability = GetBase()->GetUnitOwner()->GetMountCapability(uint32(GetMiscValueB())))
-            {
-                amount = mountCapability->Id;
-                m_canBeRecalculated = false;
-            }
-            break;
         case SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE:
         {
             if (caster)
@@ -2209,7 +2202,7 @@ void AuraEffect::HandleAuraTransform(AuraApplication const* aurApp, uint8 mode, 
                 target->ToPlayer()->setRegenTimerCount(1*IN_MILLISECONDS);
         }
         //dismount polymorphed target (after patch 2.4.2)
-        if (target->IsMounted() && !GetSpellInfo()->IsPositive())
+        if (target->IsMounted())
             target->RemoveAurasByType(SPELL_AURA_MOUNTED);
     }
     else
@@ -2729,27 +2722,33 @@ void AuraEffect::HandleAuraMounted(AuraApplication const* aurApp, uint8 mode, bo
                     displayId = 0;
         }
 
-        if (target->ToPlayer())
-            target->ToPlayer()->UnsummonPetTemporaryIfAny();
-        target->Mount(displayId, vehicleId, creatureEntry);
-
-        // cast speed aura
-        if (MountCapabilityEntry const* mountCapability = sMountCapabilityStore.LookupEntry(GetAmount()))
-            target->CastSpell(target, mountCapability->SpeedModSpell, true);
+        target->Mount(displayId, vehicleId, GetMiscValue());
     }
     else
     {
+        if (GetBase()->GetId() == 87840)
+            target->DeMorph();
+
         target->Dismount();
         //some mounts like Headless Horseman's Mount or broom stick are skill based spell
         // need to remove ALL arura related to mounts, this will stop client crash with broom stick
         // and never endless flying after using Headless Horseman's Mount
         if (mode & AURA_EFFECT_HANDLE_REAL)
-        {
             target->RemoveAurasByType(SPELL_AURA_MOUNTED);
+    }
+    target->UpdateSpeed(MOVE_RUN, true);
+    target->UpdateMount();
 
-            // remove speed aura
-            if (MountCapabilityEntry const* mountCapability = sMountCapabilityStore.LookupEntry(GetAmount()))
-                target->RemoveAurasDueToSpell(mountCapability->SpeedModSpell, target->GetGUID());
+    if (apply && target->GetTypeId() == TYPEID_PLAYER)
+    {
+        // disable pet
+        Player* player = target->ToPlayer();
+        Pet* pet = player->GetPet();
+        if (pet)
+        {
+            if (player->CanFly())
+                player->UnsummonPetTemporaryIfAny();
+            else pet->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
         }
     }
 }

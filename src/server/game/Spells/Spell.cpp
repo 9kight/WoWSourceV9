@@ -5265,12 +5265,33 @@ SpellCastResult Spell::CheckCast(bool strict)
     }
 
 
-    // Check vehicle flags
-    if (!(_triggeredCastFlags & TRIGGERED_IGNORE_CASTER_MOUNTED_OR_ON_VEHICLE))
+    Vehicle* vehicle = m_caster->GetVehicle();
+    if (vehicle && !(_triggeredCastFlags & TRIGGERED_IGNORE_CASTER_MOUNTED_OR_ON_VEHICLE))
     {
-        SpellCastResult vehicleCheck = m_spellInfo->CheckVehicle(m_caster);
-        if (vehicleCheck != SPELL_CAST_OK)
-            return vehicleCheck;
+        uint16 checkMask = 0;
+        for (uint8 effIndex = EFFECT_0; effIndex < MAX_SPELL_EFFECTS; ++effIndex)
+        {
+            SpellEffectInfo const* effInfo = &m_spellInfo->Effects[effIndex];
+            if (effInfo->ApplyAuraName == SPELL_AURA_MOD_SHAPESHIFT)
+            {
+                SpellShapeshiftFormEntry const* shapeShiftEntry = sSpellShapeshiftFormStore.LookupEntry(effInfo->MiscValue);
+                if (shapeShiftEntry && (shapeShiftEntry->flags1 & 1) == 0)  // unk flag
+                    checkMask |= VEHICLE_SEAT_FLAG_UNCONTROLLED;
+                break;
+            }
+        }
+
+        if (m_spellInfo->HasAura(SPELL_AURA_MOUNTED))
+            checkMask |= VEHICLE_SEAT_FLAG_CAN_CAST_MOUNT_SPELL;
+
+        if (!checkMask)
+            checkMask = VEHICLE_SEAT_FLAG_CAN_ATTACK;
+
+        // All creatures should be able to cast as passengers freely, restriction and attribute are only for players
+        VehicleSeatEntry const* vehicleSeat = vehicle->GetSeatForPassenger(m_caster);
+        if (!(m_spellInfo->AttributesEx6 & SPELL_ATTR6_CASTABLE_WHILE_ON_VEHICLE) && !(m_spellInfo->Attributes & SPELL_ATTR0_CASTABLE_WHILE_MOUNTED)
+            && (vehicleSeat->m_flags & checkMask) != checkMask && m_caster->GetTypeId() == TYPEID_PLAYER)
+            return SPELL_FAILED_DONT_REPORT;
     }
 
     // check spell cast conditions from database
@@ -5956,11 +5977,59 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
             case SPELL_AURA_MOUNTED:
             {
-                bool allowInWaterMount = false;
+                MountCapabilityEntry const* capability = NULL;
 
-                if (MountCapabilityEntry const* mountCapability = sMountCapabilityStore.LookupEntry(m_spellInfo->Effects[i].MiscValueB))
-                    if (mountCapability->Flags & MOUNT_FLAG_CAN_SWIM)
-                        allowInWaterMount = true;
+                if (MountTypeEntry const* type = sMountTypeStore.LookupEntry(uint32(m_spellInfo->Effects[i].MiscValueB)))
+                {
+                    uint32 ridingSkill = 5000;
+                    if (m_caster->ToPlayer())
+                        ridingSkill = m_caster->ToPlayer()->GetSkillValue(SKILL_RIDING);
+
+                    uint32 zoneId, topZoneId, areaId;
+                    m_caster->GetZoneAndAreaId(zoneId, areaId);
+                    topZoneId = zoneId;
+                    while (true)
+                    {
+                        AreaTableEntry const* zone = GetAreaEntryByAreaID(topZoneId);
+                        if (!zone)
+                            break;
+                        if (zone->zone == 0)
+                            break;
+                        topZoneId = zone->zone;
+                    }
+                    
+                    for (uint32 i = MAX_MOUNT_CAPABILITIES-1; i < MAX_MOUNT_CAPABILITIES; --i)
+                    {
+                        uint32 id = type->MountCapability[i];
+                        if (!id)
+                            continue;
+
+                        MountCapabilityEntry const* temp = sMountCapabilityStore.LookupEntry(id);
+                        if (!temp)
+                            continue;
+
+                        if (ridingSkill < temp->RequiredRidingSkill)
+                            continue;
+
+                        if (temp->RequiredMap != -1 && m_caster->GetMapId() != uint32(temp->RequiredMap))
+                            continue;
+
+                        if (temp->RequiredArea && (temp->RequiredArea != zoneId && temp->RequiredArea != topZoneId && temp->RequiredArea != areaId))
+                            continue;
+
+                        if (temp->RequiredAura && !m_caster->HasAura(temp->RequiredAura))
+                            continue;
+
+                        if (temp->RequiredSpell && !m_caster->HasSpell(temp->RequiredSpell))
+                            continue;
+
+                        capability = temp;
+                        break;
+                    }
+                }
+
+                if (m_caster->IsInWater() && !(capability && capability->Flags & MOUNT_FLAG_CAN_SWIM))
+                    return SPELL_FAILED_ONLY_ABOVEWATER;
 
                 // Ignore map check if spell have AreaId. AreaId already checked and this prevent special mount spells
                 bool allowMount = !m_caster->GetMap()->IsDungeon() || m_caster->GetMap()->IsBattlegroundOrArena();
@@ -5972,6 +6041,10 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                 if (m_caster->IsInDisallowedMountForm())
                     return SPELL_FAILED_NOT_SHAPESHIFT;
+
+                // hex & mount
+                if (m_caster->HasAura(51514))
+                    return SPELL_FAILED_CONFUSED;
 
                 break;
             }
