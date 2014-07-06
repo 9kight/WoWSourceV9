@@ -427,9 +427,12 @@ void AddSC_boss_archbishop_benedictus();
 void AddSC_trash_mobs_hot();
 
         
-void AddSC_instance_well_of_eternity();           //WellOfEternity
-void AddSC_well_of_eternity(); 
+void AddSC_instance_well_of_eternity();         //Well Of Eternity
+void AddSC_well_of_eternity();	
+void AddSC_boss_queen_azshara();
+void AddSC_boss_mannoroth();
 void AddSC_boss_perotharn();
+void AddSC_well_of_eternity_teleport();	
 
 void AddSC_instance_dragon_soul();   // Dragon Soul
 void AddSC_dragon_soul_teleport_and_transport();
@@ -1214,9 +1217,12 @@ void AddKalimdorScripts()
     AddSC_boss_archbishop_benedictus();
     AddSC_trash_mobs_hot();
     
-    AddSC_instance_well_of_eternity();         //WellOfEternity
+    AddSC_instance_well_of_eternity();         //Well Of Eternity
     AddSC_well_of_eternity();	
-    AddSC_boss_perotharn();	
+    AddSC_boss_queen_azshara();
+    AddSC_boss_mannoroth();
+    AddSC_boss_perotharn();
+    AddSC_well_of_eternity_teleport();	
 	
     AddSC_instance_dragon_soul();   // Dragon Soul
     AddSC_dragon_soul_teleport_and_transport();
