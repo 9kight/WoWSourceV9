@@ -1245,7 +1245,90 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
 {
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
+        
+ 		if (!m_spellAura || !unitTarget)
+        return;
 		
+		 switch (m_spellInfo->SpellFamilyName)
+    {
+    case SPELLFAMILY_ROGUE:
+        if (m_spellInfo->SpellFamilyFlags[0] == 0x8)    //Gouge
+            m_caster->CastSpell(unitTarget, 1776, true);
+        return;
+
+    case SPELLFAMILY_PRIEST:
+    {
+                               if (m_spellInfo->Id == 588) // Inner Fire.
+                               {
+                                   int32 amount = 0;
+                                   if (m_caster->HasAura(14747)) // Inner Sanctum.
+                                   {
+                                       amount = 2;
+                                       m_caster->CastCustomSpell(m_caster, 91724, &amount, NULL, NULL, true); // Spell Warding.
+                                   }
+                                   if (m_caster->HasAura(14770)) // Inner Sanctum.
+                                   {
+                                       amount = 4;
+                                       m_caster->CastCustomSpell(m_caster, 91724, &amount, NULL, NULL, true); // Spell Warding.
+                                   }
+                                   if (m_caster->HasAura(14771)) // Inner Sanctum.
+                                   {
+                                       amount = 6;
+                                       m_caster->CastCustomSpell(m_caster, 91724, &amount, NULL, NULL, true); // Spell Warding.
+                                   }
+                               }
+                               if (m_spellInfo->Id == 14751) // Chakra.
+                               {
+                                   if (m_caster->HasAura(81208)) // Chakra: Serenity.
+                                       m_caster->RemoveAura(81208);
+                                   if (m_caster->HasAura(81206)) // Chakra: Sanctuary.
+                                       m_caster->RemoveAura(81206);
+                                   if (m_caster->HasAura(81209)) // Chakra: Chastise.
+                                       m_caster->RemoveAura(81209);
+                               }
+                               if (m_spellInfo->Id == 41635) // Prayer of Mending.
+                               {
+                                   if (m_caster->HasAura(14751)) // Chakra.
+                                       m_caster->CastSpell(m_caster, 81206, true); // Chakra: Sanctuary   
+                               }
+                               if (m_caster->HasAura(81208)) // Chakra: Serenity.
+                               {
+                                   if (unitTarget->HasAura(139)) // Renew.
+                                       unitTarget->GetAura(139)->RefreshDuration();
+                                   if (m_spellInfo->Id == 2050) // Heal.
+                                       unitTarget->GetAura(139)->RefreshDuration();
+                                   if (m_spellInfo->Id == 2060) // Greater Heal.
+                                       unitTarget->GetAura(139)->RefreshDuration();
+                                   if (m_spellInfo->Id == 2061) // Flash Heal.
+                                       unitTarget->GetAura(139)->RefreshDuration();
+                                   if (m_spellInfo->Id == 32546) // Binding Heal.
+                                       unitTarget->GetAura(139)->RefreshDuration();
+                               }
+    }
+        break;
+
+    case SPELLFAMILY_SHAMAN:
+    {
+        if (m_spellInfo->Id == 79206)  // Spiritwalker's Grace
+        {
+            if (m_caster->HasAura(105876)) // Item - Shaman T13 Restoration 4P Bonus (Spiritwalker's Grace).
+                m_caster->CastSpell(m_caster, 105877, true); // Timewalker.
+        }
+    }
+        break;
+		
+		    case SPELLFAMILY_WARRIOR:
+    {
+        if (m_spellInfo->Id == 871)  // Shield Wall
+        {
+            if (m_caster->HasAura(105911)) // Item - Warrior T13 Protection 4P Bonus (Shield Wall)
+                m_caster->CastSpell(m_caster, 105914, true); // Shield Fortress
+        }
+    }
+        break;
+	}	
+		
+       
     switch (m_spellInfo->SpellFamilyName)
 
     {
