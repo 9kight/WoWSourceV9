@@ -74,12 +74,17 @@ class end_time_teleport : public GameObjectScript
                         if (instance->GetData(DATA_SYLVANA) != IN_PROGRESS && instance->GetData(DATA_TYRANDE) != IN_PROGRESS)
                         {
                             if (instance->GetData(DATA_SYLVANA) == DONE)
-                                result1 = 3;
+                                result2 = 3;
 
                             if (instance->GetData(DATA_TYRANDE) == DONE)
-                                result1 = 4;
-                        }
+                                result2 = 4;
+								
+						    if (instance->GetData(DATA_SYLVANA) == DONE)
+                                result3 = 5;
 
+                            if (instance->GetData(DATA_TYRANDE) == DONE)
+                                result3 = 6;
+                        }
                         switch (result2)
                         {
                             case 3:
@@ -104,7 +109,7 @@ class end_time_teleport : public GameObjectScript
                                 if (instance->GetData(DATA_SYLVANA) != IN_PROGRESS)
                                 {
                                     instance->SetData(DATA_TYRANDE, IN_PROGRESS);
-                                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Test 1", GOSSIP_SENDER_MAIN, TYRANDE_TELEPORT);
+                                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Bronze Dragonshrine", GOSSIP_SENDER_MAIN, MUROZOND_TELEPORT);
                                 }
                                 break; 
                         
@@ -112,7 +117,7 @@ class end_time_teleport : public GameObjectScript
                                 if (instance->GetData(DATA_TYRANDE) != IN_PROGRESS)
                                 {
                                     instance->SetData(DATA_SYLVANA, IN_PROGRESS);
-                                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Test 2", GOSSIP_SENDER_MAIN, SYLVANAS_TELEPORT);
+                                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Emerald Dragonshrine", GOSSIP_SENDER_MAIN, TYRANDE_TELEPORT);
                                 }
                                 break;   
                         }
