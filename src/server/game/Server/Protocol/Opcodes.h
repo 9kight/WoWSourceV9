@@ -153,7 +153,7 @@ enum Opcodes
     CMSG_CHAR_DELETE                                  = 0x6425,
     CMSG_CHAR_ENUM                                    = 0x0502,
     CMSG_CHAR_FACTION_CHANGE                          = 0x2735,
-    CMSG_COMPLETED_ARTIFACTS                          = 0x0000,
+    CMSG_COMPLETED_ARTIFACTS                          = 0x00A13,
     CMSG_CHAR_RACE_CHANGE                             = 0x0D24,
     CMSG_CHAR_RENAME                                  = 0x2327,
     CMSG_CHAT_FILTERED                                = 0x0946,
