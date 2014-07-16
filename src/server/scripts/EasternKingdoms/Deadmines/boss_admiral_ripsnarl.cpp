@@ -1,3 +1,9 @@
+/*
+*
+* Copyright (C) 2012-2014 Cerber Project <https://bitbucket.org/mojitoice/>
+*
+*/
+
 #include "ScriptPCH.h"
 #include "deadmines.h"
 
@@ -7,23 +13,20 @@ enum eSpells
     SPELL_GO_FOR_THE_THROAT_H       = 91863,
     SPELL_SWIPE                     = 88839,
     SPELL_SWIPE_H                   = 91859,
-    SPELL_THIRST_FOR_BLOOD          = 88736, // 88737 (N), 91862 (H)
-    // The Fog spells (95503)
-
-    //Extra spells
+    SPELL_THIRST_FOR_BLOOD          = 88736,
     SPELL_STEAM_AURA                = 95503,
     SPELL_FOG_AURA                  = 89247,
-
     SPELL_BUNNY_AURA                = 88755,
     SPELL_FOG                       = 88768,
-
     SPELL_SUMMON_VAPOR              = 88831,
-
-    // Vapor spells
+    SPELL_CONDENSE                  = 92016,
+    SPELL_CONDENSE_2                = 92020,
+    SPELL_CONDENSE_3                = 92029,
     SPELL_CONDENSATION              = 92013,
-    SPELL_COALESCE                  = 92042, // heroic??
-    SPELL_SWIRLING_VAPOR            = 92007, // heroic??
-    SPELL_CONDENSING_VAPOR          = 92008, // heroic??
+    SPELL_FREEZING_VAPOR            = 92011,
+    SPELL_COALESCE                  = 92042,
+    SPELL_SWIRLING_VAPOR            = 92007,
+    SPELL_CONDENSING_VAPOR          = 92008,
 };
 
 enum eAchievementMisc
@@ -63,7 +66,7 @@ enum Says
     SAY_AGGRO       = 7,
 };
 
-Position const VaporFinalSpawn [] =
+Position const VaporFinalSpawn[] =
 {
     {-70.59f, -820.57f, 40.56f, 6.28f},
     {-55.73f, -815.84f, 41.97f, 3.85f},
@@ -77,7 +80,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new boss_admiral_ripsnarlAI (creature);
+        return new boss_admiral_ripsnarlAI(creature);
     }
 
     struct boss_admiral_ripsnarlAI : public BossAI
@@ -223,9 +226,9 @@ public:
             creature_list.sort(Trinity::ObjectDistanceOrderPred(me));
             for (std::list<Creature*>::iterator itr = creature_list.begin(); itr != creature_list.end(); ++itr)
             {
-                if ((*itr) && (*itr)->isAlive() && (*itr)->GetTypeId() == TYPEID_UNIT)
+                if (( *itr ) && ( *itr )->isAlive() && ( *itr )->GetTypeId() == TYPEID_UNIT)
                 {
-                    if (Creature* bunny = (*itr)->ToCreature())
+                    if (Creature* bunny = ( *itr )->ToCreature())
                     {
                         if (apply)
                             bunny->AddAura(SPELL_FOG, bunny);
@@ -246,8 +249,8 @@ public:
             Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, players, checker);
             me->VisitNearbyWorldObject(150.0f, searcher);
 
-           for (std::list<Player*>::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-               (*itr)->RemoveAurasDueToSpell(SPELL_FOG_AURA);
+            for (std::list<Player*>::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                ( *itr )->RemoveAurasDueToSpell(SPELL_FOG_AURA);
 
         }
 
@@ -266,7 +269,7 @@ public:
 
         void SummonFinalVapors()
         {
-            for (uint8 i=0; i<3; ++i)
+            for (uint8 i = 0; i < 3; ++i)
             {
                 me->SummonCreature(NPC_VAPOR, VaporFinalSpawn[i], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
             }
@@ -296,20 +299,17 @@ public:
                 events.ScheduleEvent(EVENT_PHASE_TWO, 1000);
                 events.ScheduleEvent(EVENT_UPDATE_FOG, 100);
                 below_75 = true;
-            }
-            else if (me->GetHealthPct() < 50 && !below_50)
+            } else if (me->GetHealthPct() < 50 && !below_50)
             {
                 Talk(SAY_FOG_1);
                 events.ScheduleEvent(EVENT_PHASE_TWO, 500);
                 below_50 = true;
-            }
-            else if (me->GetHealthPct() < 25 && !below_25)
+            } else if (me->GetHealthPct() < 25 && !below_25)
             {
                 Talk(SAY_FOG_1);
                 events.ScheduleEvent(EVENT_PHASE_TWO, 500);
                 below_25 = true;
-            }
-            else if (me->GetHealthPct() < 10 && !below_10)
+            } else if (me->GetHealthPct() < 10 && !below_10)
             {
                 if (IsHeroic())
                 {
@@ -352,8 +352,7 @@ public:
                         if (vaporCount > 0)
                         {
                             Talk(SAY_FOG_2);
-                        }
-                        else if (Unit* victim = me->GetVictim())
+                        } else if (Unit* victim = me->GetVictim())
                         {
                             Talk(SAY_SPELL_1);
                             me->CastSpell(victim, SPELL_GO_FOR_THE_THROAT);
@@ -382,7 +381,7 @@ public:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                                 me->CastSpell(target, SPELL_SUMMON_VAPOR);
                         events.RescheduleEvent(EVENT_SUMMON_VAPOR, 3500);
-                            break;
+                        break;
                 }
             }
         }
@@ -452,19 +451,17 @@ public:
 
             events.Update(diff);
 
-            if (me->HasAura(92016) && !form_1)
+            if (me->HasAura(SPELL_CONDENSE) && !form_1)
             {
                 events.ScheduleEvent(EVENT_CONDENSING_VAPOR, 2000);
                 form_1 = true;
-            }
-            else if (me->HasAura(92020) && !form_2)
+            } else if (me->HasAura(SPELL_CONDENSE_2) && !form_2)
             {
                 me->SetDisplayId(25654);
                 events.CancelEvent(EVENT_CONDENSING_VAPOR);
                 events.ScheduleEvent(EVENT_SWIRLING_VAPOR, 2000);
                 form_2 = true;
-            }
-            else if (me->HasAura(92029) && !form_3)
+            } else if (me->HasAura(SPELL_CONDENSE_3) && !form_3)
             {
                 me->SetDisplayId(36455);
                 events.CancelEvent(EVENT_SWIRLING_VAPOR);
@@ -477,15 +474,15 @@ public:
                 switch (eventId)
                 {
                     case EVENT_CONDENSING_VAPOR:
-                        DoCastVictim(92008);
+                        DoCastVictim(SPELL_CONDENSING_VAPOR);
                         events.ScheduleEvent(EVENT_SWIRLING_VAPOR, 3500);
                         break;
                     case EVENT_SWIRLING_VAPOR:
-                        DoCastVictim(92007);
+                        DoCastVictim(SPELL_SWIRLING_VAPOR);
                         events.ScheduleEvent(EVENT_SWIRLING_VAPOR, 3500);
                         break;
                     case EVENT_FREEZING_VAPOR:
-                        DoCastVictim(92011);
+                        DoCastVictim(SPELL_FREEZING_VAPOR);
                         events.ScheduleEvent(EVENT_COALESCE, 5000);
                         break;
                     case EVENT_COALESCE:
@@ -501,7 +498,7 @@ public:
 class spell_coalesce_achievement : public SpellScriptLoader
 {
 public:
-    spell_coalesce_achievement() : SpellScriptLoader("spell_coalesce_achievement") {}
+    spell_coalesce_achievement() : SpellScriptLoader("spell_coalesce_achievement") { }
 
     SpellScript* GetSpellScript() const
     {
@@ -517,7 +514,7 @@ public:
             Unit* caster = GetCaster();
             if (caster)
             {
-                if (Creature *boss = caster->FindNearestCreature(NPC_ADMIRAL_RIPSNARL, 300.0f))
+                if (Creature* boss = caster->FindNearestCreature(NPC_ADMIRAL_RIPSNARL, 300.0f))
                 {
                     boss->AI()->SetData(0, VAPOR_CASTED_COALESCE);
                 }

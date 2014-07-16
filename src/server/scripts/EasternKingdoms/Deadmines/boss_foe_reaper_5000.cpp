@@ -1,37 +1,42 @@
-#include "ScriptPCH.h"
-#include "Object.h"
+/*
+*
+* Copyright (C) 2012-2014 Cerber Project <https://bitbucket.org/mojitoice/>
+*
+*/
+
+#include "ScriptMgr.h"
 #include "deadmines.h"
+#include "Object.h"
+#include "MapManager.h"
 
 enum eSpell
 {
-    SPELL_ENERGIZE              = 89132,
-    SPELL_ENERGIZED             = 91733, // -> 89200,
-    SPELL_ON_FIRE               = 91737,
-    SPELL_COSMETIC_STAND        = 88906,
+    SPELL_ENERGIZE = 89132,
+    SPELL_ENERGIZED = 91733, // -> 89200,
+    SPELL_ON_FIRE = 91737,
+    SPELL_COSMETIC_STAND = 88906,
 
     // BOSS spells
-    SPELL_OVERDRIVE             = 88481, // 88484
-    SPELL_OFFLINE               = 88348,
-    SPELL_HARVEST               = 88495,
-    SPELL_HARVEST_AURA          = 88497,
+    SPELL_OVERDRIVE = 88481, // 88484
+    SPELL_HARVEST = 88495,
+    SPELL_HARVEST_AURA = 88497,
 
-    SPELL_HARVEST_SWEEP         = 88521,
-    SPELL_HARVEST_SWEEP_H       = 91718,
+    SPELL_HARVEST_SWEEP = 88521,
+    SPELL_HARVEST_SWEEP_H = 91718,
 
-    SPELL_REAPER_STRIKE         = 88490,
-    SPELL_REAPER_STRIKE_H       = 91717,
+    SPELL_REAPER_STRIKE = 88490,
+    SPELL_REAPER_STRIKE_H = 91717,
 
-    SPELL_SAFETY_REST_OFFLINE   = 88522,
+    SPELL_SAFETY_REST_OFFLINE = 88522,
     SPELL_SAFETY_REST_OFFLINE_H = 91720,
 
-    SPELL_SUMMON_MOLTEN_SLAG    = 91839,
+    SPELL_SUMMON_MOLTEN_SLAG = 91839,
 };
 
 enum eAchievementMisc
 {
     ACHIEVEMENT_PROTOTYPE_PRODIGY = 5368,
-    NPC_PROTOTYPE_REAPER          = 49208,
-    DATA_ACHIV_PROTOTYPE_PRODIGY  = 1,
+    DATA_ACHIV_PROTOTYPE_PRODIGY = 1,
 };
 
 const Position OverdrivePoint =
@@ -57,21 +62,21 @@ enum Events
 
 enum eSays
 {
-    SAY_CAST_OVERDRIVE  = 0,
-    SAY_JUSTDIED        = 1,
-    SAY_KILLED_UNIT     = 2,
-    SAY_EVENT_START     = 3,
+    SAY_CAST_OVERDRIVE = 0,
+    SAY_JUSTDIED = 1,
+    SAY_KILLED_UNIT = 2,
+    SAY_EVENT_START = 3,
 
-    SAY_HARVEST_SWEAP   = 4,
-    SAY_CAST_OVERDRIVE_E= 5,
-    SAY_EVENT_SRO       = 6,
+    SAY_HARVEST_SWEAP = 4,
+    SAY_CAST_OVERDRIVE_E = 5,
+    SAY_EVENT_SRO = 6,
 };
 
 #define MONSTER_START "A stray jolt from the Foe Reaper has distrupted the foundry controls!"
 #define MONSTER_SLAG "The monster slag begins to bubble furiously!"
 
 
-Position const HarvestSpawn [] =
+Position const HarvestSpawn[] =
 {
     {-229.72f, -590.37f, 19.38f, 0.71f},
     {-229.67f, -565.75f, 19.38f, 5.98f},
@@ -79,22 +84,23 @@ Position const HarvestSpawn [] =
     {-182.74f, -565.96f, 19.38f, 3.35f},
 };
 
-Position const PrototypeSpawn = { -200.499f, -553.946f, 51.2295f, 4.32651f };
+Position const PrototypeSpawn = {-200.499f, -553.946f, 51.2295f, 4.32651f};
 
 
 class boss_foe_reaper_5000 : public CreatureScript
 {
 public:
-    boss_foe_reaper_5000() : CreatureScript("boss_foe_reaper_5000") { }
+    boss_foe_reaper_5000() : CreatureScript("boss_foe_reaper_5000")
+    {}
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new boss_foe_reaper_5000AI (creature);
+        return new boss_foe_reaper_5000AI(creature);
     }
 
     struct boss_foe_reaper_5000AI : public BossAI
     {
-        boss_foe_reaper_5000AI(Creature* creature) : BossAI(creature, DATA_REAPER)
+        boss_foe_reaper_5000AI(Creature* creature) : BossAI(creature, DATA_FOEREAPER)
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_STUNNED);
             prototypeGUID = 0;
@@ -197,7 +203,7 @@ public:
             _JustReachedHome();
             Talk(SAY_KILLED_UNIT);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_STUNNED);
-            instance->SetBossState(DATA_REAPER, FAIL);
+            instance->SetBossState(DATA_FOEREAPER, FAIL);
         }
 
         void DespawnOldWatchers()
@@ -217,7 +223,7 @@ public:
 
         void RespawnWatchers()
         {
-            for (uint8 i=0; i<4; ++i)
+            for (uint8 i = 0; i < 4; ++i)
             {
                 me->SummonCreature(47403, HarvestSpawn[i], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
             }
@@ -387,11 +393,12 @@ public:
 class npc_defias_watcher : public CreatureScript
 {
 public:
-    npc_defias_watcher() : CreatureScript("npc_defias_watcher") { }
+    npc_defias_watcher() : CreatureScript("npc_defias_watcher")
+    {}
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_defias_watcherAI (creature);
+        return new npc_defias_watcherAI(creature);
     }
 
     struct npc_defias_watcherAI : public ScriptedAI
@@ -421,7 +428,8 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/) {}
+        void EnterCombat(Unit* /*who*/)
+        {}
 
         void JustDied(Unit* /*Killer*/)
         {
@@ -452,7 +460,7 @@ public:
             if (!me || damage <= 0 || Status == true)
                 return;
 
-            if (me->GetHealth()-damage <= me->GetMaxHealth()*0.10)
+            if (me->GetHealth() - damage <= me->GetMaxHealth()*0.10)
             {
                 damage = 0;
                 Energizing();
@@ -471,18 +479,19 @@ public:
 
 class achievement_prototype_reaper : public AchievementCriteriaScript
 {
-    public:
-        achievement_prototype_reaper() : AchievementCriteriaScript("achievement_prototype_reaper") { }
+public:
+    achievement_prototype_reaper() : AchievementCriteriaScript("achievement_prototype_reaper")
+    {}
 
-        bool OnCheck(Player* source, Unit* target)
+    bool OnCheck(Player* source, Unit* target)
+    {
+        if (target && target->IsAIEnabled)
         {
-            if (target && target->IsAIEnabled)
-            {
-                return target->GetAI()->GetData(DATA_ACHIV_PROTOTYPE_PRODIGY);
-            }
-
-            return false;
+            return target->GetAI()->GetData(DATA_ACHIV_PROTOTYPE_PRODIGY);
         }
+
+        return false;
+    }
 };
 
 void AddSC_boss_foe_reaper_5000()

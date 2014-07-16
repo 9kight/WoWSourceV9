@@ -1,3 +1,9 @@
+/*
+*
+* Copyright (C) 2012-2014 Cerber Project <https://bitbucket.org/mojitoice/>
+*
+*/
+
 #include "ScriptPCH.h"
 #include "deadmines.h"
 
@@ -6,11 +12,16 @@ enum eSpels
     SPELL_CANNONBALL        = 89697, // 91066 (HC) supported by Spell Difficulty
     SPELL_THROW             = 91038,
     SPELL_THROW_H           = 91039,
-    SPELL_EXPLODE           = 89769
+    SPELL_EXPLODE           = 89769,
+    SPELL_EYE_GOUGE         = 90913,
+    SPELL_EYE_GOUGE_H       = 90918,
+    SPELL_EYE_PECK          = 90920,
+    SPELL_EYE_PECK_H        = 90921,
 };
 
-Position const SourcePosition[8] = {
-    {-30.2622f, -793.069f,  19.237f},
+Position const SourcePosition[8] =
+{
+    {-30.2622f, -793.069f, 19.237f},
     {-72.1059f, -786.894f, 39.5538f},
     {-58.6424f, -787.132f, 39.3505f},
     {-82.3142f, -775.5f,   26.8933f},
@@ -20,9 +31,10 @@ Position const SourcePosition[8] = {
     {-40.0035f, -793.302f, 39.4754f},
 };
 
-Position const TargetPosition[8] = {
+Position const TargetPosition[8] =
+{
     {0.512153f, -768.229f, 9.80134f},
-    {-72.559f,  -731.221f, 8.5869f },
+    {-72.559f,  -731.221f, 8.5869f},
     {-49.3264f, -730.056f, 9.32048f},
     {-100.849f, -703.773f, 9.29407f},
     {-30.6337f, -727.731f, 8.52102f},
@@ -41,7 +53,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_defias_cannonAI (creature);
+        return new npc_defias_cannonAI(creature);
     }
 
     struct npc_defias_cannonAI : public ScriptedAI
@@ -80,7 +92,7 @@ public:
             return false;
         }
 
-        void EnterCombat(Unit* /*who*/) {}
+        void EnterCombat(Unit* /*who*/) { }
 
         void GetCreature()
         {
@@ -110,8 +122,7 @@ public:
                     {
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                         Phase++;
-                    }
-                    else if (Creature* target = ObjectAccessor::GetCreature(*me, TargetGUID))
+                    } else if (Creature* target = ObjectAccessor::GetCreature(*me, TargetGUID))
                     {
                         me->CastSpell(target, SPELL_CANNONBALL);
                     }
@@ -130,7 +141,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_mining_monkeyAI (creature);
+        return new npc_mining_monkeyAI(creature);
     }
 
     struct npc_mining_monkeyAI : public ScriptedAI
@@ -190,8 +201,7 @@ public:
                                 uiTimer = 2000;
                             } else
                                 uiTimer -= uiDiff;
-                        }
-                        else
+                        } else
                         {
                             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
@@ -217,7 +227,7 @@ public:
 class go_defias_cannon : public GameObjectScript
 {
 public:
-    go_defias_cannon() : GameObjectScript("go_defias_cannon") {}
+    go_defias_cannon() : GameObjectScript("go_defias_cannon") { }
 
     bool OnGossipHello(Player* player, GameObject* go)
     {
@@ -256,14 +266,6 @@ public:
     }
 };
 
-enum eSpell
-{
-    SPELL_EYE_GOUGE         = 90913,
-    SPELL_EYE_GOUGE_H       = 90918,
-    SPELL_EYE_PECK          = 90920,
-    SPELL_EYE_PECK_H        = 90921,
-};
-
 class npc_deadmines_bird : public CreatureScript
 {
 public:
@@ -271,7 +273,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_deadmines_birdAI (creature);
+        return new npc_deadmines_birdAI(creature);
     }
 
     struct npc_deadmines_birdAI : public ScriptedAI
@@ -333,7 +335,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_goblin_engineerAI (creature);
+        return new npc_goblin_engineerAI(creature);
     }
 
     struct npc_goblin_engineerAI : public ScriptedAI
@@ -361,44 +363,39 @@ public:
 
 class go_heavy_door : public GameObjectScript
 {
-    public:
-        go_heavy_door() : GameObjectScript("go_heavy_door") {}
+public:
+    go_heavy_door() : GameObjectScript("go_heavy_door") { }
 
-        void MoveNearCreature(GameObject* me, uint32 entry, uint32 ragne)
+    void MoveNearCreature(GameObject* me, uint32 entry, uint32 ragne)
+    {
+        if (!me)
+            return;
+
+        std::list<Creature*> creature_list;
+        me->GetCreatureListWithEntryInGrid(creature_list, entry, ragne);
+
+        creature_list.sort(Trinity::ObjectDistanceOrderPred(me));
+        for (std::list<Creature*>::iterator itr = creature_list.begin(); itr != creature_list.end(); ++itr)
         {
-            if (!me)
-                return;
-
-            std::list<Creature*> creature_list;
-            me->GetCreatureListWithEntryInGrid(creature_list, entry, ragne);
-
-            creature_list.sort(Trinity::ObjectDistanceOrderPred(me));
-            for (std::list<Creature*>::iterator itr = creature_list.begin(); itr != creature_list.end(); ++itr)
+            if (( *itr ) && ( *itr )->isAlive() && ( *itr )->GetTypeId() == TYPEID_UNIT && ( *itr )->HasAura(78087))
             {
-                if ((*itr) && (*itr)->isAlive() && (*itr)->GetTypeId() == TYPEID_UNIT && (*itr)->HasAura(78087))
-                {
-                    (*itr)->GetMotionMaster()->MoveCharge(
-                        me->GetPositionX(),
-                        me->GetPositionY(),
-                        me->GetPositionZ(),
-                        5.0f
-                    );
-                    (*itr)->DespawnOrUnsummon(3000);
-                    (*itr)->AI()->Talk(0);
-                }
+                ( *itr )->GetMotionMaster()->MoveCharge( me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 5.0f);
+                ( *itr )->DespawnOrUnsummon(3000);
+                ( *itr )->AI()->Talk(0);
             }
         }
+    }
 
-        bool OnGossipHello(Player* player, GameObject* go)
-        {
-            if (!go || !player)
-                return false;
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        if (!go || !player)
+            return false;
 
-            MoveNearCreature(go, 48439, 50.0f);
-            MoveNearCreature(go, 48280, 50.0f);
+        MoveNearCreature(go, 48439, 50.0f);
+        MoveNearCreature(go, 48280, 50.0f);
 
-            return true;
-        }
+        return true;
+    }
 };
 
 #define GOSSIP_BOSS_1 "Press the button labeled 'Wood and Lumber.'"
@@ -407,83 +404,83 @@ class go_heavy_door : public GameObjectScript
 
 class go_deadmines_tp : public GameObjectScript
 {
-    public:
-        go_deadmines_tp() : GameObjectScript("go_deadmines_tp") { }
+public:
+    go_deadmines_tp() : GameObjectScript("go_deadmines_tp") { }
 
-        bool OnGossipSelect(Player* player, GameObject* /*go*/, uint32 sender, uint32 action)
+    bool OnGossipSelect(Player* player, GameObject* /*go*/, uint32 sender, uint32 action)
+    {
+        if (player->HasAura(SPELL_NIGHTMARE_ELIXIR))
+            return false;
+
+        player->PlayerTalkClass->ClearMenus();
+        player->CLOSE_GOSSIP_MENU();
+        switch (action)
         {
-            if (player->HasAura(92113))
-                return false;
-
-            player->PlayerTalkClass->ClearMenus();
-            player->CLOSE_GOSSIP_MENU();
-            switch (action)
-            {
-                case GOSSIP_ACTION_INFO_DEF:
-                    player->TeleportTo(player->GetMapId(), -305.32f, -491.29f, 49.23f, 3.14f);
-                    break;
-                case GOSSIP_ACTION_INFO_DEF+1:
-                    player->TeleportTo(player->GetMapId(), -201.09f, -606.04f, 19.30f, 3.14f);
-                    break;
-                case GOSSIP_ACTION_INFO_DEF+2:
-                    player->TeleportTo(player->GetMapId(), -129.91f, -788.89f, 17.34f, 3.14f);
-                    break;
-            }
-            return true;
+            case GOSSIP_ACTION_INFO_DEF:
+                player->TeleportTo(player->GetMapId(), -305.32f, -491.29f, 49.23f, 3.14f);
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 1:
+                player->TeleportTo(player->GetMapId(), -201.09f, -606.04f, 19.30f, 3.14f);
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 2:
+                player->TeleportTo(player->GetMapId(), -129.91f, -788.89f, 17.34f, 3.14f);
+                break;
         }
+        return true;
+    }
 
-        bool OnGossipHello(Player* player, GameObject* go)
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        if (player->HasAura(SPELL_NIGHTMARE_ELIXIR))
+            return false;
+
+        InstanceScript* instance = go->GetInstanceScript();
+        if (!instance)
+            return false;
+
+        if (instance->GetBossState(DATA_HELIX) == DONE)
         {
-            if (player->HasAura(92113))
-                return false;
-
-            InstanceScript* instance = go->GetInstanceScript();
-            if (!instance)
-                return false;
-
-            if (instance->GetBossState(DATA_HELIX) == DONE)
-            {
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_BOSS_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
-            }
-            if (instance->GetBossState(DATA_REAPER) == DONE)
-            {
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_BOSS_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
-            }
-            if (instance->GetBossState(DATA_RIPSNARL) == DONE)
-            {
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_BOSS_3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
-            }
-            player->SEND_GOSSIP_MENU(player->GetGossipTextId(go), go->GetGUID());
-            return true;
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_BOSS_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
         }
+        if (instance->GetBossState(DATA_FOEREAPER) == DONE)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_BOSS_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        }
+        if (instance->GetBossState(DATA_RIPSNARL) == DONE)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_BOSS_3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+        }
+        player->SEND_GOSSIP_MENU(player->GetGossipTextId(go), go->GetGUID());
+        return true;
+    }
 };
 
 
 class npc_mining_powder : public CreatureScript
 {
-    public:
-        npc_mining_powder() : CreatureScript("npc_mining_powder") { }
+public:
+    npc_mining_powder() : CreatureScript("npc_mining_powder") { }
 
-        struct npc_mining_powderAI : public ScriptedAI
+    struct npc_mining_powderAI : public ScriptedAI
+    {
+        npc_mining_powderAI(Creature* creature) : ScriptedAI(creature), damaged(false) { }
+
+        bool damaged;
+
+        void DamageTaken(Unit* /*attacker*/, uint32& damage)
         {
-            npc_mining_powderAI(Creature* creature) : ScriptedAI(creature), damaged(false) { }
-
-            bool damaged;
-
-            void DamageTaken(Unit* /*attacker*/, uint32& damage)
-            {
-                if (damaged)
-                    return;
-                damaged = true;
-                me->CastSpell(me, SPELL_EXPLODE);
-                me->DespawnOrUnsummon(100);
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_mining_powderAI(creature);
+            if (damaged)
+                return;
+            damaged = true;
+            me->CastSpell(me, SPELL_EXPLODE);
+            me->DespawnOrUnsummon(100);
         }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_mining_powderAI(creature);
+    }
 };
 
 void AddSC_deadmines()

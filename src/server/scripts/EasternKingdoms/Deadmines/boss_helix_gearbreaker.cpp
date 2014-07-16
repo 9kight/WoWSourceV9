@@ -1,3 +1,9 @@
+/*
+*
+* Copyright (C) 2012-2014 Cerber Project <https://bitbucket.org/mojitoice/>
+*
+*/
+
 #include "ScriptPCH.h"
 #include "deadmines.h"
 #include "Vehicle.h"
@@ -34,7 +40,7 @@ const Position OafPos[2] =
     {-289.587f, -489.575f, 49.9126f, 0},
 };
 
-const Position CrewSpawn [] =
+const Position CrewSpawn[] =
 {
     {-281.68f, -504.10f, 60.51f, 4.75f},
     {-284.71f, -504.13f, 60.42f, 4.72f},
@@ -67,7 +73,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new boss_helix_gearbreakerAI (creature);
+        return new boss_helix_gearbreakerAI(creature);
     }
 
     struct boss_helix_gearbreakerAI : public BossAI
@@ -130,8 +136,7 @@ public:
                 if (oaf && oaf->isAlive())
                 {
                     me->CastSpell(oaf, SPELL_RIDE_VEHICLE_HARDCODED);
-                }
-                else
+                } else
                 {
                     oaf = me->SummonCreature(NPC_OAF, me->GetHomePosition());
 
@@ -150,7 +155,7 @@ public:
 
         void SummonCrew()
         {
-            for (uint8 i=0; i<4; ++i)
+            for (uint8 i = 0; i < 4; ++i)
             {
                 me->SummonCreature(NPC_HELIX_CREW, CrewSpawn[i], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
             }
@@ -197,7 +202,7 @@ public:
 
             events.Update(uiDiff);
 
-            while(uint32 eventId = events.ExecuteEvent())
+            while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
@@ -227,7 +232,7 @@ public:
                         me->VisitNearbyWorldObject(150.0f, searcher);
 
                         for (std::list<Player*>::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                            me->CastSpell((*itr), SPELL_HELIX_RIDE, true);
+                            me->CastSpell(( *itr ), SPELL_HELIX_RIDE, true);
 
                         events.ScheduleEvent(EVENT_ACHIEVEVEMENT_BUFF, 60000);
                         break;
@@ -245,7 +250,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_lumbering_oafAI (creature);
+        return new npc_lumbering_oafAI(creature);
     }
 
     struct npc_lumbering_oafAI : public ScriptedAI
@@ -274,6 +279,7 @@ public:
         {
             if (!me)
                 return;
+
             events.ScheduleEvent(EVENT_OAFQUARD, 5000);
         }
 
@@ -302,7 +308,7 @@ public:
                 if (bunny)
                 {
                     me->SetInCombatWithZone();
-                    if (Unit * passenger = me->GetVehicleKit()->GetPassenger(1))
+                    if (Unit* passenger = me->GetVehicleKit()->GetPassenger(1))
                     {
                         passenger->ExitVehicle();
                         me->Attack(passenger, true);
@@ -338,7 +344,7 @@ public:
 
             events.Update(uiDiff);
 
-            while(uint32 eventId = events.ExecuteEvent())
+            while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
@@ -389,7 +395,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_sticky_bombAI (creature);
+        return new npc_sticky_bombAI(creature);
     }
 
     struct npc_sticky_bombAI : public ScriptedAI
@@ -408,6 +414,7 @@ public:
         {
             Phase   = 1;
             uiTimer = 500;
+
             if (!me)
                 return;
 
@@ -467,12 +474,12 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_helix_crewAI (creature);
+        return new npc_helix_crewAI(creature);
     }
 
     struct npc_helix_crewAI : public Scripted_NoMovementAI
     {
-        npc_helix_crewAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature){}
+        npc_helix_crewAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { }
 
         uint32 ThrowBombTimer;
 
@@ -496,8 +503,7 @@ public:
                     DoCast(player, SPELL_THROW_BOMB);
                     ThrowBombTimer = 5000;
                 }
-            }
-            else ThrowBombTimer-= diff;
+            } else ThrowBombTimer-= diff;
         }
     };
 };

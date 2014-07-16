@@ -1,5 +1,7 @@
-/*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ /*
+ *
+ * Copyright (C) 2012-2014 Cerber Project <https://bitbucket.org/mojitoice/> 
+ * Copyright (C) 2008-2013 CerberCoreCore <http://www.CerberCorecore.org/>
  * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -19,11 +21,13 @@
 #ifndef DEF_DEADMINES_H
 #define DEF_DEADMINES_H
 
+#define DMScriptName "instance_deadmines"
+
 enum Data
 {
     DATA_GLUBTOK,
     DATA_HELIX,
-    DATA_REAPER,
+    DATA_FOEREAPER,
     DATA_RIPSNARL,
     DATA_COOKIE,
     DATA_CANNON_BLAST_TIMER,
@@ -58,6 +62,9 @@ enum eCreatures
     NPC_STEAM_VALVE                 = 49457,
     NPC_ROPE                        = 49550,
     NPC_ROPE_ANCHOR                 = 49552,
+    NPC_DEFIAS_REAPER               = 47403,
+    NPC_PROTOTYPE_REAPER            = 49208,
+    NPC_COOKIES_CAULDRON            = 47754,
 
     NPC_DEFIAS_SHADOWGUARD          = 48505,
     NPC_DEFIAS_ENFORCER             = 48502,
@@ -108,13 +115,15 @@ enum eAcievement
     ACHIEVE_RAT_PACK                = 5367,
 };
 
-const Position CookieSpawn = {
-    -88.1319f, -819.33f, 39.23453f, 0.0f
+enum sharedSpells
+{
+    SPELL_NIGHTMARE_ELIXIR      = 92113,
+    SPELL_OFFLINE               = 88348,
 };
 
-enum Data64
+const Position CookieSpawn =
 {
-
+    -88.1319f, -819.33f, 39.23453f, 0.0f
 };
 
 #endif
