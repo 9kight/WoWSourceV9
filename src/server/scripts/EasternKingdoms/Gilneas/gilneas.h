@@ -70,6 +70,7 @@ enum QuestIds
 
 enum SpellIds
 {
+    SPELL_PING_GILNEAN_CROW                            = 93275,
     SPELL_ENRAGE                                       = 8599,
 	SPELL_PHASE_QUEST_2                                = 59073,
 	SPELL_SUMMON_JOSIAH_AVERY                          = 67350,
