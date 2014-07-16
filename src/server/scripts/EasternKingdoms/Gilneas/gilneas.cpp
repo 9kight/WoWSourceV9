@@ -6,6 +6,69 @@
 #include "GameObjectAI.h"
 #include "CreatureGroups.h"
 
+/*######
+## npc_gilnean_crow
+######*/
+
+class npc_gilnean_crow : public CreatureScript
+{
+public:
+    npc_gilnean_crow() : CreatureScript("npc_gilnean_crow") {}
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_gilnean_crowAI (creature);
+    }
+
+    struct npc_gilnean_crowAI : public ScriptedAI
+    {
+        npc_gilnean_crowAI(Creature* creature) : ScriptedAI(creature) {}
+
+        uint32 tSpawn;
+        bool Move;
+
+        void Reset()
+        {
+            Move            = false;
+            tSpawn          = 0;
+            me->SetPosition(me->GetCreatureData()->posX,me->GetCreatureData()->posY, me->GetCreatureData()->posZ, me->GetCreatureData()->orientation);
+        }
+
+        void SpellHit(Unit* /*caster*/, const SpellInfo* spell)
+        {
+            if (spell->Id == SPELL_PING_GILNEAN_CROW)
+            {
+                if (!Move)
+                {
+                    me->SetUInt32Value(UNIT_NPC_EMOTESTATE , EMOTE_ONESHOT_NONE); // Change our emote state to allow flight
+                    me->SetCanFly(true);
+                    Move = true;
+                }
+            }
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!Move)
+                return;
+
+            if (tSpawn <= diff)
+            {
+                me->GetMotionMaster()->MovePoint(0, (me->GetPositionX() + irand(-15, 15)), (me->GetPositionY() + irand(-15, 15)), (me->GetPositionZ() + irand(5, 15)), true);
+                tSpawn = urand (500, 1000);
+            }
+            else tSpawn -= diff;
+
+            if ((me->GetPositionZ() - me->GetCreatureData()->posZ) >= 20.0f)
+            {
+                me->DisappearAndDie();
+                me->RemoveCorpse(true);
+                Move = false;
+            }
+        }
+    };
+};
+
 // Phase 2
 /*######
 ## npc_prince_liam_greymane_phase2
@@ -125,6 +188,114 @@ public:
         }
 
     };
+};
+
+/*######
+## go_merchant_square_door
+######*/
+class go_merchant_square_door : public GameObjectScript
+{
+public:
+    go_merchant_square_door() : GameObjectScript("go_merchant_square_door") {}
+
+    struct go_merchant_square_doorAI : public GameObjectAI
+    {
+        go_merchant_square_doorAI(GameObject* gameobject) : GameObjectAI(gameobject)
+        {
+            x = 0; y = 0; z = 0; wx = 0; wy = 0; angle = 0;
+            opened = false;
+            spawnKind = 0;
+            DoorTimer = 1000;
+            playerGUID = 0;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (opened)
+            {
+                if (tQuestCredit <= diff)
+                {
+                    opened = false;
+
+                    if (spawnKind == 3)
+                    {
+                        if (Creature* spawnedCreature = go->SummonCreature(NPC_RAMPAGING_WORGEN_2, wx, wy, z, angle, TEMPSUMMON_TIMED_DESPAWN, SUMMON1_TTL))
+                        {
+                            spawnedCreature->SetPhaseMask(6, 1);
+                            spawnedCreature->SetReactState(REACT_AGGRESSIVE);
+                            if (Player *player = Player::GetPlayer(*go, playerGUID))
+                                spawnedCreature->AI()->AttackStart(player);
+                        }
+                    }
+                }
+                else tQuestCredit -= diff;
+            }
+            if (DoorTimer <= diff)
+            {
+                if (go->GetGoState() == GO_STATE_ACTIVE)
+                    go->SetGoState(GO_STATE_READY);
+                if (Creature *worgen = go->FindNearestCreature(NPC_RAMPAGING_WORGEN_2, 10))
+                    worgen->DespawnOrUnsummon();
+                DoorTimer = DOOR_TIMER;
+            }
+            else
+                DoorTimer -= diff;
+        }
+
+        bool GossipHello(Player* player)
+        {
+            if (player->GetQuestStatus(QUEST_EVAC_MERC_SQUA) == QUEST_STATUS_INCOMPLETE && go->GetGoState() == GO_STATE_READY)
+            {
+                playerGUID          = player->GetGUID();
+                opened           = true;
+                tQuestCredit     = 2500;
+                go->SetGoState(GO_STATE_ACTIVE);
+                DoorTimer = DOOR_TIMER;
+                spawnKind = urand(1, 3);
+                angle = go->GetOrientation();
+                x = go->GetPositionX() - cos(angle) * 2;
+                y = go->GetPositionY() - sin(angle) * 2;
+                z = go->GetPositionZ();
+                wx = x - cos(angle) * 2;
+                wy = y - sin(angle) * 2;
+
+                if (spawnKind < 3)
+                {
+                    if (Creature* spawnedCreature = go->SummonCreature(NPC_FRIGHTENED_CITIZEN_1, x, y, z, angle, TEMPSUMMON_MANUAL_DESPAWN))
+                    {
+                        player->KilledMonsterCredit(35830);
+                        spawnedCreature->SetPhaseMask(6, 1);
+                        spawnedCreature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                        spawnedCreature->GetMotionMaster()->MovePoint(42, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
+                    }
+                }
+                else
+                {
+                    if (Creature* spawnedCreature = go->SummonCreature(NPC_FRIGHTENED_CITIZEN_2, x, y, z, angle, TEMPSUMMON_MANUAL_DESPAWN))
+                    {
+                        player->KilledMonsterCredit(35830);
+                        spawnedCreature->SetPhaseMask(6, 1);
+                        spawnedCreature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                        spawnedCreature->GetMotionMaster()->MovePoint(42, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+
+    private:
+        float x, y, z, wx, wy, angle, tQuestCredit;
+        bool opened;
+        uint8 spawnKind;
+        uint64 playerGUID;
+        uint32 DoorTimer;
+    };
+
+    GameObjectAI* GetAI(GameObject* gameobject) const
+    {
+        return new go_merchant_square_doorAI(gameobject);
+    }
 };
 
 /*######
@@ -2644,29 +2815,33 @@ public:
     }
 };
 
+/* ######
+## You Can't Take 'Em Alone - 14348
+###### */
 enum eHorrid
 {
   SAY_BARREL    = 0
 };
 
-/* ######
-## You Can't Take 'Em Alone - 14348
-###### */
 class npc_horrid_abomination : public CreatureScript
 {
 public:
     npc_horrid_abomination() : CreatureScript("npc_horrid_abomination") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+
+    CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new npc_horrid_abominationAI(creature);
+        return new npc_horrid_abominationAI(pCreature);
     }
+
 
     struct npc_horrid_abominationAI : public ScriptedAI
     {
-        npc_horrid_abominationAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_horrid_abominationAI(Creature *c) : ScriptedAI(c) {}
+
 
         uint32 DieTimer;
+
 
         void Reset ()
         {
@@ -2674,31 +2849,37 @@ public:
             DieTimer = 5000;
         }
 
-        void SpellHit(Unit* caster, const SpellInfo* spell)
+
+        void SpellHit(Unit* caster, const SpellInfo * spell)
         {
-            if (spell->Id == SPELL_BARREL_KEG && caster->GetTypeId() == TYPEID_PLAYER && caster->ToPlayer()->GetQuestStatus(QUEST_YOU_CANT_TAKE_EM_ALONE) == QUEST_STATUS_INCOMPLETE)
+            if (spell->Id == SPELL_BARREL_KEG && caster->GetTypeId() == TYPEID_PLAYER
+                && caster->ToPlayer()->GetQuestStatus(QUEST_YOU_CANT_TAKE_EM_ALONE) == QUEST_STATUS_INCOMPLETE)
             {
                 caster->ToPlayer()->KilledMonsterCredit(QUEST_14348_KILL_CREDIT, 0);
                 me->AddUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED);
                 Talk(SAY_BARREL);
-
             }
         }
 
-        void UpdateAI(const uint32 diff)
+
+        void UpdateAI(const uint32 uiDiff)
         {
-            if (DieTimer <= diff)
+            if (DieTimer <= uiDiff)
             {
                 if (me->HasAura(SPELL_BARREL_KEG))
-                    me->DisappearAndDie();
-                else
-                    DieTimer = 1000;
+				   { 
+					 DoCast(68560);
+					 me->DespawnOrUnsummon();
+					}
+					else DieTimer = 1000;
             }
             else
-                DieTimer -= diff;
+                DieTimer -= uiDiff;
+
 
             if (!UpdateVictim())
                 return;
+
 
             DoMeleeAttackIfReady();
         }
@@ -3941,6 +4122,7 @@ public:
 
 void AddSC_gilneas()
 {
+    new npc_gilnean_crow();
 	new spell_attack_lurker();
 	new npc_admiral_nightwind();
     new npc_gilneas_city_guard_phase2();
@@ -3978,6 +4160,7 @@ void AddSC_gilneas()
     new npc_worgen_alpha_c2();
 
     new go_mandragore();
+	new go_merchant_square_door();
     new spell_rescue_noyade();
     new spell_round_up_horse();
     new npc_trigger_quest_24616();
