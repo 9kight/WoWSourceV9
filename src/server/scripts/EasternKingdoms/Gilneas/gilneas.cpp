@@ -2850,12 +2850,41 @@ public:
     }
 };
 
+class npc_gwen_armstead_qi : public CreatureScript
+{
+public:
+    npc_gwen_armstead_qi() : CreatureScript("npc_gwen_armstead_qi") { }
+
+    bool OnQuestComplete(Player* player, Creature* armstead, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_INVASION)
+        {
+            armstead->CastSpell(player, 68482, false);
+            player->SaveToDB();
+        }
+
+        return true;
+    }
+};
+
 /* ######
 ## You Can't Take 'Em Alone - 14348
 ###### */
+
 enum eHorrid
 {
-  SAY_BARREL    = 0
+    NPC_HORRID_ABOMINATION_KILL_CREDIT    = 36233,
+    NPC_PRINCE_LIAM_GREYMANE_QYCTEA       = 36140,
+
+    SAY_BARREL                            = 0,
+
+    SPELL_KEG_PLACED                      = 68555,
+    SPELL_SHOOT_QYCTEA                    = 68559,   // 68559
+    SPELL_RESTITCHING                     = 68864,
+    SPELL_EXPLOSION                       = 68560,
+    SPELL_EXPLOSION_POISON                = 42266,
+    SPELL_EXPLOSION_BONE_TYPE_ONE         = 42267,
+    SPELL_EXPLOSION_BONE_TYPE_TWO         = 42274,
 };
 
 class npc_horrid_abomination : public CreatureScript
@@ -2863,115 +2892,127 @@ class npc_horrid_abomination : public CreatureScript
 public:
     npc_horrid_abomination() : CreatureScript("npc_horrid_abomination") { }
 
-
-    CreatureAI* GetAI(Creature* pCreature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_horrid_abominationAI(pCreature);
+        return new npc_horrid_abominationAI (creature);
     }
-
 
     struct npc_horrid_abominationAI : public ScriptedAI
     {
-        npc_horrid_abominationAI(Creature *c) : ScriptedAI(c) {}
-
-
-        uint32 DieTimer;
-
-
-        void Reset ()
+        npc_horrid_abominationAI(Creature* creature) : ScriptedAI(creature)
         {
-            me->ClearUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED);
-            DieTimer = 5000;
+            uiRestitchingTimer = 3000;
+            uiShootTimer = 3000;
+            uiPlayerGUID = 0;
+            shoot = false;
+            miss = false;
+            me->_ReactDistance = 10.0f;
         }
 
+        uint64 uiPlayerGUID;
+        uint32 uiShootTimer;
+        uint32 uiRestitchingTimer;
+        bool shoot;
+        bool miss;
 
-        void SpellHit(Unit* caster, const SpellInfo * spell)
+        void SpellHit(Unit* caster, const SpellInfo* spell)
         {
-            if (spell->Id == SPELL_BARREL_KEG && caster->GetTypeId() == TYPEID_PLAYER
-                && caster->ToPlayer()->GetQuestStatus(QUEST_YOU_CANT_TAKE_EM_ALONE) == QUEST_STATUS_INCOMPLETE)
+            if (spell->Id == SPELL_KEG_PLACED)
             {
-                caster->ToPlayer()->KilledMonsterCredit(QUEST_14348_KILL_CREDIT, 0);
-                me->AddUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED);
-                Talk(SAY_BARREL);
+                me->AI()->Talk(NPC_FORSAKEN_ASSASSIN_SAY);
+                shoot = true;
+                uiPlayerGUID = caster->GetGUID();
+                me->SetReactState(REACT_PASSIVE);
+                me->GetMotionMaster()->MoveRandom(5.0f);
+                me->CombatStop();
+
             }
+
+            if (spell->Id == SPELL_SHOOT_QYCTEA)
+                ShootEvent();
         }
 
-
-        void UpdateAI(const uint32 uiDiff)
+        void ShootEvent()
         {
-            if (DieTimer <= uiDiff)
-            {
-                if (me->HasAura(SPELL_BARREL_KEG))
-				   { 
-					 DoCast(68560);
-					 me->DespawnOrUnsummon();
-					}
-					else DieTimer = 1000;
-            }
-            else
-                DieTimer -= uiDiff;
+            me->RemoveAura(SPELL_KEG_PLACED);
 
+            for (int i = 0; i < 11; ++i)
+                DoCast(SPELL_EXPLOSION_POISON);
+
+            for (int i = 0; i < 6; ++i)
+                DoCast(SPELL_EXPLOSION_BONE_TYPE_ONE);
+
+            for (int i = 0; i < 4; ++i)
+                DoCast(SPELL_EXPLOSION_BONE_TYPE_TWO);
+
+            DoCast(SPELL_EXPLOSION);
+
+            if (Player* player = Unit::GetPlayer(*me, uiPlayerGUID))
+                player->KilledMonsterCredit(NPC_HORRID_ABOMINATION_KILL_CREDIT, 0);
+
+            me->DespawnOrUnsummon(1000);
+        }
+
+        void DamageTaken(Unit* attacker, uint32 &/*damage*/)
+        {
+            if (attacker->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            Unit* victim = NULL;
+
+            if (Unit* victim = me->GetVictim())
+                if (victim->GetTypeId() == TYPEID_PLAYER)
+                    return;
+
+            if (victim)
+                me->getThreatManager().modifyThreatPercent(victim, -100);
+
+            AttackStart(attacker);
+            me->AddThreat(attacker, 10005000);
+        }
+
+        void UpdateAI(uint32 const diff)
+        {
+            if (shoot)
+            {
+                if (uiShootTimer <= diff)
+                {
+                    shoot = false;
+                    uiShootTimer = 3000;
+                    std::list<Creature*> liamList;
+                    GetCreatureListWithEntryInGrid(liamList, me, NPC_PRINCE_LIAM_GREYMANE_QYCTEA, 50.0f);
+
+                    if (liamList.empty())
+                        ShootEvent();
+                    else
+                        (*liamList.begin())->CastSpell(me, SPELL_SHOOT_QYCTEA, false);
+                }
+                else
+                    uiShootTimer -= diff;
+            }
 
             if (!UpdateVictim())
                 return;
 
+            if (me->GetVictim() && me->GetVictim()->GetTypeId() == TYPEID_UNIT)
+            {
+                if (me->GetVictim()->GetHealthPct() < 90)
+                    miss = true;
+                else
+                    miss = false;
+            }
+
+            if (uiRestitchingTimer <= diff)
+            {
+                uiRestitchingTimer = 8000;
+                DoCast(SPELL_RESTITCHING);
+            }
+            else
+                uiRestitchingTimer -= diff;
 
             DoMeleeAttackIfReady();
         }
     };
-};
-
-/*######
-## spell_keg_placed
-######*/
-class spell_keg_placed : public SpellScriptLoader
-{
-    public:
-        spell_keg_placed() : SpellScriptLoader("spell_keg_placed") {}
-
-        class spell_keg_placed_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_keg_placed_AuraScript);
-
-            void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-            {
-                tick = urand(1, 4);
-                tickcount = 0;
-            }
-
-            void HandlePeriodic(AuraEffect const* aurEff)
-            {
-                PreventDefaultAction();
-                if (Unit* caster = GetCaster())
-                {
-                    if (tickcount > tick)
-                    {
-                        if (caster->GetTypeId() != TYPEID_PLAYER)
-                            return;
-                        caster->ToPlayer()->KilledMonsterCredit(36233, 0);
-                        if (Unit* target = GetTarget())
-                            target->Kill(target);
-                    }
-                    tickcount++;
-                }
-            }
-
-            void Register()
-            {
-                OnEffectApply += AuraEffectApplyFn(spell_keg_placed_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-                OnEffectPeriodic += AuraEffectPeriodicFn(spell_keg_placed_AuraScript::HandlePeriodic, EFFECT_0, SPELL_AURA_DUMMY);
-            }
-
-        private :
-            uint32 tick;
-            uint32 tickcount;
-
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_keg_placed_AuraScript();
-        }
 };
 
 /*######
@@ -3014,60 +3055,160 @@ public:
 
 /*###### Quest Gasping for Breath  ######*/
 
-/*######
-## spell_rescue_noyade
-######*/
-class spell_rescue_noyade : public SpellScriptLoader
+enum qGFB
+{
+    QUEST_GASPING_FOR_BREATH          = 14395,
+
+    NPC_QGFB_KILL_CREDIT              = 36450,
+    NPC_DROWNING_WATCHMAN             = 36440,
+
+    SPELL_RESCUE_DROWNING_WATCHMAN    = 68735,
+    SPELL_SUMMON_SPARKLES             = 69253,
+    SPELL_DROWNING                    = 68730,
+
+    GO_SPARKLES                       = 197333,
+
+    DROWNING_WATCHMAN_RANDOM_SAY      = 0,
+};
+
+class npc_drowning_watchman : public CreatureScript
 {
 public:
-    spell_rescue_noyade() : SpellScriptLoader("spell_rescue_noyade") { }
+    npc_drowning_watchman() : CreatureScript("npc_drowning_watchman") { }
 
-    class spell_rescue_noyade_SpellScript : public SpellScript
+    CreatureAI* GetAI(Creature* creature) const
     {
-        PrepareSpellScript(spell_rescue_noyade_SpellScript);
+        return new npc_drowning_watchmanAI (creature);
+    }
 
-        bool Validate(SpellInfo const* /*spellInfo*/)
+    struct npc_drowning_watchmanAI : public ScriptedAI
+    {
+        npc_drowning_watchmanAI(Creature* creature) : ScriptedAI(creature)
         {
-            if (!sSpellMgr->GetSpellInfo(68735))
-                return false;
-            return true;
+            reset = true;
+            despawn = false;
+            exit = false;
+            uiDespawnTimer = 10000;
         }
 
-        void HandleEffectDummy(SpellEffIndex /*effIndex*/)
+        uint32 uiDespawnTimer;
+        bool reset;
+        bool despawn;
+        bool exit;
+
+        void SpellHit(Unit* caster, const SpellInfo* spell)
         {
-            if (GetCaster()->GetTypeId() != TYPEID_PLAYER || GetHitUnit()->GetTypeId() != TYPEID_UNIT || GetCaster()->GetVehicleKit() == NULL)
-                return ;
-            if (GetCaster()->ToPlayer()->GetQuestStatus(14395) != QUEST_STATUS_INCOMPLETE)
+            if (spell->Id == SPELL_RESCUE_DROWNING_WATCHMAN)
             {
-                GetCaster()->RemoveAurasDueToSpell(68735);
-                return;
+                despawn = false;
+                uiDespawnTimer = 10000;
+                me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+                me->RemoveAura(SPELL_DROWNING);
+                me->EnterVehicle(caster);
+
+                if (GameObject* go = me->FindNearestGameObject(GO_SPARKLES, 10.0f))
+                    go->Delete();
             }
-            if (GetCaster()->IsInWater())
-                GetHitUnit()->CastCustomSpell(VEHICLE_SPELL_RIDE_HARDCODED, SPELLVALUE_BASE_POINT0, 1, GetCaster(), false);
-            else if (GetHitUnit()->GetVehicle())
-            {
-                GetCaster()->GetVehicleKit()->RemoveAllPassengers();
-                GetHitUnit()->RemoveAurasDueToSpell(68730);
-                GetHitUnit()->CastSpell(GetHitUnit(), 68442, true);
-                GetCaster()->ToPlayer()->KilledMonsterCredit(36440,0);
-                GetCaster()->RemoveAurasDueToSpell(68735);
-                GetHitUnit()->ToCreature()->DespawnOrUnsummon(5000);
-                GetHitUnit()->ToCreature()->AI()->Talk(0);
-            }
-            else
-                GetCaster()->RemoveAurasDueToSpell(68735);
         }
 
-        void Register()
+        void OnExitVehicle(Unit* /*vehicle*/, uint32 /*seatId*/)
         {
-            OnEffectHitTarget += SpellEffectFn(spell_rescue_noyade_SpellScript::HandleEffectDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
+            if (!exit)
+            {
+                float x, y, z, o;
+                me->GetPosition(x, y, z, o);
+                me->SetHomePosition(x, y, z, o);
+                me->Relocate(x, y, z, o);
+                reset = true;
+                despawn = true;
+                Reset();
+            }
+        }
+
+        void Reset()
+        {
+            exit = false;
+
+            if (reset)
+            {
+                DoCast(SPELL_DROWNING);
+				me->SetVisible(true);
+                DoCast(SPELL_SUMMON_SPARKLES);
+                me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+                reset = false;
+            }
+        }
+
+        void UpdateAI(uint32 const diff)
+        {
+            if (despawn)
+            {
+                if (uiDespawnTimer <= diff)
+                {
+                    if (GameObject* go = me->FindNearestGameObject(GO_SPARKLES, 10.0f))
+                        go->Delete();
+
+                    reset = true;
+                    despawn = false;
+                    uiDespawnTimer = 10000;
+                    me->DespawnOrUnsummon();
+                }
+                else
+                    uiDespawnTimer -= diff;
+            }
         }
     };
+};
 
-    SpellScript* GetSpellScript() const
+class npc_prince_liam_greymane : public CreatureScript
+{
+public:
+    npc_prince_liam_greymane() : CreatureScript("npc_prince_liam_greymane") { }
+
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new spell_rescue_noyade_SpellScript();
+        return new npc_prince_liam_greymaneAI (creature);
     }
+
+    struct npc_prince_liam_greymaneAI : public ScriptedAI
+    {
+        npc_prince_liam_greymaneAI(Creature* creature) : ScriptedAI(creature){ }
+
+        void MoveInLineOfSight(Unit* who)
+        {
+            if (who->GetEntry() == NPC_DROWNING_WATCHMAN)
+            {
+                if (who->IsInWater() || !who->GetVehicle())
+                    return;
+
+                if (who->GetDistance(-1897.0f, 2519.97f, 1.50667f) < 5.0f)
+                    if (Unit* unit = who->GetVehicleBase())
+                    {
+                        if (Creature* watchman = who->ToCreature())
+                        {
+							watchman->AI()->Talk(DROWNING_WATCHMAN_RANDOM_SAY);
+                            watchman->DespawnOrUnsummon(15000);
+                            watchman->SetStandState(UNIT_STAND_STATE_KNEEL);
+                            CAST_AI(npc_drowning_watchman::npc_drowning_watchmanAI, watchman->AI())->exit = true;
+                            CAST_AI(npc_drowning_watchman::npc_drowning_watchmanAI, watchman->AI())->reset = true;
+                            who->ExitVehicle();
+                            unit->RemoveAura(SPELL_RESCUE_DROWNING_WATCHMAN);
+                        }
+
+                        if (Player* player = unit->ToPlayer())
+                            player->KilledMonsterCredit(NPC_QGFB_KILL_CREDIT, 0);
+                    }
+            }
+        }
+
+        void UpdateAI(uint32 const diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
 };
 
 /*###### Quest Gasping for Breath END  ######*/
@@ -4149,6 +4290,7 @@ public:
               terrainswap.insert(655);
               phaseId.insert(1);
               player->GetSession()->SendSetPhaseShift(phaseId, terrainswap);
+			  player->SaveToDB();
 			}
 
 		return true;
@@ -4180,7 +4322,8 @@ void AddSC_gilneas()
     new npc_crowley_horse();
 	new npc_slain_watchman();
 	new npc_horrid_abomination();
-    new spell_keg_placed();
+	new npc_gwen_armstead_qi();
+    //new spell_keg_placed();
     new npc_king_greymanes_horse();
     new npc_krennan_aranas_c2();
     new npc_bloodfang_stalker_c1();
@@ -4197,7 +4340,9 @@ void AddSC_gilneas()
 
     new go_mandragore();
 	new go_merchant_square_door();
-    new spell_rescue_noyade();
+    new npc_drowning_watchman();
+    new npc_prince_liam_greymane();
+    //new spell_rescue_noyade();
     new spell_round_up_horse();
     new npc_trigger_quest_24616();
 
