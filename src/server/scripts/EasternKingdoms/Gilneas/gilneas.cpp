@@ -2815,6 +2815,41 @@ public:
     }
 };
 
+/*######
+## Quest Invasion 14321
+######*/
+
+enum sWatchman
+{
+    QUEST_INVASION               = 14321,
+    NPC_FORSAKEN_ASSASSIN        = 36207,
+    SPELL_BACKSTAB               = 75360,
+    NPC_FORSAKEN_ASSASSIN_SAY    = 0,
+};
+
+class npc_slain_watchman : public CreatureScript
+{
+public:
+    npc_slain_watchman() : CreatureScript("npc_slain_watchman") { }
+	
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_INVASION)
+        {	
+            if (Creature* forsaken = player->SummonCreature(NPC_FORSAKEN_ASSASSIN, -1918.782104f,2393.562988f,30.192066f,6.265f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 6000))
+            {
+                forsaken->SetPhaseMask(1, true);
+				forsaken->SetVisible(true);
+                forsaken->AI()->AttackStart(player);
+                forsaken->CastSpell(player, SPELL_BACKSTAB, false);
+				forsaken->AI()->Talk(NPC_FORSAKEN_ASSASSIN_SAY);
+            }
+        }
+
+        return true;
+    }
+};
+
 /* ######
 ## You Can't Take 'Em Alone - 14348
 ###### */
@@ -4143,6 +4178,7 @@ void AddSC_gilneas()
     new npc_lord_darius_crowley_c3();
     new npc_king_genn_greymane();
     new npc_crowley_horse();
+	new npc_slain_watchman();
 	new npc_horrid_abomination();
     new spell_keg_placed();
     new npc_king_greymanes_horse();
