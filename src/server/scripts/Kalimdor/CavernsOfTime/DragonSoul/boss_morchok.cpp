@@ -1,9 +1,19 @@
+/* ScriptData
+SDName: boss_morchok
+SD%Complete: 95%
+SDComment:
+SDCategory: Boss Morchok
+EndScriptData
+*/
+
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "GameObjectAI.h"
 #include "dragon_soul.h"
 
 #define SPELL_STOMP RAID_MODE(109033, 109034, 103414, 108571)
+
+#define SPELL_KORCHOM RAID_MODE(109033, 109034, 109017, 109017)
 
 enum Yells
 {
@@ -16,10 +26,13 @@ enum Yells
 enum Spells
 {
     SPELL_CRUSH_ARMOR               = 103687,
+	SPELL_CLEAR_DEBUFFS             = 34098,
     SPELL_RESONATING_CRYSTAL        = 103640,
     SPELL_FURIOUS                   = 103846,
+	SPELL_SUMMON_KOHCROM            = 109017,
     SPELL_EARTHS_VENGEANCE_CHANNEL  = 103176,
     SPELL_EARTHS_VENGEANCE          = 103178,
+	SPELL_SUMMON                    = 22951,
     SPELL_BLACK_BLOOD_OF_THE_EARTH  = 103851,
     SPELL_BLACK_BLOOD_SUM           = 103180,
     SPELL_RESONATING_CRYSTAL_EX     = 108572,
@@ -27,6 +40,7 @@ enum Spells
     SPELL_DANGER                    = 103534,
     SPELL_WARNING                   = 103536,
     SPELL_SAFE                      = 103541,
+    SPELL_VORTEX	                = 103821,
     SPELL_ENRAGE                    = 47008
 };
 
@@ -36,21 +50,33 @@ enum Events
     EVENT_CRUSH_ARMOR               = 2,
     EVENT_RESONATING_CRYSTAL        = 3,
     EVENT_FURIOUS                   = 4,
-    EVENT_EARTHS_VENGEANCE          = 5,
-    EVENT_BLACK_BLOOD_OF_THE_EARTH  = 6,
-    EVENT_EXPLODE                   = 7,
-    EVENT_DESPAWN                   = 8,
-    EVENT_RESONATING                = 9,
-    EVENT_ANTI_EXPLODE              = 10,
-    EVENT_CLEANING                  = 11,
-    EVENT_PHASE_NORMAL              = 12,
-    EVENT_PHASE_BLACK_BLOOD         = 13,
-    EVENT_EARTHS_VENGEANCE_DROP     = 14,
-    EVENT_ENRAGE                    = 15,
+	EVENT_KORCHOM                   = 5,
+    EVENT_EARTHS_VENGEANCE          = 6,
+    EVENT_BLACK_BLOOD_OF_THE_EARTH  = 7,
+	EVENT_SUMMON                    = 8,
+	EVENT_EXPLODE                   = 9,
+    EVENT_EXPLODE_1                 = 10,
+	EVENT_EXPLODE_2                 = 11,
+    EVENT_EXPLODE_3                 = 12,
+	EVENT_UN_EXPLODE_1              = 13,
+	EVENT_UN_EXPLODE_2              = 14,
+	EVENT_UN_EXPLODE_3              = 15,
+    EVENT_DESPAWN                   = 16,
+    EVENT_RESONATING                = 17,
+    EVENT_ANTI_EXPLODE              = 18,
+    EVENT_CLEANING                  = 19,
+    EVENT_PHASE_NORMAL              = 20,
+    EVENT_PHASE_BLACK_BLOOD         = 21,
+    EVENT_EARTHS_VENGEANCE_DROP     = 22,
+    EVENT_ENRAGE                    = 23,
  
     // npc black blood
-    EVENT_BLACK_BLOOD               = 16,
-    EVENT_BLACK_BLOOD_DESPAWN       = 17 
+    EVENT_BLACK_BLOOD               = 24,
+    EVENT_BLACK_BLOOD_DESPAWN       = 25,
+    // Npc Morchok
+	EVENT_VORTEX                    = 26,
+	// Npc Kohcrom
+	EVENT_SUMMON_KOHCROM            = 27
 };
 
 enum Phases
@@ -64,6 +90,11 @@ enum Phases
 enum Auras
 {
     AURA_BLACK_BLOOD_OF_THE_EARTH = 103180
+};
+
+enum Actions
+{
+	ACTION_SUMMON			= 1,
 };
 
 Position const BlackBloodPositions[105] =
@@ -206,19 +237,20 @@ public:
             events.ScheduleEvent(EVENT_CRUSH_ARMOR, urand(10000, 15000));
             events.ScheduleEvent(EVENT_RESONATING_CRYSTAL, urand(25000, 35000));
             events.ScheduleEvent(EVENT_PHASE_BLACK_BLOOD, urand(45000, 55000));
+			events.ScheduleEvent(IsHeroic() ? EVENT_SUMMON_KOHCROM : EVENT_SUMMON_KOHCROM, 15000, 0);
             events.ScheduleEvent(EVENT_ENRAGE, 447000);
         }
 
         void EnterCombat(Unit* /*who*/)
         {
-		    instance->SetBossState(BOSS_MORCHOK, IN_PROGRESS);
+		           instance->SetBossState(BOSS_MORCHOK, IN_PROGRESS);		
             Talk(SAY_AGGRO);
             _EnterCombat();
         }
 
         void JustDied(Unit* /*killer*/)
         {
-		    instance->SetBossState(BOSS_MORCHOK, DONE);
+		           instance->SetBossState(BOSS_MORCHOK, DONE);
             Talk(SAY_DEATH);
 			DespawnGameobjects(209596, 100.0f);
         }
@@ -239,6 +271,43 @@ public:
             if (victim->GetTypeId() == TYPEID_PLAYER)
                 Talk(SAY_PLAYER_KILL);
         }
+		
+		void JustSummoned(Creature* summoned) 
+			{
+				summons.Summon(summoned);
+
+				if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+				{
+					summoned->AI()->AttackStart(target);
+					summoned->AddThreat(target, 250.0f);
+					DoZoneInCombat(summoned);
+				}
+
+				if (summoned->GetEntry() == NPC_KOHCROM)
+				{
+						summoned->AI()->AttackStart(me->GetVictim());
+						summoned->SetMaxHealth(MorchokHealth);
+						summoned->SetHealth(me->GetHealth());
+						summoned->setActive(true);
+						summoned->setFaction(14);
+
+					DoZoneInCombat(summoned);
+				}
+			}
+
+			void DoAction(int32 const action) 
+			{
+				switch (action)
+				{
+					case ACTION_SUMMON:
+						DoCast(me, SPELL_CLEAR_DEBUFFS);
+						DoCast(me, SPELL_KORCHOM);
+						Talk(SAY_PLAYER_KILL);
+						break;
+					default:
+						break;
+				}
+			}
 
         void DespawnGameobjects(uint32 entry, float distance)
         {
@@ -266,6 +335,8 @@ public:
                 me->SetObjectScale(0.3f);
             else if(me->HealthBelowPct(20))
                 DoCast(me, SPELL_FURIOUS);
+		    else if(me->HealthBelowPct(20)) 
+                DoCastVictim(SPELL_KORCHOM);
         }
 
         void UpdateAI(uint32 const diff)
@@ -358,9 +429,13 @@ public:
                     me->SummonGameObject(209596,-1963.92f, -2414.19f, 68.6589f, 5.57749f, 0, 0, 0, 0, 0);
                     me->SummonGameObject(209596,-1983.92f, -2434.19f, 68.3592f, 5.57749f, 0, 0, 0, 0, 0);
                     me->SummonGameObject(209596,-2018.92f, -2414.19f, 70.4433f, 5.57748f, 0, 0, 0, 0, 0);
-                    me->SummonGameObject(209596,-2018.92f, -2429.19f, 70.4409f, 5.57748f, 0, 0, 0, 0, 0);    
+                    me->SummonGameObject(209596,-2018.92f, -2429.19f, 70.4409f, 5.57748f, 0, 0, 0, 0, 0);
      
-                    events.ScheduleEvent(EVENT_BLACK_BLOOD_OF_THE_EARTH, 5000, 0, PHASE_BLACK_BLOOD);
+                    events.ScheduleEvent(EVENT_SUMMON, 5000, 0, PHASE_BLACK_BLOOD);
+                    break;
+		            case EVENT_SUMMON:
+                    DoCastAOE(SPELL_SUMMON);
+                    events.ScheduleEvent(EVENT_BLACK_BLOOD_OF_THE_EARTH, 100, 0, PHASE_BLACK_BLOOD);
                     break;
                 case EVENT_BLACK_BLOOD_OF_THE_EARTH:
                      for (int8 i = 0; i < 105; i++)
@@ -377,6 +452,15 @@ public:
                 case EVENT_PHASE_NORMAL:
                     events.SetPhase(PHASE_NORMAL);
                     events.ScheduleEvent(EVENT_PHASE_BLACK_BLOOD, urand(30000, 50000));
+                    break;
+               case EVENT_SUMMON_KOHCROM:
+                    if(me->GetHealthPct() < 20)
+                    {
+                        DoCastVictim(SPELL_SUMMON_KOHCROM);
+                        events.CancelEvent(EVENT_FURIOUS);
+                    }
+                    else
+				    events.ScheduleEvent(IsHeroic() ? EVENT_SUMMON_KOHCROM : EVENT_SUMMON_KOHCROM, 15000, 0);
                     break;
                 case EVENT_ENRAGE:
                     me->InterruptNonMeleeSpells(true);
@@ -396,6 +480,113 @@ public:
     {
         return new boss_morchokAI(creature);
     }
+};
+
+class npc_kohcrom : public CreatureScript
+          {
+          public:
+          npc_kohcrom() : CreatureScript("npc_kohcrom") { }
+
+          struct npc_kohcromAI : public ScriptedAI
+          {
+          npc_kohcromAI(Creature* creature) : ScriptedAI(creature)
+          {
+          _instance = creature->GetInstanceScript();
+          }
+
+          uint32 MorchokGUID;
+          uint32 Raid10H;
+          uint32 Raid25H;
+
+            void EnterCombat(Unit* /*who*/) 
+            {
+             DoZoneInCombat();
+             _events.Reset();
+             _events.ScheduleEvent(EVENT_STOMP, 14000);
+             _events.ScheduleEvent(EVENT_CRUSH_ARMOR, 15000);
+             _events.ScheduleEvent(EVENT_VORTEX, 71000);
+
+            
+             _instance->SetData(DATA_KOHCROM_HEALTH, me->GetHealth());
+            }
+
+            void DamageTaken(Unit* /*attacker*/, uint32& damage) 
+            {
+             _instance->SetData(DATA_KOHCROM_HEALTH, me->GetHealth() >= damage ? me->GetHealth() - damage : 0);
+
+                if(me->HealthBelowPctDamaged(80, damage))
+                {
+                 me->SetObjectScale(0.7);
+                }
+                else if(me->HealthBelowPctDamaged(70, damage))
+                {
+                 me->SetObjectScale(0.6);
+                }
+                else if(me->HealthBelowPctDamaged(60, damage))
+                {
+                 me->SetObjectScale(0.5);
+                }
+                else if(me->HealthBelowPctDamaged(50, damage))
+                {
+                 me->SetObjectScale(0.4);
+                }
+                else if(me->HealthBelowPctDamaged(40, damage))
+                {
+                 me->SetObjectScale(0.3);
+                }
+                else if(me->HealthBelowPctDamaged(20, damage))
+                {
+                 DoCast(me, SPELL_FURIOUS);
+                }
+            }
+
+            void JustDied(Unit* killer) 
+            {
+             _instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+             _instance->SetData(DATA_KOHCROM_HEALTH, 0);
+            }
+
+            void UpdateAI(uint32 const diff) 
+{
+               if (!UpdateVictim())
+               return;
+
+               if (me->GetHealth() > _instance->GetData(DATA_MORCHOK) && _instance->GetData(DATA_MORCHOK) != 0)
+               me->SetHealth(_instance->GetData(DATA_MORCHOK));
+
+               _events.Update(diff);
+
+               if (me->HasUnitState(UNIT_STATE_CASTING))
+               return;
+
+               while (uint32 eventId = _events.ExecuteEvent())
+               {
+               switch (eventId)
+                {
+                case EVENT_STOMP:
+                   DoCastAOE(SPELL_STOMP);
+                  _events.ScheduleEvent(EVENT_STOMP, 14000);
+                break;
+
+                case EVENT_CRUSH_ARMOR:
+                  DoCastVictim(SPELL_CRUSH_ARMOR);
+                 _events.ScheduleEvent(EVENT_CRUSH_ARMOR, 15000);
+                break;
+                } 
+                }
+
+                   DoMeleeAttackIfReady();
+                 }
+
+         private:
+         EventMap _events;
+         InstanceScript* _instance;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const 
+        {
+         return GetDragonSoulAI<npc_kohcromAI>(creature);
+        }
 };
 
 class npc_resonating_crystal : public CreatureScript
@@ -418,8 +609,8 @@ public:
         {
             _events.Reset();
             _events.ScheduleEvent(EVENT_RESONATING, 100);
-            _events.ScheduleEvent(EVENT_ANTI_EXPLODE, 500);
-            _events.ScheduleEvent(EVENT_EXPLODE, 11900);
+            _events.ScheduleEvent(EVENT_EXPLODE, 500);
+            _events.ScheduleEvent(EVENT_ANTI_EXPLODE, 11900);
             _events.ScheduleEvent(EVENT_DESPAWN, 12000);
             count = 0;
         }
@@ -445,26 +636,9 @@ public:
                 {
                 case EVENT_RESONATING:
                     DoCast(me, SPELL_RESONATING_CRYSTAL_AURA);
+					_events.ScheduleEvent(EVENT_RESONATING, 100);
                     break;
                 case EVENT_EXPLODE:
-                    {
-                        Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
-                        if (!PlayerList.isEmpty())
-                        {
-                            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                            {
-                                if (i->getSource()->isAlive())
-                                {
-                                    i->getSource()->RemoveAurasDueToSpell(SPELL_SAFE);
-                                    i->getSource()->RemoveAurasDueToSpell(SPELL_WARNING);
-                                    i->getSource()->RemoveAurasDueToSpell(SPELL_DANGER);
-                                }
-                            }
-                        }
-                        DoCast(me, SPELL_RESONATING_CRYSTAL_EX);
-                        break;
-                    }
-                case EVENT_ANTI_EXPLODE:
                     {
                         count = 0;
                         Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
@@ -516,7 +690,26 @@ public:
                                 }
                             }
                         }
-                        _events.ScheduleEvent(EVENT_ANTI_EXPLODE, 500);
+                        _events.ScheduleEvent(EVENT_EXPLODE, 500);
+                        break;
+                    }
+					                case EVENT_ANTI_EXPLODE:
+                    {
+                        Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
+                        if (!PlayerList.isEmpty())
+                        {
+                            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                            {
+                                if (i->getSource()->isAlive())
+                                {
+                                    i->getSource()->RemoveAurasDueToSpell(SPELL_SAFE);
+                                    i->getSource()->RemoveAurasDueToSpell(SPELL_WARNING);
+                                    i->getSource()->RemoveAurasDueToSpell(SPELL_DANGER);
+                                }
+                            }
+                        }
+                        DoCast(me, SPELL_RESONATING_CRYSTAL_EX);
+						_events.ScheduleEvent(EVENT_ANTI_EXPLODE, 11900);
                         break;
                     }
                 case EVENT_DESPAWN:
@@ -535,6 +728,7 @@ public:
                             }
                         }
                         me->DespawnOrUnsummon();
+						_events.ScheduleEvent(EVENT_DESPAWN, 12000);
                         break;
                     }
                 default:
@@ -763,6 +957,7 @@ class npc_black_blood_of_the_earth : public CreatureScript // 55267
 void AddSC_boss_morchok()
 {
     new boss_morchok();
+    new npc_kohcrom();
     new npc_resonating_crystal();
     new npc_minnor_resonating_crystal();
     new spell_morchok_stomp();
