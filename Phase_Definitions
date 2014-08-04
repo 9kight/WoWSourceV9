@@ -1,0 +1,215 @@
+phase_definitions Table
+
+[Assignment]
+
+`zoneId`
+=================
+The zoneId represents the zoneId from the zone where the definition is valid.
+Only definitions are applied to the player if the current zoneid of the player is the same as in the phase definition.
+
+That means:
+- Deepholm definitions must have the zoneId: 5042
+- Mount Hyjal definitions must have the zoneId: 616
+
+`entry`
+=================
+Entrys are unique per zoneId.
+Phase Definitions are applied in the order lowest entry -> highest entry.
+
+It is important that you use higher entrys for later phases than lower phases, because
+if you don't, you will loose the possibility to realize complex phasing dependent on huge quest chains.
+
+[Conditions]
+
+If the conditions of the phase definition fits to the player, the phasemask, terrainswap and phaseid will be applied/ send
+to the player.
+
+Condition Structure:
+
+ConditionSourceType : CONDITION_SOURCE_TYPE_PHASE_DEFINITION (23)
+SourceGroup : Is the zoneId of the phase definition.
+SourceEntry : Is the entry of the phase deinition.
+
+Currently you can only use following condition types:
+
+- CONDITION_QUESTREWARDED
+- CONDITION_QUESTTAKEN
+- CONDITION_QUEST_COMPLETE
+- CONDITION_QUEST_NONE
+- CONDITION_TEAM
+- CONDITION_CLASS
+- CONDITION_RACE
+- CONDITION_INSTANCE_DATA
+- CONDITION_LEVEL
+
+The system supports dynamically recalculation on quest status or level change.
+
+[Phasing]
+
+`phasemask`
+=================
+If the phase definition fits to the player the phasemask is added to the player (bitmask addition - current_phasemask |= phasemask).
+
+`terrainswapmap`
+=================
+Usually taken from sniffs, represents the map from where the client takes some map tiles and shows it in the current view.
+For example map: 719 (Mount Hyjal burned default terrainswap).
+
+If you want to overwrite an existing terrainswap use the flag 1 (explained later) and the default map (1 - Kalimdor to reset the Mount Hyjal terrainswap).
+
+`phaseId`
+=================
+Usually taken from sniffs and 'phase.dbc', is sent to the client.
+
+[Extended Phasing - Flags]
+
+Now you should be able to write simple phase definitions.
+
+But you can use flags to make the phasing more complex.
+
+`flags`
+=================
+
+This flags are helping you to disable some phase definitions without using "negated conditions".
+
+We are looking at a short example:
+
+__________________________________________________
+This is a small Questchain with 2 phasmasks 2, 4
+And we want to show the player 2 different npcs after each quest at the same place. (2 -> 25362, 4 -> 27236)
+
+Our creature Insert would look like this:
+
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`) VALUES
+(guid+1, 25362, map, spawnMask, 2 /*phasemask*/, x, y, z), // will be visible if you have the quest rewarded: 12345
+(guid+2, 27236, map, spawnMask, 4 /*phasemask*/, x, y, z); // will be visible if you have the quest rewarded: 54321
+
+Quest 12345
+|
+V
+Quest 54321
+
+The zone in which we like to phase is the "Kelp'Thar Forest" subzone in vashj'ir, that means we have to use its zone id (4815).
+You can find out the zoneId by using the .gps command.
+
+The phase_definition table has no entry for the zone 4815 so we are using the entrys 1-3.
+We start with the quest that you accept first: 25362.
+
+If you get the quest 25362 rewarded you will be automatically phased into phasemask 2 to see the npc 25362 (guid+1).
+
+Our Definition looks like this:
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `phaseId`, `terrainswapmap`, `flags`, `comment`) VALUES
+(4815, 1, 2, 0, 0, 0, 'Example phasemask 2 to see npc 25362');
+
+zoneId -> Kelp'Thar Forest (4815)
+entry -> because it is the first definition
+phasemask -> 2
+phaseId -> 0 (we need no phase id)
+terrainswapmap -> (we don't want any terrainswap. Theres no terrainswap available for vashjir too).
+flags -> 0
+
+If you test this definition without a condition linked to this you will be automatically phased into phasemask 2,
+because the definition is active by default.
+
+A simple quest rewarded condition linked to our phase definition will look like this:
+
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(23, -- CONDITION_SOURCE_TYPE_PHASE_DEFINITION has source type 23
+4815, -- This is the zone of the linked definition -> Kelp'Thar Forest (4815)
+1, -- This is the entry of the linked definition
+0, 0, 8, 0, 12345, 0, 0, 0, 0, '', ''); -- This is the rest of a simple quest rewarded condition.
+
+Phase Definition for Quest: 54321
+==================================
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `phaseId`, `terrainswapmap`, `flags`, `comment`) VALUES
+(4815, 2, 4, 0, 0, 1, 'Example phasemask 4 to see npc 54321');
+
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(23, 4815, 2, 0, 0, 8, 0, 54321, 0, 0, 0, 0, '', '');
+
+This looks like the same as in above example with modified questid, entry and phasemask with one exeption:
+
+The flag column is not 0!
+
+Now you will learn to use another feature of the system: flags.
+
+Flags are used to define in which way phasemasks are added to the players phase if the phase condition fits to the player and how the phase is
+calculated further.
+
+You have to mention: Every phasemask is added from the lowest entry to the hightest entry.
+
+That means if you define following definitions...
+
+Entry 3, Phasemask 1, Flags 0
+Entry 1, Phasemask 8, Flags 0
+Entry 2, Phasemask 2, Flags 0
+
+the PhaseMgr would add it like this...
+
+| Entry 1, Phasemask 8, Flags 0
+|.. 8
+| Entry 2, Phasemask 2, Flags 0
+|.. 10
+| Entry 3, Phasemask 1, Flags 0
+V.. 11
+-----------------------------------
+Phasemask: 8|2|1 = 11
+__________________________________________
+-> PHASE_FLAG_OVERWRITE_EXISTING = 0x1 (1)
+
+If you define PHASE_FLAG_OVERWRITE_EXISTING the phase definition sets the current phasemask to 0.
+After this the phasemask of the definition is added
+
+Example:
+
+Entry 1, Phasemask 8, Flags 0
+Entry 2, Phasemask 16, Flags 0
+Entry 3, Phasemask 2, Flags 1
+Entry 4, Phasemask 1, Flags 0
+
+| Entry 1, Phasemask 8, Flags 0
+|.. 8
+| Entry 2, Phasemask 16, Flags 0
+|.. 24
+|-> Set to 0
+| Entry 3, Phasemask 2, Flags 1
+|.. 2
+| Entry 4, Phasemask 1, Flags 0
+V.. 3
+-----------------------------------
+Phasemask: 2|1 = 3
+__________________________________________
+-> PHASE_FLAG_NO_MORE_PHASES = 0x2 (2)
+
+If you define PHASE_FLAG_NO_MORE_PHASES the phasemgr will abort the phase calculation after the definition was added.
+
+Example:
+
+Entry 1, Phasemask 8, Flags 2
+Entry 2, Phasemask 2, Flags 0
+Entry 3, Phasemask 1, Flags 0
+
+| Entry 1, Phasemask 8, Flags 2
+|.. 8
+|-> Abort
+
+-----------------------------------
+Phasemask: 8 = 8
+
+__________________________________________
+-> PHASE_FLAG_NEGATE_PHASE = 0x4 (3)
+
+If you define PHASE_FLAG_NEGATE_PHASE the phasemgr will negate instead to add the phasemask.
+
+Entry 1, Phasemask 10, Flags 0
+Entry 2, Phasemask 2, Flags 4
+Entry 3, Phasemask 1, Flags 0
+
+| Entry 1, Phasemask 10, Flags 0
+|.. 10
+| Entry 2, Phasemask 2, Flags 4
+|.. 8 (10 &~ 2 or in this case 10 - 2)
+| Entry 3, Phasemask 1, Flags 0
+V.. 9
+-----------------------------------
+Phasemask: (10 &~ 2) | 1 = 9 
