@@ -1073,16 +1073,6 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         }
     }
 
-    if (Group* group = pCurrChar->GetGroup())
-    {
-        if (group->isLFGGroup())
-        {
-            LfgDungeonSet Dungeons;
-            Dungeons.insert(sLFGMgr->GetDungeon(group->GetGUID()));
-            sLFGMgr->SetSelectedDungeons(pCurrChar->GetGUID(), Dungeons);
-            sLFGMgr->SetState(pCurrChar->GetGUID(), sLFGMgr->GetState(group->GetGUID()));
-        }
-    }
 
     if (!pCurrChar->GetMap()->AddPlayerToMap(pCurrChar) || !pCurrChar->CheckInstanceLoginValid())
     {
