@@ -3956,6 +3956,17 @@ class spell_gen_luck_of_the_draw : public SpellScriptLoader
                         return;
                     }
 
+
+                    LFGDungeonEntry const* randomDungeon = sLFGDungeonStore.LookupEntry(*itr);
+                    if (Group* group = owner->GetGroup())
+                        if (Map const* map = owner->GetMap())
+                            if (group->isLFGGroup())
+                                if (uint32 dungeonId = sLFGMgr->GetDungeon(group->GetGUID(), true))
+                                    if (LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(dungeonId))
+                                        if (uint32(dungeon->map) == map->GetId() && dungeon->difficulty == uint32(map->GetDifficulty()))
+                                            if (randomDungeon && randomDungeon->type == 6)
+                                                return; // in correct dungeon
+
                     Remove(AURA_REMOVE_BY_DEFAULT);
                 }
             }
