@@ -1,4 +1,5 @@
 /*
+<<<<<<< HEAD
  * Copyright (C) 2014 WoWSource 4.3.4
  *
  * Do Not Share The SourceCode
@@ -14,11 +15,30 @@ SDCategory: LFG
 EndScriptData
 */
 
+=======
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+>>>>>>> fc8fb590380a8581e688f47ce96cb1810f2f650f
 #ifndef _LFG_H
 #define _LFG_H
 
 #include "Common.h"
 
+<<<<<<< HEAD
 namespace lfg
 {
 
@@ -36,11 +56,23 @@ enum LfgRoles
     PLAYER_ROLE_TANK                             = 0x02,
     PLAYER_ROLE_HEALER                           = 0x04,
     PLAYER_ROLE_DAMAGE                           = 0x08
+=======
+#define LFG_MULTYPLIER 100
+
+enum LfgRoles
+{
+    ROLE_NONE                                    = 0x00,
+    ROLE_LEADER                                  = 0x01,
+    ROLE_TANK                                    = 0x02,
+    ROLE_HEALER                                  = 0x04,
+    ROLE_DAMAGE                                  = 0x08
+>>>>>>> fc8fb590380a8581e688f47ce96cb1810f2f650f
 };
 
 enum LfgUpdateType
 {
     LFG_UPDATETYPE_DEFAULT                       = 0,      // Internal Use
+<<<<<<< HEAD
     LFG_UPDATETYPE_LEADER_UNK1                   = 1,      // FIXME: At group leave
     LFG_UPDATETYPE_ROLECHECK_ABORTED             = 4,
     LFG_UPDATETYPE_JOIN_QUEUE                    = 6,
@@ -58,6 +90,21 @@ enum LfgUpdateType
     LFG_UPDATETYPE_DUNGEON_FINISHED              = 25,
     LFG_UPDATETYPE_PARTY_ROLE_NOT_AVAILABLE      = 43,
     LFG_UPDATETYPE_JOIN_LFG_OBJECT_FAILED        = 45,
+=======
+    LFG_UPDATETYPE_LEADER                        = 1,
+    LFG_UPDATETYPE_ROLECHECK_ABORTED             = 4,
+    LFG_UPDATETYPE_JOIN_PROPOSAL                 = 5,
+    LFG_UPDATETYPE_ROLECHECK_FAILED              = 6,
+    LFG_UPDATETYPE_REMOVED_FROM_QUEUE            = 7,
+    LFG_UPDATETYPE_PROPOSAL_FAILED               = 8,
+    LFG_UPDATETYPE_PROPOSAL_DECLINED             = 9,
+    LFG_UPDATETYPE_GROUP_FOUND                   = 10,
+    LFG_UPDATETYPE_ADDED_TO_QUEUE                = 12,
+    LFG_UPDATETYPE_PROPOSAL_BEGIN                = 13,
+    LFG_UPDATETYPE_CLEAR_LOCK_LIST               = 14,
+    LFG_UPDATETYPE_GROUP_MEMBER_OFFLINE          = 15,
+    LFG_UPDATETYPE_GROUP_DISBAND                 = 16
+>>>>>>> fc8fb590380a8581e688f47ce96cb1810f2f650f
 };
 
 enum LfgState
@@ -75,7 +122,11 @@ enum LfgState
 /// Instance lock types
 enum LfgLockStatusType
 {
+<<<<<<< HEAD
     LFG_LOCKSTATUS_NONE                          = 0,
+=======
+    LFG_LOCKSTATUS_OK                            = 0,      // Internal use only
+>>>>>>> fc8fb590380a8581e688f47ce96cb1810f2f650f
     LFG_LOCKSTATUS_INSUFFICIENT_EXPANSION        = 1,
     LFG_LOCKSTATUS_TOO_LOW_LEVEL                 = 2,
     LFG_LOCKSTATUS_TOO_HIGH_LEVEL                = 3,
@@ -86,6 +137,7 @@ enum LfgLockStatusType
     LFG_LOCKSTATUS_ATTUNEMENT_TOO_HIGH_LEVEL     = 1002,
     LFG_LOCKSTATUS_QUEST_NOT_COMPLETED           = 1022,
     LFG_LOCKSTATUS_MISSING_ITEM                  = 1025,
+<<<<<<< HEAD
     LFG_LOCKSTATUS_NOT_IN_SEASON                 = 1031,
     LFG_LOCKSTATUS_MISSING_ACHIEVEMENT           = 1034
 };
@@ -121,5 +173,26 @@ std::string GetRolesString(uint8 roles);
 std::string GetStateString(LfgState state);
 
 } // namespace lfg
+=======
+    LFG_LOCKSTATUS_NOT_IN_SEASON                 = 1031
+};
+
+enum LfgRewardCurrency
+{
+    LFG_REWARD_JUSTICE = 395,
+    LFG_REWARD_VALOR = 396
+};
+
+/// Dungeon and reason why player can't join
+struct LfgLockStatus
+{
+    uint32 dungeon;                                        ///< Dungeon Id
+    LfgLockStatusType lockstatus;                          ///< Lock type
+};
+
+typedef std::set<uint32> LfgDungeonSet;
+typedef std::map<uint32, LfgLockStatusType> LfgLockMap;
+typedef std::map<uint64, LfgLockMap> LfgLockPartyMap;
+>>>>>>> fc8fb590380a8581e688f47ce96cb1810f2f650f
 
 #endif

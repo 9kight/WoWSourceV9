@@ -26,6 +26,7 @@ enum Yells
 enum Spells
 {
     SPELL_CRUSH_ARMOR               = 103687,
+<<<<<<< HEAD
 	SPELL_CLEAR_DEBUFFS             = 34098,
     SPELL_RESONATING_CRYSTAL        = 103640,
     SPELL_FURIOUS                   = 103846,
@@ -33,6 +34,15 @@ enum Spells
     SPELL_EARTHS_VENGEANCE_CHANNEL  = 103176,
     SPELL_EARTHS_VENGEANCE          = 103178,
 	SPELL_SUMMON                    = 22951,
+=======
+    SPELL_CLEAR_DEBUFFS             = 34098,
+    SPELL_RESONATING_CRYSTAL        = 103640,
+    SPELL_FURIOUS                   = 103846,
+    SPELL_SUMMON_KOHCROM            = 109017,
+    SPELL_EARTHS_VENGEANCE_CHANNEL  = 103176,
+    SPELL_EARTHS_VENGEANCE          = 103178,
+    SPELL_SUMMON                    = 22951,
+>>>>>>> fc8fb590380a8581e688f47ce96cb1810f2f650f
     SPELL_BLACK_BLOOD_OF_THE_EARTH  = 103851,
     SPELL_BLACK_BLOOD_SUM           = 103180,
     SPELL_RESONATING_CRYSTAL_EX     = 108572,
@@ -50,6 +60,7 @@ enum Events
     EVENT_CRUSH_ARMOR               = 2,
     EVENT_RESONATING_CRYSTAL        = 3,
     EVENT_FURIOUS                   = 4,
+<<<<<<< HEAD
 	EVENT_KORCHOM                   = 5,
     EVENT_EARTHS_VENGEANCE          = 6,
     EVENT_BLACK_BLOOD_OF_THE_EARTH  = 7,
@@ -61,6 +72,19 @@ enum Events
 	EVENT_UN_EXPLODE_1              = 13,
 	EVENT_UN_EXPLODE_2              = 14,
 	EVENT_UN_EXPLODE_3              = 15,
+=======
+    EVENT_KORCHOM                   = 5,
+    EVENT_EARTHS_VENGEANCE          = 6,
+    EVENT_BLACK_BLOOD_OF_THE_EARTH  = 7,
+    EVENT_SUMMON                    = 8,
+    EVENT_EXPLODE                   = 9,
+    EVENT_EXPLODE_1                 = 10,
+    EVENT_EXPLODE_2                 = 11,
+    EVENT_EXPLODE_3                 = 12,
+    EVENT_UN_EXPLODE_1              = 13,
+    EVENT_UN_EXPLODE_2              = 14,
+    EVENT_UN_EXPLODE_3              = 15,
+>>>>>>> fc8fb590380a8581e688f47ce96cb1810f2f650f
     EVENT_DESPAWN                   = 16,
     EVENT_RESONATING                = 17,
     EVENT_ANTI_EXPLODE              = 18,
@@ -74,9 +98,15 @@ enum Events
     EVENT_BLACK_BLOOD               = 24,
     EVENT_BLACK_BLOOD_DESPAWN       = 25,
     // Npc Morchok
+<<<<<<< HEAD
 	EVENT_VORTEX                    = 26,
 	// Npc Kohcrom
 	EVENT_SUMMON_KOHCROM            = 27
+=======
+    EVENT_VORTEX                    = 26,
+	// Npc Kohcrom
+    EVENT_SUMMON_KOHCROM            = 27
+>>>>>>> fc8fb590380a8581e688f47ce96cb1810f2f650f
 };
 
 enum Phases

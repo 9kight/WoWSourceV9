@@ -5159,7 +5159,11 @@ void ObjectMgr::LoadInstanceEncounters()
             continue;
         }
 
+<<<<<<< HEAD
 		if (lastEncounterDungeon && !sLFGMgr->GetLFGDungeonEntry(lastEncounterDungeon))
+=======
+        if (lastEncounterDungeon && !sLFGDungeonStore.LookupEntry(lastEncounterDungeon))
+>>>>>>> fc8fb590380a8581e688f47ce96cb1810f2f650f
         {
             sLog->outError(LOG_FILTER_SQL,"Table `instance_encounters` has an encounter %u (%s) marked as final for invalid dungeon id %u, skipped!", entry, dungeonEncounter->encounterName, lastEncounterDungeon);
             continue;
