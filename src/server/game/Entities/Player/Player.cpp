@@ -12232,6 +12232,7 @@ InventoryResult Player::CanUseItem(ItemTemplate const* proto) const
 
 InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObject const* lootedObject) const
 {
+<<<<<<< HEAD
 	if (!GetGroup() || !GetGroup()->isLFGGroup())
 		return EQUIP_ERR_OK;    // not in LFG group
 
@@ -12242,6 +12243,28 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
 
 	if (!proto)
 		return EQUIP_ERR_ITEM_NOT_FOUND;
+=======
+    LfgDungeonSet const& dungeons = sLFGMgr->GetSelectedDungeons(GetGUID());
+    if (dungeons.empty())
+        return EQUIP_ERR_OK;    // not using LFG
+
+    if (!GetGroup() || !GetGroup()->isLFGGroup())
+        return EQUIP_ERR_OK;    // not in LFG group
+
+    // check if looted object is inside the lfg dungeon
+    bool lootedObjectInDungeon = false;
+    Map const* map = lootedObject->GetMap();
+    if (uint32 dungeonId = sLFGMgr->GetDungeon(GetGroup()->GetGUID(), true))
+        if (LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(dungeonId))
+            if (uint32(dungeon->map) == map->GetId() && dungeon->difficulty == uint32(map->GetDifficulty()))
+                lootedObjectInDungeon = true;
+
+    if (!lootedObjectInDungeon)
+        return EQUIP_ERR_OK;
+
+    if (!proto)
+        return EQUIP_ERR_ITEM_NOT_FOUND;
+>>>>>>> fc8fb590380a8581e688f47ce96cb1810f2f650f
     // Used by group, function NeedBeforeGreed, to know if a prototype can be used by a player
 
     const static uint32 item_weapon_skills[MAX_ITEM_SUBCLASS_WEAPON] =
@@ -24559,6 +24582,7 @@ Player* Player::GetNextRandomRaidMember(float radius)
 
 PartyResult Player::CanUninviteFromGroup() const
 {
+<<<<<<< HEAD
 	Group const* grp = GetGroup();
 	if (!grp)
 		return ERR_NOT_IN_GROUP;
@@ -24602,11 +24626,61 @@ PartyResult Player::CanUninviteFromGroup() const
 	}
 
 	return ERR_PARTY_RESULT_OK;
+=======
+    Group const* grp = GetGroup();
+    if (!grp)
+        return ERR_NOT_IN_GROUP;
+
+    if (grp->isLFGGroup())
+    {
+        uint64 gguid = grp->GetGUID();
+        if (!sLFGMgr->GetKicksLeft(gguid))
+            return ERR_PARTY_LFG_BOOT_LIMIT;
+
+        LfgState state = sLFGMgr->GetState(gguid);
+        if (state == LFG_STATE_BOOT)
+            return ERR_PARTY_LFG_BOOT_IN_PROGRESS;
+
+        if (grp->GetMembersCount() <= sLFGMgr->GetVotesNeeded(gguid))
+            return ERR_PARTY_LFG_BOOT_TOO_FEW_PLAYERS;
+
+        if (state == LFG_STATE_FINISHED_DUNGEON)
+            return ERR_PARTY_LFG_BOOT_DUNGEON_COMPLETE;
+
+        if (grp->isRollLootActive())
+            return ERR_PARTY_LFG_BOOT_LOOT_ROLLS;
+
+        // TODO: Should also be sent when anyone has recently left combat, with an aprox ~5 seconds timer.
+        for (GroupReference const* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
+            if (itr->getSource() && itr->getSource()->isInCombat())
+                return ERR_PARTY_LFG_BOOT_IN_COMBAT;
+
+        /* Missing support for these types
+            return ERR_PARTY_LFG_BOOT_COOLDOWN_S;
+            return ERR_PARTY_LFG_BOOT_NOT_ELIGIBLE_S;
+        */
+    }
+    else
+    {
+        if (!grp->IsLeader(GetGUID()) && !grp->IsAssistant(GetGUID()))
+            return ERR_NOT_LEADER;
+
+        if (InBattleground())
+            return ERR_INVITE_RESTRICTED;
+    }
+
+    return ERR_PARTY_RESULT_OK;
+>>>>>>> fc8fb590380a8581e688f47ce96cb1810f2f650f
 }
 
 bool Player::isUsingLfg()
 {
+<<<<<<< HEAD
 	return sLFGMgr->GetState(GetGUID()) != lfg::LFG_STATE_NONE;
+=======
+    uint64 guid = GetGUID();
+    return sLFGMgr->GetState(guid) != LFG_STATE_NONE;
+>>>>>>> fc8fb590380a8581e688f47ce96cb1810f2f650f
 }
 
 void Player::SetBattlegroundOrBattlefieldRaid(Group* group, int8 subgroup)

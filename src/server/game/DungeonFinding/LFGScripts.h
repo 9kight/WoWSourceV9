@@ -1,4 +1,5 @@
 /*
+<<<<<<< HEAD
  * Copyright (C) 2014 WoWSource 4.3.4
  *
  * Do Not Share The SourceCode
@@ -17,13 +18,41 @@ EndScriptData
 #include "Common.h"
 #include "SharedDefines.h"
 #include "ScriptMgr.h"
+=======
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ * Interaction between core and LFGScripts
+ */
+
+#include "Common.h"
+#include "SharedDefines.h"
+#include "ScriptPCH.h"
+>>>>>>> fc8fb590380a8581e688f47ce96cb1810f2f650f
 
 class Player;
 class Group;
 
+<<<<<<< HEAD
 namespace lfg
 {
 
+=======
+>>>>>>> fc8fb590380a8581e688f47ce96cb1810f2f650f
 class LFGPlayerScript : public PlayerScript
 {
     public:
@@ -34,7 +63,10 @@ class LFGPlayerScript : public PlayerScript
         void OnLogout(Player* player);
         void OnLogin(Player* player);
         void OnBindToInstance(Player* player, Difficulty difficulty, uint32 mapId, bool permanent);
+<<<<<<< HEAD
         void OnMapChanged(Player* player);
+=======
+>>>>>>> fc8fb590380a8581e688f47ce96cb1810f2f650f
 };
 
 class LFGGroupScript : public GroupScript
@@ -49,5 +81,8 @@ class LFGGroupScript : public GroupScript
         void OnChangeLeader(Group* group, uint64 newLeaderGuid, uint64 oldLeaderGuid);
         void OnInviteMember(Group* group, uint64 guid);
 };
+<<<<<<< HEAD
 
 } // namespace lfg
+=======
+>>>>>>> fc8fb590380a8581e688f47ce96cb1810f2f650f

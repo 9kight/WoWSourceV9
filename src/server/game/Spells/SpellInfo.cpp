@@ -1420,7 +1420,10 @@ bool SpellInfo::IsAuraExclusiveBySpecificWith(SpellInfo const* spellInfo) const
     SpellSpecificType spellSpec2 = spellInfo->GetSpellSpecific();
     switch (spellSpec1)
     {
+<<<<<<< HEAD
         case SPELL_SPECIFIC_TRACKER:
+=======
+>>>>>>> fc8fb590380a8581e688f47ce96cb1810f2f650f
         case SPELL_SPECIFIC_WARLOCK_ARMOR:
         case SPELL_SPECIFIC_MAGE_ARMOR:
         case SPELL_SPECIFIC_ELEMENTAL_SHIELD:
