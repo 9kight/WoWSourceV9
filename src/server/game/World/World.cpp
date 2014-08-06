@@ -1274,11 +1274,7 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_WARDEN_CLIENT_RESPONSE_DELAY] = ConfigMgr::GetIntDefault("Warden.ClientResponseDelay", 600);
 
     // Dungeon finder
-<<<<<<< HEAD
     m_int_configs[CONFIG_LFG_OPTIONSMASK] = ConfigMgr::GetIntDefault("DungeonFinder.OptionsMask", 1);
-=======
-    m_bool_configs[CONFIG_DUNGEON_FINDER_ENABLE] = ConfigMgr::GetBoolDefault("DungeonFinder.Enable", false);
->>>>>>> fc8fb590380a8581e688f47ce96cb1810f2f650f
 
     // DBC_ItemAttributes
     m_bool_configs[CONFIG_DBC_ENFORCE_ITEM_ATTRIBUTES] = ConfigMgr::GetBoolDefault("DBC.EnforceItemAttributes", true);
@@ -1620,12 +1616,9 @@ void World::SetInitialWorldSettings()
     sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Loading AreaTrigger script names...");
     sObjectMgr->LoadAreaTriggerScripts();
 
-<<<<<<< HEAD
 	sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Loading LFG entrance positions...");
     sLFGMgr->LoadLFGDungeons();
 	
-=======
->>>>>>> fc8fb590380a8581e688f47ce96cb1810f2f650f
     sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Loading Dungeon boss data...");
     sObjectMgr->LoadInstanceEncounters();
 

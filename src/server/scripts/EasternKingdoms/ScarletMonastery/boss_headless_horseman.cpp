@@ -577,20 +577,6 @@ public:
                 flame->CastSpell(flame, SPELL_BODY_FLAME, false);
             if (instance)
                 instance->SetData(DATA_HORSEMAN_EVENT, DONE);
-<<<<<<< HEAD
-=======
-
-                Map* map = me->GetMap();
-                if (map && map->IsDungeon())
-                {
-                    Map::PlayerList const& players = map->GetPlayers();
-                    if (!players.isEmpty())
-                        for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
-                            if (Player* player = i->getSource())
-                                if (player->GetDistance(me) < 120.0f)
-                                    sLFGMgr->RewardDungeonDoneFor(285, player);
-            }
->>>>>>> fc8fb590380a8581e688f47ce96cb1810f2f650f
         }
 
         void SpellHit(Unit* caster, const SpellInfo* spell)

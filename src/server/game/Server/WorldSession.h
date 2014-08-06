@@ -56,15 +56,11 @@ struct LfgJoinResultData;
 struct LfgLockStatus;
 struct LfgPlayerBoot;
 struct LfgProposal;
-<<<<<<< HEAD
 struct LfgQueueStatusData;
-=======
->>>>>>> fc8fb590380a8581e688f47ce96cb1810f2f650f
 struct LfgReward;
 struct LfgRoleCheck;
 struct LfgUpdateData;
 
-<<<<<<< HEAD
 namespace lfg
 {
 struct LfgJoinResultData;
@@ -76,8 +72,6 @@ struct LfgRoleCheck;
 struct LfgUpdateData;
 }
 
-=======
->>>>>>> fc8fb590380a8581e688f47ce96cb1810f2f650f
 enum AccountDataType
 {
     GLOBAL_CONFIG_CACHE             = 0,                    // 0x01 g
@@ -882,10 +876,7 @@ class WorldSession
 
         // Looking for Dungeon/Raid
         void HandleLfgSetCommentOpcode(WorldPacket& recvData);
-<<<<<<< HEAD
 		void HandleLfgGetLockInfoOpcode(WorldPacket& recvData);
-=======
->>>>>>> fc8fb590380a8581e688f47ce96cb1810f2f650f
         void HandleLfgPlayerLockInfoRequestOpcode(WorldPacket& recvData);
         void SendLfgPlayerLockInfo();
         void SendLfgPartyLockInfo();
@@ -896,7 +887,6 @@ class WorldSession
         void HandleLfgProposalResultOpcode(WorldPacket& recvData);
         void HandleLfgSetBootVoteOpcode(WorldPacket& recvData);
         void HandleLfgTeleportOpcode(WorldPacket& recvData);
-<<<<<<< HEAD
         void HandleLfrJoinOpcode(WorldPacket& recvData);
         void HandleLfrLeaveOpcode(WorldPacket& recvData);
         void HandleDungeonFinderGetSystemInfo(WorldPacket& recvData);
@@ -914,24 +904,6 @@ class WorldSession
         void SendLfgPlayerReward(lfg::LfgPlayerRewardData const& lfgPlayerRewardData);
         void SendLfgBootProposalUpdate(lfg::LfgPlayerBoot const& boot);
         void SendLfgUpdateProposal(lfg::LfgProposal const& proposal);
-=======
-        void HandleLfrSearchOpcode(WorldPacket& recvData);
-        void HandleLfrLeaveOpcode(WorldPacket& recvData);
-        void HandleDungeonFinderGetSystemInfo(WorldPacket& recvData);
-
-        void SendLfgUpdatePlayer(const LfgUpdateData& updateData);
-        void SendLfgUpdateParty(const LfgUpdateData& updateData);
-        void SendLfgUpdateStatus(const LfgUpdateData& updateData, bool isParty);
-        void SendLfgRoleChosen(uint64 guid, uint8 roles);
-
-        void SendLfgRoleCheckUpdate(const LfgRoleCheck* pRoleCheck);
-        void SendLfgUpdateSearch(bool update);
-        void SendLfgJoinResult(const LfgJoinResultData& joinData);
-        void SendLfgQueueStatus(uint32 dungeon, int32 waitTime, int32 avgWaitTime, int32 waitTimeTanks, int32 waitTimeHealer, int32 waitTimeDps, uint32 queuedTime, uint8 tanks, uint8 healers, uint8 dps);
-        void SendLfgPlayerReward(uint32 rdungeonEntry, uint32 sdungeonEntry, uint8 done, const LfgReward* reward, const Quest *qRew);
-        void SendLfgBootPlayer(const LfgPlayerBoot* pBoot);
-        void SendLfgUpdateProposal(uint32 proposalId, const LfgProposal *pProp);
->>>>>>> fc8fb590380a8581e688f47ce96cb1810f2f650f
         void SendLfgDisabled();
         void SendLfgOfferContinue(uint32 dungeonEntry);
         void SendLfgTeleportError(uint8 err);
