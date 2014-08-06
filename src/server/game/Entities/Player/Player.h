@@ -933,6 +933,7 @@ struct AccessRequirement
 {
     uint8  levelMin;
     uint8  levelMax;
+	uint16 item_level;
     uint32 item;
     uint32 item2;
     uint32 quest_A;
@@ -2618,6 +2619,7 @@ class Player : public Unit, public GridObject<Player>
         void RemoveAtLoginFlag(AtLoginFlags flags, bool persist = false);
 
         bool isUsingLfg();
+		bool inRandomLfgDungeon();
 
         typedef std::set<uint32> DFQuestsDoneList;
         DFQuestsDoneList m_DFQuests;
