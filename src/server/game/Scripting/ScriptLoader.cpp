@@ -62,11 +62,7 @@ void AddSC_guild_commandscript();
 void AddSC_honor_commandscript();
 void AddSC_instance_commandscript();
 void AddSC_learn_commandscript();
-<<<<<<< HEAD
 void AddSC_lfg_commandscript();
-=======
-//void AddSC_lfg_commandscript();
->>>>>>> fc8fb590380a8581e688f47ce96cb1810f2f650f
 void AddSC_list_commandscript();
 void AddSC_lookup_commandscript();
 void AddSC_message_commandscript();
@@ -848,15 +844,9 @@ void AddCommandScripts()
     AddSC_honor_commandscript();
     AddSC_instance_commandscript();
     AddSC_learn_commandscript();
-<<<<<<< HEAD
     AddSC_lfg_commandscript();
     AddSC_list_commandscript();
 	AddSC_lookup_commandscript();
-=======
-    AddSC_lookup_commandscript();
-    //AddSC_lfg_commandscript();
-    AddSC_list_commandscript();
->>>>>>> fc8fb590380a8581e688f47ce96cb1810f2f650f
     AddSC_message_commandscript();
     AddSC_misc_commandscript();
     AddSC_mmaps_commandscript();
