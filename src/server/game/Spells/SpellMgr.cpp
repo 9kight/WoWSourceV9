@@ -3109,24 +3109,35 @@ void SpellMgr::LoadSpellCustomAttr()
             case 99197:
                 spellInfo->Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_PROC_TRIGGER_SPELL_COPY;
                 break;
+            case 13809: // Ice Trap
+            case 82941: // Ice Trap        - Trap Launcher
+            case 1499:  // Freezing Trap
+            case 60192: // Freezing Trap   - Trap Launcher
+            case 82939: // Explosive Trap  - Trap Launcher
+            // Dont Remove Stealth From Camouflage
+                spellInfo->AttributesEx |= SPELL_ATTR1_NOT_BREAK_STEALTH;
+                break;			
             // Immolation Trap
             case 13795:
                 spellInfo->Effects[0].Effect = SPELL_EFFECT_SUMMON_OBJECT_SLOT3;
+			// Dont Remove Stealth From Camouflage
+                spellInfo->AttributesEx |= SPELL_ATTR1_NOT_BREAK_STEALTH;			
                 break;
             // Explosive Trap
             case 13813:
                 spellInfo->Effects[0].Effect = SPELL_EFFECT_SUMMON_OBJECT_SLOT3;
+			// Dont Remove Stealth From Camouflage
+                spellInfo->AttributesEx |= SPELL_ATTR1_NOT_BREAK_STEALTH;					
                 break;
             // Snake Trap
             case 34600:
                 spellInfo->Effects[0].Effect = SPELL_EFFECT_SUMMON_OBJECT_SLOT4;
+			// Dont Remove Stealth From Camouflage
+                spellInfo->AttributesEx |= SPELL_ATTR1_NOT_BREAK_STEALTH;					
                 break;
             // Camouflage
             case 51755:
-                spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_TAKE_DAMAGE | AURA_INTERRUPT_FLAG_CAST | AURA_INTERRUPT_FLAG_TALK | AURA_INTERRUPT_FLAG_MELEE_ATTACK |AURA_INTERRUPT_FLAG_MOUNT;
-                spellInfo->Effects[0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_PET);
-                spellInfo->Effects[1].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_PET);
-                spellInfo->Effects[2].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_PET);
+				spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_NONE;
                 break;
             case 1856: // Vanish - Rogue
                 spellInfo->Effects[0].Effect = SPELL_EFFECT_SANCTUARY;
