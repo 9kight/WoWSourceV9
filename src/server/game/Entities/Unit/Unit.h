@@ -28,6 +28,8 @@
 #include "SpellAuraDefines.h"
 #include "ThreatManager.h"
 
+
+
 #define WORLD_TRIGGER   12999
 enum SpellInterruptFlags
 {
@@ -1783,6 +1785,7 @@ class Unit : public WorldObject
         CharmInfo* InitCharmInfo();
         void DeleteCharmInfo();
         void UpdateCharmAI();
+		void EnableAI();
         //Player* GetMoverSource() const;
         Player* m_movedPlayer;
         SharedVisionList const& GetSharedVisionList() { return m_sharedVision; }
