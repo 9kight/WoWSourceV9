@@ -2,7 +2,6 @@
 
 /* Name: boss_grand_vizier_ertan
 * Progress: 100%
-* Author: Demigodess
 * Comments:
 */
 
@@ -93,7 +92,7 @@ public:
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_WIND_OF_ALTAIRUS);
 			me->AddUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY);
             me->SetHoverGroundTargetable(true);
-            me->SetHover(true);
+            //me->SetHover(true);
             summons.DespawnAll();
         }
 
