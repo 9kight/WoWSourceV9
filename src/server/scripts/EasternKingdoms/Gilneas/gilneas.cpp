@@ -275,7 +275,7 @@ public:
                 {
                     if (Creature* spawnedCreature = go->SummonCreature(NPC_FRIGHTENED_CITIZEN_1, x, y, z, angle, TEMPSUMMON_MANUAL_DESPAWN))
                     {
-                        player->KilledMonsterCredit(35830);
+                        player->KilledMonsterCredit(35830, player->GetGUID());
                         spawnedCreature->SetPhaseMask(6, 1);
                         spawnedCreature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                         spawnedCreature->GetMotionMaster()->MovePoint(42, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
@@ -285,7 +285,7 @@ public:
                 {
                     if (Creature* spawnedCreature = go->SummonCreature(NPC_FRIGHTENED_CITIZEN_2, x, y, z, angle, TEMPSUMMON_MANUAL_DESPAWN))
                     {
-                        player->KilledMonsterCredit(35830);
+                        player->KilledMonsterCredit(35830, player->GetGUID());
                         spawnedCreature->SetPhaseMask(6, 1);
                         spawnedCreature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                         spawnedCreature->GetMotionMaster()->MovePoint(42, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
