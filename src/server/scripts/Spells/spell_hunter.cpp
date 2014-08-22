@@ -50,7 +50,10 @@ enum HunterSpells
     SPELL_HUNTER_FOCUSED_FIRE_1                     = 35029,
     SPELL_HUNTER_FOCUSED_FIRE_2                     = 35030,
 	SPELL_HUNTER_FOCUS_ENERGIZE                     = 82716,
-	SPELL_HUNTER_GLYPH_OF_SILENCING_SHOT            = 56836
+	SPELL_HUNTER_GLYPH_OF_SILENCING_SHOT            = 56836,
+    SPELL_HUNTER_GLYPH_KILL_SHOT                    = 63067,
+    SPELL_HUNTER_GLYPH_KILL_SHOT_CD                 = 90967,
+    SPELL_HUNTER_KILL_SHOT                          = 53351
 };
 
 enum HunterPetCalculate
@@ -1784,6 +1787,40 @@ class spell_hun_silencing_shot : public SpellScriptLoader
         }
 };
 
+// Glyph Of Kill Shot
+class spell_hun_glyph_kill_shot : public SpellScriptLoader
+{
+public:
+    spell_hun_glyph_kill_shot() : SpellScriptLoader("spell_hun_glyph_kill_shot") { }
+
+    class spell_hun_glyph_kill_shot_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_hun_glyph_kill_shot_SpellScript);
+
+        void HandleGlyph()
+        {
+            if (GetCaster()->HasAura(SPELL_HUNTER_GLYPH_KILL_SHOT) && !GetCaster()->HasAura(SPELL_HUNTER_GLYPH_KILL_SHOT_CD))
+            {
+                if (GetHitUnit()->GetHealthPct() <= 20 && GetHitUnit()->GetHealth() > GetHitDamage())
+                {
+                    GetCaster()->AddAura(SPELL_HUNTER_GLYPH_KILL_SHOT_CD, GetCaster());
+                    GetCaster()->ToPlayer()->RemoveSpellCooldown(SPELL_HUNTER_KILL_SHOT, true);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnHit += SpellHitFn(spell_hun_glyph_kill_shot_SpellScript::HandleGlyph);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_hun_glyph_kill_shot_SpellScript();
+    }
+};
+
 void AddSC_hunter_spell_scripts()
 {
     new spell_hun_chimera_shot();
@@ -1822,4 +1859,5 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_pet_spirit_mend();
     new spell_hun_mend_pet();
 	new spell_hun_silencing_shot();
+    new spell_hun_glyph_kill_shot();
 }
