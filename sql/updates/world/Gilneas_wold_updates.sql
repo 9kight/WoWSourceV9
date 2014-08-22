@@ -24,6 +24,13 @@ DELETE FROM creature_template WHERE entry = 34571;
 INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `exp_unk`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `speed_swim`, `speed_fly`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `type_flags2`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `currencyId`, `currencyCount`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Health_mod`, `Mana_mod`, `Mana_mod_extra`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES 
 (34571, 0, 0, 0, 0, 0, 29290, 0, 0, 0, 'Gwen Armstead', 'Mayor of Duskhaven', '', 0, 10, 10, 0, 0, 2163, 2163, 3, 1, 1.14286, 1, 1.14286, 1, 0, 13, 17, 0, 42, 1, 2000, 2000, 1, 32768, 2048, 0, 0, 0, 0, 0, 0, 9, 13, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, '', 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 34571, 0, 0, 'npc_gwen_armstead_qi', 13623);
 
+DELETE FROM creature_template WHERE entry IN (36287,36288,36289);
+INSERT INTO `creature_template` VALUES 
+('36287', '0', '0', '0', '0', '0', '80', '0', '0', '0', 'Cynthia', '', 'Speak', '0', '1', '1', '0', '0', '35', '35', '16777216', '1', '1.14286', '1', '1.14286', '1', '0', '2', '2', '0', '24', '1', '2000', '2000', '1', '16384', '2048', '0', '0', '0', '0', '0', '0', '1', '1', '0', '7', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', null, null, 'SmartAI', '0', '3', '0', '1', '1', '1', '1', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', 'npc_cynthia', '13623'),
+('36288', '0', '0', '0', '0', '0', '257', '0', '0', '0', 'Ashley', '', 'Speak', '0', '1', '1', '0', '0', '35', '35', '16777216', '1', '1.14286', '1', '1.14286', '1', '0', '2', '2', '0', '24', '1', '2000', '2000', '1', '16384', '2048', '0', '0', '0', '0', '0', '0', '1', '1', '0', '7', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', null, null, 'SmartAI', '0', '3', '0', '1', '1', '1', '1', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', 'npc_ashley', '13623'),
+('36289', '0', '0', '0', '0', '0', '79', '0', '0', '0', 'James', '', 'Speak', '0', '1', '1', '0', '0', '35', '35', '16777216', '1', '1.14286', '1', '1.14286', '1', '0', '2', '2', '0', '24', '1', '2000', '2000', '1', '16384', '2048', '0', '0', '0', '0', '0', '0', '1', '1', '0', '7', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', null, null, 'SmartAI', '0', '3', '0', '1', '1', '1', '1', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', 'npc_james', '13623');
+
+
 DELETE FROM npc_spellclick_spells WHERE npc_entry IN (36289,36288,36287);
 INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`, `user_type`) VALUES 
 (36289, 68596, 1, 0),
@@ -33,3 +40,16 @@ INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`, `use
 DELETE FROM spell_script_names WHERE spell_id = 68659;
 INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
 (68659, 'spell_gen_launch');
+
+DELETE FROM spell_script_names WHERE spell_id = 103558;
+INSERT INTO `spell_script_names` VALUES ('103558', 'spell_choking_smoke_bomb');
+
+DELETE FROM creature_template WHERE entry = 36283;
+INSERT INTO `creature_template` VALUES ('36283', '0', '0', '0', '0', '0', '23884', '0', '0', '0', 'Forsaken Catapult', '', 'vehichleCursor', '0', '11', '11', '0', '0', '35', '35', '16777216', '1', '1', '1', '1', '1', '0', '2', '2', '0', '68', '1', '2000', '2000', '1', '16384', '2048', '0', '0', '0', '0', '0', '0', '1', '1', '44', '9', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '68659', '0', '0', '0', '0', '0', '0', '0', '0', '516', '0', '0', null, null, '', '0', '3', '0', '10', '1', '1', '1', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', 'npc_forsaken_catapult_qtbs', '13623');
+
+DELETE FROM npc_spellclick_spells WHERE npc_entry IN (36289,36283,36287,36288);
+INSERT INTO `npc_spellclick_spells` VALUES 
+('36289', '68596', '1', '0'),
+('36283', '69434', '1', '0'),
+('36287', '68597', '1', '0'),
+('36288', '68598', '1', '0');
