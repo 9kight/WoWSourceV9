@@ -5881,40 +5881,6 @@ const float BatWP[25][3]=
     {-1667.43f, 1666.94f, 22.131f},
 };
 
-
-class npc_captured_riding_bat : public CreatureScript
-{
-public:
-    npc_captured_riding_bat() : CreatureScript("npc_captured_riding_bat") { }
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_captured_riding_batAI(creature);
-    }
-
-    struct npc_captured_riding_batAI : public npc_escortAI
-    {
-        npc_captured_riding_batAI(Creature* creature) : npc_escortAI(creature)
-        {
-            me->SetCanFly(true);
-        }
-
-        void FinishEscort()
-        {
-            me->DespawnOrUnsummon();
-        }
-
-        void WaypointReached(uint32 /*point*/)
-        {
-        }
-
-        void UpdateAI(uint32 const diff)
-        {
-            npc_escortAI::UpdateAI(diff);
-        }
-    };
-};
-
 class spell_captured_riding_bat : public SpellScriptLoader
 {
     public:
@@ -6379,7 +6345,6 @@ void AddSC_gilneas()
     new npc_lord_godfrey_p4_8();
     new npc_lord_godfrey_map();
 	
-    new npc_captured_riding_bat();
     new spell_captured_riding_bat();
     new spell_glaive_thrower();
     new npc_glaive_thrower();
