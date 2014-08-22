@@ -208,105 +208,97 @@ public:
 class go_merchant_square_door : public GameObjectScript
 {
 public:
-    go_merchant_square_door() : GameObjectScript("go_merchant_square_door") {}
+    go_merchant_square_door() : GameObjectScript("go_merchant_square_door"), aPlayer(NULL) {}
 
-    struct go_merchant_square_doorAI : public GameObjectAI
+    float x, y, z, wx, wy, angle, tQuestCredit;
+    bool opened;
+    uint8 spawnKind;
+    Player* aPlayer;
+    GameObject* go;
+    uint32 DoorTimer;
+
+    bool OnGossipHello(Player* player, GameObject* go)
     {
-        go_merchant_square_doorAI(GameObject* gameobject) : GameObjectAI(gameobject)
+        if (player->GetQuestStatus(QUEST_EVAC_MERC_SQUA) == QUEST_STATUS_INCOMPLETE && go->GetGoState() == GO_STATE_READY)
         {
-            x = 0; y = 0; z = 0; wx = 0; wy = 0; angle = 0;
-            opened = false;
-            spawnKind = 0;
-            DoorTimer = 1000;
-            playerGUID = 0;
-        }
+            aPlayer          = player;
+            opened           = 1;
+            tQuestCredit     = 2500;
+            go->SetGoState(GO_STATE_ACTIVE);
+            DoorTimer = DOOR_TIMER;
+            spawnKind = urand(1, 3); // 1, 2=citizen, 3=citizen&worgen (66%, 33%)
+            angle = go->GetOrientation();
+            x = go->GetPositionX()-cos(angle)*2;
+            y = go->GetPositionY()-sin(angle)*2;
+            z = go->GetPositionZ();
+            wx = x-cos(angle)*2;
+            wy = y-sin(angle)*2;
 
-        void UpdateAI(uint32 diff)
-        {
-            if (opened)
+            if (spawnKind < 3)
             {
-                if (tQuestCredit <= diff)
+                if (Creature* spawnedCreature = go->SummonCreature(NPC_FRIGHTENED_CITIZEN_1, x, y, z, angle, TEMPSUMMON_TIMED_DESPAWN, SUMMON1_TTL))
                 {
-                    opened = false;
-
-                    if (spawnKind == 3)
+                    spawnedCreature->SetPhaseMask(2, 1);
+                    if (Player* target = spawnedCreature->FindNearestPlayer(10.0f))
                     {
-                        if (Creature* spawnedCreature = go->SummonCreature(NPC_RAMPAGING_WORGEN_2, wx, wy, z, angle, TEMPSUMMON_TIMED_DESPAWN, SUMMON1_TTL))
-                        {
-                            spawnedCreature->SetPhaseMask(6, 1);
-                            spawnedCreature->SetReactState(REACT_AGGRESSIVE);
-                            if (Player *player = Player::GetPlayer(*go, playerGUID))
-                                spawnedCreature->AI()->AttackStart(player);
-                        }
+                        spawnedCreature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                        spawnedCreature->SetReactState(REACT_PASSIVE);
+                        spawnedCreature->GetMotionMaster()->MovePoint(42, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
                     }
+                    spawnedCreature->DespawnOrUnsummon(8000);
                 }
-                else tQuestCredit -= diff;
-            }
-            if (DoorTimer <= diff)
-            {
-                if (go->GetGoState() == GO_STATE_ACTIVE)
-                    go->SetGoState(GO_STATE_READY);
-                if (Creature *worgen = go->FindNearestCreature(NPC_RAMPAGING_WORGEN_2, 10))
-                    worgen->DespawnOrUnsummon();
-                DoorTimer = DOOR_TIMER;
             }
             else
-                DoorTimer -= diff;
-        }
-
-        bool GossipHello(Player* player)
-        {
-            if (player->GetQuestStatus(QUEST_EVAC_MERC_SQUA) == QUEST_STATUS_INCOMPLETE && go->GetGoState() == GO_STATE_READY)
             {
-                playerGUID          = player->GetGUID();
-                opened           = true;
-                tQuestCredit     = 2500;
-                go->SetGoState(GO_STATE_ACTIVE);
-                DoorTimer = DOOR_TIMER;
-                spawnKind = urand(1, 3);
-                angle = go->GetOrientation();
-                x = go->GetPositionX() - cos(angle) * 2;
-                y = go->GetPositionY() - sin(angle) * 2;
-                z = go->GetPositionZ();
-                wx = x - cos(angle) * 2;
-                wy = y - sin(angle) * 2;
-
-                if (spawnKind < 3)
+                if (Creature* spawnedCreature = go->SummonCreature(NPC_FRIGHTENED_CITIZEN_2, x, y, z, angle, TEMPSUMMON_TIMED_DESPAWN, SUMMON1_TTL))
                 {
-                    if (Creature* spawnedCreature = go->SummonCreature(NPC_FRIGHTENED_CITIZEN_1, x, y, z, angle, TEMPSUMMON_MANUAL_DESPAWN))
+                    spawnedCreature->SetPhaseMask(2, 1);
+                    if (Player* target = spawnedCreature->FindNearestPlayer(10.0f))
                     {
-                        player->KilledMonsterCredit(35830, player->GetGUID());
-                        spawnedCreature->SetPhaseMask(6, 1);
                         spawnedCreature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                        spawnedCreature->SetReactState(REACT_PASSIVE);
                         spawnedCreature->GetMotionMaster()->MovePoint(42, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
                     }
+                    spawnedCreature->DespawnOrUnsummon(8000);
                 }
-                else
-                {
-                    if (Creature* spawnedCreature = go->SummonCreature(NPC_FRIGHTENED_CITIZEN_2, x, y, z, angle, TEMPSUMMON_MANUAL_DESPAWN))
-                    {
-                        player->KilledMonsterCredit(35830, player->GetGUID());
-                        spawnedCreature->SetPhaseMask(6, 1);
-                        spawnedCreature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
-                        spawnedCreature->GetMotionMaster()->MovePoint(42, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
-                    }
-                }
-                return true;
             }
-            return false;
+            return true;
+        }
+        return false;
+    }
+
+    void OnUpdate(GameObject* go, uint32 diff)
+    {
+        if (opened == 1)
+        {
+            if (tQuestCredit <= ((float)diff/8))
+            {
+                opened = 0;
+
+                if(aPlayer)
+                    aPlayer->KilledMonsterCredit(35830, 0);
+
+                if (spawnKind == 3)
+                {
+                    if (Creature* spawnedCreature = go->SummonCreature(NPC_RAMPAGING_WORGEN_2, wx, wy, z, angle, TEMPSUMMON_TIMED_DESPAWN, SUMMON1_TTL))
+                    {
+                        spawnedCreature->SetPhaseMask(6, 1);
+                        spawnedCreature->SetReactState(REACT_AGGRESSIVE);
+                    }
+                }
+            }
+            else tQuestCredit -= ((float)diff/8);
         }
 
-    private:
-        float x, y, z, wx, wy, angle, tQuestCredit;
-        bool opened;
-        uint8 spawnKind;
-        uint64 playerGUID;
-        uint32 DoorTimer;
-    };
+        if (DoorTimer <= diff)
+        {
+            if (go->GetGoState() == GO_STATE_ACTIVE)
+                go->SetGoState(GO_STATE_READY);
 
-    GameObjectAI* GetAI(GameObject* gameobject) const
-    {
-        return new go_merchant_square_doorAI(gameobject);
+            DoorTimer = DOOR_TIMER;
+        }
+        else
+            DoorTimer -= diff;
     }
 };
 
