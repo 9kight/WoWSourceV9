@@ -2126,5 +2126,5 @@ void AddSC_westfall()
     new npc_fire_trigger();
     new npc_summoner();
     new npc_horatio_investigate();
-    new npc_westfall_stew();
+    new npc_hungry_hobo();
 }
