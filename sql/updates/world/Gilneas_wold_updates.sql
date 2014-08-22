@@ -246,4 +246,15 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `zone`, `area`, `spawnMask`, `pha
 (295117, 195453, 638, 0, 0, 1, 1, -1575.81, 1320.37, 35.6616, 3.19194, 0, 0, 0.999683, -0.0251718, 300, 0, 1);
 
 -- Evacuate the Merchant Square
-update quest_template set RequiredNpcOrGo1 = 35830 WHERE id = 14098;
+UPDATE quest_template SET RequiredNpcOrGo1 = 35830 WHERE id = 14098;
+
+-- lorna crowley add the correct scriptname for her so now the script and text will work
+UPDATE creature_template SET ScriptName = 'npc_lorna_crowley_p4' WHERE entry = 35378;
+
+-- Crowley\'s Horse has the correct spell now it it work so you will get quest credit
+DELETE FROM creature_template WHERE entry = 35231;
+INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `exp_unk`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `speed_swim`, `speed_fly`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `type_flags2`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `currencyId`, `currencyCount`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Health_mod`, `Mana_mod`, `Mana_mod_extra`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES 
+(35231, 0, 0, 0, 0, 0, 238, 0, 0, 0, 'Crowley\'s Horse', '', '', 0, 4, 4, 0, 0, 2203, 2203, 0, 1, 1.28571, 1, 1.28571, 1, 0, 13, 17, 0, 42, 1, 0, 0, 1, 8, 0, 0, 0, 0, 0, 0, 0, 13, 17, 42, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 67063, 0, 0, 0, 0, 0, 0, 0, 0, 463, 0, 0, NULL, NULL, '', 0, 3, 1, 10, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2147483647, 0, 'npc_crowley_horse', 13623);
+
+-- thery are in wrong phase definition and they are spawnd by script on quest accept
+DELETE from creature WHERE id = 35627 and map = 638;
