@@ -205,6 +205,7 @@ public:
                 // Summon Eye
                 for (int8 i = 0; i < 7; i++)
                     me->SummonCreature(NPC_EYE_1, eye[i], TEMPSUMMON_TIMED_DESPAWN, 30000);
+                    DoCast(me, SPELL_DARKNESS);
 
                 if (IsHeroic()) // Heroic 10 and 25
                 {
