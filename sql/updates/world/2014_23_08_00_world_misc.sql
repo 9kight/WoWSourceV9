@@ -10,3 +10,6 @@ UPDATE creature_template SET ScriptName = 'Teleportation_to_the_platforms' WHERE
 
 -- myst if you change scriptnames make sure to make the changes in db to plz
 UPDATE creature_template SET ScriptName = 'npc_hungry_hobo' WHERE entry = 42617;
+
+INSERT INTO `achievement_criteria_data` (`criteria_id`, `type`, `value1`, `value2`, `ScriptName`) VALUES 
+(6084, 11, 0, 0, 'achievement_minutes_to_midnight');
