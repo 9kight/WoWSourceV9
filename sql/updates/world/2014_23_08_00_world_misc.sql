@@ -13,3 +13,6 @@ UPDATE creature_template SET ScriptName = 'npc_hungry_hobo' WHERE entry = 42617;
 
 INSERT INTO `achievement_criteria_data` (`criteria_id`, `type`, `value1`, `value2`, `ScriptName`) VALUES 
 (6084, 11, 0, 0, 'achievement_minutes_to_midnight');
+
+-- captain Cookie's pot
+UPDATE creature_template SET ScriptName = 'npc_captain_cookie_cauldron' WHERE entry = 47754;
