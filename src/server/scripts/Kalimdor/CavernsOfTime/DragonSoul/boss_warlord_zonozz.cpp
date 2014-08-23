@@ -80,6 +80,7 @@ enum BossSpellsAndAuras
     SPELL_BLACK_BLOOD          = 104378,
     SPELL_SPREYED_SPHERE       = 103527,
     SPELL_BLACK_BLOOD_ERUPTION = 108799,
+    SPELL_DARKNESS             = 109413,
     AURA_DIFFUSION             = 106836
 };
 
