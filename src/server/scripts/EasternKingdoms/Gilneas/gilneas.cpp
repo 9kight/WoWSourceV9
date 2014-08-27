@@ -2890,7 +2890,7 @@ public:
     {
         if (quest->GetQuestId() == QUEST_INVASION)
         {
-            armstead->CastSpell(player, 68482, false);
+            armstead->CastSpell(player, 80224, true);
             player->SaveToDB();
         }
 

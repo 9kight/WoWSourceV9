@@ -142,7 +142,8 @@ public:
                     switch (summon->GetEntry())
                     {
                         case NPC_FROZEN_SERVITOR:
-                            summon->CastSpell(summon, SPELL_VISUAL_ICY_BOULDER_TARGET, false);
+                            summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE)
+							//summon->CastSpell(summon, SPELL_VISUAL_ICY_BOULDER_TARGET, false);
                             break;
 
                         default:
@@ -251,12 +252,12 @@ class npc_frozen_servitor : public CreatureScript
 			{
                  me->SetVisible(true);
 			     //me->SetUnitState(UNIT_STATE_CASTING);
-                 events.ScheduleEvent(EVENT_ICY_BOULDER, 4000);
+                 //events.ScheduleEvent(EVENT_ICY_BOULDER, 4000);
 			}
 			
             void IsSummonedBy(Unit* /*summoner*/) 
             {
-                events.ScheduleEvent(EVENT_ICY_BOULDER, 4000);
+                events.ScheduleEvent(EVENT_ICY_BOULDER, urand(5000, 10000));
             }
 
             void UpdateAI(const uint32 diff) 
@@ -273,7 +274,7 @@ class npc_frozen_servitor : public CreatureScript
                         case EVENT_ICY_BOULDER:
                           if(Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                              DoCast(target, SPELL_VISUAL_ICY_BOULDER_TARGET); // Temp untill  SPELL ICY_BOULDERS is scripted
-                             events.ScheduleEvent(EVENT_ICY_BOULDER, 4000);
+                             events.ScheduleEvent(EVENT_ICY_BOULDER, urand(8000, 12000));
                             break;
 
                         default:
