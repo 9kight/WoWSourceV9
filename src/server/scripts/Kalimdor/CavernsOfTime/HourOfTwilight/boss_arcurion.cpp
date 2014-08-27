@@ -142,7 +142,7 @@ public:
                     switch (summon->GetEntry())
                     {
                         case NPC_FROZEN_SERVITOR:
-                            summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE)
+                            summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
 							//summon->CastSpell(summon, SPELL_VISUAL_ICY_BOULDER_TARGET, false);
                             break;
 
@@ -251,7 +251,6 @@ class npc_frozen_servitor : public CreatureScript
 			void Reset() 
 			{
                  me->SetVisible(true);
-			     //me->SetUnitState(UNIT_STATE_CASTING);
                  //events.ScheduleEvent(EVENT_ICY_BOULDER, 4000);
 			}
 			
