@@ -2870,10 +2870,11 @@ public:
             if (Creature* forsaken = player->SummonCreature(NPC_FORSAKEN_ASSASSIN, -1918.782104f,2393.562988f,30.192066f,6.265f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 6000))
             {
                 forsaken->SetPhaseMask(1, true);
-				forsaken->SetVisible(true);
+                forsaken->SetVisible(true);
+                forsaken->setFaction(14);
+                forsaken->AI()->Talk(NPC_FORSAKEN_ASSASSIN_SAY);
                 forsaken->AI()->AttackStart(player);
                 forsaken->CastSpell(player, SPELL_BACKSTAB, false);
-				forsaken->AI()->Talk(NPC_FORSAKEN_ASSASSIN_SAY);
             }
         }
 
