@@ -1382,35 +1382,35 @@ class spell_pri_spirit_of_redemption : public SpellScriptLoader
 };
 
 // 81208,81206 Chakra: Serenity and Chakra: Sanctuary spell swap supressor
-class spell_pri_chakra_swap_supressor: public SpellScriptLoader
+class spell_pri_chakra_swap_supressor : public SpellScriptLoader
 {
-public:
-    spell_pri_chakra_swap_supressor() : SpellScriptLoader("spell_pri_chakra_swap_supressor") {}
+    public:
+        spell_pri_chakra_swap_supressor() : SpellScriptLoader("spell_pri_chakra_swap_supressor") { }
 
-    class spell_pri_chakra_swap_supressor_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_pri_chakra_swap_supressor_SpellScript);
-
-        void PreventSwapApplicationOnCaster(WorldObject*& target)
+        class spell_pri_chakra_swap_supressor_AuraScript : public AuraScript
         {
-            // If the caster has the Revelations talent (88627) The chakra: serenity aura (81208) and the chakra: sanctuary
-            // (81206) swaps the Holy Word: Chastise spell (the one that you learn when you spec into the holy tree)
-            // for a Holy Word: Serenity spell (88684) or a Holy Word: Sanctuary (88684), if the caster doesnt have the
-            // talent, lets just block the swap effect.
-            if (!GetCaster()->HasAura(PRIEST_SPELL_REVELATIONS))
-                target = NULL;
-        }
+            PrepareAuraScript(spell_pri_chakra_swap_supressor_AuraScript);
 
-        void Register()
+            void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+            {
+                if (GetCaster())
+                {
+                    // Revelations
+                    if (!GetCaster()->HasAura(88627))
+                        amount = 88625;
+                }
+            }
+
+            void Register()
+            {
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pri_chakra_swap_supressor_AuraScript::CalculateAmount, EFFECT_2, SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
         {
-            OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_pri_chakra_swap_supressor_SpellScript::PreventSwapApplicationOnCaster, EFFECT_2, TARGET_UNIT_CASTER);
+            return new spell_pri_chakra_swap_supressor_AuraScript();
         }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_pri_chakra_swap_supressor_SpellScript();
-    }
 };
 
 // 81585 Chakra: Serenity
