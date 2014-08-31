@@ -1,4 +1,4 @@
-DELETE FROM `spell_script_names` WHERE `spell_id` IN (34861,64844,64904,54968,48438,17,73325,71610,2825,51556,52759,61295,1064,71641,82984,82988,30881,77755,77756,77762,88756,88764,51562);
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (34861,64844,64904,54968,48438,17,73325,71610,2825,51556,52759,61295,1064,71641,82984,82988,30881,77755,77756,77762,88756,88764,51562,51490,-51490);
 INSERT INTO `spell_script_names` (`spell_id` ,`ScriptName`) VALUES
 (34861,'spell_pri_circle_of_healing'),
 (64844, 'spell_pri_divine_hymn'),
@@ -21,7 +21,9 @@ INSERT INTO `spell_script_names` (`spell_id` ,`ScriptName`) VALUES
 (77762, 'spell_sha_lava_surge_proc'),
 (88756, 'spell_sha_rolling_thunder'),
 (88764, 'spell_sha_rolling_thunder'),
-(1064,'spell_sha_chain_heal');
+(1064,'spell_sha_chain_heal'),
+(51490,'spell_sha_thunderstorm');
+
 
 DELETE FROM `spell_proc_event` WHERE `entry` IN (82984,82988);
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `procFlags`, `procEx`, `ppmRate`, `CustomChance`, `Cooldown`) VALUES

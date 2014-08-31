@@ -959,7 +959,7 @@ class spell_sha_mana_tide_totem : public SpellScriptLoader
         }
 };
 
-// -51490 - Thunderstorm
+// 51490 - Thunderstorm
 class spell_sha_thunderstorm : public SpellScriptLoader
 {
     public:
