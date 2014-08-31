@@ -2891,7 +2891,7 @@ public:
     {
         if (quest->GetQuestId() == QUEST_INVASION)
         {
-            armstead->CastSpell(player, 80224, true);
+            player->CastSpell(player, 80224, true);
             player->SaveToDB();
         }
 
@@ -4228,8 +4228,8 @@ public:
     {
         if (quest->GetQuestId() == QUEST_THE_KINGS_OBSERVATORY)
         {
-            player->CastSpell(player, SPELL_CATACLYSM_TYPE_3, false);
-            player->CastSpell(player, SPELL_ZONE_SPECIFIC_11, false);
+            player->CastSpell(player, SPELL_CATACLYSM_TYPE_3, true);
+            player->CastSpell(player, SPELL_ZONE_SPECIFIC_11, true);
             player->SaveToDB();
         }
 
@@ -4251,7 +4251,7 @@ public:
             player->RemoveAura(59087);
             player->RemoveAura(59074);
             player->RemoveAura(59073);
-            player->CastSpell(player, SPELL_ZONE_SPECIFIC_11, false);
+            player->CastSpell(player, SPELL_ZONE_SPECIFIC_11, true);
             player->SaveToDB();
         }
 
@@ -6236,7 +6236,7 @@ public:
             for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
                 if (Player* player = i->getSource())
                     if (uiPhase & player->GetPhaseMask())
-                        player->CastSpell(player, uiSpellId, false);
+                        player->CastSpell(player, uiSpellId, true);
         }
 
         void UpdateAI(uint32 const diff)
