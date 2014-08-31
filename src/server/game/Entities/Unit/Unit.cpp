@@ -8988,12 +8988,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, uint32 absorb, Au
                 return false;
             break;
         }
-        case 96947: // Loom of Fate
-        {
-            if (!victim->HealthBelowPctDamaged(35, damage))
-                return false;
-            break;
-        }
         case 85126: // Seals of Command
         {
             if (!HasAuraState(AURA_STATE_JUDGEMENT))
