@@ -9219,6 +9219,14 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, uint32 absorb, Au
                 return false;
             break;
         }
+		case 96947: // Loom of fate (for Spidersilk Spindle trinket http://www.wowhead.com/item=68981)
+		case 97130: // Loom of fate (for spidersilk Spindle trinket http://www.wowhead.com/item=69138)
+		{
+			// Procs only if damage takes health below 35%
+			if (!HealthBelowPctDamaged(35, damage) || HealthBelowPct(35))
+				return false;
+			break;
+		}
         default:
             break;
     }
