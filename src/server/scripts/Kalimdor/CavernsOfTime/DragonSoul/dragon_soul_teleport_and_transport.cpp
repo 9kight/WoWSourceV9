@@ -97,7 +97,7 @@ class travel_to_wyrmrest_summit : public CreatureScript
             {
                 if (instance->GetBossState(DATA_PORTALS_ON_OFF) == DONE)
                 {
-                    player->TeleportTo(967, -1786.92f, -2393.18f, 341.355f, 6.141f);
+                    player->TeleportTo(967, -13855.80f, -13670.82f, 264.95f, 1.614f);
                     player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
                 }
             }

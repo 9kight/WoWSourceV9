@@ -37,7 +37,7 @@ enum Spells
     SPELL_HANDS_OF_FROST               = 102593,
     SPELL_CHAINS_OF_FROST              = 102582,
     SPELL_ICY_TOMB                     = 103252,
-    SPELL_VISUAL_ICY_BOULDER_CRASH	   = 102199,
+    SPELL_VISUAL_ICY_BOULDER_CRASH     = 102199,
     SPELL_VISUAL_ICY_BOULDER_TARGET    = 102198,
     SPELL_ICY_BOULDER                  = 102480, // Needs Scripting include SPELL_VISUAL_ICY_BOULDER_TARGET || SPELL_VISUAL_ICY_BOULDER_CRASH
     SPELL_TORRENT_OF_FROST             = 103962,
@@ -114,7 +114,7 @@ public:
             events.Reset();
             m_uiHealthAmountModifier = 1;
             //frozen->DespawnOrUnsummon();
-			me->SummonGameObject(GO_ICEWALL_DOOR, 4711.87f, 33.5087f, 64.559f, 0.471238f, 0, 0, 0, 0, 0);
+            me->SummonGameObject(GO_ICEWALL_DOOR, 4711.87f, 33.5087f, 64.559f, 0.471238f, 0, 0, 0, 0, 0);
         }
 		
         void EnterCombat(Unit* /*Ent*/)
@@ -123,7 +123,7 @@ public:
             instance->SetData(DATA_ARCURION_EVENT, IN_PROGRESS);
             Talk(SAY_FORCES);	
             Talk(SAY_AGGRO);
-		    events.ScheduleEvent(EVENT_SUMMON, 5000);
+            events.ScheduleEvent(EVENT_SUMMON, 5000);
             DoCast(SPELL_HANDS_OF_FROST);
             events.ScheduleEvent(EVENT_HANDS_OF_FROST, urand(5000,10000));
             events.ScheduleEvent(EVENT_CHAINS_OF_FROST, urand(12000,19000));
@@ -143,7 +143,7 @@ public:
                     {
                         case NPC_FROZEN_SERVITOR:
                             summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-							//summon->CastSpell(summon, SPELL_VISUAL_ICY_BOULDER_TARGET, false);
+                            //summon->CastSpell(summon, SPELL_VISUAL_ICY_BOULDER_TARGET, false);
                             break;
 
                         default:
@@ -218,12 +218,10 @@ public:
                         DoCast(SPELL_ICY_TOMB);
                         events.ScheduleEvent(EVENT_ICY_TOMB, urand(111000, 113000));
                         break;						
-
-						
-					default:
-                       break;
-				}
-			}
+                        default:
+                        break;
+                 }
+              }
             // Health check
             if (HealthBelowPct(30 * m_uiHealthAmountModifier))
             {
@@ -248,11 +246,11 @@ class npc_frozen_servitor : public CreatureScript
         private:
             EventMap events;
 			
-			void Reset() 
-			{
-                 me->SetVisible(true);
-                 //events.ScheduleEvent(EVENT_ICY_BOULDER, 4000);
-			}
+            void Reset() 
+                 {
+                   me->SetVisible(true);
+                  //events.ScheduleEvent(EVENT_ICY_BOULDER, 4000);
+                  }
 			
             void IsSummonedBy(Unit* /*summoner*/) 
             {
