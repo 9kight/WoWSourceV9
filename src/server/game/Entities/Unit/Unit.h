@@ -1484,8 +1484,7 @@ class Unit : public WorldObject
         uint32 GetMountID() const { return GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID); }
         void Mount(uint32 mount, uint32 vehicleId = 0, uint32 creatureEntry = 0);
         void Dismount();
-        void SendMountResult(MountResult error);
-        void UpdateMount();
+        MountCapabilityEntry const* GetMountCapability(uint32 mountType) const;
 
         void SendDurabilityLoss(Player* receiver, uint32 percent);
         void PlayOneShotAnimKit(uint32 id);
@@ -2431,7 +2430,6 @@ class Unit : public WorldObject
 
         uint32 m_unitTypeMask;
         LiquidTypeEntry const* _lastLiquid;
-        MountCapabilityEntry const* _mount;
 		
         bool m_IsInKillingProcess;		
 
