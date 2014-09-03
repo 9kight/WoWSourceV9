@@ -80,6 +80,7 @@ enum BossSpellsAndAuras
     SPELL_BLACK_BLOOD          = 104378,
     SPELL_SPREYED_SPHERE       = 103527,
     SPELL_BLACK_BLOOD_ERUPTION = 108799,
+    SPELL_DARKNESS             = 109413,
     AURA_DIFFUSION             = 106836
 };
 
@@ -204,6 +205,7 @@ public:
                 // Summon Eye
                 for (int8 i = 0; i < 7; i++)
                     me->SummonCreature(NPC_EYE_1, eye[i], TEMPSUMMON_TIMED_DESPAWN, 30000);
+                    DoCast(me, SPELL_DARKNESS);
 
                 if (IsHeroic()) // Heroic 10 and 25
                 {

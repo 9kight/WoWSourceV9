@@ -272,41 +272,6 @@ class spell_warl_curse_of_weakness : public SpellScriptLoader
         }
 };
 
-// 17962 - Conflagrate - Updated to 4.3.4
-class spell_warl_conflagrate : public SpellScriptLoader
-{
-    public:
-        spell_warl_conflagrate() : SpellScriptLoader("spell_warl_conflagrate") { }
-
-        class spell_warl_conflagrate_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_warl_conflagrate_SpellScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_IMMOLATE))
-                    return false;
-                return true;
-            }
-
-            void HandleHit(SpellEffIndex /*effIndex*/)
-            {
-                if (AuraEffect const* aurEff = GetHitUnit()->GetAuraEffect(SPELL_WARLOCK_IMMOLATE, EFFECT_2, GetCaster()->GetGUID()))
-                    SetHitDamage(CalculatePct(aurEff->GetAmount(), GetSpellInfo()->Effects[EFFECT_1].CalcValue(GetCaster())));
-            }
-
-            void Register()
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_warl_conflagrate_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_warl_conflagrate_SpellScript();
-        }
-};
-
 // Rain of fire
 class spell_warl_rain_of_fire : public SpellScriptLoader
 {
@@ -2906,7 +2871,6 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_bane_of_doom();
     new spell_warl_banish();
     new spell_warl_curse_of_weakness();
-    new spell_warl_conflagrate();
     new spell_warl_create_healthstone();
     new spell_warl_demonic_circle_summon();
     new spell_warl_demonic_circle_teleport();

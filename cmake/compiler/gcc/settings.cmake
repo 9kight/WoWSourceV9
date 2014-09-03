@@ -1,6 +1,9 @@
 # Set build-directive (used in core to tell which buildtype we used)
 add_definitions(-D_BUILD_DIRECTIVE='"${CMAKE_BUILD_TYPE}"')
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99")
+message(STATUS "GCC: Enabled C99 support")
+
 if(PLATFORM EQUAL 32)
   # Required on 32-bit systems to enable SSE2 (standard on x64)
   set(SSE_FLAGS "-msse2 -mfpmath=sse")

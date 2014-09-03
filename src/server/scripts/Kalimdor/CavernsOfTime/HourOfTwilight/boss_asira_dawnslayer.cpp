@@ -105,10 +105,9 @@ public:
                            DoCast(SPELL_MARK_OF_SILENCE);
                            events.ScheduleEvent(EVENT_MARK_OF_SILENCE, 11000);
                         break;
-    
+
                     case EVENT_CHOKING_SMOKE_BOMB:
                            Talk(SAY_SMOKE_BOMB);
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                            DoCast(SPELL_CHOKING_SMOKE_BOMB);
                            events.ScheduleEvent(EVENT_CHOKING_SMOKE_BOMB, 17000);
                         break;
@@ -116,7 +115,7 @@ public:
                     case EVENT_LESSER_BLADE_BARRIER:
                          DoCast(me, LESSER_BLADE_BARRIER, true);
                         break;					
-																	
+
 					default:
                        break;
 				}
@@ -134,7 +133,44 @@ public:
     };
 };
 
+// 103558 - Choking Smoke Bomb
+class spell_choking_smoke_bomb : public SpellScriptLoader
+{
+    public:
+        spell_choking_smoke_bomb() : SpellScriptLoader("spell_choking_smoke_bomb") { }
+
+        class spell_choking_smoke_bomb_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_choking_smoke_bomb_AuraScript);
+       
+            void OnTick(AuraEffect const* aurEff)
+            {
+                Unit* caster = GetCaster();
+
+                if(!caster)
+                    return;
+
+                if (DynamicObject* dynObj = caster->GetDynObject(103558))
+                {   
+                    // Casts AOE interfere targeting aura
+                    caster->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), 103790, true);
+                }
+            }
+
+            void Register()
+            {
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_choking_smoke_bomb_AuraScript::OnTick, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
+            }
+        };
+    
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_choking_smoke_bomb_AuraScript();
+        }
+};
+
 void AddSC_boss_asira_dawnslayer() 
 {
     new boss_asira_dawnslayer();
+    new spell_choking_smoke_bomb();
 }

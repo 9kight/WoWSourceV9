@@ -962,7 +962,6 @@ bool VehicleJoinEvent::Execute(uint64, uint32)
 
     Passenger->InterruptNonMeleeSpells(false);
     Passenger->RemoveAurasByType(SPELL_AURA_MOUNTED);
-    Passenger->Dismount();
 
     Player* player = Passenger->ToPlayer();
     if (player)
@@ -975,7 +974,6 @@ bool VehicleJoinEvent::Execute(uint64, uint32)
         player->StopCastingBindSight();
         player->SendOnCancelExpectedVehicleRideAura();
         player->UnsummonPetTemporaryIfAny();
-        player->Dismount();
     }
 
     if (Seat->second.SeatInfo->m_flags && !(Seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_ALLOW_TURNING))

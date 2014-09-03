@@ -2752,6 +2752,40 @@ public:
     }
 };
 
+// 71610, 71641 - Echoes of Light (Althor's Abacus)
+class spell_item_echoes_of_light : public SpellScriptLoader
+{
+    public:
+        spell_item_echoes_of_light() : SpellScriptLoader("spell_item_echoes_of_light") { }
+
+        class spell_item_echoes_of_light_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_item_echoes_of_light_SpellScript);
+
+            void FilterTargets(std::list<WorldObject*>& targets)
+            {
+                if (targets.size() < 2)
+                    return;
+
+                targets.sort(Trinity::HealthPctOrderPred());
+
+                WorldObject* target = targets.front();
+                targets.clear();
+                targets.push_back(target);
+            }
+
+            void Register() override
+            {
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_item_echoes_of_light_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ALLY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const override
+        {
+            return new spell_item_echoes_of_light_SpellScript();
+        }
+};
+
 void AddSC_item_spell_scripts()
 {
     // 23074 Arcanite Dragonling
@@ -2822,4 +2856,5 @@ void AddSC_item_spell_scripts()
     new spell_item_flask_of_enhancement(); // Spell - 79637
     new spell_item_synapse_springs(); // Spell - 82174
     new grounded_plasma_shield(); // Spell - 82626
+    new spell_item_echoes_of_light();
 }

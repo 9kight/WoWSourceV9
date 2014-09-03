@@ -4205,7 +4205,11 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(13); // 50000yd
                 break;
           // ENDOF ISLE OF CONQUEST SPELLS
-          //
+          // GUILD PERK SPELLS
+            case 83968: // Mass Resurrection
+                spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_DEAD;
+                break;
+          // ENDOF GUILD PERK SPELLS
             case 88611: // Smoke bomb Aura
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(28);
                 spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(14);

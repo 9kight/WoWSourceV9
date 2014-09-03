@@ -898,33 +898,67 @@ class spell_rog_blind : public SpellScriptLoader
         }
 };
 
-// -76577 - Smoke bomb
-class spell_rog_smoke : public SpellScriptLoader
+// 76577 - Smoke Bomb
+class spell_rog_smoke_bomb_inv : public SpellScriptLoader
 {
     public:
-        spell_rog_smoke() : SpellScriptLoader("spell_rog_smoke") { }
+        spell_rog_smoke_bomb_inv() : SpellScriptLoader("spell_rog_smoke_bomb_inv") { }
 
-        class spell_rog_smoke_AuraScript : public AuraScript
+        class spell_rog_smoke_bomb_inv_SpellScript : public SpellScript
         {
-            PrepareAuraScript(spell_rog_smoke_AuraScript);
+            PrepareSpellScript(spell_rog_smoke_bomb_inv_SpellScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/) { return true; }
-
-            void HandleEffectPeriodic(AuraEffect const* aurEff)
+            void FilterTargets(std::list<WorldObject*>& targets)
             {
-                if (DynamicObject* dyn = GetTarget()->GetDynObject(aurEff->GetId()))
-                    GetTarget()->CastSpell(dyn->GetPositionX(), dyn->GetPositionY(), dyn->GetPositionZ(), 88611, true);
+                for (std::list<WorldObject*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                {
+                    if((*itr)->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        Player* pl = (*itr)->ToPlayer();
+                        if(!pl->IsFriendlyTo(GetCaster()))
+                            pl->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
+                    }
+                }
             }
 
             void Register()
             {
-                OnEffectPeriodic += AuraEffectPeriodicFn(spell_rog_smoke_AuraScript::HandleEffectPeriodic, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_rog_smoke_bomb_inv_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENTRY);
             }
         };
 
+        class spell_rog_smoke_bomb_inv_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_rog_smoke_bomb_inv_AuraScript);
+       
+            void OnTick(AuraEffect const* aurEff)
+            {
+                Unit* caster = GetCaster();
+
+                if(!caster)
+                    return;
+
+                if (DynamicObject* dynObj = caster->GetDynObject(76577))
+                {   
+                    // Casts aoe interfere targetting aura
+                    caster->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), 88611, true);
+                }
+            }
+
+            void Register()
+            {
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_rog_smoke_bomb_inv_AuraScript::OnTick, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_rog_smoke_bomb_inv_SpellScript();
+        }
+    
         AuraScript* GetAuraScript() const
         {
-            return new spell_rog_smoke_AuraScript();
+            return new spell_rog_smoke_bomb_inv_AuraScript();
         }
 };
 
@@ -1308,7 +1342,7 @@ void AddSC_rogue_spell_scripts()
     new spell_rogue_gouge();
     new spell_rog_backstab();
     new spell_rog_sap();
-    new spell_rog_smoke();
+    new spell_rog_smoke_bomb_inv();
     new spell_rog_blind();
     new spell_rog_stealth();
     new spell_rogue_deadly_brew();

@@ -8,13 +8,7 @@
     Gnome Starting Zone
 */
 
-/*
- *  @Npc   : Sanitron 500 (46185)
- *  @Quest : Decontamination (27635)
- *  @Descr : Board the Sanitron 500 to begin the decontamination process.
- */
-
-enum NpcSanotron500
+enum RandomQuests
 {
     SAY_CONTAMINATION_START     = 0,
     SAY_CONTAMINATION_3         = 1,
@@ -28,23 +22,10 @@ enum NpcSanotron500
 
     SAY_UGH_NOT_THIS            = 0,
     SAY_OH_NO                   = 1,
-    
-    NPC_DECONTAMINATION_BUNNY   = 46165,
-    NPC_CLEAN_CANNON            = 46208,
-    NPC_SAFE_TECHNICAN          = 46230,
-
-    SPELL_DECONTAMINATION_STAGE_1       = 86075,
-    SPELL_DECONTAMINATION_STAGE_2       = 86084,
-    SPELL_DECONTAMINATION_STAGE_3       = 86086,
-    SPELL_DECONTAMINATION_STAGE_2_ALT   = 86098,
-    SPELL_DECONTAMINATION               = 86106,
-    SPELL_CLEAN_CANNON_CLEAN_BURST      = 86080,
-    SPELL_IRRADIATED                    = 80653,
-    SPELL_EXPLOSION                     = 30934,
-    
-    QUEST_PINNED_DOWN                   = 27670,
-    QUEST_STAGING_IN_BREWNALL           = 26339,
-    QUEST_JOB_FOR_BOT                   = 26205,
+  
+    QUEST_PINNED_DOWN           = 27670,
+    QUEST_STAGING_IN_BREWNALL   = 26339,
+    QUEST_JOB_FOR_BOT           = 26205,
 };
 
 class DistanceSelector
@@ -62,104 +43,203 @@ class DistanceSelector
         uint32 const _distance;
 };
 
+/*######
+## npc_sanitron500
+######*/
+
+/*
+ *  @Npc   : Sanitron 500 (46185)
+ *  @Quest : Decontamination (27635)
+ *  @Descr : Board the Sanitron 500 to begin the decontamination process.
+ */
+enum eSanitron
+{
+    SPELL_CANNON_BURST          = 86080,
+    SPELL_DECONTAMINATE_STAGE_1 = 86075,
+    SPELL_DECONTAMINATE_STAGE_2 = 86086,
+    SPELL_IRRADIATE             = 80653,
+
+    SPELL_EXPLOSION             = 30934,	
+
+    QUEST_DECONTAMINATION       = 27635,
+	
+    NPC_DECONTAMINATION_BUNNY   = 46165,
+    NPC_CLEAN_CANNON            = 46208,
+    NPC_SAFE_TECHNICAN          = 46230
+};
+
 class npc_sanitron500 : public CreatureScript
 {
-public: npc_sanitron500() : CreatureScript("npc_sanitron500") { }
+public:
+    npc_sanitron500() : CreatureScript("npc_sanitron500") {}
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        return new npc_sanitron500AI(pCreature);
+        QuestStatus status = pPlayer->GetQuestStatus(QUEST_DECONTAMINATION);
+        if (status == QUEST_STATUS_INCOMPLETE)
+        {
+            pPlayer->HandleEmoteCommand(0);
+            Vehicle *vehicle = pCreature->GetVehicleKit();
+            pPlayer->EnterVehicle(pCreature->ToUnit(), 0);
+            pCreature->MonsterSay("Commencing decontamination sequence...", LANG_UNIVERSAL, 0);
+        }
+        return true;
     }
-	
+
     struct npc_sanitron500AI : public ScriptedAI
     {
-        npc_sanitron500AI(Creature *c) : ScriptedAI(c) {}
-
-        bool EventStarted;
-
-        uint8 Phase;
-        uint32 PhaseTime;
-        uint64 PlayerGuid;
+        npc_sanitron500AI(Creature* pCreature) : ScriptedAI(pCreature), vehicle(pCreature->GetVehicleKit()) 
+        {
+            assert(vehicle);
+        }
+        
+        Vehicle *vehicle;
+        Unit* Technician;
+        Creature::Unit* Bunny[4];
+        Creature::Unit* Cannon[4];
+        std::list<Unit*> targets;
+        uint32 uiTimer;
+        uint32 uiRespawnTimer;
+        uint8 uiPhase;
 
         void Reset()
         {
-            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
-            me->GetMotionMaster()->MoveTargetedHome();
-            Phase = 0;
-            PlayerGuid = 0;
-            EventStarted = false;
+            uiTimer = 0;
+            uiRespawnTimer = 6000;
+            uiPhase = 0;
         }
 
-        void SpellHit(Unit* pPlayer, const SpellInfo* pSpell)
+        Unit* unit(uint32 entry, uint32 range, bool alive)
         {
-            if(pSpell->Id == 86106)
-            {
-                PlayerGuid = pPlayer->GetGUID();
-                if(pPlayer->isAlive())
+            if (Unit* unit = me->FindNearestCreature(entry, float(range), alive))
+                if (Unit* unit2 = Unit::GetCreature(*me, unit->GetGUID()))
+                    return unit2;
+        }
+
+        void GetTargets()
+        {
+            Trinity::AnyUnitInObjectRangeCheck u_check(me, 100.0f);
+            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+            me->VisitNearbyObject(100.0f, searcher);
+            if (!targets.empty())
+                for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
                 {
-                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
-                    pPlayer->EnterVehicle(me, 0);
+                    if ((*iter)->GetTypeId() != TYPEID_PLAYER)
+                    {
+                        switch ((*iter)->GetEntry())
+                        {
+                        case 46230:
+                            if ((*iter)->GetDistance2d(-5165.209961f, 713.809021f) <= 1)
+                                Technician = (*iter);
+                            break;
+                        case 46165:
+                            if ((*iter)->GetDistance2d(-5164.919922f, 723.890991f) <= 1)
+                                Bunny[0] = (*iter);
+                            if ((*iter)->GetDistance2d(-5182.560059f, 726.656982f) <= 1)
+                                Bunny[1] = (*iter);
+                            if ((*iter)->GetDistance2d(-5166.350098f, 706.336975f) <= 1)
+                                Bunny[2] = (*iter);
+                            if ((*iter)->GetDistance2d(-5184.040039f, 708.405029f) <= 1)
+                                Bunny[3] = (*iter);
+                            break;
+                        case 46208:
+                            if ((*iter)->GetDistance2d(-5164.209961f, 719.267029f) <= 1)
+                                Cannon[0] = (*iter);
+                            if ((*iter)->GetDistance2d(-5165.000000f, 709.453979f) <= 1)
+                                Cannon[1] = (*iter);
+                            if ((*iter)->GetDistance2d(-5183.830078f, 722.093994f) <= 1)
+                                Cannon[2] = (*iter);
+                            if ((*iter)->GetDistance2d(-5184.470215f, 712.554993f) <= 1)
+                                Cannon[3] = (*iter);
+                            break;
+                        }
+                    }
                 }
-                EventStarted = true;
-                PhaseTime = 1000;
-            }
-        }
-
-        void SearchForTrigger(Unit* target, uint32 triggerEntry, uint32 SpellID, bool ArcRequirement)
-        {
-            Player* pPlayer = me->GetPlayer(*me, PlayerGuid);
-
-            std::list<Unit*> SearchedTriggers;
-            Trinity::AllCreaturesOfEntryInRange u_check(target, triggerEntry, 100.0f);
-            Trinity::UnitListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher(target, SearchedTriggers, u_check);
-            target->VisitNearbyObject(100.0f, searcher);
-
-            if(SearchedTriggers.empty())
-                return;
-
-            for (std::list<Unit*>::const_iterator iter = SearchedTriggers.begin(); iter != SearchedTriggers.end(); ++iter)
-            {
-                if(ArcRequirement)
-                {
-                    if((*iter)->HasInArc(M_PI/3, me))
-                        (*iter)->CastSpell(target, SpellID, true);
-
-                } else (*iter)->CastSpell(target, SpellID, true);
-            } SearchedTriggers.clear();
         }
 
         void UpdateAI(const uint32 diff)
         {
-            if(Player* pPlayer = me->GetPlayer(*me, PlayerGuid))
-            {
-                if(PhaseTime <= diff)
+            if (!vehicle->HasEmptySeat(0))
+                if (uiTimer <= diff)
                 {
-                    switch(Phase)
+                    switch(uiPhase)
                     {
-                        case 0:
+                    case 0: me->GetMotionMaster()->MovePoint(1, -5173.34f, 730.11f, 294.25f);
+                        GetTargets();
+                        ++uiPhase;
+                        uiTimer = 5500;
+                        break;
+                    case 1:
+                        if (Bunny[0] && Bunny[1])
                         {
-                            me->MonsterSay("Commencing decontamination sequence...", 0, 0);
-                            me->GetMotionMaster()->MoveForward(7.5f, 3.5f);
-                            Phase++;
-                            PhaseTime = 4000;
-                            break;
+                            Bunny[0]->CastSpell(me, SPELL_DECONTAMINATE_STAGE_1, true);
+                            Bunny[1]->CastSpell(me, SPELL_DECONTAMINATE_STAGE_1, true);
                         }
-                        case 1: SearchForTrigger(pPlayer, 46165, 86075, true); Phase++; PhaseTime = 2000; break;
-                        case 2: me->GetMotionMaster()->MoveForward(9.0f, -1.5f); Phase++; PhaseTime = 2000; break;
-                        case 3: SearchForTrigger(pPlayer, 46208, 86080, false); pPlayer->CastSpell(pPlayer, 86084, true); Phase++; PhaseTime = 5000; break;
-                        case 4: me->GetMotionMaster()->MoveForward(8.0f, 1.0f); Phase++; PhaseTime = 5000; break;
-                        case 5: SearchForTrigger(pPlayer, 46165, 86086, true); Phase++; PhaseTime = 5000; break;
-                        case 6: me->MonsterSay("Decontamination complete. Standby for delivery.", 0, 0); Phase++; PhaseTime = 1000; break;
-                        case 7: me->GetMotionMaster()->MoveForward(6.0f, 0.0f);  Phase++; PhaseTime = 2000; break;
-                        case 8: me->MonsterSay("Warning, system overload. Malfunction imminent!", 0, 0); Phase++; PhaseTime = 3000; break;
-                        case 9: pPlayer->ExitVehicle(); Reset(); break;
-                        default: break;
+                        ++uiPhase;
+                        uiTimer = 5000;
+                        break;
+                    case 2:
+                        if (Cannon[0] && Cannon[1] && Cannon[2] && Cannon[3])
+                        {
+                            me->GetMotionMaster()->MovePoint(2, -5173.72f, 725.7f, 294.03f);
+                            Cannon[0]->CastSpell(me, SPELL_CANNON_BURST, true);
+                            Cannon[1]->CastSpell(me, SPELL_CANNON_BURST, true);
+                            Cannon[2]->CastSpell(me, SPELL_CANNON_BURST, true);
+                            Cannon[3]->CastSpell(me, SPELL_CANNON_BURST, true);
+                        }
+                        ++uiPhase;
+                        uiTimer = 2000;
+                        break;
+                    case 3:
+                        if (Technician)
+                            me->GetMotionMaster()->MovePoint(3, -5174.57f, 716.45f, 289.53f);
+                            Technician->MonsterSay("Ugh! Not this again! I'm asking for a new station next expedition...", LANG_UNIVERSAL, 0);
+                        ++uiPhase;
+                        uiTimer = 8000;
+                        break;
+                    case 4:
+                        if (Bunny[2] && Bunny[3])
+                        {
+                            me->GetMotionMaster()->MovePoint(4, -5175.04f, 707.2f, 294.4f);
+                            Bunny[2]->CastSpell(me, SPELL_DECONTAMINATE_STAGE_2, true);
+                            Bunny[3]->CastSpell(me, SPELL_DECONTAMINATE_STAGE_2, true);
+                        }
+                        ++uiPhase;
+                        uiTimer = 1000;
+                        break;
+                    case 5:
+                        if (vehicle->GetPassenger(0))
+                            if (Player* player = vehicle->GetPassenger(0)->ToPlayer())
+                                player->CompleteQuest(QUEST_DECONTAMINATION);
+                        me->MonsterSay("Decontamination complete. Standby for delivery.", LANG_UNIVERSAL, 0);
+                        me->GetMotionMaster()->MovePoint(5, -5175.61f, 700.38f, 290.89f);
+                        ++uiPhase;
+                        uiTimer = 3000;
+                        break;
+                    case 6:
+                        me->MonsterSay("Warning, system overload. Malfunction imminent!", LANG_UNIVERSAL, 0);
+                        me->CastSpell(me, SPELL_EXPLOSION);
+                        ++uiPhase;
+                        uiTimer = 1000;
+                        break;
+                    case 7:
+                        me->SetCanFly(false);
+                        vehicle->GetPassenger(0)->RemoveAurasDueToSpell(SPELL_IRRADIATE);
+                        vehicle->RemoveAllPassengers();
+                        me->setDeathState(JUST_DIED);
+                        ++uiPhase;
+                        uiTimer = 0;
+                        break;
                     }
-                } else PhaseTime -= diff;
-            }
+                }
+                else uiTimer -= diff;
         }
     };
 
+    CreatureAI *GetAI(Creature *pCreature) const
+    {
+        return new npc_sanitron500AI(pCreature);
+    }
 };
 
 float CrushcogAddPlace[4][4] =

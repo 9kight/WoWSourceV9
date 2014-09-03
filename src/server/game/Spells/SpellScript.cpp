@@ -1150,6 +1150,16 @@ AuraEffect* AuraScript::GetFirstEffectOfType(AuraType type) const
     return m_aura->GetFirstEffectOfType(type);
 }
 
+void SpellScript::GetTargetSpeedXYZ(float &speedXY, float &speedZ)
+{
+    if (m_spell->m_targets.HasTraj())
+    {
+        speedXY = m_spell->m_targets.GetSpeedXY();
+        speedZ = m_spell->m_targets.GetSpeedZ();
+    }
+}
+
+
 Unit* AuraScript::GetTarget() const
 {
     switch (m_currentScriptState)

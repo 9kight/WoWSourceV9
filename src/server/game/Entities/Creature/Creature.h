@@ -730,6 +730,9 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         void SetObjectScale(float scale);
         void SetDisplayId(uint32 modelId);
 
+        void SetSeerGUID(uint64 guid) { uiSeerGUID = guid; }
+        uint64 GetSeerGUID() const { return uiSeerGUID; }
+		
     protected:
         bool CreateFromProto(uint32 guidlow, uint32 Entry, uint32 vehId, uint32 team, const CreatureData* data = NULL);
         bool InitEntry(uint32 entry, uint32 team=ALLIANCE, const CreatureData* data=NULL);
@@ -779,6 +782,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
 
         bool IsInvisibleDueToDespawn() const;
         bool CanAlwaysSee(WorldObject const* obj) const;
+		uint64 uiSeerGUID;
 
         void UpdateMovementFlag();
 

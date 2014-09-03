@@ -1529,10 +1529,6 @@ void GameObject::Use(Unit* user)
             user->RemoveAurasByType(SPELL_AURA_MOUNTED);
             spellId = info->spellcaster.spellId;
 
-            if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId))
-                if (spellInfo->Attributes & SPELL_ATTR0_CANT_USED_IN_COMBAT)
-                    triggered = false;
-
             AddUse();
             break;
         }

@@ -28,6 +28,8 @@
 #include "SpellAuraDefines.h"
 #include "ThreatManager.h"
 
+
+
 #define WORLD_TRIGGER   12999
 enum SpellInterruptFlags
 {
@@ -1482,8 +1484,7 @@ class Unit : public WorldObject
         uint32 GetMountID() const { return GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID); }
         void Mount(uint32 mount, uint32 vehicleId = 0, uint32 creatureEntry = 0);
         void Dismount();
-        void SendMountResult(MountResult error);
-        void UpdateMount();
+        MountCapabilityEntry const* GetMountCapability(uint32 mountType) const;
 
         void SendDurabilityLoss(Player* receiver, uint32 percent);
         void PlayOneShotAnimKit(uint32 id);
@@ -1783,6 +1784,7 @@ class Unit : public WorldObject
         CharmInfo* InitCharmInfo();
         void DeleteCharmInfo();
         void UpdateCharmAI();
+		void EnableAI();
         //Player* GetMoverSource() const;
         Player* m_movedPlayer;
         SharedVisionList const& GetSharedVisionList() { return m_sharedVision; }
@@ -2428,7 +2430,6 @@ class Unit : public WorldObject
 
         uint32 m_unitTypeMask;
         LiquidTypeEntry const* _lastLiquid;
-        MountCapabilityEntry const* _mount;
 		
         bool m_IsInKillingProcess;		
 
@@ -2509,31 +2510,53 @@ namespace Trinity
     class PowerPctOrderPred
     {
         public:
-            PowerPctOrderPred(Powers power, bool ascending = true) : m_power(power), m_ascending(ascending) {}
-            bool operator() (const Unit* a, const Unit* b) const
+            PowerPctOrderPred(Powers power, bool ascending = true) : _power(power), _ascending(ascending) { }
+
+            bool operator()(WorldObject const* objA, WorldObject const* objB) const
             {
-                float rA = a->GetMaxPower(m_power) ? float(a->GetPower(m_power)) / float(a->GetMaxPower(m_power)) : 0.0f;
-                float rB = b->GetMaxPower(m_power) ? float(b->GetPower(m_power)) / float(b->GetMaxPower(m_power)) : 0.0f;
-                return m_ascending ? rA < rB : rA > rB;
+                Unit const* a = objA->ToUnit();
+                Unit const* b = objB->ToUnit();
+                float rA = (a && a->GetMaxPower(_power)) ? float(a->GetPower(_power)) / float(a->GetMaxPower(_power)) : 0.0f;
+                float rB = (b && b->GetMaxPower(_power)) ? float(b->GetPower(_power)) / float(b->GetMaxPower(_power)) : 0.0f;
+                return _ascending ? rA < rB : rA > rB;
             }
+
+            bool operator()(Unit const* a, Unit const* b) const
+            {
+                float rA = a->GetMaxPower(_power) ? float(a->GetPower(_power)) / float(a->GetMaxPower(_power)) : 0.0f;
+                float rB = b->GetMaxPower(_power) ? float(b->GetPower(_power)) / float(b->GetMaxPower(_power)) : 0.0f;
+                return _ascending ? rA < rB : rA > rB;
+            }
+
         private:
-            const Powers m_power;
-            const bool m_ascending;
+            Powers const _power;
+            bool const _ascending;
     };
 
     // Binary predicate for sorting Units based on percent value of health
     class HealthPctOrderPred
     {
         public:
-            HealthPctOrderPred(bool ascending = true) : m_ascending(ascending) {}
-            bool operator() (const Unit* a, const Unit* b) const
+            HealthPctOrderPred(bool ascending = true) : _ascending(ascending) { }
+
+            bool operator()(WorldObject const* objA, WorldObject const* objB) const
+            {
+                Unit const* a = objA->ToUnit();
+                Unit const* b = objB->ToUnit();
+                float rA = (a && a->GetMaxHealth()) ? float(a->GetHealth()) / float(a->GetMaxHealth()) : 0.0f;
+                float rB = (b && b->GetMaxHealth()) ? float(b->GetHealth()) / float(b->GetMaxHealth()) : 0.0f;
+                return _ascending ? rA < rB : rA > rB;
+            }
+
+            bool operator() (Unit const* a, Unit const* b) const
             {
                 float rA = a->GetMaxHealth() ? float(a->GetHealth()) / float(a->GetMaxHealth()) : 0.0f;
                 float rB = b->GetMaxHealth() ? float(b->GetHealth()) / float(b->GetMaxHealth()) : 0.0f;
-                return m_ascending ? rA < rB : rA > rB;
+                return _ascending ? rA < rB : rA > rB;
             }
+
         private:
-            const bool m_ascending;
+            bool const _ascending;
     };
 }
 #endif

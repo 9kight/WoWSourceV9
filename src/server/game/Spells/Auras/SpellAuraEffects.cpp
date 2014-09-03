@@ -558,6 +558,13 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
         case SPELL_AURA_MANA_SHIELD:
             m_canBeRecalculated = false;
             break;
+        case SPELL_AURA_MOUNTED:
+            if (MountCapabilityEntry const* mountCapability = GetBase()->GetUnitOwner()->GetMountCapability(uint32(GetMiscValueB())))
+            {
+                amount = mountCapability->Id;
+                m_canBeRecalculated = false;
+            }
+            break;
         case SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE:
         {
             if (caster)
@@ -2228,7 +2235,7 @@ void AuraEffect::HandleAuraTransform(AuraApplication const* aurApp, uint8 mode, 
                 target->ToPlayer()->setRegenTimerCount(1*IN_MILLISECONDS);
         }
         //dismount polymorphed target (after patch 2.4.2)
-        if (target->IsMounted())
+        if (target->IsMounted() && !GetSpellInfo()->IsPositive())
             target->RemoveAurasByType(SPELL_AURA_MOUNTED);
     }
     else
@@ -2748,33 +2755,27 @@ void AuraEffect::HandleAuraMounted(AuraApplication const* aurApp, uint8 mode, bo
                     displayId = 0;
         }
 
-        target->Mount(displayId, vehicleId, GetMiscValue());
+        if (target->ToPlayer())
+            target->ToPlayer()->UnsummonPetTemporaryIfAny();
+        target->Mount(displayId, vehicleId, creatureEntry);
+
+        // cast speed aura
+        if (MountCapabilityEntry const* mountCapability = sMountCapabilityStore.LookupEntry(GetAmount()))
+            target->CastSpell(target, mountCapability->SpeedModSpell, true);
     }
     else
     {
-        if (GetBase()->GetId() == 87840)
-            target->DeMorph();
-
         target->Dismount();
         //some mounts like Headless Horseman's Mount or broom stick are skill based spell
         // need to remove ALL arura related to mounts, this will stop client crash with broom stick
         // and never endless flying after using Headless Horseman's Mount
         if (mode & AURA_EFFECT_HANDLE_REAL)
-            target->RemoveAurasByType(SPELL_AURA_MOUNTED);
-    }
-    target->UpdateSpeed(MOVE_RUN, true);
-    target->UpdateMount();
-
-    if (apply && target->GetTypeId() == TYPEID_PLAYER)
-    {
-        // disable pet
-        Player* player = target->ToPlayer();
-        Pet* pet = player->GetPet();
-        if (pet)
         {
-            if (player->CanFly())
-                player->UnsummonPetTemporaryIfAny();
-            else pet->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+            target->RemoveAurasByType(SPELL_AURA_MOUNTED);
+
+            // remove speed aura
+            if (MountCapabilityEntry const* mountCapability = sMountCapabilityStore.LookupEntry(GetAmount()))
+                target->RemoveAurasDueToSpell(mountCapability->SpeedModSpell, target->GetGUID());
         }
     }
 }
@@ -5649,8 +5650,12 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                     }
                     break;
                 }
-                case 75592: // Anhuur - Divine Reckoning
-                    caster->CastSpell(target, m_spellInfo->Effects[m_effIndex].TriggerSpell, true);
+                case 75592: // Divine reconing - normal
+                case 94949: // Divine reconing - heroic
+                {
+                                int32 bp0 = GetAmount();
+                                caster->CastCustomSpell(target, 75591, &bp0, NULL, NULL, false);
+                }
                     break;
                 case 66149: // Bullet Controller Periodic - 10 Man
                 case 68396: // Bullet Controller Periodic - 25 Man

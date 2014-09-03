@@ -433,6 +433,53 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
             }
             case SPELLFAMILY_WARLOCK:
             {
+			// Incinerate Rank 1 & 2
+                if ((m_spellInfo->SpellFamilyFlags[1] & 0x000040) && m_spellInfo->SpellIconID == 2128)
+                {
+                    // Incinerate does more dmg (dmg/6) if the target have Immolate debuff.
+                    // Check aura state for speed but aura state set not only for Immolate spell
+                    if (unitTarget->HasAuraState(AURA_STATE_CONFLAGRATE))
+                    {
+                        if (unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_WARLOCK, 0x4, 0, 0))
+                            damage += damage / 6;
+                    }
+                }
+            // Conflagrate - consumes Immolate
+                else if (m_spellInfo->TargetAuraState == AURA_STATE_CONFLAGRATE)
+                {
+                    AuraEffect const* aura = NULL;          // found req. aura for damage calculation
+
+                    Unit::AuraEffectList const &mPeriodic = unitTarget->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
+                    for (Unit::AuraEffectList::const_iterator i = mPeriodic.begin(); i != mPeriodic.end(); ++i)
+                    {
+                        // for caster applied auras only
+                        if ((*i)->GetSpellInfo()->SpellFamilyName != SPELLFAMILY_WARLOCK || (*i)->GetCasterGUID() != m_caster->GetGUID())
+                            continue;
+
+                        // Immolate
+                        if ((*i)->GetSpellInfo()->SpellFamilyFlags[0] & 0x4)
+                        {
+                            aura = *i;          // it selected always if exist
+                            break;
+                        }
+                    }
+
+                    // found Immolate
+                    if (aura)
+                    {
+                        uint32 pdamage = aura->GetAmount() > 0 ? aura->GetAmount() : 0;
+                        pdamage = m_caster->SpellDamageBonusDone(unitTarget, aura->GetSpellInfo(), pdamage, DOT, aura->GetBase()->GetStackAmount());
+                        uint32 pct_dir = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, (effIndex + 1));
+                        uint8 baseTotalTicks = uint8(m_caster->CalcSpellDuration(aura->GetSpellInfo()) / aura->GetSpellInfo()->Effects[2].Amplitude);
+                        damage += int32(CalculatePct(pdamage * baseTotalTicks, pct_dir)) / 3;
+
+                        uint32 pct_dot = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, (effIndex + 2)) / 3;
+                        m_spellValue->EffectBasePoints[1] = m_spellInfo->Effects[EFFECT_1].CalcBaseValue(int32(CalculatePct(pdamage * baseTotalTicks, pct_dot)));
+
+                        apply_direct_bonus = false;
+                        break;
+                    }
+                }
             }
             case SPELLFAMILY_DRUID:
             {
@@ -542,20 +589,6 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
         {
             damage = m_originalCaster->SpellDamageBonusDone(unitTarget, m_spellInfo, (uint32)damage, SPELL_DIRECT_DAMAGE);
             damage = unitTarget->SpellDamageBonusTaken(m_spellInfo, (uint32)damage, SPELL_DIRECT_DAMAGE, 1, m_originalCaster->GetGUID());
-        }
-
-        // Incinerate Rank 1 & 2
-        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && (m_spellInfo->SpellFamilyFlags[1] & 0x000040) && m_spellInfo->SpellIconID == 2128)
-        {
-            // Incinerate does more dmg (dmg/6) if the target have Immolate debuff.
-            // Check aura state for speed but aura state set not only for Immolate spell
-            if (unitTarget->HasAuraState(AURA_STATE_CONFLAGRATE))
-            {
-                if (unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_WARLOCK, 0x4, 0, 0))
-                {
-                    damage += damage / 6;
-                }
-            }
         }
         
         m_damage += damage;
@@ -6298,31 +6331,29 @@ void Spell::EffectResurrectWithAura(SpellEffIndex effIndex)
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
 
-    if (!unitTarget || !unitTarget->IsInWorld())
+    Unit* unit = m_targets.GetCorpseTarget() ? sObjectAccessor->FindUnit(m_targets.GetCorpseTarget()->GetOwnerGUID()) : unitTarget;
+
+    if (!unit || !unit->IsInWorld())
         return;
 
-    Player* target = unitTarget->ToPlayer();
-    if (!target)
-        return;
+    if (Player* target = unit->ToPlayer())
+    {
+        if (target->IsRessurectRequested())       // already have one active request
+            return;
 
-    if (unitTarget->isAlive())
-        return;
+        uint32 health = target->CountPctFromMaxHealth(damage);
+        uint32 mana = CalculatePct(target->GetMaxPower(POWER_MANA), damage);
+        uint32 resurrectAura = 0;
+        if (sSpellMgr->GetSpellInfo(GetSpellInfo()->Effects[effIndex].TriggerSpell))
+            resurrectAura = GetSpellInfo()->Effects[effIndex].TriggerSpell;
 
-    if (target->IsRessurectRequested())       // already have one active request
-        return;
+        if (resurrectAura && target->HasAura(resurrectAura))
+            return;
 
-    uint32 health = target->CountPctFromMaxHealth(damage);
-    uint32 mana   = CalculatePct(target->GetMaxPower(POWER_MANA), damage);
-    uint32 resurrectAura = 0;
-    if (sSpellMgr->GetSpellInfo(GetSpellInfo()->Effects[effIndex].TriggerSpell))
-        resurrectAura = GetSpellInfo()->Effects[effIndex].TriggerSpell;
-
-    if (resurrectAura && target->HasAura(resurrectAura))
-        return;
-
-    ExecuteLogEffectResurrect(effIndex, target);
-    target->SetResurrectRequestData(m_caster, health, mana, resurrectAura);
-    SendResurrectRequest(target);
+        ExecuteLogEffectResurrect(effIndex, target);
+        target->SetResurrectRequestData(m_caster, health, mana, resurrectAura);
+        SendResurrectRequest(target);
+    }
 }
 
 void Spell::EffectCreateAreaTrigger(SpellEffIndex effIndex)

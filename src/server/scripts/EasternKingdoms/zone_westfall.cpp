@@ -2046,71 +2046,90 @@ public:
     };
 };
 
-enum clodoEnum { 
-
-    NPC_HOMELESS_STORMWIND_CITIZEN      = 42384,
-    NPC_HOMELESS_STORMWIND_CITIZEN2     = 42386,
-    NPC_WEST_PLAINS_DRIFTER             = 42391,
-    KILL_CREDIT_WESTFALL_STEW           = 42617
-
+enum eHobo
+{
+    QUEST_FEEDING_THE_HUNGRY = 26271,
+    STEW = 42617,
+    SPELL_FULL_BELLY = 79451,
 };
 
-class npc_westfall_stew : public CreatureScript
+class npc_hungry_hobo : public CreatureScript
 {
-public:
-    npc_westfall_stew() : CreatureScript("npc_westfall_stew") { }
+    public:
+    npc_hungry_hobo() : CreatureScript("npc_hungry_hobo") {}
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_westfall_stewAI (creature);
+        return new npc_hungry_hoboAI (creature);
     }
-    
-    struct npc_westfall_stewAI : public ScriptedAI
+
+    struct npc_hungry_hoboAI : public ScriptedAI
     {
-        npc_westfall_stewAI(Creature* creature) : ScriptedAI(creature) {}
-        uint32 time;
-        bool booltest;
-        std::list<Creature*> clodoList;
-            
+        npc_hungry_hoboAI(Creature* creature) : ScriptedAI(creature) {}
+
+        uint8 count;
+        uint32 Miam;
+
         void Reset()
         {
-            time = 30000;
-            booltest = true;
-            if(Player* invocer = me->ToTempSummon()->GetSummoner()->ToPlayer()) 
-            {               
-                GetCreatureListWithEntryInGrid(clodoList, me, NPC_HOMELESS_STORMWIND_CITIZEN, 15.0f);
-                for (auto clodo: clodoList)
-                {
-                    if(clodo->getStandState() != UNIT_STAND_STATE_SIT)
-                    {
-                        clodo->GetMotionMaster()->MoveFollow(me, 1, me->GetAngle(clodo));
-                        clodo->AI()->Talk(0);
-                        clodo->SetStandState(UNIT_STAND_STATE_SIT);
-                        invocer->KilledMonsterCredit(KILL_CREDIT_WESTFALL_STEW, 0);
-                    }
-                }               
-            }
+            count = 0;
+            Miam = 2000;
+
+            me->SetStandState(UNIT_STAND_STATE_SLEEP);
         }
+
+        void Eat()
+        {
+            me->CastSpell(me, SPELL_FULL_BELLY, true);
+            me->SetStandState(UNIT_STAND_STATE_SIT);
+        }
+
         void UpdateAI(const uint32 diff)
         {
-            if(booltest)
+            if (Miam < diff)
             {
-                if (time < diff)
+                if (Creature* stew = me->FindNearestCreature(STEW, 10.0f, true))
                 {
-                    for (auto clodo: clodoList)
+                    if (me->HasAura(SPELL_FULL_BELLY) && count == 0)
+                        return;
+
+                    switch (count)
                     {
-                        clodo->SetStandState(UNIT_STAND_STATE_STAND);
-                        clodo->SetDefaultMovementType(RANDOM_MOTION_TYPE);                   
-                    } 
-                    me->DespawnOrUnsummon();
-                    booltest = false;
+                        case 0:
+                        {
+                            me->RemoveStandFlags(UNIT_STAND_STATE_SLEEP);
+                            me->SetStandFlags(UNIT_STAND_STATE_STAND);
+                            Miam = 1000;
+                            count++;
+                            break;
+                        }
+                        case 1:
+                        {
+                            Eat();
+                            Miam = 2000;
+                            count++;
+                            break;
+                        }
+                        case 2:
+                        {
+                            if (Unit* player = me->GetPlayer(*stew, stew->GetUInt64Value(UNIT_FIELD_SUMMONEDBY)))
+                                player->ToPlayer()->KilledMonsterCredit(42617, NULL);
+                                Miam = 25000;
+                                count++;
+                                break;
+                        }
+                        default:
+                        break;
+                    }
                 }
-                else 
-                    time -= diff;
+                else Miam = 3000;
+
+                if (count == 3)
+                    Reset();
             }
+            else Miam -= diff;
         }
     };
-
 };
 
 void AddSC_westfall()
@@ -2126,5 +2145,5 @@ void AddSC_westfall()
     new npc_fire_trigger();
     new npc_summoner();
     new npc_horatio_investigate();
-    new npc_westfall_stew();
+    new npc_hungry_hobo();
 }
