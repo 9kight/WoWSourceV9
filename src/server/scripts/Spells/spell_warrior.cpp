@@ -31,6 +31,7 @@ enum WarriorSpells
     SPELL_WARRIOR_BLOODTHIRST                       = 23885,
     SPELL_WARRIOR_BLOODTHIRST_DAMAGE                = 23881,
     SPELL_WARRIOR_CHARGE                            = 34846,
+    SPELL_WARRIOR_COLOSSUS_SMASH                    = 86346,
     SPELL_WARRIOR_DEEP_WOUNDS_RANK_1                = 12162,
     SPELL_WARRIOR_DEEP_WOUNDS_RANK_2                = 12850,
     SPELL_WARRIOR_DEEP_WOUNDS_RANK_3                = 12868,
@@ -42,6 +43,10 @@ enum WarriorSpells
     SPELL_WARRIOR_JUGGERNAUT_CRIT_BONUS_TALENT      = 64976,
     SPELL_WARRIOR_LAST_STAND_TRIGGERED              = 12976,
     SPELL_WARRIOR_SLAM                              = 50782,
+    SPELL_WARRIOR_SHIELD_SLAM                       = 23922,
+    SPELL_WARRIOR_MORTAL_STRIKE                     = 12294,
+    SPELL_WARRIOR_REND                              = 94009,
+    SPELL_WARRIOR_RETALIATION_DAMAGE                = 22858,
     SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK     = 26654,
     SPELL_WARRIOR_TAUNT                             = 355,
     SPELL_WARRIOR_UNRELENTING_ASSAULT_RANK_1        = 46859,
@@ -1105,62 +1110,6 @@ class spell_warr_incite : public SpellScriptLoader
         }
 };
 
-class spell_warrior_retaliation : public SpellScriptLoader
-{
-    class script_impl : public AuraScript
-    {
-        PrepareAuraScript(script_impl);
-
-        enum { SPELL_RETALIATION = 22858 };
-
-        bool Load()
-        {
-            Unit const* const caster = GetCaster();
-            return caster && caster->GetTypeId() == TYPEID_PLAYER;
-        }
-
-        bool CheckProc(ProcEventInfo& eventInfo)
-        {
-            Unit const* const caster = GetCaster();
-            Unit* const target = eventInfo.GetProcTarget();
-            if (!target)
-                return false;
-
-            // Attacks from behind
-            if (!caster->HasInArc(M_PI, target))
-                return false;
-
-            // Controlled (Stun/Fear/Hex/etc.)
-            if (caster->HasUnitState(UNIT_STATE_CONTROLLED))
-                return false;
-
-            return true;
-        }
-
-        void OnProc(AuraEffect const*, ProcEventInfo& eventInfo)
-        {
-            GetCaster()->CastSpell(eventInfo.GetProcTarget(), SPELL_RETALIATION, true);
-        }
-
-        void Register()
-        {
-            DoCheckProc += AuraCheckProcFn(script_impl::CheckProc);
-            OnEffectProc += AuraEffectProcFn(script_impl::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
-        }
-    };
-
-public:
-    spell_warrior_retaliation()
-        : SpellScriptLoader("spell_warrior_retaliation")
-    {
-    }
-
-    AuraScript* GetAuraScript() const
-    {
-        return new script_impl();
-    }
-};
-
 class spell_warrior_improved_hamstring : public SpellScriptLoader
 {
     class script_impl : public AuraScript
@@ -1199,6 +1148,224 @@ public:
     }
 };
 
+// 58387 - Glyph of Sunder Armor
+class spell_warr_glyph_of_sunder_armor : public SpellScriptLoader
+{
+    public:
+        spell_warr_glyph_of_sunder_armor() : SpellScriptLoader("spell_warr_glyph_of_sunder_armor") { }
+
+        class spell_warr_glyph_of_sunder_armor_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_warr_glyph_of_sunder_armor_AuraScript);
+
+            void HandleEffectCalcSpellMod(AuraEffect const* aurEff, SpellModifier*& spellMod)
+            {
+                if (!spellMod)
+                {
+                    spellMod = new SpellModifier(aurEff->GetBase());
+                    spellMod->op = SpellModOp(aurEff->GetMiscValue());
+                    spellMod->type = SPELLMOD_FLAT;
+                    spellMod->spellId = GetId();
+                    spellMod->mask = GetSpellInfo()->Effects[aurEff->GetEffIndex()].SpellClassMask;
+                }
+
+                spellMod->value = aurEff->GetAmount();
+            }
+
+            void Register() 
+            {
+                DoEffectCalcSpellMod += AuraEffectCalcSpellModFn(spell_warr_glyph_of_sunder_armor_AuraScript::HandleEffectCalcSpellMod, EFFECT_0, SPELL_AURA_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const 
+        {
+            return new spell_warr_glyph_of_sunder_armor_AuraScript();
+        }
+};
+
+// 84583 Lambs to the Slaughter
+class spell_warr_lambs_to_the_slaughter : public SpellScriptLoader
+{
+    public:
+        spell_warr_lambs_to_the_slaughter() : SpellScriptLoader("spell_warr_lambs_to_the_slaughter") { }
+
+        class spell_warr_lambs_to_the_slaughter_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_warr_lambs_to_the_slaughter_AuraScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/) 
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_MORTAL_STRIKE) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_REND))
+                    return false;
+                return true;
+            }
+
+            void OnProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
+            {
+                if (Aura* aur = eventInfo.GetProcTarget()->GetAura(SPELL_WARRIOR_REND, GetTarget()->GetGUID()))
+                    aur->SetDuration(aur->GetSpellInfo()->GetMaxDuration(), true);
+
+            }
+
+            void Register() 
+            {
+                OnEffectProc += AuraEffectProcFn(spell_warr_lambs_to_the_slaughter_AuraScript::OnProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const 
+        {
+            return new spell_warr_lambs_to_the_slaughter_AuraScript();
+        }
+};
+
+// 20230 - Retaliation
+class spell_warr_retaliation : public SpellScriptLoader
+{
+    public:
+        spell_warr_retaliation() : SpellScriptLoader("spell_warr_retaliation") { }
+
+        class spell_warr_retaliation_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_warr_retaliation_AuraScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/) 
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_RETALIATION_DAMAGE))
+                    return false;
+                return true;
+            }
+
+            bool CheckProc(ProcEventInfo& eventInfo)
+            {
+                // check attack comes not from behind and warrior is not stunned
+                return GetTarget()->isInFront(eventInfo.GetProcTarget(), M_PI) && !GetTarget()->HasUnitState(UNIT_STATE_STUNNED);
+            }
+
+            void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+            {
+                PreventDefaultAction();
+                GetTarget()->CastSpell(eventInfo.GetProcTarget(), SPELL_WARRIOR_RETALIATION_DAMAGE, true, NULL, aurEff);
+            }
+
+            void Register() 
+            {
+                DoCheckProc += AuraCheckProcFn(spell_warr_retaliation_AuraScript::CheckProc);
+                OnEffectProc += AuraEffectProcFn(spell_warr_retaliation_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const 
+        {
+            return new spell_warr_retaliation_AuraScript();
+        }
+};
+
+// 52437 - Sudden Death
+class spell_warr_sudden_death : public SpellScriptLoader
+{
+    public:
+        spell_warr_sudden_death() : SpellScriptLoader("spell_warr_sudden_death") { }
+
+        class spell_warr_sudden_death_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_warr_sudden_death_AuraScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/) 
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_COLOSSUS_SMASH))
+                    return false;
+                return true;
+            }
+
+            void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                // Remove cooldown on Colossus Smash
+                if (Player* player = GetTarget()->ToPlayer())
+                    player->RemoveSpellCooldown(SPELL_WARRIOR_COLOSSUS_SMASH, true);
+            }
+
+            void Register() 
+            {
+                AfterEffectApply += AuraEffectRemoveFn(spell_warr_sudden_death_AuraScript::HandleApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL); // correct?
+            }
+        };
+
+        AuraScript* GetAuraScript() const 
+        {
+            return new spell_warr_sudden_death_AuraScript();
+        }
+};
+
+// 46951 - Sword and Board
+class spell_warr_sword_and_board : public SpellScriptLoader
+{
+    public:
+        spell_warr_sword_and_board() : SpellScriptLoader("spell_warr_sword_and_board") { }
+
+        class spell_warr_sword_and_board_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_warr_sword_and_board_AuraScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/) 
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SHIELD_SLAM))
+                    return false;
+                return true;
+            }
+
+            void OnProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
+            {
+                // Remove cooldown on Shield Slam
+                if (Player* player = GetTarget()->ToPlayer())
+                    player->RemoveSpellCooldown(SPELL_WARRIOR_SHIELD_SLAM, true);
+            }
+
+            void Register() 
+            {
+                OnEffectProc += AuraEffectProcFn(spell_warr_sword_and_board_AuraScript::OnProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const 
+        {
+            return new spell_warr_sword_and_board_AuraScript();
+        }
+};
+
+// Intercept
+// Spell Id: 20253
+// Triggered By: 20252
+class spell_warr_intercept_triggered : public SpellScriptLoader
+{
+public:
+	spell_warr_intercept_triggered() : SpellScriptLoader("spell_warr_intercept_triggered") { }
+
+	class spell_warr_intercept_triggered_SpellScript : public SpellScript
+	{
+		PrepareSpellScript(spell_warr_intercept_triggered_SpellScript);
+
+		void CalculateDamage(SpellEffIndex effect)
+		{
+			// Formula: 1 + AttackPower * 0.12
+			if(Unit* caster = GetCaster())
+				SetHitDamage(int32(1 + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.12f));
+		}
+
+		void Register()
+		{
+			OnEffectHitTarget += SpellEffectFn(spell_warr_intercept_triggered::spell_warr_intercept_triggered_SpellScript::CalculateDamage,EFFECT_1,SPELL_EFFECT_SCHOOL_DAMAGE);
+		}
+	};
+
+	SpellScript* GetSpellScript() const
+	{
+		return new spell_warr_intercept_triggered_SpellScript();
+	}
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_heroic_strike();
@@ -1227,6 +1394,12 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_colossus_smash();
     new spell_warr_incite();
     new spell_warr_second_wind();
-    new spell_warrior_retaliation();
     new spell_warrior_improved_hamstring();
+	
+    new spell_warr_glyph_of_sunder_armor();
+    new spell_warr_lambs_to_the_slaughter();
+    new spell_warr_retaliation();
+    new spell_warr_sudden_death();
+    new spell_warr_sword_and_board();
+    new spell_warr_intercept_triggered();
 }

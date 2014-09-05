@@ -28,13 +28,16 @@
 
 enum RogueSpells
 {
-    SPELL_ROGUE_BLADE_FLURRY_EXTRA_ATTACK        = 22482,
-    SPELL_ROGUE_CHEAT_DEATH_COOLDOWN             = 31231,
-    SPELL_ROGUE_GLYPH_OF_PREPARATION             = 56819,
-    SPELL_ROGUE_PREY_ON_THE_WEAK                 = 58670,
-    SPELL_ROGUE_SHIV_TRIGGERED                   = 5940,
-    SPELL_ROGUE_TRICKS_OF_THE_TRADE_DMG_BOOST    = 57933,
-    SPELL_ROGUE_TRICKS_OF_THE_TRADE_PROC         = 59628,
+    SPELL_ROGUE_BLADE_FLURRY_EXTRA_ATTACK           = 22482,
+    SPELL_ROGUE_CHEAT_DEATH_COOLDOWN                = 31231,
+    SPELL_ROGUE_GLYPH_OF_PREPARATION                = 56819,
+    SPELL_ROGUE_PREY_ON_THE_WEAK                    = 58670,
+    SPELL_ROGUE_SILCE_AND_DICE                      = 5171,
+    SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT   = 31665,
+    SPELL_ROGUE_OVERKILL_POWER_REGEN                = 58427,
+    SPELL_ROGUE_SHIV_TRIGGERED                      = 5940,
+    SPELL_ROGUE_TRICKS_OF_THE_TRADE_DMG_BOOST       = 57933,
+    SPELL_ROGUE_TRICKS_OF_THE_TRADE_PROC            = 59628,
 };
 
 enum RogueSpellIcons
@@ -545,49 +548,56 @@ class spell_rog_stealth : public SpellScriptLoader
         }
 };
 
+// 1943 - Rupture
 class spell_rogue_rupture : public SpellScriptLoader
 {
-    class script_impl : public AuraScript
-    {
-        PrepareAuraScript(script_impl);
+    public:
+        spell_rogue_rupture() : SpellScriptLoader("spell_rogue_rupture") { }
 
-        void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool& canBeRecalculated)
+        class spell_rogue_rupture_AuraScript : public AuraScript
         {
-            Unit const* const caster = GetCaster();
-            if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
-                return;
+            PrepareAuraScript(spell_rogue_rupture_AuraScript);
 
-            float const apPerCombo[] = { 0.0f, 0.015f, 0.024f, 0.03f, 0.03428571f, 0.0375f };
-            uint8 const cp = caster->ToPlayer()->GetComboPoints();
+            bool Load() 
+            {
+                Unit* caster = GetCaster();
+                return caster && caster->GetTypeId() == TYPEID_PLAYER;
+            }
 
-            float value = amount + caster->GetTotalAttackPowerValue(BASE_ATTACK) * apPerCombo[cp];
+            void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& canBeRecalculated)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    canBeRecalculated = false;
 
-            // Revealing Strike
-            if (AuraEffect const* const rsAurEff = caster->GetAuraEffect(84617, EFFECT_2, caster->GetGUID()))
-                AddPct(value, rsAurEff->GetAmount());
+                    float const attackpowerPerCombo[6] =
+                    {
+                        0.0f,
+                        0.015f,         // 1 point:  ${($m1 + $b1*1 + 0.015 * $AP) * 4} damage over 8 secs
+                        0.024f,         // 2 points: ${($m1 + $b1*2 + 0.024 * $AP) * 5} damage over 10 secs
+                        0.03f,          // 3 points: ${($m1 + $b1*3 + 0.03 * $AP) * 6} damage over 12 secs
+                        0.03428571f,    // 4 points: ${($m1 + $b1*4 + 0.03428571 * $AP) * 7} damage over 14 secs
+                        0.0375f         // 5 points: ${($m1 + $b1*5 + 0.0375 * $AP) * 8} damage over 16 secs
+                    };
 
-            value *= 0.5f * GetMaxDuration() / IN_MILLISECONDS;
-            value /= aurEff->GetTotalTicks();
-            amount = int32(value);
-            canBeRecalculated = false;
-        }
+                    uint8 cp = caster->ToPlayer()->GetComboPoints();
+                    if (cp > 5)
+                        cp = 5;
 
-        void Register()
+                    amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * attackpowerPerCombo[cp]);
+                }
+            }
+
+            void Register() 
+            {
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_rogue_rupture_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+            }
+        };
+
+        AuraScript* GetAuraScript() const 
         {
-            DoEffectCalcAmount += AuraEffectCalcAmountFn(script_impl::CalculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+            return new spell_rogue_rupture_AuraScript();
         }
-    };
-
-public:
-    spell_rogue_rupture()
-        : SpellScriptLoader("spell_rogue_rupture")
-    {
-    }
-
-    AuraScript* GetAuraScript() const
-    {
-        return new script_impl();
-    }
 };
 
 // 5938 - Shiv
@@ -1325,6 +1335,109 @@ public:
     }
 };
 
+// 51664 - Cut to the Chase
+class spell_rog_cut_to_the_chase : public SpellScriptLoader
+{
+    public:
+        spell_rog_cut_to_the_chase () : SpellScriptLoader("spell_rog_cut_to_the_chase") { }
+
+        class spell_rog_cut_to_the_chase_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_rog_cut_to_the_chase_AuraScript);
+
+            void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
+            {
+                PreventDefaultAction();
+                if (Aura* aur = GetTarget()->GetAura(SPELL_ROGUE_SILCE_AND_DICE))
+                    aur->SetDuration(aur->GetSpellInfo()->GetMaxDuration(), true);
+            }
+
+            void Register() 
+            {
+                OnEffectProc += AuraEffectProcFn(spell_rog_cut_to_the_chase_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const 
+        {
+            return new spell_rog_cut_to_the_chase_AuraScript();
+        }
+};
+
+// 31666 - Master of Subtlety
+class spell_rog_master_of_subtlety : public SpellScriptLoader
+{
+    public:
+        spell_rog_master_of_subtlety() : SpellScriptLoader("spell_rog_master_of_subtlety") { }
+
+        class spell_rog_master_of_subtlety_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_rog_master_of_subtlety_AuraScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT))
+                    return false;
+                return true;
+            }
+
+            void HandleEffectPeriodic(AuraEffect const* /*aurEff*/)
+            {
+                Unit* target = GetTarget();
+
+                if (!target->HasAuraType(SPELL_AURA_MOD_STEALTH))
+                    target->RemoveAurasDueToSpell(SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT);
+            }
+
+            void Register()
+            {
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_rog_master_of_subtlety_AuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_rog_master_of_subtlety_AuraScript();
+        }
+};
+
+// 58428 - Overkill
+class spell_rog_overkill : public SpellScriptLoader
+{
+    public:
+        spell_rog_overkill() : SpellScriptLoader("spell_rog_overkill") { }
+
+        class spell_rog_overkill_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_rog_overkill_AuraScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_ROGUE_OVERKILL_POWER_REGEN))
+                    return false;
+                return true;
+            }
+
+            void HandleEffectPeriodic(AuraEffect const* /*aurEff*/)
+            {
+                Unit* target = GetTarget();
+
+                if (!target->HasAuraType(SPELL_AURA_MOD_STEALTH))
+                    target->RemoveAurasDueToSpell(SPELL_ROGUE_OVERKILL_POWER_REGEN);
+            }
+
+            void Register()
+            {
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_rog_overkill_AuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_rog_overkill_AuraScript();
+        }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_blade_flurry();
@@ -1352,4 +1465,7 @@ void AddSC_rogue_spell_scripts()
     new spell_rogue_redirect();
     new spell_rogue_glyph_of_hemorrhage();
     new spell_rogue_restless_blades();
+    new spell_rog_cut_to_the_chase();
+    new spell_rog_master_of_subtlety();
+    new spell_rog_overkill();
 }
