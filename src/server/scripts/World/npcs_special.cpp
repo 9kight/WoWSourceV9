@@ -3503,62 +3503,6 @@ public:
         }
 };
 
-/*######
-## npc_dancing_rune_weapon
-######*/
-
-class npc_dancing_rune_weapon : public CreatureScript
-{
-public:
-    npc_dancing_rune_weapon() : CreatureScript("npc_dancing_rune_weapon") { }
-
-    struct npc_dancing_rune_weaponAI : PetAI
-    {
-        npc_dancing_rune_weaponAI(Creature* creature) : PetAI(creature) {}
-        
-        void InitializeAI()
-        {
-            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
-            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE);
-            me->SetReactState(REACT_AGGRESSIVE);
-
-            if(Unit* owner = me->GetOwner())
-            {
-                float minDamage = CalculatePct(owner->GetFloatValue(UNIT_FIELD_MINDAMAGE), 50);
-                float maxDamage = CalculatePct(owner->GetFloatValue(UNIT_FIELD_MAXDAMAGE), 50);
-                
-                me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, minDamage);
-                me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, maxDamage);
-            }
-        }
-
-        void UpdateAI( const uint32 /*diff*/)
-        {   
-            if(Unit* owner = me->GetOwner())
-            {
-                Unit* ownerVictim = owner->GetVictim();
-                Unit* meVictim = me->GetVictim();
-
-                // Rune Weapon's target switching only when DK switches
-                if(ownerVictim != meVictim)
-                {
-                    meVictim = ownerVictim;
-                        
-                    me->Attack(meVictim, true);
-                    me->GetMotionMaster()->MoveChase(meVictim);
-                }
-            }
-
-            DoMeleeAttackIfReady();
-        }
-    };
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_dancing_rune_weaponAI(creature);
-    }
-};
-
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -3600,7 +3544,6 @@ void AddSC_npcs_special()
     new npc_fungal_growth_two();
     new npc_consecration();
     new npc_melee_guardian();
-	new npc_Tentacle_of_the_Old_Ones();
-	new npc_remove_phase_auras();
-	new npc_dancing_rune_weapon();
+    new npc_Tentacle_of_the_Old_Ones();
+    new npc_remove_phase_auras();
 }

@@ -5650,8 +5650,12 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                     }
                     break;
                 }
-                case 75592: // Anhuur - Divine Reckoning
-                    caster->CastSpell(target, m_spellInfo->Effects[m_effIndex].TriggerSpell, true);
+                case 75592: // Divine reconing - normal
+                case 94949: // Divine reconing - heroic
+                {
+                                int32 bp0 = GetAmount();
+                                caster->CastCustomSpell(target, 75591, &bp0, NULL, NULL, false);
+                }
                     break;
                 case 66149: // Bullet Controller Periodic - 10 Man
                 case 68396: // Bullet Controller Periodic - 25 Man
