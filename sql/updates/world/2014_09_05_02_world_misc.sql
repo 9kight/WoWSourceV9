@@ -4,7 +4,7 @@ UPDATE `quest_template` SET `flags` = 1024 , SpecialFlags` = 0 WHERE IN (28777,2
 
 -- just to Make Sure they can deliver the quest if autocomplete failed ( which it shouldnt )
 DELETE FROM `creature_involvedrelation` WHERE `quest` IN (28777,25047,28775,28776,28787);
-INSERT INTO `creature_involvedrelation` VALUES 
+INSERT INTO `creature_involvedrelation` (`id`,`quest`) VALUES 
 (44582,28777), -- Alliance JC trainer in Stormwind
 (44582,25047),
 (44582,28775),
