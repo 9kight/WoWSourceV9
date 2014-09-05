@@ -1,7 +1,8 @@
-DELETE FROM `spell_script_names` WHERE `spell_id` IN (1329,2098,31666,58428);
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (1329,51667,2098,31666,58428);
 INSERT INTO spell_script_names VALUES
 (1329, 'spell_rog_cut_to_the_chase'),
-(2098, 'spell_rog_cut_to_the_chase'),
+(51667, 'spell_rog_cut_to_the_chase'),
+(2098, 'spell_rogue_eviscerate'),
 (58428,'spell_rog_overkill'),
 (31666,'spell_rog_master_of_subtlety');
 
