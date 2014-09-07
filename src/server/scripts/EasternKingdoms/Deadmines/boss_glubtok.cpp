@@ -557,7 +557,7 @@ public:
                 case ACTION_STOP_FIREWALL:
                     for (uint8 i = 0; i < 8; ++i)
                     {
-                        if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
+                        if (Unit* passenger = me->GetVehicleKit()->GetPassenger(i))
                         {
                             passenger->RemoveAllAuras();
                             passenger->CastStop();
