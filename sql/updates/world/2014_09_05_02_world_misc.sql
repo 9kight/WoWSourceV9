@@ -1,6 +1,6 @@
 -- jewel crafting quest fix
 UPDATE `quest_template` SET `RequiredClasses` = 0 WHERE `Id` = 28778;
-UPDATE `quest_template` SET `flags` = 1024 , SpecialFlags` = 0 WHERE IN (28777,25047,28775,28776,28787);
+UPDATE `quest_template` SET `flags` = 1024 , `SpecialFlags` = 0 WHERE IN (28777,25047,28775,28776,28787);
 
 -- just to Make Sure they can deliver the quest if autocomplete failed ( which it shouldnt )
 DELETE FROM `creature_involvedrelation` WHERE `quest` IN (28777,25047,28775,28776,28787);
