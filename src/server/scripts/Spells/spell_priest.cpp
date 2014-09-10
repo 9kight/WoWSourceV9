@@ -168,7 +168,7 @@ class spell_pri_divine_aegis : public SpellScriptLoader
 
             bool CheckProc(ProcEventInfo& eventInfo)
             {
-                return eventInfo.GetProcTarget() != nullptr;
+                return eventInfo.GetProcTarget();
             }
 
             void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)

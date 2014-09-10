@@ -1815,7 +1815,7 @@ public:
         }
     };
 
-    SpellScript* GetSpellScript() const override
+    SpellScript* GetSpellScript() const
     {
         return new spell_hun_glyph_kill_shot_SpellScript();
     }

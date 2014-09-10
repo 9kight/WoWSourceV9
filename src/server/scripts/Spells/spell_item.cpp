@@ -2774,13 +2774,13 @@ class spell_item_echoes_of_light : public SpellScriptLoader
                 targets.push_back(target);
             }
 
-            void Register() override
+            void Register()
             {
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_item_echoes_of_light_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ALLY);
             }
         };
 
-        SpellScript* GetSpellScript() const override
+        SpellScript* GetSpellScript() const
         {
             return new spell_item_echoes_of_light_SpellScript();
         }
