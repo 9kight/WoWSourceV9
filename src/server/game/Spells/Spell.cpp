@@ -5774,7 +5774,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     case 62857:
                         if (m_caster->GetTypeId() == TYPEID_PLAYER)
                             if (Battleground const* bg = m_caster->ToPlayer()->GetBattleground())
-                                if (bg->GetStatus() == STATUS_IN_PROGRESS)
+                                if (bg->GetStatus() == STATUS_IN_PROGRESS || bg->GetStatus() == STATUS_WAIT_JOIN)
                                     return SPELL_FAILED_NOT_IN_BATTLEGROUND;
                         break;
                 }
