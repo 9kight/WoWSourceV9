@@ -5768,6 +5768,18 @@ SpellCastResult Spell::CheckCast(bool strict)
                 SummonPropertiesEntry const* SummonProperties = sSummonPropertiesStore.LookupEntry(m_spellInfo->Effects[i].MiscValueB);
                 if (!SummonProperties)
                     break;
+
+                switch (m_spellInfo->Id)
+                {
+                    case 62857:
+                        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                            if (Battleground const* bg = m_caster->ToPlayer()->GetBattleground())
+                                if (bg->GetStatus() == STATUS_IN_PROGRESS)
+                                    return SPELL_FAILED_NOT_IN_BATTLEGROUND;
+                        break;
+                }
+                break;
+
                 switch (SummonProperties->Category)
                 {
                     case SUMMON_CATEGORY_PET:
