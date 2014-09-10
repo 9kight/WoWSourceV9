@@ -33,6 +33,10 @@ enum RogueSpells
     SPELL_ROGUE_GLYPH_OF_PREPARATION                = 56819,
     SPELL_ROGUE_PREY_ON_THE_WEAK                    = 58670,
     SPELL_ROGUE_SILCE_AND_DICE                      = 5171,
+	SPELL_ROGUE_OVERKILL_TALENT                     = 58426,
+	SPELL_ROGUE_OVERKILL_PERIODIC                   = 58428,
+	SPELL_ROGUE_MASTER_OF_SUBTLETY_PERIODIC         = 31666,
+	SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE          = 31223,
     SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT   = 31665,
     SPELL_ROGUE_OVERKILL_POWER_REGEN                = 58427,
     SPELL_ROGUE_SHIV_TRIGGERED                      = 5940,
@@ -506,7 +510,7 @@ class spell_rog_recuperate : public SpellScriptLoader
         }
 };
 
-// Stealth
+// 1784 - Stealth
 class spell_rog_stealth : public SpellScriptLoader
 {
     public:
@@ -516,29 +520,51 @@ class spell_rog_stealth : public SpellScriptLoader
         {
             PrepareAuraScript(spell_rog_stealth_AuraScript);
 
-            void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            bool Validate(SpellInfo const* /*spellInfo*/)
             {
-                if (Unit* caster = GetCaster())
-                    // Overkill
-                    if (caster->HasAura(58426))
-                        caster->CastSpell(caster, 58427, true);
+                if (!sSpellMgr->GetSpellInfo(SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_ROGUE_MASTER_OF_SUBTLETY_PERIODIC) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_ROGUE_OVERKILL_TALENT) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_ROGUE_OVERKILL_POWER_REGEN) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_ROGUE_OVERKILL_PERIODIC))
+                    return false;
+                return true;
             }
 
-            void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-                if (Unit* target = GetTarget())
-                    // Overkill
-                    if (Aura* overkill = target->GetAura(58427, target->GetGUID()))
-                    {
-                        overkill->SetMaxDuration(20 * IN_MILLISECONDS);
-                        overkill->SetDuration(20 * IN_MILLISECONDS);
-                    }
+                Unit* target = GetTarget();
+
+                // Master of Subtlety
+                if (AuraEffect const* aurEff = target->GetAuraEffect(SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE, EFFECT_0))
+                {
+                    int32 basepoints0 = aurEff->GetAmount();
+                    target->CastCustomSpell(target, SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT, &basepoints0, NULL, NULL, true);
+                }
+
+                // Overkill
+                if (target->HasAura(SPELL_ROGUE_OVERKILL_TALENT))
+                    target->CastSpell(target, SPELL_ROGUE_OVERKILL_POWER_REGEN, true);
+            }
+
+            void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                Unit* target = GetTarget();
+
+                // Master of subtlety
+                if (target->HasAura(SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE))
+                    target->CastSpell(target, SPELL_ROGUE_MASTER_OF_SUBTLETY_PERIODIC, true);
+
+                // Overkill
+                if (target->HasAura(SPELL_ROGUE_OVERKILL_TALENT))
+                    target->CastSpell(target, SPELL_ROGUE_OVERKILL_PERIODIC, true);
             }
 
             void Register()
             {
-                OnEffectApply += AuraEffectApplyFn(spell_rog_stealth_AuraScript::HandleApply, EFFECT_1, SPELL_AURA_MOD_STEALTH, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
-                OnEffectRemove += AuraEffectApplyFn(spell_rog_stealth_AuraScript::HandleRemove, EFFECT_1, SPELL_AURA_MOD_STEALTH, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+                AfterEffectApply += AuraEffectApplyFn(spell_rog_stealth_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_MOD_SHAPESHIFT, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+                AfterEffectRemove += AuraEffectRemoveFn(spell_rog_stealth_AuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_MOD_SHAPESHIFT, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
             }
         };
 
