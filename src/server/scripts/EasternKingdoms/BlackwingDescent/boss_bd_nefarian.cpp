@@ -623,16 +623,6 @@ public:
             me->SetReactState(REACT_DEFENSIVE);
         }
 
-        void EnterCombat(Unit* /*who*/)
-        {
-            DoCast(me, SPELL_ONYXIA_DISCHARGE_BAR);
-            m_uiPowerTimer = 2000;
-            m_uiDistancesCheckTimer = 10000;
-            events.ScheduleEvent(EVENT_SF_BREATH, urand(7000, 9000));
-            events.ScheduleEvent(EVENT_LIGHTNING_DISCHARGE, urand(12000, 15000));
-            events.ScheduleEvent(EVENT_TAL_LASH, urand(4000, 6000));
-        }
-
         void EnterEvadeMode()
         {
             me->DespawnOrUnsummon(100);
@@ -642,13 +632,6 @@ public:
         {
             if (!UpdateVictim())
                 return;
-
-            if (m_uiPowerTimer <= diff)
-            {
-               DoCast(me, SPELL_INCREASE_BAR, false);
-               m_uiPowerTimer = 2000;
-            }
-            else m_uiPowerTimer -= diff;
 
             if (m_uiDistancesCheckTimer <= diff)
             {
@@ -1043,20 +1026,3 @@ void AddSC_boss_bd_nefarian()
     new spell_nefarian_tail_lash();
     new spell_onyxia_lightning_discharge();
 }
-
-/* Inserting a Transport!!!! - Not needed, kept as building new transport future reference.
-
-Transport* t = new Transport(21867, 0);
-std::set<uint32> unused;
-uint32 theguid = sObjectMgr->GenerateLowGuid(HIGHGUID_MO_TRANSPORT);
-t->Create(theguid, 207834, 669, -107.213f, -224.62f, -6.867f, 3.14f, 255, 0);
-Map* tMap = me->GetMap();
-t->SetMap(tMap);
-t->AddToWorld();
-t->BuildStopMovePacket(tMap);
-
-// transmit creation packet
-t->UpdateForMap(tMap);
-
-sMapMgr->m_Transports.insert(t);
-sMapMgr->m_TransportsByMap[669].insert(t);*/
