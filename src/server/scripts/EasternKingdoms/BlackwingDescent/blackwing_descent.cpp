@@ -53,7 +53,7 @@ public:
             introSaid = false;
             creature->SetReactState(REACT_PASSIVE);
             creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            creature->SetDisplayId(11686);
+            creature->SetDisplayId(32440);
         }
 
         uint32 timer;
