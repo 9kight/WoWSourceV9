@@ -334,3 +334,6 @@ UPDATE creature_template SET equipment_id=39756 WHERE entry=39756;
 UPDATE creature_template SET equipment_id=40845 WHERE entry=40845; 
 UPDATE creature_template SET equipment_id=39974 WHERE entry=39974; 
 UPDATE creature_template SET equipment_id=24240 WHERE entry=24240; 
+
+DELETE FROM creature_equip_template WHERE entry IN (44380,48446,44245);
+UPDATE creature_equip_template SET id=1 WHERE id=0;
