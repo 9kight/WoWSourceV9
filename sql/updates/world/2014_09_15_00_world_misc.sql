@@ -255,3 +255,82 @@ UPDATE `creature_equip_template` SET `itemEntry3`=0 WHERE `entry`=41509; -- Iron
 UPDATE `creature_equip_template` SET `itemEntry3`=12523 WHERE `entry`=1686; -- Irene Sureshot
 UPDATE `creature_equip_template` SET `itemEntry3`=44635 WHERE `entry`=32710; -- Garl Grimgrizzle
 UPDATE `creature_equip_template` SET `itemEntry3`=44635 WHERE `entry`=32711; -- Warp-Huntress Kula
+
+-- add missing emote state for some npc Alliance tol barad
+DELETE FROM creature_template_addon WHERE entry IN (48252);
+DELETE FROM creature_addon WHERE guid IN (251258,251264);
+INSERT INTO `creature_template_addon` VALUES ('48252', '0', '0', '0', '1', '69', '');
+INSERT INTO `creature_addon` VALUES ('251258', '0', '0', '0', '1', '27', '');
+INSERT INTO `creature_addon` VALUES ('251264', '0', '0', '0', '1', '27', '');
+
+-- emote state orgrimmar
+DELETE FROM creature_addon WHERE guid IN (117232,98365);
+INSERT INTO `creature_addon` VALUES ('117232', '0', '0', '0', '1', '233', '');
+INSERT INTO `creature_addon` VALUES ('98365', '0', '0', '0', '1', '233', '');
+
+-- update movement state for some npc
+UPDATE creature_template SET MovementType=1 WHERE entry IN (47549,47540,47542,47591,47531,47534,47590,47550,46509);
+UPDATE creature SET MovementType=1 WHERE id IN (47549,47540,47542,47591,47531,47534,47590,47550,46509);
+UPDATE creature SET spawndist=5 WHERE id IN (47549,47540,47542,47591,47531,47534,47590,47550,46509);
+
+-- stormwind and orgrimmar fly guards corection
+UPDATE creature_template SET MovementType=1 WHERE entry=51346;
+UPDATE creature SET MovementType=1 WHERE id=51346;
+UPDATE creature SET spawndist=40 WHERE id=51346;
+UPDATE creature_template SET MovementType=1 WHERE entry=51348;
+UPDATE creature SET MovementType=1 WHERE id=51348;
+UPDATE creature SET spawndist=40 WHERE id=51348;
+DELETE FROM `creature_template` WHERE `entry`=51348;
+DELETE FROM `creature_template` WHERE `entry`=51346;
+INSERT INTO `creature_template` VALUES ('51348', '0', '0', '0', '0', '0', '37310', '37311', '0', '0', 'Stormwind City Guard', '', 'Directions', '435', '85', '85', '3', '0', '11', '11', '1', '3', '1.14286', '1', '3', '1', '0', '530', '713', '0', '827', '15', '2000', '0', '1', '32768', '0', '2048', '0', '0', '0', '0', '0', '530', '713', '827', '7', '2048', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '95826', '71507', '96161', '0', '0', '0', '0', '0', '0', '0', '0', '0', null, null, '', '1', '4', '1', '1.5', '1', '1', '1', '0', '0', '0', '0', '0', '0', '0', '197', '1', '0', '0', '0', 'npc_chevaucheur_de_griffon_de_hurlevent', '13623');
+INSERT INTO `creature_template` VALUES ('51346', '0', '0', '0', '0', '0', '37328', '37329', '37330', '37331', 'Orgrimmar Grunt', '', 'Directions', '1951', '85', '85', '3', '0', '85', '85', '1', '3', '1.14286', '1', '3', '1', '0', '530', '713', '0', '827', '15', '2000', '0', '1', '32768', '0', '2048', '0', '0', '0', '0', '0', '530', '713', '827', '7', '2048', '0', '51346', '0', '0', '0', '0', '0', '0', '0', '0', '95826', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', null, null, '', '1', '4', '1', '1.5', '1', '1', '1', '0', '0', '0', '0', '0', '0', '0', '197', '1', '0', '0', '0', 'npc_coursier_du_vent_dorgrimmar', '13623');
+
+-- forgoten  update equipment for preiously commit
+UPDATE creature_template SET equipment_id=39002 WHERE entry=39002; 
+UPDATE creature_template SET equipment_id=45532 WHERE entry=45532; 
+UPDATE creature_template SET equipment_id=44636 WHERE entry=44636; 
+UPDATE creature_template SET equipment_id=44640 WHERE entry=44640; 
+UPDATE creature_template SET equipment_id=44629 WHERE entry=44629; 
+UPDATE creature_template SET equipment_id=44790 WHERE entry=44790; 
+UPDATE creature_template SET equipment_id=44789 WHERE entry=44789; 
+UPDATE creature_template SET equipment_id=51128 WHERE entry=51128; 
+UPDATE creature_template SET equipment_id=44899 WHERE entry=44899; 
+UPDATE creature_template SET equipment_id=45228 WHERE entry=45228; 
+UPDATE creature_template SET equipment_id=45225 WHERE entry=45225; 
+UPDATE creature_template SET equipment_id=45280 WHERE entry=45280; 
+UPDATE creature_template SET equipment_id=45292 WHERE entry=45292; 
+UPDATE creature_template SET equipment_id=45479 WHERE entry=45479; 
+UPDATE creature_template SET equipment_id=45376 WHERE entry=45376; 
+UPDATE creature_template SET equipment_id=45484 WHERE entry=45484; 
+UPDATE creature_template SET equipment_id=45315 WHERE entry=45315; 
+UPDATE creature_template SET equipment_id=45313 WHERE entry=45313; 
+UPDATE creature_template SET equipment_id=45312 WHERE entry=45312; 
+UPDATE creature_template SET equipment_id=45374 WHERE entry=45374; 
+UPDATE creature_template SET equipment_id=44375 WHERE entry=44375; 
+UPDATE creature_template SET equipment_id=12736 WHERE entry=12736; 
+UPDATE creature_template SET equipment_id=27260 WHERE entry=27260; 
+UPDATE creature_template SET equipment_id=54214 WHERE entry=54214; 
+UPDATE creature_template SET equipment_id=18488 WHERE entry=18488; 
+UPDATE creature_template SET equipment_id=27160 WHERE entry=27160; 
+UPDATE creature_template SET equipment_id=27566 WHERE entry=27566; 
+UPDATE creature_template SET equipment_id=26344 WHERE entry=26344; 
+UPDATE creature_template SET equipment_id=25975 WHERE entry=25975; 
+UPDATE creature_template SET equipment_id=53405 WHERE entry=53405; 
+UPDATE creature_template SET equipment_id=32702 WHERE entry=32702; 
+UPDATE creature_template SET equipment_id=27500 WHERE entry=27500; 
+UPDATE creature_template SET equipment_id=17326 WHERE entry=17326; 
+UPDATE creature_template SET equipment_id=30189 WHERE entry=30189; 
+UPDATE creature_template SET equipment_id=30657 WHERE entry=30657; 
+UPDATE creature_template SET equipment_id=28179 WHERE entry=28179; 
+UPDATE creature_template SET equipment_id=30377 WHERE entry=30377; 
+UPDATE creature_template SET equipment_id=30443 WHERE entry=30443; 
+UPDATE creature_template SET equipment_id=30188 WHERE entry=30188; 
+UPDATE creature_template SET equipment_id=30595 WHERE entry=30595; 
+UPDATE creature_template SET equipment_id=30685 WHERE entry=30685; 
+UPDATE creature_template SET equipment_id=30596 WHERE entry=30596; 
+UPDATE creature_template SET equipment_id=30989 WHERE entry=30989; 
+UPDATE creature_template SET equipment_id=39445 WHERE entry=39445; 
+UPDATE creature_template SET equipment_id=39756 WHERE entry=39756; 
+UPDATE creature_template SET equipment_id=40845 WHERE entry=40845; 
+UPDATE creature_template SET equipment_id=39974 WHERE entry=39974; 
+UPDATE creature_template SET equipment_id=24240 WHERE entry=24240; 
