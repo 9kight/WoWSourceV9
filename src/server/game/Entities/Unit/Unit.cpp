@@ -5360,6 +5360,40 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
         {
             switch (dummySpell->Id)
             {
+                // Wrath of Tarecgosa
+                case 101056:
+                {
+                    if (!roll_chance_i(4))
+                        return false;
+
+                    basepoints0 = damage;
+                    triggered_spell_id = 101085;
+                    break;
+                }
+                case 107786: // Item - Dragon Soul - Proc - Agi Melee 1H Axe
+                case 109873: // Item - Dragon Soul - Proc - Agi Melee 1H Axe Heroic
+                case 109866: // Item - Dragon Soul - Proc - Agi Melee 1H Axe LFR
+                {
+                    const static uint32 DamageSpell[3][3]=
+                    {
+                      //Flameblast   Shadowblast  Iceblast
+                        {107785,     107787,      107789}, // Normal
+                        {109872,     109868,      109870}, // Heroic
+                        {109871,     109867,      109869}, // LFR
+                    };
+
+                    int32 index = -1;
+                    switch (dummySpell->Id)
+                    {
+                        case 107786: index = 0; break; // Normal
+                        case 109873: index = 1; break; // Heroic
+                        case 109866: index = 2; break; // LFR
+                    }
+
+                    ASSERT(index >= 0 && index <= 2);
+                    triggered_spell_id = DamageSpell[index][urand(0, 2)];
+                    break;
+                }
                 // Engulfing Magic
                 case 86622:
                 case 95639:
