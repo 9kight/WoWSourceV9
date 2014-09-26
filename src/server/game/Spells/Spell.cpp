@@ -4935,7 +4935,7 @@ void Spell::TakeRunePower(bool didHit)
         RuneType rune = player->GetCurrentRune(i);
         if (!player->GetRuneCooldown(i) && runeCost[rune] > 0)
         {
-            player->SetRuneCooldown(i, didHit ? player->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN));
+            player->SetRuneCooldown(i, didHit ? player->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN), true);
             player->SetLastUsedRune(rune);
             player->SetLastUsedRuneIndex(i);
             runeCost[rune]--;
@@ -4951,7 +4951,7 @@ void Spell::TakeRunePower(bool didHit)
             RuneType rune = player->GetCurrentRune(i);
             if (!player->GetRuneCooldown(i) && rune == RUNE_DEATH)
             {
-                player->SetRuneCooldown(i, didHit ? player->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN));
+                player->SetRuneCooldown(i, didHit ? player->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN), true);
                 player->SetLastUsedRune(rune);
                 player->SetLastUsedRuneIndex(i);
                 runeCost[rune]--;
