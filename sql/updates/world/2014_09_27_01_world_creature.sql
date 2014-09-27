@@ -368,8 +368,3 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,0,1,0,61,0,100,0,0,0,0,0,89,5,0,0,0,0,0,1,0,0,0,0,0,0,0,"Infernal Attacker - On spawn - Set random movement"),
 (@ENTRY,0,2,3,8,0,100,0,37277,0,0,0,3,0,17312,0,0,0,0,1,0,0,0,0,0,0,0,"Infernal Attacker - On Spellhit - Set model"),
 (@ENTRY,0,3,0,61,0,100,0,0,0,0,0,19,33685760,0,0,0,0,0,1,0,0,0,0,0,0,0,"Infernal Attacker - On Spellhit - Remove unit_flags");
-
-
-UPDATE `creature_template` SET `ScriptName`= 'npc_invis_infernal_caster' WHERE `entry`=21417;
-UPDATE `creature_template` SET `AIName`="", `ScriptName`= 'npc_infernal_attacker' WHERE `entry`=21419;
-DELETE FROM `smart_scripts` WHERE `entryorguid`=21419 AND `source_type`=0;
