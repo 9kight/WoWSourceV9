@@ -156,9 +156,11 @@ class boss_murozond : public CreatureScript
                     go->SetPhaseMask(PHASEMASK_ANYWHERE,true);
                     go->UpdateObjectVisibility();
                 }
-
-
+                
+				instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 110158, 0, me);
+							
                 AddProgressBarToPlayers(true);
+				_JustDied();
             }
 
             void EnterCombat(Unit* /*who*/)
@@ -175,7 +177,7 @@ class boss_murozond : public CreatureScript
                 events.ScheduleEvent(EVENT_DISTORTION_BOMB, 10000);
                 events.ScheduleEvent(EVENT_TEMPORAL_BLAST, 15000);
                 events.ScheduleEvent(EVENT_INFINITE_BREATH, 20000);
-                events.ScheduleEvent(EVENT_TAIL_SWIP, 23000);
+                events.ScheduleEvent(EVENT_TAIL_SWIP, 23000);					
             }
 
             void DespawnCreatures(uint32 entry)
