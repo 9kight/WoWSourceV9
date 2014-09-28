@@ -209,6 +209,7 @@ bool Pet::LoadPet(Player* owner, PetData* t_pet, bool current)
         data << uint32(t_pet->summon_spell_id);
         data << uint32(256); // CAST_FLAG_UNKNOWN3
         data << uint32(0);
+		data << uint32(getMSTime());
         owner->SendMessageToSet(&data, true);
     }
 
