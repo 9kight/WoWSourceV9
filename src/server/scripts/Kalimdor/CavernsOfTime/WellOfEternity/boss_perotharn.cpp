@@ -126,8 +126,8 @@ public:
             bAchieve = false;
 
             me->SetReactState(REACT_PASSIVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
-            DoCast(me, SPELL_CAMOUFLAGE, true);
+            // me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            // DoCast(me, SPELL_CAMOUFLAGE, true);
         }
 
         void InitializeAI()
