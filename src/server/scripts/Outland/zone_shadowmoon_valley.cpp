@@ -97,7 +97,7 @@ public:
             infernalGUID = infernal->GetGUID();
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -171,7 +171,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if (!UpdateVictim())
                 return;

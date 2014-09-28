@@ -451,6 +451,10 @@ private:
         uint32 GetTotalReputation() const { return m_totalReputation; }
         uint32 GetWeekReputation() const { return m_weekReputation; }
 
+        std::set<uint32> GetTrackedCriteriaIds() const { return m_trackedCriteriaIds; }
+        void SetTrackedCriteriaIds(std::set<uint32> criteriaIds) { m_trackedCriteriaIds.swap(criteriaIds); }
+        bool IsTrackingCriteriaId(uint32 criteriaId) const { return m_trackedCriteriaIds.find(criteriaId) != m_trackedCriteriaIds.end(); }
+
         Profession professions[2];
         void SetProfession(Profession prof[2]);
         void SaveProfession(SQLTransaction& trans) const;
@@ -487,6 +491,8 @@ private:
         uint8 m_rankId;
         std::string m_publicNote;
         std::string m_officerNote;
+
+        std::set<uint32> m_trackedCriteriaIds;
 
         int32 m_bankWithdraw[GUILD_BANK_MAX_TABS + 1];
         uint32 m_achievementPoints;
@@ -877,6 +883,7 @@ public:
     // Handle client commands
     void HandleRoster(WorldSession* session = NULL);
     void HandleQuery(WorldSession* session);
+    void HandleSetAchievementTracking(WorldSession* session, std::set<uint32> const& achievementIds);
     void HandleSetMOTD(WorldSession* session, std::string const& motd);
     void HandleSetInfo(WorldSession* session, std::string const& info);
     void HandleSetEmblem(WorldSession* session, const EmblemInfo& emblemInfo);
@@ -937,6 +944,7 @@ public:
     void BroadcastPacketToRank(WorldPacket* packet, uint8 rankId) const;
     void BroadcastPacket(WorldPacket* packet) const;
     void BroadCastPacketToEveryoneExcept(WorldPacket* packet, uint64 Not) const;
+    void BroadcastPacketIfTrackingAchievement(WorldPacket* packet, uint32 criteriaId) const;
 
     void MassInviteToEvent(WorldSession* session, uint32 minLevel, uint32 maxLevel, uint32 minRank);
 

@@ -828,6 +828,22 @@ void WorldSession::HandleGuildSetGuildMaster(WorldPacket& recvPacket)
         guild->HandleSetNewGuildMaster(this, playerName);
 }
 
+void WorldSession::HandleGuildSetAchievementTracking(WorldPacket& recvPacket)
+{
+    uint32 count = recvPacket.ReadBits(24);
+    std::set<uint32> achievementIds;
+
+    for (uint32 i = 0; i < count; ++i)
+    {
+        uint32 achievementId;
+        recvPacket >> achievementId;
+        achievementIds.insert(achievementId);
+    }
+
+    if (Guild* guild = GetPlayer()->GetGuild())
+        guild->HandleSetAchievementTracking(this, achievementIds);
+}
+
 /*void WorldSession::HandleGuildSwitchRankOpcode(WorldPacket& recvPacket)
 {
     uint32 rankId;

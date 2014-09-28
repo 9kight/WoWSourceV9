@@ -2055,6 +2055,31 @@ void Guild::SendGuildRankInfo(WorldSession* session) const
     sLog->outDebug(LOG_FILTER_GUILD, "SMSG_GUILD_RANK [%s]", session->GetPlayerInfo().c_str());
 }
 
+void Guild::HandleSetAchievementTracking(WorldSession* session, std::set<uint32> const& achievementIds)
+{
+    Player* player = session->GetPlayer();
+
+    if (Member* member = GetMember(player->GetGUID()))
+    {
+        std::set<uint32> criteriaIds;
+
+        for (std::set<uint32>::iterator achievementId = achievementIds.begin(); achievementId != achievementIds.end(); ++achievementId)
+        {
+            if (AchievementCriteriaEntryList const* cList = sAchievementMgr->GetAchievementCriteriaByAchievement(*achievementId))
+            {
+                for (AchievementCriteriaEntryList::const_iterator itr = cList->begin(); itr != cList->end(); ++itr)
+                {
+                    AchievementCriteriaEntry const* criteria = *itr;
+                    criteriaIds.insert(criteria->ID);
+                }
+            }
+        }
+
+        member->SetTrackedCriteriaIds(criteriaIds);
+        m_achievementMgr.SendAllTrackedCriterias(player, member->GetTrackedCriteriaIds());
+    }
+}
+
 void Guild::HandleSetMOTD(WorldSession* session, std::string const& motd)
 {
     if (m_motd == motd)
@@ -3335,6 +3360,14 @@ void Guild::BroadCastPacketToEveryoneExcept(WorldPacket* packet, uint64 Not) con
     for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
         if (Player* player = itr->second->FindPlayer())
             if (player->GetGUID() != Not)
+                player->GetSession()->SendPacket(packet);
+}
+
+void Guild::BroadcastPacketIfTrackingAchievement(WorldPacket* packet, uint32 criteriaId) const
+{
+    for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
+        if (itr->second->IsTrackingCriteriaId(criteriaId))
+            if (Player* player = itr->second->FindPlayer())
                 player->GetSession()->SendPacket(packet);
 }
 
