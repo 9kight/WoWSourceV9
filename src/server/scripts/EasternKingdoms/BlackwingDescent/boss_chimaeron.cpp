@@ -63,6 +63,7 @@ enum Spells
     SPELL_FINKLES_MIXTURE_VISUAL        = 91106,
     SPELL_SYSTEM_FAILURE                = 88853,
     SPELL_REROUTE_POWER                 = 88861,
+	SPELL_LOW_HEALTH                    = 89084,
 
    // Nefarian
    SPELL_MOCKING_SHADOWS                = 91307
@@ -557,40 +558,56 @@ public:
 class spell_finkles_mixture : public SpellScriptLoader
 {
 public:
-    spell_finkles_mixture() : SpellScriptLoader("spell_finkles_mixture") {}
+	spell_finkles_mixture() : SpellScriptLoader("spell_finkles_mixture") { }
 
-    class spell_finkles_mixture_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_finkles_mixture_AuraScript);
+	class spell_finkles_mixture_AuraScript : public AuraScript
+	{
+		PrepareAuraScript(spell_finkles_mixture_AuraScript);
 
-        void Absorb(AuraEffect* aurEff, DamageInfo & dmgInfo, uint32 & absorbAmount)
-        {
-            Unit * caster = GetCaster();
+		void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool& /*canBeRecalculated*/)
+		{
+			amount = -1;
+		}
 
-            if (!caster)
-                return;
+		void Absorb(AuraEffect* aurEff, DamageInfo & dmgInfo, uint32 & absorbAmount)
+		{
+			if (!GetTarget())
+				return;
 
-            Unit* target = dmgInfo.GetVictim();
+			uint32 curHealth = GetTarget()->GetHealth();
 
-            int32 remainingHealth = target->GetHealth() - dmgInfo.GetDamage();
+			if (curHealth >= 10000)
+			{
+				absorbAmount = dmgInfo.GetDamage() - curHealth + 1;
+			}
+		}
 
-            if (target->GetHealth() >= 10000 && remainingHealth <= 0)
-            {
-                absorbAmount = dmgInfo.GetDamage() - (target->GetHealth() - 2);
-            }
-            else absorbAmount = 0;
-        }
+		void PeriodicTick(AuraEffect const* aurEff)
+		{
+			if (!GetTarget())
+				return;
 
-        void Register()
-        {
-            OnEffectAbsorb += AuraEffectAbsorbFn(spell_finkles_mixture_AuraScript::Absorb, EFFECT_1);
-        }
-    };
+			if (GetTarget()->GetHealth() < 10000)
+				GetTarget()->CastSpell(GetTarget(), SPELL_LOW_HEALTH, true);
+			else
+			{
+				if (GetTarget()->HasAura(SPELL_LOW_HEALTH))
+					GetTarget()->RemoveAurasDueToSpell(SPELL_LOW_HEALTH);
+			}
+		}
 
-    AuraScript* GetAuraScript() const
-    {
-        return new spell_finkles_mixture_AuraScript();
-    }
+		void Register()
+		{
+			DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_finkles_mixture_AuraScript::CalculateAmount, EFFECT_1, SPELL_AURA_SCHOOL_ABSORB);
+			OnEffectAbsorb += AuraEffectAbsorbFn(spell_finkles_mixture_AuraScript::Absorb, EFFECT_1);
+			OnEffectPeriodic += AuraEffectPeriodicFn(spell_finkles_mixture_AuraScript::PeriodicTick, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+		}
+	};
+
+	AuraScript* GetAuraScript() const
+	{
+		return new spell_finkles_mixture_AuraScript();
+	}
 };
 
 void AddSC_boss_chimaeron()
