@@ -128,6 +128,8 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_DISORIENTED, true);
             me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CONFUSE, true);
             me->setActive(true);
+
+			me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
         }
 
         void InitializeAI()
@@ -171,7 +173,7 @@ public:
 
         void AttackStart(Unit* who)
         {
-            if (who)
+            if(who)
                 me->Attack(who, false);
         }
 
@@ -228,7 +230,7 @@ public:
                 {
                 case EVENT_TOTAL_OBEDIENCE:
                     Talk(SAY_ALL);
-                    DoCastAOE(SPELL_TOTAL_OBEDIENCE);
+                    //DoCastAOE(SPELL_TOTAL_OBEDIENCE);
                     break;
                 case EVENT_ADDS_1:
                     Talk((addsCount / 2) + 9);
@@ -254,7 +256,7 @@ public:
                     break;
                 case EVENT_END:
                     {
-					
+					GameObject* reward = me->SummonGameObject(210025, 3465.447f, -5238.09f, 230.575f, 4.54f, 4.54f, 4.54f, 4.54f, 4.54f, 200000);
                    if (me->GetMap()->IsHeroic())
                        {
                           if (!me->GetMap()->GetPlayers().isEmpty())
