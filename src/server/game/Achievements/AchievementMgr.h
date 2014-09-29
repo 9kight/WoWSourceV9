@@ -243,6 +243,7 @@ class AchievementMgr
         void CompletedAchievement(AchievementEntry const* entry, Player* referencePlayer);
         void CheckAllAchievementCriteria(Player* referencePlayer);
         void SendAllAchievementData(Player* receiver) const;
+        void SendAllTrackedCriterias(Player* receiver, std::set<uint32> const& trackedCriterias) const;
         void SendAchievementInfo(Player* receiver, uint32 achievementId = 0) const;
         bool HasAchieved(uint32 achievementId) const;
         CompletedAchievementData* GetCompletedDataForAchievement(uint32 achievementId);
