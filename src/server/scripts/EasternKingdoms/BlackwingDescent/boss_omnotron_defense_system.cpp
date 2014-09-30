@@ -1027,31 +1027,39 @@ class spell_shadow_conductor : public SpellScriptLoader // 92051
         }
 };
 
-class spell_activate : public SpellScriptLoader
+class spell_omnotron_active_trigger : public SpellScriptLoader
 {
-    public:
-        spell_activate() : SpellScriptLoader("spell_activate") { }
+public:
+	spell_omnotron_active_trigger() : SpellScriptLoader("spell_omnotron_active_trigger") { }
 
-        class spell_activate_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_activate_AuraScript);
 
-            void HandlePeriodic(AuraEffect const* /*aurEff*/)
-            {
-                if (Unit *me = GetTarget())
-                    me->SetPower(POWER_ENERGY, me->GetPower(POWER_ENERGY)-1);
-            }
+	class spell_omnotron_active_trigger_SpellScript : public SpellScript
+	{
+		PrepareSpellScript(spell_omnotron_active_trigger_SpellScript);
 
-            void Register()
-            {
-                OnEffectPeriodic += AuraEffectPeriodicFn(spell_activate_AuraScript::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
-            }
-        };
 
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_activate_AuraScript();
-        }
+		void HandleScript(SpellEffIndex /*effIndex*/)
+		{
+			if (!(GetHitUnit() && GetHitUnit()->isAlive()))
+				return;
+
+			if (Unit* caster = GetCaster())
+			{
+				if (caster->GetPower(POWER_ENERGY) >= 1)
+					caster->SetPower(POWER_ENERGY, caster->GetPower(POWER_ENERGY) - 1);
+			}
+		}
+
+		void Register()
+		{
+			OnEffectHitTarget += SpellEffectFn(spell_omnotron_active_trigger_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_DUMMY);
+		}
+	};
+
+	SpellScript* GetSpellScript() const
+	{
+		return new spell_omnotron_active_trigger_SpellScript();
+	}
 };
 
 class spell_fire : public SpellScriptLoader
@@ -1090,6 +1098,6 @@ void AddSC_boss_omnotron_defense_system()
     new npc_chemical_cloud();
     new npc_power_generator();
     new spell_shadow_conductor();
-    new spell_activate();
+	new spell_omnotron_active_trigger();
     new spell_fire();
 }
