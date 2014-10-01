@@ -32,7 +32,7 @@ enum Spells
 {
     // Proto-Behemoth 
     SPELL_ROOT                               = 42716,
-    SPELL_FIREBALL                           = 86058, // Basic spell. 1.5s cast.
+	SPELL_FIREBALL                           = 86058, // Basic spell. 1.5s cast.
     SPELL_FIREBALL_TD                        = 83862, // Time Dilation. 3s cast.
 
     SPELL_SCORCHING_BREATH                   = 83707,  // Triggers 83855 which needs radius.
@@ -494,133 +494,120 @@ class boss_halfus : public CreatureScript
 
 class npc_proto_behemoth : public CreatureScript
 {
-    public:
-        npc_proto_behemoth() : CreatureScript("npc_proto_behemoth") {}
+public:
+	npc_proto_behemoth() : CreatureScript("npc_proto_behemoth") { }
 
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_proto_behemothAI(creature);
-        }
-            
-        struct npc_proto_behemothAI : public ScriptedAI
-        {
-            npc_proto_behemothAI(Creature* creature) : ScriptedAI(creature)
-            {
-                instance = creature->GetInstanceScript();
-                SetCombatMovement(false);
-            }
+	struct npc_proto_behemothAI : public ScriptedAI
+	{
+		npc_proto_behemothAI(Creature * creature) : ScriptedAI(creature)
+		{
+			me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+			me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
+			me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_STUN, true);
+			me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_FEAR, true);
+			me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_ROOT, true);
+			me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_FREEZE, true);
+			me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_POLYMORPH, true);
+			me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_HORROR, true);
+			me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SAPPED, true);
+			me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_CHARM, true);
+			me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_DISORIENTED, true);
+			me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CONFUSE, true);
+			pInstance = creature->GetInstanceScript();
+		}
 
-            InstanceScript* instance;
-            EventMap events;
-            bool canBarrage, canBreath;
+		InstanceScript* pInstance;
+		EventMap events;
+		void Reset()
+		{
+			if (!pInstance)
+				return;
+			me->SetCanFly(true);
+			SetCombatMovement(false);
+			me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+			me->SetMaxPower(POWER_MANA, 179000);
+			me->SetPower(POWER_MANA, 179000);
+			me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, 0x02);
+			me->AddUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY | MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING);
+		}
 
-            void Reset()
-            {
-                events.Reset();
+		void EnterEvadeMode()
+		{
+			me->RemoveAllAuras();
+			Reset();
+		}
 
-                if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == POINT_MOTION_TYPE)
-                    me->GetMotionMaster()->MovementExpired();
+		void EnterCombat(Unit* who)
+		{
+			if (!pInstance)
+				return;
 
-                canBarrage = false;
-                canBreath  = false;
+			me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, 0x02);
+			me->AddUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY | MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING);
 
-                me->GetMotionMaster()->MoveTargetedHome();
+			if (me->HasAura(SPELL_SUPERHEATED_BREATH))
+				events.ScheduleEvent(EVENT_SCORCHING_BREATH, 30000);
+			if (me->HasAura(SPELL_DANCING_FLAMES))
+				events.ScheduleEvent(EVENT_FIREBALL_BARRAGE, 20000);
+			events.ScheduleEvent(EVENT_FIREBALL, 16000);
+		}
 
-                me->SetMaxPower(POWER_MANA, 179000);
-                me->SetPower(POWER_MANA, 179000);
-                me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, 0x02);
-                me->AddUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY | MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING);
-            }
+		void DamageTaken(Unit* attacker, uint32 &damage)
+		{
+			if (!pInstance)
+				return;
 
-            void EnterEvadeMode()
-            {
-                me->RemoveAllAuras();
-                Reset();
-            }
+			damage = 0;
+		}
 
-            void EnterCombat(Unit* /*who*/)
-            {
-                canBarrage = false;
-                canBreath  = false;
+		void UpdateAI(const uint32 diff)
+		{
+			if (!pInstance || !UpdateVictim())
+				return;
 
-                me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, 0x02);
-                me->AddUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY | MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING);
+			events.Update(diff);
 
-                events.ScheduleEvent(EVENT_MOVE_UP, 500);
-                events.ScheduleEvent(EVENT_ROOT, 13000);
-                events.ScheduleEvent(EVENT_FIREBALL, 16000);
-            }
+			if (me->HasUnitState(UNIT_STATE_CASTING))
+				return;
 
-            void UpdateAI(const uint32 uiDiff)
-            {
-                if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
-                    return;
+			if (Creature* Halfus = me->FindNearestCreature(NPC_HALFUS_WORMBREAKER, 500.0f, true))
+			if (!Halfus->isInCombat())
+				me->AI()->EnterEvadeMode();
 
-                if (Creature* Halfus = me->FindNearestCreature(NPC_HALFUS_WORMBREAKER, 500.0f, true))
-                    if (!Halfus->isInCombat())
-                        me->AI()->EnterEvadeMode();
+			while (uint32 eventId = events.ExecuteEvent())
+			{
+				switch (eventId)
+				{
+				case EVENT_FIREBALL:
+					if (Unit *target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+					{
+						if (me->HasAura(SPELL_TIME_DILATION))
+							DoCast(target, SPELL_FIREBALL_TD);
+						else
+							DoCast(target, SPELL_FIREBALL);
+					}
+					events.ScheduleEvent(EVENT_FIREBALL, urand(4000, 7000));
+					break;
+				case EVENT_FIREBALL_BARRAGE:
+					DoCast(me, SPELL_FIREBALL_BARRAGE);
+					events.ScheduleEvent(EVENT_FIREBALL_BARRAGE, urand(25000, 30000));
+					break;
+				case EVENT_SCORCHING_BREATH:
+					DoCast(me, SPELL_SCORCHING_BREATH);
+					events.ScheduleEvent(EVENT_SCORCHING_BREATH, urand(35000, 40000));
+					break;
+				default:
+						break;
+				}
+			}
 
-                if (me->HasAura(SPELL_DANCING_FLAMES) && !canBarrage)
-                {
-                    events.ScheduleEvent(EVENT_FIREBALL_BARRAGE, urand(3000, 7000));
-                    canBarrage = true;
-                }
+		}
+	};
 
-                if (me->HasAura(SPELL_SUPERHEATED_BREATH) && !canBreath)
-                {
-                    events.ScheduleEvent(EVENT_SCORCHING_BREATH, urand(3000, 7000));
-                    canBreath = true;
-                }
-
-                events.Update(uiDiff);
-
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch(eventId)
-                    {
-                        case EVENT_MOVE_UP:
-                        me->SetReactState(REACT_PASSIVE);
-                        me->GetMotionMaster()->MovePoint(1, -322.578f, -680.321f, 925.3f);
-                        break;
-
-                        case EVENT_ROOT:
-                        DoCast(me, SPELL_ROOT);
-                        break;
-
-                        case EVENT_FIREBALL:
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
-                        {
-                            if (!me->HasAura(SPELL_TIME_DILATION))
-                                DoCast(target, SPELL_FIREBALL);
-                            else
-                                DoCast(target, SPELL_FIREBALL_TD);
-                        }
-
-                        if (me->HasAura(SPELL_TIME_DILATION))
-                            events.ScheduleEvent(EVENT_FIREBALL, urand(18000, 25000));
-                        else                            
-                            events.ScheduleEvent(EVENT_FIREBALL, urand(4000, 7000));
-                        break;
-
-                        case EVENT_SCORCHING_BREATH:
-                        DoCast(me, SPELL_SCORCHING_BREATH);
-                        if (me->GetMap()->IsHeroic())
-                            events.ScheduleEvent(EVENT_SCORCHING_BREATH, urand(5000, 7000));
-                        else
-                            events.ScheduleEvent(EVENT_SCORCHING_BREATH, urand(7000, 9000));
-                        break;
-
-                        case EVENT_FIREBALL_BARRAGE:
-                        DoCast(me, SPELL_FIREBALL_BARRAGE);
-                        if (me->GetMap()->IsHeroic())
-                            events.ScheduleEvent(EVENT_FIREBALL_BARRAGE, urand(26000, 30000));
-                        else
-                            events.ScheduleEvent(EVENT_FIREBALL_BARRAGE, urand(30000, 34000));
-                        break;
-                    }
-                }
-            }
-        };
+	CreatureAI* GetAI(Creature* creature) const
+	{
+		return new npc_proto_behemothAI(creature);
+	}
 };
 
 class npc_halfus_dragon: public CreatureScript
