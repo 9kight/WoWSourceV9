@@ -224,8 +224,8 @@ public:
             //events.ScheduleEvent(EVENT_FEL_FIRESTORM, 20000);
             events.ScheduleEvent(EVENT_SUMMON_DEBILITATOR, 65000);
             events.ScheduleEvent(EVENT_SUMMON_DEVASTATOR, urand(5000, 8000));
-            events.ScheduleEvent(EVENT_SUMMON_DEVASTATOR, urand(5000, 8000));
-            events.ScheduleEvent(EVENT_SUMMON_DEVASTATOR, urand(5000, 8000));
+			events.ScheduleEvent(EVENT_SUMMON_DEVASTATOR, urand(5000, 8000));
+			events.ScheduleEvent(EVENT_SUMMON_DEVASTATOR, urand(5000, 8000));
             events.ScheduleEvent(EVENT_CHECK_PLAYERS, 3000);
 
             for (uint8 i = 0; i < 2; ++i)
@@ -358,7 +358,7 @@ public:
                     {
                         uint32 i = urand(0, 2);
                         me->SummonCreature(NPC_DOOMGUARD_DEVASTATOR, devastatorPos[i], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000);
-                        events.ScheduleEvent(EVENT_SUMMON_DEVASTATOR, urand(4000, 7000));
+                        events.ScheduleEvent(EVENT_SUMMON_DEVASTATOR, urand(5000, 8000));
                         break;
                     }
                 case EVENT_EMBEDDED_BLADE:
@@ -483,7 +483,9 @@ public:
                               }
                           }
                        }
-					   
+				
+				instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 105576, 0, me);
+				me->SummonGameObject(209541, 3356.39f, -5748.73f, 15.2165f, 2.60053f, 0, 0, 0, 0,0);
                 instance->UpdateEncounterState(ENCOUNTER_CREDIT_CAST_SPELL, SPELL_COMPLETE_ENCOUNTER, me);
                 instance->SetBossState(DATA_MANNOROTH, DONE);
             }
