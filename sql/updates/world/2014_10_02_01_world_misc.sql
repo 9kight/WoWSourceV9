@@ -23,7 +23,7 @@ INSERT INTO `creature_model_info` (`modelid`, `bounding_radius`, `combat_reach`,
 (20447, 0.372, 1.5, 0, 20449), -- Male Green Orc
 (20448, 0.372, 1.5, 0, 20450), -- Male Dark Green Orc
 (20449, 0.236, 1.5, 1, 20448), -- Female Dark Green Orc
-(20450, 0.236, 1.5, 1, 20447), -- Female Green Orc
+(20450, 0.236, 1.5, 1, 20447); -- Female Green Orc
 
 -- DB/Creature: General Lightsbane
 UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry` IN(29851,29860,29858,29859);
