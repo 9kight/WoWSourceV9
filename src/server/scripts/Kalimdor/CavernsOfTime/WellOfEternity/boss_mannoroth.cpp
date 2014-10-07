@@ -485,7 +485,7 @@ public:
                        }
 				
 				instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 105576, 0, me);
-				me->SummonGameObject(209541, 3356.39f, -5748.73f, 15.2165f, 2.60053f, 0, 0, 0, 0,0);
+				GameObject* reward = me->SummonGameObject(209541, 3356.39f, -5748.73f, 15.2165f, 2.60053f, 0, 0, 0, 0, 200000);
                 instance->UpdateEncounterState(ENCOUNTER_CREDIT_CAST_SPELL, SPELL_COMPLETE_ENCOUNTER, me);
                 instance->SetBossState(DATA_MANNOROTH, DONE);
             }
