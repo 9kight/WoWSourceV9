@@ -146,7 +146,7 @@ public:
 
         void DamageTaken(Unit* /*attacker*/, uint32& damage)
         {
-            if (me->HealthBelowPctDamaged(50, damage) && (events.GetPhaseMask() & PHASE_MASK_NORMAL) && !_hasDispersed)
+            if (me->HealthBelowPct(50) && !_hasDispersed)
             {
                 events.SetPhase(PHASE_DISPERSE);
                 _hasDispersed = true;
