@@ -39,14 +39,14 @@ EndScriptData
 
 enum ScriptedTexts
 {
-	SAY_AGGRO = 0,
-	SAY_BERSERK = 1,
-	SAY_DEATH = 2,
-	SAY_INTRO_1 = 3,
-	SAY_INTRO_2 = 4,
-	SAY_KILL = 5,
-	SAY_TWILIGHT = 6,
-	SAY_UNSTABLE = 7,
+    SAY_AGGRO       = 3,
+    SAY_BERSERK     = 4,
+    SAY_DEATH       = 11,
+    SAY_INTRO_1     = 1,
+    SAY_INTRO_2     = 2,
+    SAY_KILL        = 8,
+    SAY_TWILIGHT    = 6,
+    SAY_UNSTABLE    = 7,
 };
 
 enum Spells
