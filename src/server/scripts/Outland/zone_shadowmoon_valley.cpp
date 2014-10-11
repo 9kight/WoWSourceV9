@@ -78,14 +78,14 @@ public:
             ground = 0.f;
         }
 
-        void Reset() override
+        void Reset() 
         {
             ground = me->GetMap()->GetHeight(me->GetPositionX(), me->GetPositionY(), me->GetPositionZMinusOffset());
             SummonInfernal();
             events.ScheduleEvent(EVENT_CAST_SUMMON_INFERNAL, urand(1000, 3000));
         }
 
-        void SetData(uint32 id, uint32 data) override
+        void SetData(uint32 id, uint32 data) 
         {
             if (id == TYPE_INFERNAL && data == DATA_DIED)
                 SummonInfernal();
@@ -97,7 +97,7 @@ public:
             infernalGUID = infernal->GetGUID();
         }
 
-        void UpdateAI(uint32 const diff) override
+        void UpdateAI(uint32 const diff) 
         {
             events.Update(diff);
 
@@ -125,7 +125,7 @@ public:
         float ground;
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const 
     {
         return new npc_invis_infernal_casterAI(creature);
     }
@@ -144,25 +144,25 @@ public:
     {
         npc_infernal_attackerAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void Reset() override
+        void Reset() 
         {
             me->SetDisplayId(MODEL_INVISIBLE);
             me->GetMotionMaster()->MoveRandom(5.0f);
         }
 
-        void IsSummonedBy(Unit* summoner) override
+        void IsSummonedBy(Unit* summoner) 
         {
             if (summoner->ToCreature())
                 casterGUID = summoner->ToCreature()->GetGUID();;
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) 
         {
             if (Creature* caster = ObjectAccessor::GetCreature(*me, casterGUID))
                 caster->AI()->SetData(TYPE_INFERNAL, DATA_DIED);
         }
 
-        void SpellHit(Unit* /*caster*/, const SpellInfo* spell) override
+        void SpellHit(Unit* /*caster*/, const SpellInfo* spell) 
         {
             if (spell->Id == SPELL_SUMMON_INFERNAL)
             {
@@ -171,7 +171,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 const diff) override
+        void UpdateAI(uint32 const diff) 
         {
             if (!UpdateVictim())
                 return;
@@ -183,7 +183,7 @@ public:
         ObjectGuid casterGUID;
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const 
     {
         return new npc_infernal_attackerAI(creature);
     }
