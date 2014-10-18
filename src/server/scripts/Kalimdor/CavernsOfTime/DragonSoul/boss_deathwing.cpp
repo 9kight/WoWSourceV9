@@ -299,6 +299,10 @@ public:
 			if(Creature* trall = me->FindNearestCreature(NPC_MAELSTROM_TRALL, 300.0f, true))
 				trall->AI()->Talk(SAY_TRALL_DEATH_DEATHWING);
 			me->DespawnOrUnsummon(5000);
+			if (RAID_DIFFICULTY_10MAN_NORMAL || RAID_DIFFICULTY_10MAN_HEROIC || RAID_DIFFICULTY_25MAN_NORMAL || RAID_DIFFICULTY_25MAN_HEROIC)
+				instance->DoCompleteAchievement(6177); // Destroyer's End
+			if (RAID_DIFFICULTY_10MAN_HEROIC ||  RAID_DIFFICULTY_25MAN_HEROIC)
+				instance->DoCompleteAchievement(6116); // Heroic: Madness of Deathwing
             _JustDied();
         }
     };
