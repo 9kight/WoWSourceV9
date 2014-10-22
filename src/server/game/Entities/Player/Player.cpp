@@ -64,6 +64,7 @@
 #include "ReputationMgr.h"
 #include "Pet.h"
 #include "QuestDef.h"
+#include "revision.h"
 #include "SkillDiscovery.h"
 #include "SocialMgr.h"
 #include "SpellAuraEffects.h"
@@ -15577,6 +15578,20 @@ void Player::AddQuest(Quest const* quest, Object* questGiver)
 
     UpdateForQuestWorldObjects();
 
+	if (sWorld->getBoolConfig(CONFIG_QUEST_ENABLE_QUEST_TRACKER)) // check if Quest Tracker is enabled
+
+		{   
+		    // prepare Quest Tracker datas
+			PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_QUEST_TRACK);
+		    stmt->setUInt32(0, quest_id);
+		    stmt->setUInt32(1, GetGUIDLow());
+		    stmt->setString(2, _HASH);
+		    stmt->setString(3, _DATE);
+			 
+			// add to Quest Tracker
+			CharacterDatabase.Execute(stmt);
+		}
+
     if (questGiver != NULL)
     {
         switch(questGiver->GetTypeId())
@@ -15640,6 +15655,16 @@ void Player::CompleteQuest(uint32 quest_id)
             sScriptMgr->OnQuestComplete(this, qInfo);
         }
     }
+	if (sWorld->getBoolConfig(CONFIG_QUEST_ENABLE_QUEST_TRACKER)) // check if Quest Tracker is enabled
+		{
+		    // prepare Quest Tracker datas
+	        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_QUEST_TRACK_COMPLETE_TIME);
+		    stmt->setUInt32(0, quest_id);
+		    stmt->setUInt32(1, GetGUIDLow());
+		    
+		    // add to Quest Tracker
+		    CharacterDatabase.Execute(stmt);
+		}
 }
 
 void Player::IncompleteQuest(uint32 quest_id)
