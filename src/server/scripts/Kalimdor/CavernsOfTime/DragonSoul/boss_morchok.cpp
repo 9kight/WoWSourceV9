@@ -224,10 +224,10 @@ public:
         {
             _Reset();
 			instance->SetBossState(BOSS_MORCHOK, NOT_STARTED);
-            Raid10N = 23400130;
-            Raid10H = 13957449;
-            Raid25N = 66299996;
-            Raid25H = 58631360;
+            Raid10N = 2771770;
+            Raid10H = 7853306;
+            Raid25N = 1653275;
+            Raid25H = 6944948;
             MorchokHealth = RAID_MODE(Raid10N, Raid25N, Raid10H, Raid25H);
             me->SetMaxHealth(MorchokHealth);
             me->SetFullHealth();
