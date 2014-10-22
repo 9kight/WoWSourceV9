@@ -91,11 +91,26 @@ public:
         EventMap events;
 		uint8 phase;
 
+		uint32 HagaraHealth;
+		uint32 Raid10N;
+		uint32 Raid10H;
+		uint32 Raid25N;
+		uint32 Raid25H;
+	 // uint32 Raid25RF; Raid Finder not yet implemented
+
         void Reset()
         {
             events.Reset();
 
             instance->SetBossState(DATA_PORTALS_ON_OFF, DONE);
+			Raid10N = 2645240;
+			Raid10H = 3967860;
+			Raid25N = 7935720;
+			Raid25H = 11903580;
+		 // Raid25RF = 77302800;
+			HagaraHealth = RAID_MODE(Raid10N, Raid25N, Raid10H, Raid25H /*, Raid25RF */);
+			me->SetMaxHealth(HagaraHealth);
+			me->SetFullHealth();
             _Reset();
         }
 

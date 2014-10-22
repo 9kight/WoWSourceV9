@@ -13,7 +13,7 @@ EndScriptData
 
 #define SPELL_STOMP RAID_MODE(109033, 109034, 103414, 108571)
 
-#define SPELL_KORCHOM RAID_MODE(109033, 109034, 109017, 109017)
+#define SPELL_KORCHOM RAID_MODE(109034, 109017) // This spell must be just in 10HC / 25HC 
 
 enum Yells
 {
@@ -219,16 +219,18 @@ public:
         uint32 Raid10H;
         uint32 Raid25N;
         uint32 Raid25H;
+	 // uint32 Raid25RF; Raid Finder not yet implemented
 		GameObject* Innerwall;
         void Reset()
         {
             _Reset();
 			instance->SetBossState(BOSS_MORCHOK, NOT_STARTED);
-            Raid10N = 23400130;
-            Raid10H = 13957449;
-            Raid25N = 66299996;
-            Raid25H = 58631360;
-            MorchokHealth = RAID_MODE(Raid10N, Raid25N, Raid10H, Raid25H);
+			Raid10N = 2771770;
+			Raid10H = 7853306;
+			Raid25N = 1653275;
+			Raid25H = 6944948;
+		 // Raid25RF = 76500000;
+			MorchokHealth = RAID_MODE(Raid10N, Raid25N, Raid10H, Raid25H /*, Raid25RF */);
             me->SetMaxHealth(MorchokHealth);
             me->SetFullHealth();
             me->SetObjectScale(1);

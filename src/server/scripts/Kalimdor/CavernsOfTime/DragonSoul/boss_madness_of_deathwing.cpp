@@ -126,6 +126,13 @@ public:
 		InstanceScript* instance;
         EventMap events;
 
+		uint32 DeathwingHealth;
+		uint32 Raid10N;
+		uint32 Raid10H;
+		uint32 Raid25N;
+		uint32 Raid25H;
+	 // uint32 Raid25RF; Raid Finder not yet implemented
+
 		void Reset()
 		{
 			events.Reset();
@@ -133,7 +140,14 @@ public:
 			instance->SetBossState(DATA_PORTALS_ON_OFF, DONE);
 			me->SetCanFly(true);
 			me->SetReactState(REACT_AGGRESSIVE);
-
+			Raid10N = 127120160;
+			Raid10H = 99265376;
+			Raid25N = 362292448;
+			Raid25H = 297851968;
+		 // Raid25RF = 286020352;
+			DeathwingHealth = RAID_MODE(Raid10N, Raid25N, Raid10H, Raid25H /*, Raid25RF */);
+			me->SetMaxHealth(DeathwingHealth);
+			me->SetFullHealth();
 			me->SetInCombatWithZone();
 
 			Talk(SAY_AGGRO);
