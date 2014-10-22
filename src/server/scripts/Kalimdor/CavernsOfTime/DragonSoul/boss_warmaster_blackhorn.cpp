@@ -69,10 +69,10 @@ public:
         void Reset()
         {
             events.Reset();
-			Raid10N = 1587144;
-			Raid10H = 2876698;
-			Raid25N = 3967860;
-			Raid25H = 6904076;
+			Raid10N = 20614080;
+			Raid10H = 37363020;
+			Raid25N = 51535200;
+			Raid25H = 89671248;
 		 // Raid25RF = 38651400;
 			WarmasterHealth = RAID_MODE(Raid10N, Raid25N, Raid10H, Raid25H /*, Raid25RF */);
 			me->SetMaxHealth(WarmasterHealth);

@@ -213,10 +213,10 @@ public:
 			me->GetMotionMaster()->MovePoint(4659700, -1699.160f, -2388.110f, 341.540f);
 			me->SetSpeed(MOVE_FLIGHT, 2.5f);
 			Raid10N = 56688720;
-			Raid10H = 55271500;
+			Raid10H = 85033080;
 			Raid25N = 184238336;
-			Raid25H = 179604464;
-		 // Raid25RF = 184238336;
+			Raid25H = 276314560;
+		 // Raid25RF = 110542992;
 			UltraxionHealth = RAID_MODE(Raid10N, Raid25N, Raid10H, Raid25H /*, Raid25RF */);
 			me->SetMaxHealth(UltraxionHealth);
 			me->SetFullHealth();

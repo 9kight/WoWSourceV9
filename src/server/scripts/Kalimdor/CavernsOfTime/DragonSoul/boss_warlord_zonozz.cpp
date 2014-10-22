@@ -165,10 +165,10 @@ public:
             events.Reset();
             sprey = false;
             instance->SetData(DATA_PORTALS_ON_OFF, DONE);
-			Raid10N = 5250801;
-			Raid10H = 6659392;
-			Raid25N = 15725951;
-			Raid25H = 19978174;
+			Raid10N = 68198240;
+			Raid10H = 86493256;
+			Raid25N = 204251168;
+			Raid25H = 259479278;
 		 // Raid25RF = 153188384;
 			WarlordHealth = RAID_MODE(Raid10N, Raid25N, Raid10H, Raid25H /*, Raid25RF */);
 			me->SetMaxHealth(WarlordHealth);

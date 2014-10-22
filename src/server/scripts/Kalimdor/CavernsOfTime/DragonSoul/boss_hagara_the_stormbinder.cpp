@@ -103,10 +103,10 @@ public:
             events.Reset();
 
             instance->SetBossState(DATA_PORTALS_ON_OFF, DONE);
-			Raid10N = 2645240;
-			Raid10H = 3967860;
-			Raid25N = 7935720;
-			Raid25H = 11903580;
+			Raid10N = 34356800;
+			Raid10H = 33497878;
+			Raid25N = 103070400;
+			Raid25H = 100493640;
 		 // Raid25RF = 77302800;
 			HagaraHealth = RAID_MODE(Raid10N, Raid25N, Raid10H, Raid25H /*, Raid25RF */);
 			me->SetMaxHealth(HagaraHealth);

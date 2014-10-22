@@ -141,9 +141,9 @@ public:
 			me->SetCanFly(true);
 			me->SetReactState(REACT_AGGRESSIVE);
 			Raid10N = 127120160;
-			Raid10H = 99265376;
-			Raid25N = 362292448;
-			Raid25H = 297851968;
+			Raid10H = 152715968;
+			Raid25N = 381360480;
+			Raid25H = 458233824;
 		 // Raid25RF = 286020352;
 			DeathwingHealth = RAID_MODE(Raid10N, Raid25N, Raid10H, Raid25H /*, Raid25RF */);
 			me->SetMaxHealth(DeathwingHealth);

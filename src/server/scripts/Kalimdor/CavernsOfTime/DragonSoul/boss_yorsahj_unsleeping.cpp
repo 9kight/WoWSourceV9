@@ -137,10 +137,10 @@ public:
         void Reset()
         {
             events.Reset();
-			Raid10N = 3637205;
-			Raid10H = 6890850;
-			Raid25N = 10911615;
-			Raid25H = 19905430;
+			Raid10N = 47240600;
+			Raid10H = 89499464;
+			Raid25N = 141721792;
+			Raid25H = 258534912;
 		 // Raid25RF = 106291344;
 			YorsahjHealth = RAID_MODE(Raid10N, Raid25N, Raid10H, Raid25H /*, Raid25RF */);
 			me->SetMaxHealth(YorsahjHealth);
