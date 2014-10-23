@@ -2327,8 +2327,10 @@ bool Aura::CallScriptEffectProcHandlers(AuraEffect const* aurEff, AuraApplicatio
             if ((*effItr).IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
                 (*effItr).Call(*scritr, aurEff, eventInfo);
         }
-        if (!preventDefault)
-            preventDefault = (*scritr)->_IsDefaultActionPrevented();
+		
+        if (!preventDefault && (*scritr)->_IsDefaultActionPrevented())
+            preventDefault = true;
+			
         (*scritr)->_FinishScriptCall();
     }
     return preventDefault;
