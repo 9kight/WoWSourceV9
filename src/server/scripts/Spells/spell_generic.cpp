@@ -4254,14 +4254,14 @@ public:
         }
 
     private:
-        bool Validate(SpellInfo const* /*spellInfo*/) override
+        bool Validate(SpellInfo const* /*spellInfo*/) 
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_MIXOLOGY))
                 return false;
             return true;
         }
 
-        bool Load() override
+        bool Load() 
         {
             return GetCaster() && GetCaster()->GetTypeId() == TYPEID_PLAYER;
         }
@@ -4446,13 +4446,13 @@ public:
 
         int32 bonus;
 
-        void Register() override
+        void Register() 
         {
             DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_gen_mixology_bonus_AuraScript::CalculateAmount, EFFECT_ALL, SPELL_AURA_ANY);
         }
     };
 
-    AuraScript* GetAuraScript() const override
+    AuraScript* GetAuraScript() const 
     {
         return new spell_gen_mixology_bonus_AuraScript();
     }
