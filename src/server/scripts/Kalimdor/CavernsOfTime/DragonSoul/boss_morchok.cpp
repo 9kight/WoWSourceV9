@@ -214,26 +214,11 @@ public:
         boss_morchokAI(Creature* creature) : BossAI(creature, DATA_MORCHOK) { }
 
         Creature* blackblood;
-        uint32 MorchokHealth;
-        uint32 Raid10N;
-        uint32 Raid10H;
-        uint32 Raid25N;
-        uint32 Raid25H;
-	 // uint32 Raid25RF; Raid Finder not yet implemented
 		GameObject* Innerwall;
         void Reset()
         {
             _Reset();
 			instance->SetBossState(BOSS_MORCHOK, NOT_STARTED);
-
-			Raid10N = 36000200;
-			Raid25N = 102000000;
-			Raid10H = 21473000;
-			Raid25H = 58631360;
-		 // Raid25RF = 76500000;
-			MorchokHealth = RAID_MODE(Raid10N, Raid25N, Raid10H, Raid25H /*, Raid25RF */);
-            me->SetMaxHealth(MorchokHealth);
-            me->SetFullHealth();
             me->SetObjectScale(1);
             events.SetPhase(PHASE_NORMAL);
             events.ScheduleEvent(EVENT_STOMP, urand(9000, 14000));

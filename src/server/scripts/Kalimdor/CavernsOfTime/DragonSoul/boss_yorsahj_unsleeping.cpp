@@ -127,24 +127,9 @@ public:
 
         bool mana_void;
 
-		uint32 YorsahjHealth;
-		uint32 Raid10N;
-		uint32 Raid10H;
-		uint32 Raid25N;
-		uint32 Raid25H;
-	 // uint32 Raid25RF; Raid Finder not yet implemented
-
         void Reset()
         {
             events.Reset();
-			Raid10N = 47240600;
-			Raid10H = 89499464;
-			Raid25N = 141721792;
-			Raid25H = 258534912;
-		 // Raid25RF = 106291344;
-			YorsahjHealth = RAID_MODE(Raid10N, Raid25N, Raid10H, Raid25H /*, Raid25RF */);
-			me->SetMaxHealth(YorsahjHealth);
-			me->SetFullHealth();
             instance->SetData(DATA_PORTALS_ON_OFF, DONE);
             _Reset();
         }

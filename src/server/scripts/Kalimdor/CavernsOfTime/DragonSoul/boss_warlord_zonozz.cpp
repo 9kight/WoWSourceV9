@@ -153,26 +153,11 @@ public:
 
         bool sprey;
 
-		uint32 WarlordHealth;
-		uint32 Raid10N;
-		uint32 Raid10H;
-		uint32 Raid25N;
-		uint32 Raid25H;
-	 // uint32 Raid25RF; Raid Finder not yet implemented
-
         void Reset()
         {
             events.Reset();
             sprey = false;
             instance->SetData(DATA_PORTALS_ON_OFF, DONE);
-			Raid10N = 68198240;
-			Raid10H = 86493256;
-			Raid25N = 204251168;
-			Raid25H = 259479278;
-		 // Raid25RF = 153188384;
-			WarlordHealth = RAID_MODE(Raid10N, Raid25N, Raid10H, Raid25H /*, Raid25RF */);
-			me->SetMaxHealth(WarlordHealth);
-			me->SetFullHealth();
             me->RemoveAura(EVENT_FOCUSEF_ANGER);
             _Reset();
         }

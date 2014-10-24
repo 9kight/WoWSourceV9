@@ -59,24 +59,9 @@ public:
         InstanceScript* instance;
         EventMap events;
 
-		uint32 WarmasterHealth;
-		uint32 Raid10N;
-		uint32 Raid10H;
-		uint32 Raid25N;
-		uint32 Raid25H;
-	 // uint32 Raid25RF; Raid Finder not yet implemented
-
         void Reset()
         {
             events.Reset();
-			Raid10N = 20614080;
-			Raid10H = 37363020;
-			Raid25N = 51535200;
-			Raid25H = 89671248;
-		 // Raid25RF = 38651400;
-			WarmasterHealth = RAID_MODE(Raid10N, Raid25N, Raid10H, Raid25H /*, Raid25RF */);
-			me->SetMaxHealth(WarmasterHealth);
-			me->SetFullHealth();
 			me->RemoveAllAuras();
             _Reset();
         }

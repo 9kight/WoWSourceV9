@@ -140,14 +140,6 @@ public:
 			instance->SetBossState(DATA_PORTALS_ON_OFF, DONE);
 			me->SetCanFly(true);
 			me->SetReactState(REACT_AGGRESSIVE);
-			Raid10N = 127120160;
-			Raid10H = 152715968;
-			Raid25N = 381360480;
-			Raid25H = 458233824;
-		 // Raid25RF = 286020352;
-			DeathwingHealth = RAID_MODE(Raid10N, Raid25N, Raid10H, Raid25H /*, Raid25RF */);
-			me->SetMaxHealth(DeathwingHealth);
-			me->SetFullHealth();
 			me->SetInCombatWithZone();
 
 			Talk(SAY_AGGRO);
