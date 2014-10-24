@@ -91,13 +91,6 @@ public:
         EventMap events;
 		uint8 phase;
 
-		uint32 HagaraHealth;
-		uint32 Raid10N;
-		uint32 Raid10H;
-		uint32 Raid25N;
-		uint32 Raid25H;
-	 // uint32 Raid25RF; Raid Finder not yet implemented
-
         void Reset()
         {
             events.Reset();

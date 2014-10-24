@@ -126,13 +126,6 @@ public:
 		InstanceScript* instance;
         EventMap events;
 
-		uint32 DeathwingHealth;
-		uint32 Raid10N;
-		uint32 Raid10H;
-		uint32 Raid25N;
-		uint32 Raid25H;
-	 // uint32 Raid25RF; Raid Finder not yet implemented
-
 		void Reset()
 		{
 			events.Reset();
