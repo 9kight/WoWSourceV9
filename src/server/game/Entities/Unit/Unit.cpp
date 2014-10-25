@@ -16443,6 +16443,14 @@ bool Unit::HandleAuraRaidProcFromChargeWithValue(AuraEffect* triggeredByAura)
     // current aura expire
     triggeredByAura->GetBase()->SetCharges(1);             // will removed at next charges decrease
     return true;
+	
+	 // Glyph of Prayer of Mending
+        if (HasAura(55685) && jumps == 4)
+        {
+            heal += heal * 0.6f;
+            CastCustomSpell(this, 33110, &heal, NULL, NULL, true, NULL, NULL, caster_guid);
+            return true;
+        }
 
 }
 bool Unit::HandleAuraRaidProcFromCharge(AuraEffect* triggeredByAura)
