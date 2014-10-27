@@ -8208,21 +8208,6 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 /*damage*/, Aura* triggeredByAura
                     CastCustomSpell(target, 85759, &bp0, NULL, NULL, true);
                     return true;
                 }
-                case 26022: // Pursuit of Justice
-                case 26023:
-                {
-                    if (!procSpell || !(procSpell->GetAllEffectsMechanicMask() & ((1 << MECHANIC_FEAR) | (1 << MECHANIC_STUN) | (1 << MECHANIC_ROOT))))
-                        return false;
-
-                    // Patch 4.0.6 (8-Feb-2011): Pursuit of Justice is now providing Holy Power when the paladin gets stunned by the Fire mage talent Impact.
-                    // Conversely, Pursuit of Justice is no longer granting Holy Power when the Paladin is hit by Holy Wrath.
-                    if (procSpell->Id == 2812)
-                        return false;
-
-                    *handled = true;
-                    CastSpell(this, 89024, false);
-                    break;
-                }
                 // Nevermelting Ice Crystal
                 case 71564:
                     RemoveAuraFromStack(71564);
