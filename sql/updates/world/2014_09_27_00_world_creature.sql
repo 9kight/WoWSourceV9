@@ -8,7 +8,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position
 
 -- New Spawns
 SET @CGUID := 213306;
-DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+67;
+DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+180;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
 (@CGUID+0,21961,530,1,1,-2624.587,2645.83,75.00489,4.70832,300,0,0),-- Cataclysm Overseer
 (@CGUID+1,21961,530,1,1,-2658.601,2642.981,74.9452,4.725823,300,0,0),-- Cataclysm Overseer
@@ -199,13 +199,13 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2624.166,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2624.166,2571.218,75.01111,0,0,0,0,100,0),
-(@PATH,2,-2624.62,2542.242,74.24536,0,0,0,0,100,0),
-(@PATH,3,-2624.166,2571.218,75.01111,0,0,0,0,100,0),
-(@PATH,4,-2624.751,2607.99,74.93158,0,0,0,0,100,0),
-(@PATH,5,-2624.563,2651.694,74.28185,0,0,0,0,100,0),
-(@PATH,6,-2624.751,2607.99,74.93158,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2624.166,2571.218,75.01111,0,0,0,100,0),
+(@PATH,2,-2624.62,2542.242,74.24536,0,0,0,100,0),
+(@PATH,3,-2624.166,2571.218,75.01111,0,0,0,100,0),
+(@PATH,4,-2624.751,2607.99,74.93158,0,0,0,100,0),
+(@PATH,5,-2624.563,2651.694,74.28185,0,0,0,100,0),
+(@PATH,6,-2624.751,2607.99,74.93158,0,0,0,100,0);
 
 -- Pathing for Cataclysm Overseer Entry: 21961
 SET @NPC := @CGUID+1;
@@ -214,15 +214,15 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2743.211,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2743.211,2099.005,117.2918,0,0,0,0,100,0),
-(@PATH,2,-2743.264,2132.767,117.0985,0,0,0,0,100,0),
-(@PATH,3,-2742.951,2145.269,116.2745,0,0,0,0,100,0),
-(@PATH,4,-2743.264,2132.767,117.0985,0,0,0,0,100,0),
-(@PATH,5,-2743.211,2099.005,117.2918,0,0,0,0,100,0),
-(@PATH,6,-2741.874,2064.646,117.3364,0,0,0,0,100,0),
-(@PATH,7,-2742.875,2033.14,117.0252,0,0,0,0,100,0),
-(@PATH,8,-2741.874,2064.646,117.3364,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2743.211,2099.005,117.2918,0,0,0,100,0),
+(@PATH,2,-2743.264,2132.767,117.0985,0,0,0,100,0),
+(@PATH,3,-2742.951,2145.269,116.2745,0,0,0,100,0),
+(@PATH,4,-2743.264,2132.767,117.0985,0,0,0,100,0),
+(@PATH,5,-2743.211,2099.005,117.2918,0,0,0,100,0),
+(@PATH,6,-2741.874,2064.646,117.3364,0,0,0,100,0),
+(@PATH,7,-2742.875,2033.14,117.0252,0,0,0,100,0),
+(@PATH,8,-2741.874,2064.646,117.3364,0,0,0,100,0);
 
 -- Pathing for Cataclysm Overseer Entry: 21961
 SET @NPC := @CGUID+2;
@@ -231,15 +231,15 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2657.852,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2657.852,2594.252,74.94736,0,0,0,0,100,0),
-(@PATH,2,-2658.395,2560.189,74.94743,0,0,0,0,100,0),
-(@PATH,3,-2658.091,2527.67,74.94743,0,0,0,0,100,0),
-(@PATH,4,-2658.395,2560.189,74.94743,0,0,0,0,100,0),
-(@PATH,5,-2657.852,2594.252,74.94736,0,0,0,0,100,0),
-(@PATH,6,-2658.377,2626.292,74.94731,0,0,0,0,100,0),
-(@PATH,7,-2658.736,2653.005,74.94393,0,0,0,0,100,0),
-(@PATH,8,-2658.377,2626.292,74.94731,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2657.852,2594.252,74.94736,0,0,0,100,0),
+(@PATH,2,-2658.395,2560.189,74.94743,0,0,0,100,0),
+(@PATH,3,-2658.091,2527.67,74.94743,0,0,0,100,0),
+(@PATH,4,-2658.395,2560.189,74.94743,0,0,0,100,0),
+(@PATH,5,-2657.852,2594.252,74.94736,0,0,0,100,0),
+(@PATH,6,-2658.377,2626.292,74.94731,0,0,0,100,0),
+(@PATH,7,-2658.736,2653.005,74.94393,0,0,0,100,0),
+(@PATH,8,-2658.377,2626.292,74.94731,0,0,0,100,0);
 
 -- Pathing for Cataclysm Overseer Entry: 21961
 SET @NPC := @CGUID+3;
@@ -248,17 +248,17 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2774.228,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2774.228,2205.861,93.40082,0,0,0,0,100,0),
-(@PATH,2,-2774.099,2231.308,93.40082,0,0,0,0,100,0),
-(@PATH,3,-2774.292,2264.527,92.85751,0,0,0,0,100,0),
-(@PATH,4,-2774.898,2299.137,93.37387,0,0,0,0,100,0),
-(@PATH,5,-2774.974,2330.74,92.13889,0,0,0,0,100,0),
-(@PATH,6,-2775.949,2350.123,93.32701,0,0,0,0,100,0),
-(@PATH,7,-2774.974,2330.74,92.13889,0,0,0,0,100,0),
-(@PATH,8,-2774.898,2299.137,93.37387,0,0,0,0,100,0),
-(@PATH,9,-2774.292,2264.527,92.85751,0,0,0,0,100,0),
-(@PATH,10,-2774.099,2231.308,93.40082,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2774.228,2205.861,93.40082,0,0,0,100,0),
+(@PATH,2,-2774.099,2231.308,93.40082,0,0,0,100,0),
+(@PATH,3,-2774.292,2264.527,92.85751,0,0,0,100,0),
+(@PATH,4,-2774.898,2299.137,93.37387,0,0,0,100,0),
+(@PATH,5,-2774.974,2330.74,92.13889,0,0,0,100,0),
+(@PATH,6,-2775.949,2350.123,93.32701,0,0,0,100,0),
+(@PATH,7,-2774.974,2330.74,92.13889,0,0,0,100,0),
+(@PATH,8,-2774.898,2299.137,93.37387,0,0,0,100,0),
+(@PATH,9,-2774.292,2264.527,92.85751,0,0,0,100,0),
+(@PATH,10,-2774.099,2231.308,93.40082,0,0,0,100,0);
 
 -- Pathing for Cataclysm Overseer Entry: 21961
 SET @NPC := @CGUID+4;
@@ -267,19 +267,19 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2759.871,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2759.871,2277.614,93.29873,0,0,0,0,100,0),
-(@PATH,2,-2760.06,2308.136,93.37035,0,0,0,0,100,0),
-(@PATH,3,-2759.403,2333.865,92.56857,0,0,0,0,100,0),
-(@PATH,4,-2760.633,2357.157,93.31051,0,0,0,0,100,0),
-(@PATH,5,-2759.403,2333.865,92.56857,0,0,0,0,100,0),
-(@PATH,6,-2760.06,2308.136,93.37035,0,0,0,0,100,0),
-(@PATH,7,-2759.871,2277.614,93.29873,0,0,0,0,100,0),
-(@PATH,8,-2758.652,2248.756,93.28703,0,0,0,0,100,0),
-(@PATH,9,-2759.07,2225.875,92.48966,0,0,0,0,100,0),
-(@PATH,10,-2759.81,2209.213,93.28703,0,0,0,0,100,0),
-(@PATH,11,-2759.07,2225.875,92.48966,0,0,0,0,100,0),
-(@PATH,12,-2758.652,2248.756,93.28703,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2759.871,2277.614,93.29873,0,0,0,100,0),
+(@PATH,2,-2760.06,2308.136,93.37035,0,0,0,100,0),
+(@PATH,3,-2759.403,2333.865,92.56857,0,0,0,100,0),
+(@PATH,4,-2760.633,2357.157,93.31051,0,0,0,100,0),
+(@PATH,5,-2759.403,2333.865,92.56857,0,0,0,100,0),
+(@PATH,6,-2760.06,2308.136,93.37035,0,0,0,100,0),
+(@PATH,7,-2759.871,2277.614,93.29873,0,0,0,100,0),
+(@PATH,8,-2758.652,2248.756,93.28703,0,0,0,100,0),
+(@PATH,9,-2759.07,2225.875,92.48966,0,0,0,100,0),
+(@PATH,10,-2759.81,2209.213,93.28703,0,0,0,100,0),
+(@PATH,11,-2759.07,2225.875,92.48966,0,0,0,100,0),
+(@PATH,12,-2758.652,2248.756,93.28703,0,0,0,100,0);
 
 -- Pathing for Cataclysm Overseer Entry: 21961
 SET @NPC := @CGUID+5;
@@ -288,22 +288,22 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2775.073,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2775.073,2395.292,93.28701,0,0,0,0,100,0),
-(@PATH,2,-2776.016,2358.512,93.32701,0,0,0,0,100,0),
-(@PATH,3,-2775.073,2395.292,93.28701,0,0,0,0,100,0),
-(@PATH,4,-2772.866,2425.821,92.54453,0,0,0,0,100,0),
-(@PATH,5,-2774.25,2452.304,93.39854,0,0,0,0,100,0),
-(@PATH,6,-2772.562,2466.367,93.39854,0,0,0,0,100,0),
-(@PATH,7,-2758.671,2467.425,93.40414,0,0,0,0,100,0),
-(@PATH,8,-2742.215,2468.052,93.40414,0,0,0,0,100,0),
-(@PATH,9,-2741.37,2499.675,93.40414,0,0,0,0,100,0),
-(@PATH,10,-2742.215,2468.052,93.40414,0,0,0,0,100,0),
-(@PATH,11,-2758.671,2467.425,93.40414,0,0,0,0,100,0),
-(@PATH,12,-2772.562,2466.367,93.39854,0,0,0,0,100,0),
-(@PATH,13,-2774.25,2452.304,93.39854,0,0,0,0,100,0),
-(@PATH,14,-2772.866,2425.821,92.54453,0,0,0,0,100,0),
-(@PATH,15,-2775.073,2395.292,93.28701,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2775.073,2395.292,93.28701,0,0,0,100,0),
+(@PATH,2,-2776.016,2358.512,93.32701,0,0,0,100,0),
+(@PATH,3,-2775.073,2395.292,93.28701,0,0,0,100,0),
+(@PATH,4,-2772.866,2425.821,92.54453,0,0,0,100,0),
+(@PATH,5,-2774.25,2452.304,93.39854,0,0,0,100,0),
+(@PATH,6,-2772.562,2466.367,93.39854,0,0,0,100,0),
+(@PATH,7,-2758.671,2467.425,93.40414,0,0,0,100,0),
+(@PATH,8,-2742.215,2468.052,93.40414,0,0,0,100,0),
+(@PATH,9,-2741.37,2499.675,93.40414,0,0,0,100,0),
+(@PATH,10,-2742.215,2468.052,93.40414,0,0,0,100,0),
+(@PATH,11,-2758.671,2467.425,93.40414,0,0,0,100,0),
+(@PATH,12,-2772.562,2466.367,93.39854,0,0,0,100,0),
+(@PATH,13,-2774.25,2452.304,93.39854,0,0,0,100,0),
+(@PATH,14,-2772.866,2425.821,92.54453,0,0,0,100,0),
+(@PATH,15,-2775.073,2395.292,93.28701,0,0,0,100,0);
 
 -- Pathing for Cataclysm Overseer Entry: 21961
 SET @NPC := @CGUID+6;
@@ -312,21 +312,21 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2742.463,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2742.463,2466.129,93.38111,0,0,0,0,100,0),
-(@PATH,2,-2740.73,2447.661,93.38111,0,0,0,0,100,0),
-(@PATH,3,-2759.502,2447.807,93.38111,0,0,0,0,100,0),
-(@PATH,4,-2759.231,2419.446,93.32586,0,0,0,0,100,0),
-(@PATH,5,-2759.33,2387.436,92.4454,0,0,0,0,100,0),
-(@PATH,6,-2761.243,2364.419,93.31051,0,0,0,0,100,0),
-(@PATH,7,-2759.33,2387.436,92.4454,0,0,0,0,100,0),
-(@PATH,8,-2759.231,2419.446,93.32586,0,0,0,0,100,0),
-(@PATH,9,-2759.502,2447.807,93.38111,0,0,0,0,100,0),
-(@PATH,10,-2740.73,2447.661,93.38111,0,0,0,0,100,0),
-(@PATH,11,-2742.463,2466.129,93.38111,0,0,0,0,100,0),
-(@PATH,12,-2709.779,2464.938,93.25584,0,0,0,0,100,0),
-(@PATH,13,-2709.288,2476.609,93.32631,0,0,0,0,100,0),
-(@PATH,14,-2709.779,2464.938,93.25584,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2742.463,2466.129,93.38111,0,0,0,100,0),
+(@PATH,2,-2740.73,2447.661,93.38111,0,0,0,100,0),
+(@PATH,3,-2759.502,2447.807,93.38111,0,0,0,100,0),
+(@PATH,4,-2759.231,2419.446,93.32586,0,0,0,100,0),
+(@PATH,5,-2759.33,2387.436,92.4454,0,0,0,100,0),
+(@PATH,6,-2761.243,2364.419,93.31051,0,0,0,100,0),
+(@PATH,7,-2759.33,2387.436,92.4454,0,0,0,100,0),
+(@PATH,8,-2759.231,2419.446,93.32586,0,0,0,100,0),
+(@PATH,9,-2759.502,2447.807,93.38111,0,0,0,100,0),
+(@PATH,10,-2740.73,2447.661,93.38111,0,0,0,100,0),
+(@PATH,11,-2742.463,2466.129,93.38111,0,0,0,100,0),
+(@PATH,12,-2709.779,2464.938,93.25584,0,0,0,100,0),
+(@PATH,13,-2709.288,2476.609,93.32631,0,0,0,100,0),
+(@PATH,14,-2709.779,2464.938,93.25584,0,0,0,100,0);
 
 -- Pathing for Cataclysm Overseer Entry: 21961
 SET @NPC := @CGUID+7;
@@ -335,13 +335,13 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2708.779,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2708.779,2068.911,117.2379,0,0,0,0,100,0),
-(@PATH,2,-2708.359,2090.884,117.2379,0,0,0,0,100,0),
-(@PATH,3,-2707.642,2117.71,117.2379,0,0,0,0,100,0),
-(@PATH,4,-2707.291,2149.051,116.3592,0,0,0,0,100,0),
-(@PATH,5,-2707.642,2117.71,117.2379,0,0,0,0,100,0),
-(@PATH,6,-2708.359,2090.884,117.2379,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2708.779,2068.911,117.2379,0,0,0,100,0),
+(@PATH,2,-2708.359,2090.884,117.2379,0,0,0,100,0),
+(@PATH,3,-2707.642,2117.71,117.2379,0,0,0,100,0),
+(@PATH,4,-2707.291,2149.051,116.3592,0,0,0,100,0),
+(@PATH,5,-2707.642,2117.71,117.2379,0,0,0,100,0),
+(@PATH,6,-2708.359,2090.884,117.2379,0,0,0,100,0);
 
 -- Pathing for Shadow Council Felsworn Entry: 21753
 SET @NPC := @CGUID+8;
@@ -350,11 +350,11 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2795.16,`posi
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2795.16,2236.348,93.37387,0,0,0,0,100,0),
-(@PATH,2,-2795.431,2271.447,92.24887,0,0,0,0,100,0),
-(@PATH,3,-2795.16,2236.348,93.37387,0,0,0,0,100,0),
-(@PATH,4,-2794.978,2201.984,93.40082,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2795.16,2236.348,93.37387,0,0,0,100,0),
+(@PATH,2,-2795.431,2271.447,92.24887,0,0,0,100,0),
+(@PATH,3,-2795.16,2236.348,93.37387,0,0,0,100,0),
+(@PATH,4,-2794.978,2201.984,93.40082,0,0,0,100,0);
 
 -- Pathing for Shadow Council Felsworn Entry: 21753
 SET @NPC := @CGUID+9;
@@ -363,11 +363,11 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2747.554,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2747.554,2294.194,92.17666,0,0,0,0,100,0),
-(@PATH,2,-2747.99,2332.008,93.37035,0,0,0,0,100,0),
-(@PATH,3,-2747.863,2364.971,92.44698,0,0,0,0,100,0),
-(@PATH,4,-2746.703,2395.644,92.38509,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2747.554,2294.194,92.17666,0,0,0,100,0),
+(@PATH,2,-2747.99,2332.008,93.37035,0,0,0,100,0),
+(@PATH,3,-2747.863,2364.971,92.44698,0,0,0,100,0),
+(@PATH,4,-2746.703,2395.644,92.38509,0,0,0,100,0);
 
 -- Pathing for Shadow Council Felsworn Entry: 21753
 SET @NPC := @CGUID+10;
@@ -376,11 +376,11 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2761.939,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2761.939,2308.565,93.37035,0,0,0,0,100,0),
-(@PATH,2,-2761.886,2336.399,93.28854,0,0,0,0,100,0),
-(@PATH,3,-2761.948,2369.98,93.34652,0,0,0,0,100,0),
-(@PATH,4,-2762.17,2403.536,93.32586,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2761.939,2308.565,93.37035,0,0,0,100,0),
+(@PATH,2,-2761.886,2336.399,93.28854,0,0,0,100,0),
+(@PATH,3,-2761.948,2369.98,93.34652,0,0,0,100,0),
+(@PATH,4,-2762.17,2403.536,93.32586,0,0,0,100,0);
 
 -- Pathing for Shadow Council Felsworn Entry: 21753
 SET @NPC := @CGUID+11;
@@ -389,11 +389,11 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2761.123,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2761.123,2103.653,117.3472,0,0,0,0,100,0),
-(@PATH,2,-2761.215,2144.157,116.0134,0,0,0,0,100,0),
-(@PATH,3,-2761.123,2103.653,117.3472,0,0,0,0,100,0),
-(@PATH,4,-2762.027,2078.674,116.1458,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2761.123,2103.653,117.3472,0,0,0,100,0),
+(@PATH,2,-2761.215,2144.157,116.0134,0,0,0,100,0),
+(@PATH,3,-2761.123,2103.653,117.3472,0,0,0,100,0),
+(@PATH,4,-2762.027,2078.674,116.1458,0,0,0,100,0);
 
 -- Pathing for Shadow Council Felsworn Entry: 21753
 SET @NPC := @CGUID+12;
@@ -402,11 +402,11 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2777.587,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2777.587,2282.628,92.58359,0,0,0,0,100,0),
-(@PATH,2,-2777.419,2331.222,92.42014,0,0,0,0,100,0),
-(@PATH,3,-2777.186,2363.471,93.32701,0,0,0,0,100,0),
-(@PATH,4,-2777.419,2331.222,92.42014,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2777.587,2282.628,92.58359,0,0,0,100,0),
+(@PATH,2,-2777.419,2331.222,92.42014,0,0,0,100,0),
+(@PATH,3,-2777.186,2363.471,93.32701,0,0,0,100,0),
+(@PATH,4,-2777.419,2331.222,92.42014,0,0,0,100,0);
 
 -- Pathing for Shadow Council Felsworn Entry: 21753
 SET @NPC := @CGUID+13;
@@ -415,13 +415,13 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2762.517,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2762.517,2211.211,93.28703,0,0,0,0,100,0),
-(@PATH,2,-2761.956,2237.105,93.28703,0,0,0,0,100,0),
-(@PATH,3,-2761.867,2270.47,93.30166,0,0,0,0,100,0),
-(@PATH,4,-2762.346,2303.099,93.37035,0,0,0,0,100,0),
-(@PATH,5,-2761.867,2270.47,93.30166,0,0,0,0,100,0),
-(@PATH,6,-2761.956,2237.105,93.28703,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2762.517,2211.211,93.28703,0,0,0,100,0),
+(@PATH,2,-2761.956,2237.105,93.28703,0,0,0,100,0),
+(@PATH,3,-2761.867,2270.47,93.30166,0,0,0,100,0),
+(@PATH,4,-2762.346,2303.099,93.37035,0,0,0,100,0),
+(@PATH,5,-2761.867,2270.47,93.30166,0,0,0,100,0),
+(@PATH,6,-2761.956,2237.105,93.28703,0,0,0,100,0);
 
 -- Pathing for Shadow Council Felsworn Entry: 21753
 SET @NPC := @CGUID+14;
@@ -430,11 +430,11 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2777.572,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2777.572,2279.407,92.54025,0,0,0,0,100,0),
-(@PATH,2,-2777.548,2237.198,92.2955,0,0,0,0,100,0),
-(@PATH,3,-2779.242,2203.625,93.40082,0,0,0,0,100,0),
-(@PATH,4,-2777.548,2237.198,92.2955,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2777.572,2279.407,92.54025,0,0,0,100,0),
+(@PATH,2,-2777.548,2237.198,92.2955,0,0,0,100,0),
+(@PATH,3,-2779.242,2203.625,93.40082,0,0,0,100,0),
+(@PATH,4,-2777.548,2237.198,92.2955,0,0,0,100,0);
 
 -- Pathing for Shadow Council Felsworn Entry: 21753
 SET @NPC := @CGUID+15;
@@ -443,13 +443,13 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2694.64,`posi
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2694.64,2068.898,117.2379,0,0,0,0,100,0),
-(@PATH,2,-2695.301,2033.725,117.3797,0,0,0,0,100,0),
-(@PATH,3,-2694.64,2068.898,117.2379,0,0,0,0,100,0),
-(@PATH,4,-2694.855,2102.532,117.2397,0,0,0,0,100,0),
-(@PATH,5,-2693.58,2129.576,116.6858,0,0,0,0,100,0),
-(@PATH,6,-2694.855,2102.532,117.2397,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2694.64,2068.898,117.2379,0,0,0,100,0),
+(@PATH,2,-2695.301,2033.725,117.3797,0,0,0,100,0),
+(@PATH,3,-2694.64,2068.898,117.2379,0,0,0,100,0),
+(@PATH,4,-2694.855,2102.532,117.2397,0,0,0,100,0),
+(@PATH,5,-2693.58,2129.576,116.6858,0,0,0,100,0),
+(@PATH,6,-2694.855,2102.532,117.2397,0,0,0,100,0);
 
 -- Pathing for Shadow Council Felsworn Entry: 21753
 SET @NPC := @CGUID+16;
@@ -458,13 +458,13 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2679.245,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2679.245,2063.623,116.3816,0,0,0,0,100,0),
-(@PATH,2,-2678.192,2096.006,116.2379,0,0,0,0,100,0),
-(@PATH,3,-2678.287,2122.549,116.7668,0,0,0,0,100,0),
-(@PATH,4,-2678.192,2096.006,116.2379,0,0,0,0,100,0),
-(@PATH,5,-2679.245,2063.623,116.3816,0,0,0,0,100,0),
-(@PATH,6,-2679.909,2035.793,118.7458,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2679.245,2063.623,116.3816,0,0,0,100,0),
+(@PATH,2,-2678.192,2096.006,116.2379,0,0,0,100,0),
+(@PATH,3,-2678.287,2122.549,116.7668,0,0,0,100,0),
+(@PATH,4,-2678.192,2096.006,116.2379,0,0,0,100,0),
+(@PATH,5,-2679.245,2063.623,116.3816,0,0,0,100,0),
+(@PATH,6,-2679.909,2035.793,118.7458,0,0,0,100,0);
 
 -- Pathing for Shadow Council Felsworn Entry: 21753
 SET @NPC := @CGUID+17;
@@ -473,14 +473,14 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2713.678,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2713.678,2469.491,93.22096,0,0,0,0,100,0),
-(@PATH,2,-2712.112,2501.797,93.04128,0,0,0,0,100,0),
-(@PATH,3,-2700.205,2500.273,89.71194,0,0,0,0,100,0),
-(@PATH,4,-2696.189,2493.531,90.74828,0,0,0,0,100,0),
-(@PATH,5,-2698.287,2465.581,93.03493,0,0,0,0,100,0),
-(@PATH,6,-2704.336,2456.793,92.19871,0,0,0,0,100,0),
-(@PATH,7,-2714.398,2451.214,92.19871,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2713.678,2469.491,93.22096,0,0,0,100,0),
+(@PATH,2,-2712.112,2501.797,93.04128,0,0,0,100,0),
+(@PATH,3,-2700.205,2500.273,89.71194,0,0,0,100,0),
+(@PATH,4,-2696.189,2493.531,90.74828,0,0,0,100,0),
+(@PATH,5,-2698.287,2465.581,93.03493,0,0,0,100,0),
+(@PATH,6,-2704.336,2456.793,92.19871,0,0,0,100,0),
+(@PATH,7,-2714.398,2451.214,92.19871,0,0,0,100,0);
 
 -- Pathing for Shadow Council Felsworn Entry: 21753
 SET @NPC := @CGUID+18;
@@ -489,11 +489,11 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2637.056,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2637.056,2518.985,74.54729,0,0,0,0,100,0),
-(@PATH,2,-2637.002,2566.124,74.94743,0,0,0,0,100,0),
-(@PATH,3,-2636.515,2597.017,74.94736,0,0,0,0,100,0),
-(@PATH,4,-2637.002,2566.124,74.94743,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2637.056,2518.985,74.54729,0,0,0,100,0),
+(@PATH,2,-2637.002,2566.124,74.94743,0,0,0,100,0),
+(@PATH,3,-2636.515,2597.017,74.94736,0,0,0,100,0),
+(@PATH,4,-2637.002,2566.124,74.94743,0,0,0,100,0);
 
 -- Pathing for Shadow Council Felsworn Entry: 21753
 SET @NPC := @CGUID+19;
@@ -502,9 +502,9 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2622.359,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2622.359,2651.183,74.192,0,0,0,0,100,0),
-(@PATH,2,-2622.162,2602.941,74.93158,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2622.359,2651.183,74.192,0,0,0,100,0),
+(@PATH,2,-2622.162,2602.941,74.93158,0,0,0,100,0);
 
 -- Pathing for Shadow Council Felsworn Entry: 21753
 SET @NPC := @CGUID+20;
@@ -513,9 +513,9 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2637.046,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2637.046,2601.445,74.94731,0,0,0,0,100,0),
-(@PATH,2,-2636.693,2650.933,74.31893,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2637.046,2601.445,74.94731,0,0,0,100,0),
+(@PATH,2,-2636.693,2650.933,74.31893,0,0,0,100,0);
 
 -- Pathing for Shadow Council Felsworn Entry: 21753
 SET @NPC := @CGUID+21;
@@ -524,9 +524,9 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2652.786,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2652.786,2651.182,74.58089,0,0,0,0,100,0),
-(@PATH,2,-2653.248,2602.359,74.94731,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2652.786,2651.182,74.58089,0,0,0,100,0),
+(@PATH,2,-2653.248,2602.359,74.94731,0,0,0,100,0);
 
 -- Pathing for Shadow Council Felsworn Entry: 21753
 SET @NPC := @CGUID+22;
@@ -535,11 +535,11 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2670.338,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2670.338,2594.025,74.94743,0,0,0,0,100,0),
-(@PATH,2,-2670.897,2566.762,74.32243,0,0,0,0,100,0),
-(@PATH,3,-2669.479,2527.44,74.49906,0,0,0,0,100,0),
-(@PATH,4,-2670.897,2566.762,74.32243,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2670.338,2594.025,74.94743,0,0,0,100,0),
+(@PATH,2,-2670.897,2566.762,74.32243,0,0,0,100,0),
+(@PATH,3,-2669.479,2527.44,74.49906,0,0,0,100,0),
+(@PATH,4,-2670.897,2566.762,74.32243,0,0,0,100,0);
 
 -- Pathing for Shadow Council Felsworn Entry: 21753
 SET @NPC := @CGUID+23;
@@ -548,13 +548,13 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2745.622,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2745.622,2429.984,92.47161,0,0,0,0,100,0),
-(@PATH,2,-2745.583,2469.102,93.40414,0,0,0,0,100,0),
-(@PATH,3,-2745.991,2494.831,93.28452,0,0,0,0,100,0),
-(@PATH,4,-2745.583,2469.102,93.40414,0,0,0,0,100,0),
-(@PATH,5,-2745.658,2430.102,92.20086,0,0,0,0,100,0),
-(@PATH,6,-2745.909,2396.996,92.29305,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2745.622,2429.984,92.47161,0,0,0,100,0),
+(@PATH,2,-2745.583,2469.102,93.40414,0,0,0,100,0),
+(@PATH,3,-2745.991,2494.831,93.28452,0,0,0,100,0),
+(@PATH,4,-2745.583,2469.102,93.40414,0,0,0,100,0),
+(@PATH,5,-2745.658,2430.102,92.20086,0,0,0,100,0),
+(@PATH,6,-2745.909,2396.996,92.29305,0,0,0,100,0);
 
 -- Pathing for Shadow Council Felsworn Entry: 21753
 SET @NPC := @CGUID+24;
@@ -563,11 +563,11 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2652.775,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2652.775,2561.478,74.32243,0,0,0,0,100,0),
-(@PATH,2,-2652.384,2595.102,74.94736,0,0,0,0,100,0),
-(@PATH,3,-2652.775,2561.478,74.32243,0,0,0,0,100,0),
-(@PATH,4,-2652.475,2520.3,74.67888,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2652.775,2561.478,74.32243,0,0,0,100,0),
+(@PATH,2,-2652.384,2595.102,74.94736,0,0,0,100,0),
+(@PATH,3,-2652.775,2561.478,74.32243,0,0,0,100,0),
+(@PATH,4,-2652.475,2520.3,74.67888,0,0,0,100,0);
 
 -- Pathing for Shadow Council Felsworn Entry: 21753
 SET @NPC := @CGUID+25;
@@ -576,9 +576,9 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2623.394,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2623.394,2536.816,74.73218,0,0,0,0,100,0),
-(@PATH,2,-2622.707,2583.397,74.72375,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2623.394,2536.816,74.73218,0,0,0,100,0),
+(@PATH,2,-2622.707,2583.397,74.72375,0,0,0,100,0);
 
 -- Pathing for Shadow Council Felsworn Entry: 21753
 SET @NPC := @CGUID+26;
@@ -587,11 +587,11 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2762.018,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2762.018,2436.756,93.38111,0,0,0,0,100,0),
-(@PATH,2,-2761.198,2485.882,92.27914,0,0,0,0,100,0),
-(@PATH,3,-2762.018,2436.756,93.38111,0,0,0,0,100,0),
-(@PATH,4,-2763.022,2404.462,93.32586,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2762.018,2436.756,93.38111,0,0,0,100,0),
+(@PATH,2,-2761.198,2485.882,92.27914,0,0,0,100,0),
+(@PATH,3,-2762.018,2436.756,93.38111,0,0,0,100,0),
+(@PATH,4,-2763.022,2404.462,93.32586,0,0,0,100,0);
 
 -- Pathing for Shadow Council Felsworn Entry: 21753
 SET @NPC := @CGUID+27;
@@ -600,13 +600,13 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2776.525,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2776.525,2401.978,93.37827,0,0,0,0,100,0),
-(@PATH,2,-2775.851,2435.901,92.59995,0,0,0,0,100,0),
-(@PATH,3,-2776.1,2474.675,93.34993,0,0,0,0,100,0),
-(@PATH,4,-2775.851,2435.901,92.59995,0,0,0,0,100,0),
-(@PATH,5,-2776.525,2401.978,93.37827,0,0,0,0,100,0),
-(@PATH,6,-2776.522,2368.578,92.58315,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2776.525,2401.978,93.37827,0,0,0,100,0),
+(@PATH,2,-2775.851,2435.901,92.59995,0,0,0,100,0),
+(@PATH,3,-2776.1,2474.675,93.34993,0,0,0,100,0),
+(@PATH,4,-2775.851,2435.901,92.59995,0,0,0,100,0),
+(@PATH,5,-2776.525,2401.978,93.37827,0,0,0,100,0),
+(@PATH,6,-2776.522,2368.578,92.58315,0,0,0,100,0);
 
 -- Pathing for Shadow Council Felsworn Entry: 21753
 SET @NPC := @CGUID+28;
@@ -615,11 +615,11 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2729.753,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2729.753,2466.869,93.32631,0,0,0,0,100,0),
-(@PATH,2,-2729.548,2504.533,93.33694,0,0,0,0,100,0),
-(@PATH,3,-2729.753,2466.869,93.32631,0,0,0,0,100,0),
-(@PATH,4,-2730.019,2426.732,92.59812,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2729.753,2466.869,93.32631,0,0,0,100,0),
+(@PATH,2,-2729.548,2504.533,93.33694,0,0,0,100,0),
+(@PATH,3,-2729.753,2466.869,93.32631,0,0,0,100,0),
+(@PATH,4,-2730.019,2426.732,92.59812,0,0,0,100,0);
 
 -- Pathing for Shadow Council Felsworn Entry: 21753
 SET @NPC := @CGUID+29;
@@ -628,11 +628,11 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2670.016,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2670.016,2634.249,74.96772,0,0,0,0,100,0),
-(@PATH,2,-2670.114,2652.084,74.96772,0,0,0,0,100,0),
-(@PATH,3,-2670.016,2634.249,74.96772,0,0,0,0,100,0),
-(@PATH,4,-2669.654,2599.65,74.94743,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2670.016,2634.249,74.96772,0,0,0,100,0),
+(@PATH,2,-2670.114,2652.084,74.96772,0,0,0,100,0),
+(@PATH,3,-2670.016,2634.249,74.96772,0,0,0,100,0),
+(@PATH,4,-2669.654,2599.65,74.94743,0,0,0,100,0);
 
 -- Pathing for Shadow Council Felsworn Entry: 21753
 SET @NPC := @CGUID+30;
@@ -641,11 +641,11 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2683.622,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2683.622,2557.177,74.94743,0,0,0,0,100,0),
-(@PATH,2,-2683.448,2597.54,74.94743,0,0,0,0,100,0),
-(@PATH,3,-2683.622,2557.177,74.94743,0,0,0,0,100,0),
-(@PATH,4,-2683.835,2535.185,74.44743,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2683.622,2557.177,74.94743,0,0,0,100,0),
+(@PATH,2,-2683.448,2597.54,74.94743,0,0,0,100,0),
+(@PATH,3,-2683.622,2557.177,74.94743,0,0,0,100,0),
+(@PATH,4,-2683.835,2535.185,74.44743,0,0,0,100,0);
 
 -- Pathing for Shadow Council Felsworn Entry: 21753
 SET @NPC := @CGUID+31;
@@ -654,9 +654,9 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2685.01,`posi
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2685.01,2651.311,74.65302,0,0,0,0,100,0),
-(@PATH,2,-2683.696,2602.2,74.97202,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2685.01,2651.311,74.65302,0,0,0,100,0),
+(@PATH,2,-2683.696,2602.2,74.97202,0,0,0,100,0);
 
 -- Pathing for Shadow Council Felsworn Entry: 21753
 SET @NPC := @CGUID+32;
@@ -665,13 +665,13 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2745.845,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2745.845,2098.965,117.2918,0,0,0,0,100,0),
-(@PATH,2,-2745.236,2141.679,116.4493,0,0,0,0,100,0),
-(@PATH,3,-2745.845,2098.965,117.2918,0,0,0,0,100,0),
-(@PATH,4,-2744.838,2064.231,116.8859,0,0,0,0,100,0),
-(@PATH,5,-2745.277,2032.015,116.2408,0,0,0,0,100,0),
-(@PATH,6,-2744.838,2064.231,116.8859,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2745.845,2098.965,117.2918,0,0,0,100,0),
+(@PATH,2,-2745.236,2141.679,116.4493,0,0,0,100,0),
+(@PATH,3,-2745.845,2098.965,117.2918,0,0,0,100,0),
+(@PATH,4,-2744.838,2064.231,116.8859,0,0,0,100,0),
+(@PATH,5,-2745.277,2032.015,116.2408,0,0,0,100,0),
+(@PATH,6,-2744.838,2064.231,116.8859,0,0,0,100,0);
 
 -- Pathing for Shadow Council Felsworn Entry: 21753
 SET @NPC := @CGUID+33;
@@ -680,13 +680,13 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2728.972,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2728.972,2067.545,117.2379,0,0,0,0,100,0),
-(@PATH,2,-2728.488,2101.93,117.2379,0,0,0,0,100,0),
-(@PATH,3,-2728.951,2136.013,117.3078,0,0,0,0,100,0),
-(@PATH,4,-2728.488,2101.93,117.2379,0,0,0,0,100,0),
-(@PATH,5,-2728.972,2067.545,117.2379,0,0,0,0,100,0),
-(@PATH,6,-2729.725,2034.252,117.2379,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2728.972,2067.545,117.2379,0,0,0,100,0),
+(@PATH,2,-2728.488,2101.93,117.2379,0,0,0,100,0),
+(@PATH,3,-2728.951,2136.013,117.3078,0,0,0,100,0),
+(@PATH,4,-2728.488,2101.93,117.2379,0,0,0,100,0),
+(@PATH,5,-2728.972,2067.545,117.2379,0,0,0,100,0),
+(@PATH,6,-2729.725,2034.252,117.2379,0,0,0,100,0);
 
 -- Pathing for Shadow Council Felsworn Entry: 21753
 SET @NPC := @CGUID+34;
@@ -695,13 +695,13 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2711.632,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2711.632,2102.142,117.2379,0,0,0,0,100,0),
-(@PATH,2,-2711.521,2139.267,117.3078,0,0,0,0,100,0),
-(@PATH,3,-2711.632,2102.142,117.2379,0,0,0,0,100,0),
-(@PATH,4,-2712.39,2068.484,117.2379,0,0,0,0,100,0),
-(@PATH,5,-2711.994,2039.217,117.1129,0,0,0,0,100,0),
-(@PATH,6,-2712.39,2068.484,117.2379,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2711.632,2102.142,117.2379,0,0,0,100,0),
+(@PATH,2,-2711.521,2139.267,117.3078,0,0,0,100,0),
+(@PATH,3,-2711.632,2102.142,117.2379,0,0,0,100,0),
+(@PATH,4,-2712.39,2068.484,117.2379,0,0,0,100,0),
+(@PATH,5,-2711.994,2039.217,117.1129,0,0,0,100,0),
+(@PATH,6,-2712.39,2068.484,117.2379,0,0,0,100,0);
 
 -- Pathing for Shadow Council Zealot Entry: 21754
 SET @NPC := @CGUID+35;
@@ -710,11 +710,11 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2785.22,`posi
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2785.22,2256.417,93.37387,0,0,0,0,100,0),
-(@PATH,2,-2784.655,2291.455,92.24887,0,0,0,0,100,0),
-(@PATH,3,-2785.22,2256.417,93.37387,0,0,0,0,100,0),
-(@PATH,4,-2785.702,2208.109,93.27582,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2785.22,2256.417,93.37387,0,0,0,100,0),
+(@PATH,2,-2784.655,2291.455,92.24887,0,0,0,100,0),
+(@PATH,3,-2785.22,2256.417,93.37387,0,0,0,100,0),
+(@PATH,4,-2785.702,2208.109,93.27582,0,0,0,100,0);
 
 -- Pathing for Shadow Council Zealot Entry: 21754
 SET @NPC := @CGUID+36;
@@ -723,11 +723,11 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2804.135,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2804.135,2236.564,92.51945,0,0,0,0,100,0),
-(@PATH,2,-2805.031,2198.412,93.28703,0,0,0,0,100,0),
-(@PATH,3,-2804.135,2236.564,92.51945,0,0,0,0,100,0),
-(@PATH,4,-2802.395,2272.887,93.38139,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2804.135,2236.564,92.51945,0,0,0,100,0),
+(@PATH,2,-2805.031,2198.412,93.28703,0,0,0,100,0),
+(@PATH,3,-2804.135,2236.564,92.51945,0,0,0,100,0),
+(@PATH,4,-2802.395,2272.887,93.38139,0,0,0,100,0);
 
 -- Pathing for Shadow Council Zealot Entry: 21754
 SET @NPC := @CGUID+37;
@@ -736,10 +736,10 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2785.103,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2785.103,2378.464,92.28701,0,0,0,0,100,0),
-(@PATH,2,-2785.072,2315.19,92.25803,0,0,0,0,100,0),
-(@PATH,3,-2785.525,2346.845,92.21165,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2785.103,2378.464,92.28701,0,0,0,100,0),
+(@PATH,2,-2785.072,2315.19,92.25803,0,0,0,100,0),
+(@PATH,3,-2785.525,2346.845,92.21165,0,0,0,100,0);
 
 -- Pathing for Shadow Council Zealot Entry: 21754
 SET @NPC := @CGUID+38;
@@ -748,9 +748,9 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2785.131,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2785.131,2471.353,92.22493,0,0,0,0,100,0),
-(@PATH,2,-2784.354,2422.32,92.56406,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2785.131,2471.353,92.22493,0,0,0,100,0),
+(@PATH,2,-2784.354,2422.32,92.56406,0,0,0,100,0);
 
 -- Pathing for Shadow Council Zealot Entry: 21754
 SET @NPC := @CGUID+39;
@@ -759,13 +759,13 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2756.622,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2756.622,2229.722,92.28703,0,0,0,0,100,0),
-(@PATH,2,-2755.861,2208.263,93.28703,0,0,0,0,100,0),
-(@PATH,3,-2756.622,2229.722,92.28703,0,0,0,0,100,0),
-(@PATH,4,-2757.308,2264.421,93.28703,0,0,0,0,100,0),
-(@PATH,5,-2757.039,2298.67,93.30166,0,0,0,0,100,0),
-(@PATH,6,-2757.308,2264.421,93.28703,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2756.622,2229.722,92.28703,0,0,0,100,0),
+(@PATH,2,-2755.861,2208.263,93.28703,0,0,0,100,0),
+(@PATH,3,-2756.622,2229.722,92.28703,0,0,0,100,0),
+(@PATH,4,-2757.308,2264.421,93.28703,0,0,0,100,0),
+(@PATH,5,-2757.039,2298.67,93.30166,0,0,0,100,0),
+(@PATH,6,-2757.308,2264.421,93.28703,0,0,0,100,0);
 
 -- Pathing for Shadow Council Zealot Entry: 21754
 SET @NPC := @CGUID+40;
@@ -774,13 +774,13 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2771.052,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2771.052,2268.596,93.37387,0,0,0,0,100,0),
-(@PATH,2,-2771.679,2235.563,93.37387,0,0,0,0,100,0),
-(@PATH,3,-2771.962,2202.936,93.40082,0,0,0,0,100,0),
-(@PATH,4,-2771.679,2235.563,93.37387,0,0,0,0,100,0),
-(@PATH,5,-2771.052,2268.596,93.37387,0,0,0,0,100,0),
-(@PATH,6,-2770.619,2295.07,93.37387,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2771.052,2268.596,93.37387,0,0,0,100,0),
+(@PATH,2,-2771.679,2235.563,93.37387,0,0,0,100,0),
+(@PATH,3,-2771.962,2202.936,93.40082,0,0,0,100,0),
+(@PATH,4,-2771.679,2235.563,93.37387,0,0,0,100,0),
+(@PATH,5,-2771.052,2268.596,93.37387,0,0,0,100,0),
+(@PATH,6,-2770.619,2295.07,93.37387,0,0,0,100,0);
 
 -- Pathing for Shadow Council Zealot Entry: 21754
 SET @NPC := @CGUID+41;
@@ -789,13 +789,13 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2753.945,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2753.945,2102.062,117.3472,0,0,0,0,100,0),
-(@PATH,2,-2753.002,2067.915,116.1668,0,0,0,0,100,0),
-(@PATH,3,-2753.865,2033.915,116.2114,0,0,0,0,100,0),
-(@PATH,4,-2753.002,2067.915,116.1668,0,0,0,0,100,0),
-(@PATH,5,-2753.945,2102.062,117.3472,0,0,0,0,100,0),
-(@PATH,6,-2753.775,2145.034,116.2692,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2753.945,2102.062,117.3472,0,0,0,100,0),
+(@PATH,2,-2753.002,2067.915,116.1668,0,0,0,100,0),
+(@PATH,3,-2753.865,2033.915,116.2114,0,0,0,100,0),
+(@PATH,4,-2753.002,2067.915,116.1668,0,0,0,100,0),
+(@PATH,5,-2753.945,2102.062,117.3472,0,0,0,100,0),
+(@PATH,6,-2753.775,2145.034,116.2692,0,0,0,100,0);
 
 -- Pathing for Shadow Council Zealot Entry: 21754
 SET @NPC := @CGUID+42;
@@ -804,13 +804,13 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2704.264,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2704.264,2136.729,117.3078,0,0,0,0,100,0),
-(@PATH,2,-2704.649,2103.023,117.2379,0,0,0,0,100,0),
-(@PATH,3,-2705.716,2065.331,117.2379,0,0,0,0,100,0),
-(@PATH,4,-2705.87,2035.906,117.2379,0,0,0,0,100,0),
-(@PATH,5,-2705.716,2065.331,117.2379,0,0,0,0,100,0),
-(@PATH,6,-2704.649,2103.023,117.2379,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2704.264,2136.729,117.3078,0,0,0,100,0),
+(@PATH,2,-2704.649,2103.023,117.2379,0,0,0,100,0),
+(@PATH,3,-2705.716,2065.331,117.2379,0,0,0,100,0),
+(@PATH,4,-2705.87,2035.906,117.2379,0,0,0,100,0),
+(@PATH,5,-2705.716,2065.331,117.2379,0,0,0,100,0),
+(@PATH,6,-2704.649,2103.023,117.2379,0,0,0,100,0);
 
 -- Pathing for Shadow Council Zealot Entry: 21754
 SET @NPC := @CGUID+43;
@@ -819,13 +819,13 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2722.125,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2722.125,2069.174,117.2379,0,0,0,0,100,0),
-(@PATH,2,-2722.249,2034.047,117.2379,0,0,0,0,100,0),
-(@PATH,3,-2722.125,2069.174,117.2379,0,0,0,0,100,0),
-(@PATH,4,-2720.923,2115.775,117.2379,0,0,0,0,100,0),
-(@PATH,5,-2720.486,2142.357,116.9133,0,0,0,0,100,0),
-(@PATH,6,-2720.923,2115.775,117.2379,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2722.125,2069.174,117.2379,0,0,0,100,0),
+(@PATH,2,-2722.249,2034.047,117.2379,0,0,0,100,0),
+(@PATH,3,-2722.125,2069.174,117.2379,0,0,0,100,0),
+(@PATH,4,-2720.923,2115.775,117.2379,0,0,0,100,0),
+(@PATH,5,-2720.486,2142.357,116.9133,0,0,0,100,0),
+(@PATH,6,-2720.923,2115.775,117.2379,0,0,0,100,0);
 
 -- Pathing for Shadow Council Zealot Entry: 21754
 SET @NPC := @CGUID+44;
@@ -834,13 +834,13 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2690.13,`posi
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2690.13,2064.948,117.2378,0,0,0,0,100,0),
-(@PATH,2,-2689.416,2099.356,116.8526,0,0,0,0,100,0),
-(@PATH,3,-2688.399,2132.129,116.1147,0,0,0,0,100,0),
-(@PATH,4,-2689.416,2099.356,116.8526,0,0,0,0,100,0),
-(@PATH,5,-2690.13,2064.948,117.2378,0,0,0,0,100,0),
-(@PATH,6,-2690.084,2035.869,117.6316,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2690.13,2064.948,117.2378,0,0,0,100,0),
+(@PATH,2,-2689.416,2099.356,116.8526,0,0,0,100,0),
+(@PATH,3,-2688.399,2132.129,116.1147,0,0,0,100,0),
+(@PATH,4,-2689.416,2099.356,116.8526,0,0,0,100,0),
+(@PATH,5,-2690.13,2064.948,117.2378,0,0,0,100,0),
+(@PATH,6,-2690.084,2035.869,117.6316,0,0,0,100,0);
 
 -- Pathing for Shadow Council Zealot Entry: 21754
 SET @NPC := @CGUID+45;
@@ -849,13 +849,13 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2737.035,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2737.035,2498.918,93.40414,0,0,0,0,100,0),
-(@PATH,2,-2737.381,2465.538,93.38111,0,0,0,0,100,0),
-(@PATH,3,-2737.459,2428.079,92.20086,0,0,0,0,100,0),
-(@PATH,4,-2737.381,2465.538,93.38111,0,0,0,0,100,0),
-(@PATH,5,-2737.035,2498.918,93.40414,0,0,0,0,100,0),
-(@PATH,6,-2736.389,2511.215,93.38651,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2737.035,2498.918,93.40414,0,0,0,100,0),
+(@PATH,2,-2737.381,2465.538,93.38111,0,0,0,100,0),
+(@PATH,3,-2737.459,2428.079,92.20086,0,0,0,100,0),
+(@PATH,4,-2737.381,2465.538,93.38111,0,0,0,100,0),
+(@PATH,5,-2737.035,2498.918,93.40414,0,0,0,100,0),
+(@PATH,6,-2736.389,2511.215,93.38651,0,0,0,100,0);
 
 -- Pathing for Shadow Council Zealot Entry: 21754
 SET @NPC := @CGUID+46;
@@ -864,15 +864,15 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2628.166,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2628.166,2652.95,74.27159,0,0,0,0,100,0),
-(@PATH,2,-2627.974,2631.489,74.93158,0,0,0,0,100,0),
-(@PATH,3,-2629.114,2598.675,75.01111,0,0,0,0,100,0),
-(@PATH,4,-2628.789,2564.261,74.94849,0,0,0,0,100,0),
-(@PATH,5,-2629.153,2518.347,74.27462,0,0,0,0,100,0),
-(@PATH,6,-2628.789,2564.261,74.94849,0,0,0,0,100,0),
-(@PATH,7,-2629.114,2598.675,75.01111,0,0,0,0,100,0),
-(@PATH,8,-2627.974,2631.489,74.93158,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2628.166,2652.95,74.27159,0,0,0,100,0),
+(@PATH,2,-2627.974,2631.489,74.93158,0,0,0,100,0),
+(@PATH,3,-2629.114,2598.675,75.01111,0,0,0,100,0),
+(@PATH,4,-2628.789,2564.261,74.94849,0,0,0,100,0),
+(@PATH,5,-2629.153,2518.347,74.27462,0,0,0,100,0),
+(@PATH,6,-2628.789,2564.261,74.94849,0,0,0,100,0),
+(@PATH,7,-2629.114,2598.675,75.01111,0,0,0,100,0),
+(@PATH,8,-2627.974,2631.489,74.93158,0,0,0,100,0);
 
 -- Pathing for Shadow Council Zealot Entry: 21754
 SET @NPC := @CGUID+47;
@@ -881,11 +881,11 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2770.884,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2770.884,2403.361,93.37827,0,0,0,0,100,0),
-(@PATH,2,-2769.982,2437.895,93.39854,0,0,0,0,100,0),
-(@PATH,3,-2769.842,2482.756,93.34993,0,0,0,0,100,0),
-(@PATH,4,-2769.982,2437.895,93.39854,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2770.884,2403.361,93.37827,0,0,0,100,0),
+(@PATH,2,-2769.982,2437.895,93.39854,0,0,0,100,0),
+(@PATH,3,-2769.842,2482.756,93.34993,0,0,0,100,0),
+(@PATH,4,-2769.982,2437.895,93.39854,0,0,0,100,0);
 
 -- Pathing for Shadow Council Zealot Entry: 21754
 SET @NPC := @CGUID+48;
@@ -894,13 +894,13 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2754.18,`posi
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2754.18,2431.333,93.32586,0,0,0,0,100,0),
-(@PATH,2,-2755.019,2403.688,93.32586,0,0,0,0,100,0),
-(@PATH,3,-2754.18,2431.333,93.32586,0,0,0,0,100,0),
-(@PATH,4,-2753.878,2462.278,93.38111,0,0,0,0,100,0),
-(@PATH,5,-2754.642,2486.674,92.27914,0,0,0,0,100,0),
-(@PATH,6,-2753.878,2462.278,93.38111,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2754.18,2431.333,93.32586,0,0,0,100,0),
+(@PATH,2,-2755.019,2403.688,93.32586,0,0,0,100,0),
+(@PATH,3,-2754.18,2431.333,93.32586,0,0,0,100,0),
+(@PATH,4,-2753.878,2462.278,93.38111,0,0,0,100,0),
+(@PATH,5,-2754.642,2486.674,92.27914,0,0,0,100,0),
+(@PATH,6,-2753.878,2462.278,93.38111,0,0,0,100,0);
 
 -- Pathing for Shadow Council Zealot Entry: 21754
 SET @NPC := @CGUID+49;
@@ -909,11 +909,11 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2720.884,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2720.884,2469.591,93.32631,0,0,0,0,100,0),
-(@PATH,2,-2720.662,2513.249,92.96389,0,0,0,0,100,0),
-(@PATH,3,-2720.884,2469.591,93.32631,0,0,0,0,100,0),
-(@PATH,4,-2720.884,2434.87,92.5084,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2720.884,2469.591,93.32631,0,0,0,100,0),
+(@PATH,2,-2720.662,2513.249,92.96389,0,0,0,100,0),
+(@PATH,3,-2720.884,2469.591,93.32631,0,0,0,100,0),
+(@PATH,4,-2720.884,2434.87,92.5084,0,0,0,100,0);
 
 -- Pathing for Shadow Council Zealot Entry: 21754
 SET @NPC := @CGUID+50;
@@ -922,13 +922,13 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2756.388,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2756.388,2332.109,92.19946,0,0,0,0,100,0),
-(@PATH,2,-2756.482,2301.443,93.37035,0,0,0,0,100,0),
-(@PATH,3,-2756.388,2332.109,92.19946,0,0,0,0,100,0),
-(@PATH,4,-2756.648,2365.67,93.31051,0,0,0,0,100,0),
-(@PATH,5,-2755.329,2399.249,93.34652,0,0,0,0,100,0),
-(@PATH,6,-2756.648,2365.67,93.31051,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2756.388,2332.109,92.19946,0,0,0,100,0),
+(@PATH,2,-2756.482,2301.443,93.37035,0,0,0,100,0),
+(@PATH,3,-2756.388,2332.109,92.19946,0,0,0,100,0),
+(@PATH,4,-2756.648,2365.67,93.31051,0,0,0,100,0),
+(@PATH,5,-2755.329,2399.249,93.34652,0,0,0,100,0),
+(@PATH,6,-2756.648,2365.67,93.31051,0,0,0,100,0);
 
 -- Pathing for Shadow Council Zealot Entry: 21754
 SET @NPC := @CGUID+51;
@@ -937,13 +937,13 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2771.347,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2771.347,2336.068,93.06529,0,0,0,0,100,0),
-(@PATH,2,-2769.864,2369.139,93.17776,0,0,0,0,100,0),
-(@PATH,3,-2770.086,2395.213,93.28701,0,0,0,0,100,0),
-(@PATH,4,-2769.864,2369.139,93.17776,0,0,0,0,100,0),
-(@PATH,5,-2771.347,2336.068,93.06529,0,0,0,0,100,0),
-(@PATH,6,-2770.781,2301.665,93.38303,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2771.347,2336.068,93.06529,0,0,0,100,0),
+(@PATH,2,-2769.864,2369.139,93.17776,0,0,0,100,0),
+(@PATH,3,-2770.086,2395.213,93.28701,0,0,0,100,0),
+(@PATH,4,-2769.864,2369.139,93.17776,0,0,0,100,0),
+(@PATH,5,-2771.347,2336.068,93.06529,0,0,0,100,0),
+(@PATH,6,-2770.781,2301.665,93.38303,0,0,0,100,0);
 
 -- Pathing for Shadow Council Zealot Entry: 21754
 SET @NPC := @CGUID+52;
@@ -952,15 +952,15 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2661.922,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2661.922,2565.167,74.94743,0,0,0,0,100,0),
-(@PATH,2,-2662.236,2526.605,74.94743,0,0,0,0,100,0),
-(@PATH,3,-2661.922,2565.167,74.94743,0,0,0,0,100,0),
-(@PATH,4,-2661.766,2598.691,74.94736,0,0,0,0,100,0),
-(@PATH,5,-2661.454,2632.066,74.94731,0,0,0,0,100,0),
-(@PATH,6,-2661.921,2652.52,74.94393,0,0,0,0,100,0),
-(@PATH,7,-2661.454,2632.066,74.94731,0,0,0,0,100,0),
-(@PATH,8,-2661.766,2598.691,74.94736,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2661.922,2565.167,74.94743,0,0,0,100,0),
+(@PATH,2,-2662.236,2526.605,74.94743,0,0,0,100,0),
+(@PATH,3,-2661.922,2565.167,74.94743,0,0,0,100,0),
+(@PATH,4,-2661.766,2598.691,74.94736,0,0,0,100,0),
+(@PATH,5,-2661.454,2632.066,74.94731,0,0,0,100,0),
+(@PATH,6,-2661.921,2652.52,74.94393,0,0,0,100,0),
+(@PATH,7,-2661.454,2632.066,74.94731,0,0,0,100,0),
+(@PATH,8,-2661.766,2598.691,74.94736,0,0,0,100,0);
 
 -- Pathing for Shadow Council Zealot Entry: 21754
 SET @NPC := @CGUID+53;
@@ -969,15 +969,15 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2676.634,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2676.634,2630.928,74.71323,0,0,0,0,100,0),
-(@PATH,2,-2676.133,2597.521,74.94743,0,0,0,0,100,0),
-(@PATH,3,-2675.693,2564.413,74.84319,0,0,0,0,100,0),
-(@PATH,4,-2676.745,2531.281,74.96903,0,0,0,0,100,0),
-(@PATH,5,-2675.693,2564.413,74.84319,0,0,0,0,100,0),
-(@PATH,6,-2676.133,2597.521,74.94743,0,0,0,0,100,0),
-(@PATH,7,-2676.634,2630.928,74.71323,0,0,0,0,100,0),
-(@PATH,8,-2677.356,2651.749,74.96772,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2676.634,2630.928,74.71323,0,0,0,100,0),
+(@PATH,2,-2676.133,2597.521,74.94743,0,0,0,100,0),
+(@PATH,3,-2675.693,2564.413,74.84319,0,0,0,100,0),
+(@PATH,4,-2676.745,2531.281,74.96903,0,0,0,100,0),
+(@PATH,5,-2675.693,2564.413,74.84319,0,0,0,100,0),
+(@PATH,6,-2676.133,2597.521,74.94743,0,0,0,100,0),
+(@PATH,7,-2676.634,2630.928,74.71323,0,0,0,100,0),
+(@PATH,8,-2677.356,2651.749,74.96772,0,0,0,100,0);
 
 -- Pathing for Shadow Council Zealot Entry: 21754
 SET @NPC := @CGUID+54;
@@ -986,17 +986,17 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2645.054,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2645.054,2653.658,74.94393,0,0,0,0,100,0),
-(@PATH,2,-2644.895,2632.497,74.94731,0,0,0,0,100,0),
-(@PATH,3,-2645.055,2597.804,74.94736,0,0,0,0,100,0),
-(@PATH,4,-2644.371,2564.333,74.36674,0,0,0,0,100,0),
-(@PATH,5,-2644.736,2531.433,74.94743,0,0,0,0,100,0),
-(@PATH,6,-2645.176,2513.085,74.32243,0,0,0,0,100,0),
-(@PATH,7,-2644.736,2531.433,74.94743,0,0,0,0,100,0),
-(@PATH,8,-2644.371,2564.333,74.36674,0,0,0,0,100,0),
-(@PATH,9,-2645.055,2597.804,74.94736,0,0,0,0,100,0),
-(@PATH,10,-2644.895,2632.497,74.94731,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2645.054,2653.658,74.94393,0,0,0,100,0),
+(@PATH,2,-2644.895,2632.497,74.94731,0,0,0,100,0),
+(@PATH,3,-2645.055,2597.804,74.94736,0,0,0,100,0),
+(@PATH,4,-2644.371,2564.333,74.36674,0,0,0,100,0),
+(@PATH,5,-2644.736,2531.433,74.94743,0,0,0,100,0),
+(@PATH,6,-2645.176,2513.085,74.32243,0,0,0,100,0),
+(@PATH,7,-2644.736,2531.433,74.94743,0,0,0,100,0),
+(@PATH,8,-2644.371,2564.333,74.36674,0,0,0,100,0),
+(@PATH,9,-2645.055,2597.804,74.94736,0,0,0,100,0),
+(@PATH,10,-2644.895,2632.497,74.94731,0,0,0,100,0);
 
 -- Pathing for Shadow Council Zealot Entry: 21754
 SET @NPC := @CGUID+55;
@@ -1005,15 +1005,15 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2738.647,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2738.647,2029.915,117.2366,0,0,0,0,100,0),
-(@PATH,2,-2738.477,2065.157,117.3364,0,0,0,0,100,0),
-(@PATH,3,-2737.82,2098.544,117.2918,0,0,0,0,100,0),
-(@PATH,4,-2737.512,2131.9,117.3472,0,0,0,0,100,0),
-(@PATH,5,-2737.184,2145.899,115.8942,0,0,0,0,100,0),
-(@PATH,6,-2737.512,2131.9,117.3472,0,0,0,0,100,0),
-(@PATH,7,-2737.82,2098.544,117.2918,0,0,0,0,100,0),
-(@PATH,8,-2738.477,2065.157,117.3364,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2738.647,2029.915,117.2366,0,0,0,100,0),
+(@PATH,2,-2738.477,2065.157,117.3364,0,0,0,100,0),
+(@PATH,3,-2737.82,2098.544,117.2918,0,0,0,100,0),
+(@PATH,4,-2737.512,2131.9,117.3472,0,0,0,100,0),
+(@PATH,5,-2737.184,2145.899,115.8942,0,0,0,100,0),
+(@PATH,6,-2737.512,2131.9,117.3472,0,0,0,100,0),
+(@PATH,7,-2737.82,2098.544,117.2918,0,0,0,100,0),
+(@PATH,8,-2738.477,2065.157,117.3364,0,0,0,100,0);
 
 -- Pathing for Wildhammer Guard Entry: 19353
 SET @NPC := @CGUID+62;
@@ -1022,21 +1022,21 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2738.818,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2738.818,1952.552,153.4082,0,0,0,0,100,0),
-(@PATH,2,-2724.426,1951.31,147.3684,0,0,0,0,100,0),
-(@PATH,3,-2711.517,1951.894,144.3868,0,0,0,0,100,0),
-(@PATH,4,-2701.61,1953.292,143.8939,0,0,0,0,100,0),
-(@PATH,5,-2711.517,1951.894,144.3868,0,0,0,0,100,0),
-(@PATH,6,-2724.426,1951.31,147.3684,0,0,0,0,100,0),
-(@PATH,7,-2738.818,1952.552,153.4082,0,0,0,0,100,0),
-(@PATH,8,-2752.306,1951.067,160.1505,0,0,0,0,100,0),
-(@PATH,9,-2763.156,1949.187,166.0191,0,0,0,0,100,0),
-(@PATH,10,-2771.908,1945.806,172.0308,0,0,0,0,100,0),
-(@PATH,11,-2778.184,1942.703,177.1924,0,0,0,0,100,0),
-(@PATH,12,-2771.908,1945.806,172.0308,0,0,0,0,100,0),
-(@PATH,13,-2763.26,1949.171,166.2084,0,0,0,0,100,0),
-(@PATH,14,-2752.41,1951.051,160.2691,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2738.818,1952.552,153.4082,0,0,0,100,0),
+(@PATH,2,-2724.426,1951.31,147.3684,0,0,0,100,0),
+(@PATH,3,-2711.517,1951.894,144.3868,0,0,0,100,0),
+(@PATH,4,-2701.61,1953.292,143.8939,0,0,0,100,0),
+(@PATH,5,-2711.517,1951.894,144.3868,0,0,0,100,0),
+(@PATH,6,-2724.426,1951.31,147.3684,0,0,0,100,0),
+(@PATH,7,-2738.818,1952.552,153.4082,0,0,0,100,0),
+(@PATH,8,-2752.306,1951.067,160.1505,0,0,0,100,0),
+(@PATH,9,-2763.156,1949.187,166.0191,0,0,0,100,0),
+(@PATH,10,-2771.908,1945.806,172.0308,0,0,0,100,0),
+(@PATH,11,-2778.184,1942.703,177.1924,0,0,0,100,0),
+(@PATH,12,-2771.908,1945.806,172.0308,0,0,0,100,0),
+(@PATH,13,-2763.26,1949.171,166.2084,0,0,0,100,0),
+(@PATH,14,-2752.41,1951.051,160.2691,0,0,0,100,0);
 
 -- Pathing for Kor'kron Defender Entry: 19362
 SET @NPC := @CGUID+65;
@@ -1045,16 +1045,16 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2679.007,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2679.007,2707.241,103.5283,0,0,0,0,100,0),
-(@PATH,2,-2689.075,2716.259,106.572,0,0,0,0,100,0),
-(@PATH,3,-2699.496,2721.168,111.1267,0,0,0,0,100,0),
-(@PATH,4,-2706.34,2725.309,114.5727,0,0,0,0,100,0),
-(@PATH,5,-2713.205,2729.05,117.3128,0,0,0,0,100,0),
-(@PATH,6,-2706.492,2725.396,114.4426,0,0,0,0,100,0),
-(@PATH,7,-2699.496,2721.168,111.1267,0,0,0,0,100,0),
-(@PATH,8,-2689.075,2716.259,106.572,0,0,0,0,100,0),
-(@PATH,9,-2679.007,2707.241,103.5283,0,0,0,0,100,0),
-(@PATH,10,-2681.186,2699.77,101.498,0,0,0,0,100,0),
-(@PATH,11,-2687.217,2694.512,98.07244,0,0,0,0,100,0),
-(@PATH,12,-2681.186,2699.77,101.498,0,0,0,0,100,0);
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`action`,`action_chance`,`wpguid`) VALUES
+(@PATH,1,-2679.007,2707.241,103.5283,0,0,0,100,0),
+(@PATH,2,-2689.075,2716.259,106.572,0,0,0,100,0),
+(@PATH,3,-2699.496,2721.168,111.1267,0,0,0,100,0),
+(@PATH,4,-2706.34,2725.309,114.5727,0,0,0,100,0),
+(@PATH,5,-2713.205,2729.05,117.3128,0,0,0,100,0),
+(@PATH,6,-2706.492,2725.396,114.4426,0,0,0,100,0),
+(@PATH,7,-2699.496,2721.168,111.1267,0,0,0,100,0),
+(@PATH,8,-2689.075,2716.259,106.572,0,0,0,100,0),
+(@PATH,9,-2679.007,2707.241,103.5283,0,0,0,100,0),
+(@PATH,10,-2681.186,2699.77,101.498,0,0,0,100,0),
+(@PATH,11,-2687.217,2694.512,98.07244,0,0,0,100,0),
+(@PATH,12,-2681.186,2699.77,101.498,0,0,0,100,0);
