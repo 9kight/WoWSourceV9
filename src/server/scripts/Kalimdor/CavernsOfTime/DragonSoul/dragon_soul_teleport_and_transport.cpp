@@ -21,7 +21,12 @@ class npc_eiendormi : public CreatureScript
             if (InstanceScript* instance = creature->GetInstanceScript())
             {
                 if (instance->GetBossState(BOSS_MORCHOK) == DONE)
-                    player->TeleportTo(967, -1870.114f, -3077.727f, -176.308f, 0.390f);
+				{
+                    //player->TeleportTo(967, -1870.114f, -3077.727f, -176.308f, 0.390f);
+					if (Creature *t = player->SummonCreature(572880, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(),
+					player->GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 300 * IN_MILLISECONDS))
+					player->CastCustomSpell(VEHICLE_SPELL_RIDE_HARDCODED, SPELLVALUE_BASE_POINT0, 1, t, false);
+				}
             }
 
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
@@ -38,14 +43,20 @@ class npc_valeera_tele : public CreatureScript
         {
             if (InstanceScript* instance = creature->GetInstanceScript())
             {
-                if (instance->GetBossState(BOSS_MORCHOK) == DONE)
-                    player->TeleportTo(967, -1735.930f, -1818.239f, -219.328f, 0.0f);
+				if (instance->GetBossState(BOSS_MORCHOK) == DONE)
+				{
+					//player->TeleportTo(967, -1735.930f, -1818.239f, -219.328f, 0.0f);
+					if (Creature *t = player->SummonCreature(572890, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(),
+					player->GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 300 * IN_MILLISECONDS))
+					player->CastCustomSpell(VEHICLE_SPELL_RIDE_HARDCODED, SPELLVALUE_BASE_POINT0, 1, t, false);
+				}
             }
 
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
             return true;
         }
 };
+
 
 class npc_nethestrasz : public CreatureScript
 {
@@ -57,7 +68,12 @@ class npc_nethestrasz : public CreatureScript
             if (InstanceScript* instance = creature->GetInstanceScript())
             {
                 if (instance->GetBossState(BOSS_UNSLEEPING) == DONE && instance->GetBossState(BOSS_WARLORD) == DONE)
-                    player->TeleportTo(967, -1786.69f, -2393.67f, 341.355f, 0.16f);
+				{
+                    //player->TeleportTo(967, -1786.69f, -2393.67f, 341.355f, 0.16f);
+					if (Creature *t = player->SummonCreature(572870, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(),
+					player->GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 300 * IN_MILLISECONDS))
+					player->CastCustomSpell(VEHICLE_SPELL_RIDE_HARDCODED, SPELLVALUE_BASE_POINT0, 1, t, false);
+				}
             }
 
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
@@ -97,7 +113,7 @@ class travel_to_wyrmrest_summit : public CreatureScript
             {
                 if (instance->GetBossState(DATA_PORTALS_ON_OFF) == DONE)
                 {
-                    player->TeleportTo(967, -13855.80f, -13670.82f, 264.95f, 1.614f);
+                    player->TeleportTo(967, -1786.92f, -2393.18f, 341.355f, 6.141f);
                     player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
                 }
             }
