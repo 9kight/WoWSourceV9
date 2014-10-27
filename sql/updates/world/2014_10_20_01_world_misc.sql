@@ -58,7 +58,7 @@ UPDATE creature SET spawndist=0 WHERE id=11281;
 UPDATE creature_template SET MovementType=1 WHERE entry=11282;
 UPDATE creature SET MovementType=1 WHERE id=11282;
 UPDATE creature SET spawndist=3 WHERE id=11282;
-UPDATE creature template SET MovementType=1 WHERE entry=11283;
+UPDATE creature_template SET MovementType=1 WHERE entry=11283;
 UPDATE creature SET MovementType=1 WHERE id=11283;
 UPDATE creature SET spawndist=3 WHERE id=11283;
 -- missing loot for npc elit 10820
