@@ -12,8 +12,8 @@ EndScriptData
 #include "dragon_soul.h"
 
 #define SPELL_STOMP RAID_MODE(109033, 109034, 103414, 108571)
-
 #define SPELL_KORCHOM RAID_MODE(109034, 109017) // This spell must be just in 10HC / 25HC 
+#define MorchokHealth RAID_MODE<uint32>(1, 2, 3, 4)
 
 enum Yells
 {
