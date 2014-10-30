@@ -1377,10 +1377,10 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         target->CastSpell(target, 61922, true); // Sprint (waterwalk)
                 break;
         }
-		// Paladin - Pursuit of Justice
-        if (GetSpellInfo()->GetAllEffectsMechanicMask() & ((1<<MECHANIC_ROOT)|(1<<MECHANIC_STUN) |(1<<MECHANIC_FEAR)))
-            if ((target->HasAura(26022) && roll_chance_i(50)) || target->HasAura(26023))
-                target->CastSpell(target,89024,true);
+		// Paladin - Pursuit of Justice        
+		if ((target->HasAura(26022) && roll_chance_i(50)) || target->HasAura(26023))
+			if (GetSpellInfo()->GetAllEffectsMechanicMask() & ((1<<MECHANIC_ROOT)|(1<<MECHANIC_STUN) |(1<<MECHANIC_FEAR)))
+				target->CastSpell(target,89024,true);
     }
     // mods at aura remove
     else
