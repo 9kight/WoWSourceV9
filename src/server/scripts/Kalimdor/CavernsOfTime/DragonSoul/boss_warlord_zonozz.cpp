@@ -294,6 +294,10 @@ public:
             instance->SetBossState(BOSS_WARLORD, DONE);
             instance->SetData(DATA_PORTALS_ON_OFF, DONE);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me); // Remove
+			Unit * portal = me->FindNearestCreature(NPC_PORTAL_WYRMREST_BASE, 20.0f);
+
+			if (!portal)
+				portal = me->SummonCreature(NPC_PORTAL_WYRMREST_BASE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 3, 1.5f, TEMPSUMMON_TIMED_DESPAWN, 5 * MINUTE*IN_MILLISECONDS);
         }
         private:
             std::list<Unit *> playerList;

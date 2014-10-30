@@ -371,6 +371,17 @@ public:
 				break;
 			}
 
+			Unit * portal = me->FindNearestCreature(NPC_PORTAL_WYRMREST_BASE, 20.0f);
+
+			if (!portal)
+				portal = me->SummonCreature(NPC_PORTAL_WYRMREST_BASE, me->GetPositionX(), me->GetPositionY()+2, me->GetPositionZ() + 3, 1.5f, TEMPSUMMON_TIMED_DESPAWN, 5 * MINUTE*IN_MILLISECONDS);
+ 
+
+			Unit * secondportal = me->FindNearestCreature(NPC_PORTAL_ETERNITY, 20.0f);
+
+			if (!secondportal)
+				portal = me->SummonCreature(NPC_PORTAL_ETERNITY, me->GetPositionX(), me->GetPositionY()-2, me->GetPositionZ() + 3, 1.5f, TEMPSUMMON_TIMED_DESPAWN, 5 * MINUTE*IN_MILLISECONDS);
+
 			me->DespawnOrUnsummon(3000);
 		}
 

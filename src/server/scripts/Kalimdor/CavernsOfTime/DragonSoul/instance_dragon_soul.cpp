@@ -224,7 +224,7 @@ public:
                 case BOSS_ULTRAXION:
                     if(state == DONE)
                         if(Creature* creature = instance->GetCreature(Trall_Vs_UltraxionGUID))
-                            creature->SummonCreature(NPC_TRAVEL_TO_THE_DECK_OF_THE_SKYFIRE, -1802.141f, -2364.638f, 340.796f, 5.234f, TEMPSUMMON_CORPSE_DESPAWN, 900000);
+							creature->SummonCreature(NPC_PORTAL_SKYFIRE, -1802.141f, -2364.638f, 340.796f, 5.234f, TEMPSUMMON_CORPSE_DESPAWN, 900000);
                     break;
                 case DATA_TRALL_VS_ULTRAXION:
                     switch (state)

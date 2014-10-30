@@ -276,6 +276,12 @@ public:
             instance->SetBossState(DATA_PORTALS_ON_OFF, DONE);
             instance->SetBossState(DATA_TRALL_VS_ULTRAXION, IN_PROGRESS);
             _JustDied();
+
+			Unit * portal = me->FindNearestCreature(NPC_PORTAL_SKYFIRE, 20.0f);
+
+			if (!portal)
+				portal = me->SummonCreature(NPC_PORTAL_SKYFIRE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 3, 1.5f, TEMPSUMMON_TIMED_DESPAWN, 5 * MINUTE*IN_MILLISECONDS);
+
         }
     };
 };

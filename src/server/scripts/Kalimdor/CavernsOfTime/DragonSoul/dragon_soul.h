@@ -107,8 +107,6 @@ enum Creatures
     NPC_NOZDORMU           = 56666,
     NPC_ASPECT_OF_MAGIC    = 56664,
 
-    NPC_TRAVEL_TO_THE_DECK_OF_THE_SKYFIRE = 57378,
-    NPC_TRAVEL_TO_THE_MAELSTROM           = 57443,
     NPC_PORTAL                            = 57328,
 
     NPC_CORRUPTION_PARASITE = 57479,
@@ -122,7 +120,13 @@ enum Creatures
 	NPC_ALEXTRASZA_THE_LIFE_BINDER       = 56630,
 	NPC_NOZDORMU_THE_TIMELESS_ONE        = 56666,
 	NPC_KALECGOS                         = 56664,
-	
+
+	NPC_PORTAL_WYRMREST_BASE             = 57882, // Portal - Travel to Wyrmrest Base
+	NPC_PORTAL_ETERNITY                  = 57377, // Portal - Travel to the Eye of Eternity
+	NPC_PORTAL_SKYFIRE                   = 57378, // Portal - Travel to the deck of The Skyfire
+    NPC_PORTAL_WYRMREST_SUMMIT           = 57379, // Portal - Travel to Wyrmrest Summit
+    NPC_PORTAL_MAELSTROM                 = 57443, // Portal - Travel to The Maelstrom
+
 };
 
 template<class AI>

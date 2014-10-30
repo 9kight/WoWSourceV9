@@ -128,7 +128,7 @@ public:
         void JustDied(Unit* pkiller)
         {
             instance->SetBossState(BOSS_WARMASTER, DONE);
-	    pkiller->SummonCreature(NPC_TRAVEL_TO_THE_MAELSTROM, 13405.485f, -12131.544f, 150.971f, 6.213f, TEMPSUMMON_CORPSE_DESPAWN, 600000);
+			pkiller->SummonCreature(NPC_PORTAL_WYRMREST_SUMMIT, 13405.485f, -12131.544f, 150.971f, 6.213f, TEMPSUMMON_CORPSE_DESPAWN, 5 * MINUTE*IN_MILLISECONDS);
             _JustDied();
         }
     };

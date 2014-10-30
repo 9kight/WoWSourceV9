@@ -279,13 +279,18 @@ public:
             Talk(WHISPER_KILL);
         }
 
-        void JustDied(Unit* /*killer*/)
-        {
-            instance->SetBossState(BOSS_UNSLEEPING, DONE);
-            instance->SetData(DATA_PORTALS_ON_OFF, DONE);
-            Talk(WHISPER_DEATH);
-            _JustDied();
-        }
+		void JustDied(Unit* /*killer*/)
+		{
+			instance->SetBossState(BOSS_UNSLEEPING, DONE);
+			instance->SetData(DATA_PORTALS_ON_OFF, DONE);
+			Talk(WHISPER_DEATH);
+			_JustDied();
+
+			Unit * portal = me->FindNearestCreature(NPC_PORTAL_WYRMREST_BASE, 20.0f);
+
+			if (!portal)
+				portal = me->SummonCreature(NPC_PORTAL_WYRMREST_BASE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 3, 1.5f, TEMPSUMMON_TIMED_DESPAWN, 5 * MINUTE*IN_MILLISECONDS);
+		}
     };
 };
 
