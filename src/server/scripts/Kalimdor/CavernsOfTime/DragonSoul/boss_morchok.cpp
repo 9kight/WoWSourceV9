@@ -25,13 +25,13 @@ enum Yells
 enum Spells
 {
     SPELL_CRUSH_ARMOR               = 103687,
-	SPELL_CLEAR_DEBUFFS             = 34098,
+    SPELL_CLEAR_DEBUFFS             = 34098,
     SPELL_RESONATING_CRYSTAL        = 103640,
     SPELL_FURIOUS                   = 103846,
-	SPELL_SUMMON_KOHCROM            = 109017,
+    SPELL_SUMMON_KOHCROM            = 109017,
     SPELL_EARTHS_VENGEANCE_CHANNEL  = 103176,
     SPELL_EARTHS_VENGEANCE          = 103178,
-	SPELL_SUMMON                    = 22951,
+    SPELL_SUMMON                    = 22951,
     SPELL_BLACK_BLOOD_OF_THE_EARTH  = 103851,
     SPELL_BLACK_BLOOD_SUM           = 103180,
     SPELL_RESONATING_CRYSTAL_EX     = 108572,
@@ -39,7 +39,7 @@ enum Spells
     SPELL_DANGER                    = 103534,
     SPELL_WARNING                   = 103536,
     SPELL_SAFE                      = 103541,
-    SPELL_VORTEX	                = 103821,
+    SPELL_VORTEX					= 103821,
     SPELL_ENRAGE                    = 47008
 };
 
@@ -49,17 +49,17 @@ enum Events
     EVENT_CRUSH_ARMOR               = 2,
     EVENT_RESONATING_CRYSTAL        = 3,
     EVENT_FURIOUS                   = 4,
-	EVENT_KORCHOM                   = 5,
+    EVENT_KORCHOM                   = 5,
     EVENT_EARTHS_VENGEANCE          = 6,
     EVENT_BLACK_BLOOD_OF_THE_EARTH  = 7,
-	EVENT_SUMMON                    = 8,
-	EVENT_EXPLODE                   = 9,
+    EVENT_SUMMON                    = 8,
+    EVENT_EXPLODE                   = 9,
     EVENT_EXPLODE_1                 = 10,
-	EVENT_EXPLODE_2                 = 11,
+    EVENT_EXPLODE_2                 = 11,
     EVENT_EXPLODE_3                 = 12,
-	EVENT_UN_EXPLODE_1              = 13,
-	EVENT_UN_EXPLODE_2              = 14,
-	EVENT_UN_EXPLODE_3              = 15,
+    EVENT_UN_EXPLODE_1              = 13,
+    EVENT_UN_EXPLODE_2              = 14,
+    EVENT_UN_EXPLODE_3              = 15,
     EVENT_DESPAWN                   = 16,
     EVENT_RESONATING                = 17,
     EVENT_ANTI_EXPLODE              = 18,
@@ -73,9 +73,9 @@ enum Events
     EVENT_BLACK_BLOOD               = 24,
     EVENT_BLACK_BLOOD_DESPAWN       = 25,
     // Npc Morchok
-	EVENT_VORTEX                    = 26,
-	// Npc Kohcrom
-	EVENT_SUMMON_KOHCROM            = 27
+    EVENT_VORTEX                    = 26,
+    // Npc Kohcrom
+    EVENT_SUMMON_KOHCROM            = 27
 };
 
 enum Phases
@@ -213,7 +213,7 @@ public:
         boss_morchokAI(Creature* creature) : BossAI(creature, DATA_MORCHOK) { }
 
         Creature* blackblood;
-		GameObject* Innerwall;
+	GameObject* Innerwall;
         void Reset()
         {
             _Reset();
@@ -230,14 +230,14 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
-		           instance->SetBossState(BOSS_MORCHOK, IN_PROGRESS);		
+	    instance->SetBossState(BOSS_MORCHOK, IN_PROGRESS);		
             Talk(SAY_AGGRO);
             _EnterCombat();
         }
 
         void JustDied(Unit* /*killer*/)
         {
-		           instance->SetBossState(BOSS_MORCHOK, DONE);
+            instance->SetBossState(BOSS_MORCHOK, DONE);
             Talk(SAY_DEATH);
 			DespawnGameobjects(209596, 100.0f);
         }
@@ -272,10 +272,10 @@ public:
 
 				if (summoned->GetEntry() == NPC_KOHCROM)
 				{
-						summoned->AI()->AttackStart(me->GetVictim());
-						summoned->SetHealth(me->GetHealth());
-						summoned->setActive(true);
-						summoned->setFaction(14);
+				    summoned->AI()->AttackStart(me->GetVictim());
+					summoned->SetHealth(me->GetHealth());
+					summoned->setActive(true);
+					summoned->setFaction(14);
 
 					DoZoneInCombat(summoned);
 				}
@@ -321,7 +321,7 @@ public:
                 me->SetObjectScale(0.3f);
             else if(me->HealthBelowPct(20))
                 DoCast(me, SPELL_FURIOUS);
-		    else if(me->HealthBelowPct(20)) 
+			else if(me->HealthBelowPct(20)) 
                 DoCastVictim(SPELL_KORCHOM);
         }
 
@@ -419,7 +419,7 @@ public:
      
                     events.ScheduleEvent(EVENT_SUMMON, 5000, 0, PHASE_BLACK_BLOOD);
                     break;
-		            case EVENT_SUMMON:
+			    case EVENT_SUMMON:
                     DoCastAOE(SPELL_SUMMON);
                     events.ScheduleEvent(EVENT_BLACK_BLOOD_OF_THE_EARTH, 100, 0, PHASE_BLACK_BLOOD);
                     break;
@@ -440,14 +440,15 @@ public:
                     events.ScheduleEvent(EVENT_PHASE_BLACK_BLOOD, urand(30000, 50000));
                     break;
                case EVENT_SUMMON_KOHCROM:
-                    if(me->GetHealthPct() < 20)
-                    {
-                        DoCastVictim(SPELL_SUMMON_KOHCROM);
-                        events.CancelEvent(EVENT_FURIOUS);
-                    }
-                    else
-				    events.ScheduleEvent(IsHeroic() ? EVENT_SUMMON_KOHCROM : EVENT_SUMMON_KOHCROM, 15000, 0);
-                    break;
+					if (me->GetMap()->IsHeroic())
+						if(me->GetHealthPct() < 90)
+							{
+								DoCastVictim(SPELL_SUMMON_KOHCROM);
+								events.CancelEvent(EVENT_FURIOUS);
+		 					}
+						else
+							events.ScheduleEvent(IsHeroic() ? EVENT_SUMMON_KOHCROM : EVENT_SUMMON_KOHCROM, 15000, 0);                    
+					break;
                 case EVENT_ENRAGE:
                     me->InterruptNonMeleeSpells(true);
                     DoCast(me, SPELL_ENRAGE);
@@ -502,23 +503,23 @@ class npc_kohcrom : public CreatureScript
 
                 if(me->HealthBelowPctDamaged(80, damage))
                 {
-                 me->SetObjectScale(0.7);
+                 me->SetObjectScale(0.7f);
                 }
                 else if(me->HealthBelowPctDamaged(70, damage))
                 {
-                 me->SetObjectScale(0.6);
+                 me->SetObjectScale(0.6f);
                 }
                 else if(me->HealthBelowPctDamaged(60, damage))
                 {
-                 me->SetObjectScale(0.5);
+                 me->SetObjectScale(0.5f);
                 }
                 else if(me->HealthBelowPctDamaged(50, damage))
                 {
-                 me->SetObjectScale(0.4);
+                 me->SetObjectScale(0.4f);
                 }
                 else if(me->HealthBelowPctDamaged(40, damage))
                 {
-                 me->SetObjectScale(0.3);
+                 me->SetObjectScale(0.3f);
                 }
                 else if(me->HealthBelowPctDamaged(20, damage))
                 {
