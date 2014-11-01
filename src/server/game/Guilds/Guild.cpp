@@ -2471,38 +2471,35 @@ void Guild::HandleLeaveMember(WorldSession* session)
 
 }
 
+
 void Guild::HandleRemoveMember(WorldSession* session, uint64 guid)
 {
-    Player* player = session->GetPlayer();
-    Player* removedPlayer = ObjectAccessor::FindPlayer(guid);
-    Member* member = GetMember(guid);
-
-    // Player must have rights to remove members
-    if (!_HasRankRight(player, GR_RIGHT_REMOVE))
-        SendCommandResult(session, GUILD_COMMAND_REMOVE, ERR_GUILD_PERMISSIONS);
-    // Removed player must be a member of the guild
-    else if (member && removedPlayer)
-    {
-        //std::string name = member->GetName();
-        // Guild masters cannot be removed
-        if (member->IsRank(GR_GUILDMASTER))
-            SendCommandResult(session, GUILD_COMMAND_REMOVE, ERR_GUILD_LEADER_LEAVE);
-        // Do not allow to remove player with the same rank or higher
-        else if (member->IsRankNotLower(player->GetRank()))
-            SendCommandResult(session, GUILD_COMMAND_REMOVE, ERR_GUILD_RANK_TOO_HIGH_S, removedPlayer->GetName());
-        else
-        {
-            // After call to DeleteMember pointer to member becomes invalid
-            DeleteMember(guid, false, true);
-            _LogEvent(GUILD_EVENT_LOG_UNINVITE_PLAYER, player->GetGUIDLow(), GUID_LOPART(guid));
-            _BroadcastEvent(GE_REMOVED, 0);
-            // Guild Reputation Disband Time
-            UpdateDisbandCharacterReputationGuild(GUID_LOPART(guid));
-            SendCommandResult(session, GUILD_COMMAND_REMOVE, ERR_GUILD_COMMAND_SUCCESS, removedPlayer->GetName());
-        }
-    }
-    else if (!member && removedPlayer) // If he's not a member of the guild - unlikely, but possible :)
-        SendCommandResult(session, GUILD_COMMAND_REMOVE, ERR_GUILD_PLAYER_NOT_IN_GUILD, removedPlayer->GetName());
+	Player* player = session->GetPlayer();
+	// Player must have rights to remove members
+	if (!_HasRankRight(player, GR_RIGHT_REMOVE))
+		SendCommandResult(session, GUILD_COMMAND_REMOVE, ERR_GUILD_PERMISSIONS);
+	else if (Member* member = GetMember(guid))
+	{
+		std::string name = member->GetName();
+		// Guild masters cannot be removed
+		if (member->IsRank(GR_GUILDMASTER))
+			SendCommandResult(session, GUILD_COMMAND_REMOVE, ERR_GUILD_LEADER_LEAVE);
+		// Do not allow to remove player with the same rank or higher
+		else
+		{
+			Member const* memberMe = GetMember(player->GetGUID());
+			if (!memberMe || member->IsRankNotLower(memberMe->GetRankId()))
+				SendCommandResult(session, GUILD_COMMAND_REMOVE, ERR_GUILD_RANK_TOO_HIGH_S, name);
+			else
+			{
+				// After call to DeleteMember pointer to member becomes invalid
+				DeleteMember(guid, false, true);
+				_LogEvent(GUILD_EVENT_LOG_UNINVITE_PLAYER, player->GetGUIDLow(), GUID_LOPART(guid));
+				_BroadcastEvent(GE_REMOVED, 0, name.c_str(), player->GetName().c_str());
+				SendCommandResult(session, GUILD_COMMAND_REMOVE, ERR_GUILD_COMMAND_SUCCESS, name);
+			}
+		}
+	}
 }
 
 void Guild::HandleUpdateMemberRank(WorldSession* session, uint64 guid, bool demote)
