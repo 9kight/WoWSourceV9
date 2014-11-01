@@ -1278,7 +1278,7 @@ void Guild::ChallengesMgr::LoadChallengesFromDB()
     uint32 completedCount = 0;
     PreparedStatement* stmt2 = CharacterDatabase.GetPreparedStatement(CHAR_SEL_GUILD_CHALLENGES_COMPLETED);
     stmt2->setUInt32(0, m_owner->GetId());
-    PreparedQueryResult completedResult = CharacterDatabase.Query(stmt2);
+    QueryResult completedResult = CharacterDatabase.Query("SELECT challengeId, dateCompleted FROM guild_challenges_completed ORDER BY guildId");
 
     if(completedResult && completedResult->GetRowCount() > 0)
     {
@@ -1338,12 +1338,15 @@ void Guild::ChallengesMgr::CheckChallenge(Group* grp, uint32 challengeId)
     uint32 guildMembersInGroup = 0;
     uint32 memberCount = grp->GetMembersCount();
 
-    Group::MemberSlotList membersGrp = grp->GetMemberSlots();
-
-    for(Group::MemberSlotList::iterator itr = membersGrp.begin(); itr != membersGrp.end();++itr)
+    if(grp)
     {
-        if(Member* mem = m_owner->GetMember(itr->guid))
-            guildMembersInGroup++;
+		Group::MemberSlotList const& membersGrp = grp->GetMemberSlots();
+
+		for (Group::MemberSlotList::const_iterator itr = membersGrp.begin(); itr != membersGrp.end(); ++itr)
+		{
+			if (m_owner->GetMember(itr->guid))
+				guildMembersInGroup++;
+		}
     }
 
     uint8 type = m_challenges[challengeId].typeId;
@@ -1402,12 +1405,7 @@ void Guild::ChallengesMgr::GiveReward(uint32 challengeId)
     GuildChallenge challenge = m_challenges[challengeId];
 
     m_owner->GiveXP(challenge.XPReward);
-
-    if(m_owner->GetLevel() >= 5)
-    {
-        m_owner->AddMoneyToBank(challenge.GoldReward);
-        //we must implement bellow the Cash Flow guild perk
-    }
+    m_owner->AddMoneyToBank(challenge.GoldReward);
 
     WorldPacket data(SMSG_GUILD_CHALLENGE_COMPLETED, 20);
 
