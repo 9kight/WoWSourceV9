@@ -899,7 +899,7 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (46329, 0, 0, 0, 0, 0, 100, 0, 2000, 7000, 32000, 37000, 11, 78542, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Enslaved Waterspout cast spell Splash'),
 (46329, 0, 1, 0, 0, 0, 100, 0, 1000, 1000, 10000, 11000, 11, 78799, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Enslaved Waterspout cast spell Wave Crash');
 
-UPDATE  creature_template SET faction_H=35 WHERE entry=45943
+UPDATE  creature_template SET faction_H=35 WHERE entry=45943;
 UPDATE creature SET phaseMask=1 WHERE id=47796;
 UPDATE creature SET phaseMask=1 WHERE id=47168;
 UPDATE creature SET phaseMask=1 WHERE id=46807;
