@@ -244,6 +244,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //170 SPELL_EFFECT_170
     &Spell::EffectNULL,                                     //171 SPELL_EFFECT_171
     &Spell::EffectResurrectWithAura,                        //172 SPELL_EFFECT_RESURRECT_WITH_AURA
+    &Spell::EffectUnlockGuildVaultTab,                      //173 SPELL_EFFECT_UNLOCK_GUILD_VAULT_TAB
     &Spell::EffectNULL,                                     //173 SPELL_EFFECT_UNLOCK_GUILD_VAULT_TAB
     &Spell::EffectNULL,                                     //174 SPELL_EFFECT_174
     &Spell::EffectUnused,                                   //175 SPELL_EFFECT_175  unused
@@ -6226,6 +6227,17 @@ void Spell::EffectGiveCurrency(SpellEffIndex effIndex)
         return;
 
     unitTarget->ToPlayer()->ModifyCurrency(m_spellInfo->Effects[effIndex].MiscValue, damage);
+}
+
+void Spell::EffectUnlockGuildVaultTab(SpellEffIndex effIndex)
+{
+	if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
+		return;
+
+	// Safety checks done in Spell::CheckCast
+	Player* caster = m_caster->ToPlayer();
+	if (Guild* guild = caster->GetGuild())
+		guild->HandleBuyBankTab(caster->GetSession(), m_spellInfo->Effects[effIndex].BasePoints - 1);
 }
 
 void Spell::EffectCastButtons(SpellEffIndex effIndex)
