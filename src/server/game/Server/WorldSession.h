@@ -463,6 +463,9 @@ class WorldSession
         // character view
         void HandleShowingHelmOpcode(WorldPacket& recvData);
         void HandleShowingCloakOpcode(WorldPacket& recvData);
+		
+		// Knockback
+		void HandleMoveKnockBackAck(WorldPacket& recvPacket);
 
         // repair
         void HandleRepairItemOpcode(WorldPacket& recvPacket);

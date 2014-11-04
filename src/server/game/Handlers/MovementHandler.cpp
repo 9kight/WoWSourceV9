@@ -643,3 +643,20 @@ void WorldSession::HandleMovementUnrootAck(WorldPacket& recvPacket)
 
     HandleMovementInfo(info, recvPacket.GetOpcode(), recvPacket.size()-4, _player->m_mover);
 }
+
+void WorldSession::HandleMoveKnockBackAck(WorldPacket& recvData)
+{
+    sLog->outError(LOG_FILTER_NETWORKIO, "CMSG_MOVE_KNOCK_BACK_ACK");
+
+    MovementInfo movementInfo;
+    GetPlayer()->ReadMovementInfo(recvData, &movementInfo);
+
+    if (_player->m_mover->GetGUID() != movementInfo.guid)
+        return;
+
+    _player->m_movementInfo = movementInfo;
+
+    WorldPacket data(SMSG_MOVE_UPDATE_KNOCK_BACK, 66);
+    _player->WriteMovementInfo(data);
+    _player->SendMessageToSet(&data, false);
+}

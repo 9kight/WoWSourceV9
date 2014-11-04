@@ -129,6 +129,31 @@ namespace Movement
         bool _BroadCastControlled, _BroadCastSelf, _isControlledPacket;
         MovementInfo* _info;
     };
+
+	class ExtraMovementStatusElement
+	{
+		friend class PacketSender;
+
+	public:
+		ExtraMovementStatusElement(MovementStatusElements const* elements) : _elements(elements), _index(0) { }
+
+		void ReadNextElement(ByteBuffer& packet);
+		void WriteNextElement(ByteBuffer& packet);
+
+		struct
+		{
+			ObjectGuid guid;
+			float floatData;
+			int8  byteData;
+		} Data;
+
+	protected:
+		void ResetIndex() { _index = 0; }
+
+	private:
+		MovementStatusElements const* _elements;
+		uint32 _index;
+	};
 }
 
 MovementStatusElements* GetMovementStatusElementsSequence(Opcodes opcode);
