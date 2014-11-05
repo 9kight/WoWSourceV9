@@ -111,7 +111,8 @@ enum MovementStatusElements
     MSEZeroBit, // writes bit value 0 or skips read bit
     MSEOneBit,  // writes bit value 1 or skips read bit
     MSEEnd,     // marks end of parsing
-    MSE_COUNT
+    MSE_COUNT,
+	MSEExtraFloat
 };
 
 namespace Movement

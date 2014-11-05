@@ -32,9 +32,13 @@
 #include "ObjectMgr.h"
 #include "Chat.h"
 #include "MovementStructures.h"
+#include "Vehicle.h" 
+
+#define MOVEMENT_PACKET_TIME_DELAY 0 
 
 void WorldSession::HandleMoveWorldportAckOpcode(WorldPacket&)
 {
+	sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: got MSG_MOVE_WORLDPORT_ACK.");
     HandleMoveWorldportAckOpcode();
 }
 
@@ -46,6 +50,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
 
     GetPlayer()->SetSemaphoreTeleportFar(false);
 
+	// get the teleport destination
     WorldLocation const& loc = GetPlayer()->GetTeleportDest();
 
     // possible errors in the coordinate validity check
@@ -64,14 +69,14 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         GetPlayer()->m_InstanceValid = true;
 
     Map* oldMap = GetPlayer()->GetMap();
+	Map* newMap = sMapMgr->CreateMap(loc.GetMapId(), GetPlayer());
     if (GetPlayer()->IsInWorld())
     {
-        sLog->outError(LOG_FILTER_NETWORKIO, "Player (Name %s) is still in world when teleported from map %u to new map %u", GetPlayer()->GetName().c_str(), oldMap->GetId(), loc.GetMapId());
+        sLog->outError(LOG_FILTER_NETWORKIO, "%s %s is still in world when teleported from map %s (%u) to new map %s (%u)",  oldMap->GetId(), newMap ? newMap->GetMapName() : "Unknown", loc.GetMapId()); 
         oldMap->RemovePlayerFromMap(GetPlayer(), false);
     }
 
     // relocate the player to the teleport destination
-    Map* newMap = sMapMgr->CreateMap(loc.GetMapId(), GetPlayer());
     // the CanEnter checks are done in TeleporTo but conditions may change
     // while the player is in transit, for example the map may get full
     if (!newMap || !newMap->CanEnter(GetPlayer()))
@@ -80,8 +85,11 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         GetPlayer()->TeleportTo(GetPlayer()->m_homebindMapId, GetPlayer()->m_homebindX, GetPlayer()->m_homebindY, GetPlayer()->m_homebindZ, GetPlayer()->GetOrientation());
         return;
     }
-    else
-        GetPlayer()->Relocate(&loc);
+    
+	float z = loc.GetPositionZ();
+	if (GetPlayer()->HasUnitMovementFlag(MOVEMENTFLAG_HOVER))
+		z += GetPlayer()->GetFloatValue(UNIT_FIELD_HOVERHEIGHT);
+	GetPlayer()->Relocate(loc.GetPositionX(), loc.GetPositionY(), z, loc.GetOrientation());
 
     GetPlayer()->ResetMap();
     GetPlayer()->SetMap(newMap);
@@ -175,6 +183,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
 
 void WorldSession::HandleMoveTeleportAck(WorldPacket& recvPacket)
 {
+	sLog->outDebug(LOG_FILTER_NETWORKIO, "MSG_MOVE_TELEPORT_ACK");
     ObjectGuid guid;
     uint32 ackCount = recvPacket.read<uint32>();
     recvPacket.read_skip<uint32>(); // should be new position in kind of struction
@@ -659,4 +668,44 @@ void WorldSession::HandleMoveKnockBackAck(WorldPacket& recvData)
     WorldPacket data(SMSG_MOVE_UPDATE_KNOCK_BACK, 66);
     _player->WriteMovementInfo(data);
     _player->SendMessageToSet(&data, false);
+}
+
+void WorldSession::HandleMoveHoverAck(WorldPacket& recvPacket)
+{
+	sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_MOVE_HOVER_ACK");
+
+	MovementInfo info;
+	info.ReadFromPacket(recvPacket);
+
+	recvPacket.read_skip<uint32>();                           // unk
+
+	MovementInfo movementInfo;
+	GetPlayer()->ReadMovementInfo(recvPacket, &movementInfo);
+
+	recvPacket.read_skip<uint32>();                           // unk2
+}
+
+void WorldSession::HandleMoveWaterWalkAck(WorldPacket& recvPacket)
+{
+	sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_MOVE_WATER_WALK_ACK");
+
+	MovementInfo info;
+	info.ReadFromPacket(recvPacket);
+
+	recvPacket.read_skip<uint32>();                           // unk
+
+	MovementInfo movementInfo;
+	GetPlayer()->ReadMovementInfo(recvPacket, &movementInfo);
+
+	recvPacket.read_skip<uint32>();                           // unk2
+}
+
+void WorldSession::HandleSetCollisionHeightAck(WorldPacket& recvPacket)
+{
+	sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_MOVE_SET_COLLISION_HEIGHT_ACK");
+
+	static MovementStatusElements const heightElement = MSEExtraFloat;
+	Movement::ExtraMovementStatusElement extra(&heightElement);
+	MovementInfo movementInfo;
+	GetPlayer()->ReadMovementInfo(recvPacket, &movementInfo, &extra);
 }

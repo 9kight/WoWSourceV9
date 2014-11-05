@@ -458,6 +458,9 @@ class WorldSession
         // new party stats
         void HandleInspectHonorStatsOpcode(WorldPacket& recvPacket);
 
+		void HandleMoveWaterWalkAck(WorldPacket& recvPacket);
+		void HandleMoveHoverAck(WorldPacket& recvData);
+
         void HandleMountSpecialAnimOpcode(WorldPacket& recvdata);
 
         // character view
@@ -466,6 +469,8 @@ class WorldSession
 		
 		// Knockback
 		void HandleMoveKnockBackAck(WorldPacket& recvPacket);
+
+		void HandleSetCollisionHeightAck(WorldPacket& recvPacket);
 
         // repair
         void HandleRepairItemOpcode(WorldPacket& recvPacket);
