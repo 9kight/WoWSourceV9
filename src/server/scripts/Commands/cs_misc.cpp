@@ -1562,7 +1562,6 @@ public:
         uint32 mapId;
         uint32 areaId;
         uint32 phase            = 0;
-        std::string guildName;
 
         // get additional information from Player object
         if (target)
@@ -1582,7 +1581,6 @@ public:
             mapId             = target->GetMapId();
             areaId            = target->GetAreaId();
             phase             = target->GetPhaseMask();
-            guildName         = target->GetGuild() ? target->GetGuildName() : "<gildenlos>";
         }
         // get additional information from DB
         else
@@ -1670,7 +1668,6 @@ public:
         std::string nameLink = handler->playerLink(targetName);
 
         handler->PSendSysMessage(LANG_PINFO_ACCOUNT, (target ? "" : handler->GetTrinityString(LANG_OFFLINE)), nameLink.c_str(), GUID_LOPART(targetGuid), userName.c_str(), accId, eMail.c_str(), security, lastIp.c_str(), lastLogin.c_str(), latency);
-        handler->PSendSysMessage("GuildName: %s", guildName.c_str());
 
         std::string bannedby = "unknown";
         std::string banreason = "";
@@ -1800,6 +1797,29 @@ public:
         }
         else
            handler->PSendSysMessage(LANG_PINFO_MAP_OFFLINE, map->name, areaName.c_str());
+
+		stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_GUILD_MEMBER_EXTENDED);
+		stmt->setUInt32(0, GUID_LOPART(targetGuid));
+		
+	    result = CharacterDatabase.Query(stmt);
+		if (result)
+		    {
+			    uint32 guildId = 0;
+			    std::string guildName = "";
+			    std::string guildRank = "";
+			    std::string note = "";
+			    std::string officeNote = "";
+			    
+			    Field* fields = result->Fetch();
+			    guildId = fields[0].GetUInt32();
+			    guildName = fields[1].GetString();
+			    //rankId           = fields[2].GetUInt8();
+			    guildRank = fields[3].GetString();
+			    note = fields[4].GetString();
+			    officeNote = fields[5].GetString();
+			    
+			    handler->PSendSysMessage(LANG_PINFO_GUILD_INFO, guildName.c_str(), guildId, guildRank.c_str(), note.c_str(), officeNote.c_str());
+			}
 
         QueryResult vipresult = LoginDatabase.PQuery("SELECT type, unsetdate, setdate FROM vip_accounts WHERE id = %u AND active = 1", accId);
         if (vipresult)
