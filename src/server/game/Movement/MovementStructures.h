@@ -111,7 +111,8 @@ enum MovementStatusElements
     MSEZeroBit, // writes bit value 0 or skips read bit
     MSEOneBit,  // writes bit value 1 or skips read bit
     MSEEnd,     // marks end of parsing
-    MSE_COUNT
+    MSE_COUNT,
+	MSEExtraFloat
 };
 
 namespace Movement
@@ -129,6 +130,31 @@ namespace Movement
         bool _BroadCastControlled, _BroadCastSelf, _isControlledPacket;
         MovementInfo* _info;
     };
+
+	class ExtraMovementStatusElement
+	{
+		friend class PacketSender;
+
+	public:
+		ExtraMovementStatusElement(MovementStatusElements const* elements) : _elements(elements), _index(0) { }
+
+		void ReadNextElement(ByteBuffer& packet);
+		void WriteNextElement(ByteBuffer& packet);
+
+		struct
+		{
+			ObjectGuid guid;
+			float floatData;
+			int8  byteData;
+		} Data;
+
+	protected:
+		void ResetIndex() { _index = 0; }
+
+	private:
+		MovementStatusElements const* _elements;
+		uint32 _index;
+	};
 }
 
 MovementStatusElements* GetMovementStatusElementsSequence(Opcodes opcode);
