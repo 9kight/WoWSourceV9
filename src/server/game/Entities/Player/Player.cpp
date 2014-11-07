@@ -27746,19 +27746,19 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
 	//! Anti-cheat checks. Please keep them in seperate if () blocks to maintain a clear overview.
 	//! Might be subject to latency, so just remove improper flags.
 #ifdef TRINITY_DEBUG
-#define REMOVE_VIOLATING_FLAGS(check, maskToRemove) \
-	{ \
-	if (check) \
-	{ \
-	sLog->outDebug(LOG_FILTER_ENTITIES, "Player::ReadMovementInfo: Violation of MovementFlags found (%s). " \
-	"MovementFlags: %u, MovementFlags2: %u for player GUID: %u. Mask %u will be removed.", \
-	STRINGIZE(check), mi->GetMovementFlags(), mi->GetExtraMovementFlags(), GetGUIDLow(), maskToRemove); \
-	mi->RemoveMovementFlag((maskToRemove)); \
-	} \
+#define REMOVE_VIOLATING_FLAGS(check, maskToRemove)\
+	{\
+	if (check)\
+	{\
+	sLog->outDebug(LOG_FILTER_UNITS, "WorldSession::ReadMovementInfo: Violation of MovementFlags found (%s). "\
+	"MovementFlags: %u, MovementFlags2: %u for player GUID: %u. Mask %u will be removed.",\
+	STRINGIZE(check), mi->GetMovementFlags(), mi->GetExtraMovementFlags(), GetGUIDLow(), maskToRemove);\
+	mi->RemoveMovementFlag((maskToRemove));\
+	}\
 	}
 #else
-#define REMOVE_VIOLATING_FLAGS(check, maskToRemove) \
-	if (check) \
+#define REMOVE_VIOLATING_FLAGS(check, maskToRemove)\
+	if (check)\
 	mi->RemoveMovementFlag((maskToRemove));
 #endif
 
