@@ -1,4 +1,5 @@
 -- Ozruk texts
+DELETE FROM `creature_text` WHERE `entry` = 49154;
 DELETE FROM `creature_text` WHERE `entry` = 49654;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
 (49154, 0, 0, 'None may pass into the World''s Heart!', 14, 0, 100, 0, 0, 21919,  'Ozruk to Player'),
@@ -28,6 +29,10 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (49653, 1, 1, 'Ah-ha! I''ve got you right where I want you!', 14, 0, 100, 0, 0, 21787, 'Millhouse Manastorm'),
 (49653, 1, 2, 'Now... witness the full power of Millhouse Manastorm!', 14, 0, 100, 0, 0, 21788, 'Millhouse Manastorm'),
 (49653, 1, 3, 'Prison taught me one very important lesson, well, two if you count how to hold your soap, but yes! SURVIVAL!', 14, 0, 100, 0, 0, 21789, 'Millhouse Manastorm');
+
+-- Stonecore Sentry
+DELETE FROM `creature_text` WHERE `entry` IN (42695);
+INSERT INTO `creature_text` VALUES ('42695', '0', '0', '%s becomes enraged!', '16', '0', '100', '0', '0', '0', 'combat Enrage');
 
 -- http://www.wowhead.com/npc=43537 and heroic 49662
 DELETE FROM `creature_template` WHERE `entry`=43537;
