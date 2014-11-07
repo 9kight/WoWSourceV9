@@ -1528,6 +1528,7 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_lava_lash_trigger();
     new spell_sha_fulmination();
     new spell_sha_lava_surge();
+	new spell_sha_lava_surge_proc();
     new spell_sha_earthquake_trigger();
     new spell_sha_earthquake();
     new spell_sha_pet_scaling_04();
