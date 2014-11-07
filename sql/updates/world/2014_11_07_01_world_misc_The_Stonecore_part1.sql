@@ -2725,3 +2725,31 @@ INSERT INTO `creature` VALUES (288110, 49859, 725, 5088, 5088, 2, 1, 0, 0, 1320.
 -- fix dberrors
 DELETE FROM  creature_questrelation WHERE id=42428 AND quest=28814;
 DELETE FROM  reference_loot_template WHERE entry IN (58051,58055);
+
+DELETE FROM `spell_target_position` WHERE `id` IN (79193, 79199, 86860, 86858, 86856);
+INSERT INTO `spell_target_position` (`id`, `effIndex`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
+(79193, 0, 725, 1260, 960, 205.443756, 0),
+(79199, 0, 725, 1280, 1050, 210.383057, 0),
+(86860, 0, 725, 1350.75, 919.133, 194.769, 0),
+(86858, 0, 725, 1341.19, 913.399, 197.092, 0),
+(86856, 0, 725, 1361.89, 920.219, 196.308, 0);
+
+-- Set UNIT_FLAG_NOT_SELECTABLE to Gravity Well and Seismic Shard.
+UPDATE `creature_template` SET `unit_flags` = 33554432 WHERE `entry` IN (42499, 42355);
+
+UPDATE `creature_template` SET `mechanic_immune_mask` = 617299839 WHERE `entry` IN (43391, 43438, 43214, 42188, 42333);
+
+-- Set UNIT_FLAG_NOT_SELECTABLE to Trashing Charge.
+UPDATE `creature_template` SET `unit_flags` = 33554432 WHERE `entry` = 43743;
+
+-- Set UNIT_FLAG_NOT_SELECTABLE to Stalactite Trigger - Boss, Lava Fissure, .
+UPDATE `creature_template` SET `unit_flags` = 33554432 WHERE `entry` IN (43159, 43242);
+
+-- "Stalactite Trigger - Boss": InhabitType correction
+UPDATE `creature_template` SET `InhabitType` = 7 WHERE `entry` = 43159;
+
+-- "Stalactite Trigger - Boss": InhabitType correction
+UPDATE `creature_template` SET `InhabitType` = 7 WHERE `entry` IN (42333, 49624);
+
+-- Set UNIT_FLAG_NOT_SELECTABLE to Rupture Controller and Rupture.
+UPDATE `creature_template` SET `unit_flags` = 33554432 WHERE `entry` IN (49597, 49576);
