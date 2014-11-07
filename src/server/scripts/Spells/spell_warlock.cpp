@@ -2036,6 +2036,11 @@ class spell_warl_cremation : public SpellScriptLoader
 
             void HandleScriptEffect(SpellEffIndex /*effIndex*/)
             {
+				Unit* caster = GetCaster();
+				
+				if (!caster)
+			    	return;
+					
                 if (Unit* unitTarget = GetHitUnit())
                     // Refresh immolate on target
                     if (AuraEffect* aur = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_WARLOCK, 0x00000004, 0, 0, GetCaster()->GetGUID()))
