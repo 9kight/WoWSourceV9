@@ -94,8 +94,21 @@ class boss_echo_of_jaina : public CreatureScript
             boss_echo_of_jainaAI(Creature* creature) : BossAI(creature, BOSS_ECHO_OF_JAINA), summons(me)
             {
                 instance = me->GetInstanceScript();
+				DespawnGameobjects(209318, 1000.0f);
             }
 
+		    void DespawnGameobjects(uint32 entry, float distance)
+		    {
+		    	std::list<GameObject*> gameobjects;
+		    	GetGameObjectListWithEntryInGrid(gameobjects, me, entry, distance);
+
+		    	if (gameobjects.empty())
+			    	return;
+
+		    	for (std::list<GameObject*>::iterator iter = gameobjects.begin(); iter != gameobjects.end(); ++iter)
+			    	(*iter)->RemoveFromWorld();
+	    	}
+			
             InstanceScript* instance;
             uint32 VolleyCount;
             SummonList summons;

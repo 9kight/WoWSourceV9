@@ -253,18 +253,27 @@ void WorldSession::HandleGuildChallengeRequest(WorldPacket& recvPacket)
     }
 }
 
+
 void WorldSession::HandleGuildSwitchRank(WorldPacket& recvPacket)
 {
-    uint32 rank;
-    bool direction;                 // if its true, then the rank rises, if no, it goes down
+	uint32 rank;
+	bool direction; // if its true, then the rank rises, if no, it goes down
+	recvPacket >> rank;
+	direction = recvPacket.ReadBit();
+	Guild* guild = GetPlayer()->GetGuild();
+	if (!guild)
+	{
+		Guild::SendCommandResult(this, GUILD_COMMAND_CREATE, ERR_GUILD_PLAYER_NOT_IN_GUILD);
+		return;
+	}
+	if (GetPlayer()->GetGUID() != guild->GetLeaderGUID())
+	{
+		Guild::SendCommandResult(this, GUILD_COMMAND_INVITE, ERR_GUILD_PERMISSIONS);
+		return;
+	}
 
-    recvPacket >> rank;
-    direction = recvPacket.ReadBit();
-
-    Guild* pGuild = GetPlayer()->GetGuild();
-
-  //  if(pGuild)
+  //  if(guild)
   //  {
-    //    pGuild->MoveRank(rank,direction);
+    //    guild->MoveRank(rank,direction);
   //  }
 }

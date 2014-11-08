@@ -2183,10 +2183,6 @@ class Player : public Unit, public GridObject<Player>
         void ApplyManaRegenBonus(int32 amount, bool apply);
         void ApplyHealthRegenBonus(int32 amount, bool apply);
         void UpdateManaRegen();
-        uint32 GetRuneTimer(uint8 index) const { return m_runeGraceCooldown[index]; }
-        void SetRuneTimer(uint8 index, uint32 timer) { m_runeGraceCooldown[index] = timer; }
-        uint32 GetLastRuneGraceTimer(uint8 index) const { return m_lastRuneGraceTimers[index]; }
-        void SetLastRuneGraceTimer(uint8 index, uint32 timer) { m_lastRuneGraceTimers[index] = timer; }
 
         uint64 GetLootGUID() const { return m_lootGuid; }
         void SetLootGUID(uint64 guid) { m_lootGuid = guid; }
@@ -2740,7 +2736,7 @@ class Player : public Unit, public GridObject<Player>
             SetRuneConvertAura(index, aura, auraType, spellInfo);
             ConvertRune(index, newType);
         }
-        void SetRuneCooldown(uint8 index, uint32 cooldown, bool casted = false);
+        void SetRuneCooldown(uint8 index, uint32 cooldown) { m_runes->runes[index].Cooldown = cooldown; m_runes->SetRuneState(index, (cooldown == 0) ? true : false); }
         void RemoveRunesByAuraEffect(AuraEffect const* aura);
         void RestoreBaseRune(uint8 index);
         void ConvertRune(uint8 index, RuneType newType);
@@ -2777,6 +2773,8 @@ class Player : public Unit, public GridObject<Player>
         void ClearWhisperWhiteList() { WhisperList.clear(); }
         void AddWhisperWhiteList(uint64 guid) { WhisperList.push_back(guid); }
         bool IsInWhisperWhiteList(uint64 guid);
+
+		void ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::ExtraMovementStatusElement* extras = NULL);
 
         /*! These methods send different packets to the client in apply and unapply case.
             These methods are only sent to the current unit.
@@ -3197,10 +3195,6 @@ class Player : public Unit, public GridObject<Player>
         uint8 m_MirrorTimerFlags;
         uint8 m_MirrorTimerFlagsLast;
         bool m_isInWater;
-		
-        // Rune type / Rune timer
-        uint32 m_runeGraceCooldown[MAX_RUNES];
-        uint32 m_lastRuneGraceTimers[MAX_RUNES];
 
         // Current teleport data
         WorldLocation m_teleport_dest;

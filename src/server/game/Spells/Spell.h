@@ -349,6 +349,7 @@ class Spell
         void EffectPlaySound(SpellEffIndex effIndex);
         void EffectRemoveAura(SpellEffIndex effIndex);
         void EffectDamageFromMaxHealthPCT(SpellEffIndex effIndex);
+        void EffectUnlockGuildVaultTab(SpellEffIndex effIndex);
         void EffectCastButtons(SpellEffIndex effIndex);
         void EffectRechargeManaGem(SpellEffIndex effIndex);
         void EffectGiveCurrency(SpellEffIndex effIndex);

@@ -339,6 +339,11 @@ class Vehicle;
 class VehicleJoinEvent;
 class TransportBase;
 class SpellCastTargets;
+namespace Movement
+{
+	class ExtraMovementStatusElement;
+	class MoveSpline;
+}
 
 typedef std::list<Unit*> UnitList;
 typedef std::list< std::pair<Aura*, uint8> > DispelChargesList;
@@ -2268,6 +2273,8 @@ class Unit : public WorldObject
         void EnterVehicle(Unit* base, int8 seatId = -1);
         void ExitVehicle(Position const* exitPosition = NULL);
         void ChangeSeat(int8 seatId, bool next = true);
+
+		void WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusElement* extras = NULL);
 
         // Should only be called by AuraEffect::HandleAuraControlVehicle(AuraApplication const* auraApp, uint8 mode, bool apply) const;
         void _ExitVehicle(Position const* exitPosition = NULL);

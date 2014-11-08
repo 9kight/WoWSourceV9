@@ -1278,7 +1278,7 @@ void Guild::ChallengesMgr::LoadChallengesFromDB()
     uint32 completedCount = 0;
     PreparedStatement* stmt2 = CharacterDatabase.GetPreparedStatement(CHAR_SEL_GUILD_CHALLENGES_COMPLETED);
     stmt2->setUInt32(0, m_owner->GetId());
-    PreparedQueryResult completedResult = CharacterDatabase.Query(stmt2);
+    QueryResult completedResult = CharacterDatabase.Query("SELECT challengeId, dateCompleted FROM guild_challenges_completed ORDER BY guildId");
 
     if(completedResult && completedResult->GetRowCount() > 0)
     {
@@ -1338,12 +1338,15 @@ void Guild::ChallengesMgr::CheckChallenge(Group* grp, uint32 challengeId)
     uint32 guildMembersInGroup = 0;
     uint32 memberCount = grp->GetMembersCount();
 
-    Group::MemberSlotList membersGrp = grp->GetMemberSlots();
-
-    for(Group::MemberSlotList::iterator itr = membersGrp.begin(); itr != membersGrp.end();++itr)
+    if(grp)
     {
-        if(Member* mem = m_owner->GetMember(itr->guid))
-            guildMembersInGroup++;
+		Group::MemberSlotList const& membersGrp = grp->GetMemberSlots();
+
+		for (Group::MemberSlotList::const_iterator itr = membersGrp.begin(); itr != membersGrp.end(); ++itr)
+		{
+			if (m_owner->GetMember(itr->guid))
+				guildMembersInGroup++;
+		}
     }
 
     uint8 type = m_challenges[challengeId].typeId;
@@ -1402,12 +1405,7 @@ void Guild::ChallengesMgr::GiveReward(uint32 challengeId)
     GuildChallenge challenge = m_challenges[challengeId];
 
     m_owner->GiveXP(challenge.XPReward);
-
-    if(m_owner->GetLevel() >= 5)
-    {
-        m_owner->AddMoneyToBank(challenge.GoldReward);
-        //we must implement bellow the Cash Flow guild perk
-    }
+    m_owner->AddMoneyToBank(challenge.GoldReward);
 
     WorldPacket data(SMSG_GUILD_CHALLENGE_COMPLETED, 20);
 
@@ -2265,14 +2263,17 @@ void Guild::HandleBuyBankTab(WorldSession* session, uint8 tabId)
     if (tabId != _GetPurchasedTabsSize())
         return;
 
-    uint32 tabCost = _GetGuildBankTabPrice(tabId) * GOLD;
-    if (!tabCost)
-        return;
+    if (tabId < GUILD_BANK_MAX_TABS - 2) // 7th tab is actually the 6th
+	{
+		uint32 tabCost = _GetGuildBankTabPrice(tabId) * GOLD;
+		if (!tabCost)
+			return;
 
-    if (!player->HasEnoughMoney(uint64(tabCost)))                   // Should not happen, this is checked by client
-        return;
+		if (!player->HasEnoughMoney(uint64(tabCost)))                   // Should not happen, this is checked by client
+			return;
 
-    player->ModifyMoney(-int64(tabCost));
+		player->ModifyMoney(-int64(tabCost));
+	}
 
     _CreateNewBankTab();
     _BroadcastEvent(GE_BANK_TAB_PURCHASED, 0);
@@ -2473,38 +2474,35 @@ void Guild::HandleLeaveMember(WorldSession* session)
 
 }
 
+
 void Guild::HandleRemoveMember(WorldSession* session, uint64 guid)
 {
-    Player* player = session->GetPlayer();
-    Player* removedPlayer = ObjectAccessor::FindPlayer(guid);
-    Member* member = GetMember(guid);
-
-    // Player must have rights to remove members
-    if (!_HasRankRight(player, GR_RIGHT_REMOVE))
-        SendCommandResult(session, GUILD_COMMAND_REMOVE, ERR_GUILD_PERMISSIONS);
-    // Removed player must be a member of the guild
-    else if (member && removedPlayer)
-    {
-        //std::string name = member->GetName();
-        // Guild masters cannot be removed
-        if (member->IsRank(GR_GUILDMASTER))
-            SendCommandResult(session, GUILD_COMMAND_REMOVE, ERR_GUILD_LEADER_LEAVE);
-        // Do not allow to remove player with the same rank or higher
-        else if (member->IsRankNotLower(player->GetRank()))
-            SendCommandResult(session, GUILD_COMMAND_REMOVE, ERR_GUILD_RANK_TOO_HIGH_S, removedPlayer->GetName());
-        else
-        {
-            // After call to DeleteMember pointer to member becomes invalid
-            DeleteMember(guid, false, true);
-            _LogEvent(GUILD_EVENT_LOG_UNINVITE_PLAYER, player->GetGUIDLow(), GUID_LOPART(guid));
-            _BroadcastEvent(GE_REMOVED, 0);
-            // Guild Reputation Disband Time
-            UpdateDisbandCharacterReputationGuild(GUID_LOPART(guid));
-            SendCommandResult(session, GUILD_COMMAND_REMOVE, ERR_GUILD_COMMAND_SUCCESS, removedPlayer->GetName());
-        }
-    }
-    else if (!member && removedPlayer) // If he's not a member of the guild - unlikely, but possible :)
-        SendCommandResult(session, GUILD_COMMAND_REMOVE, ERR_GUILD_PLAYER_NOT_IN_GUILD, removedPlayer->GetName());
+	Player* player = session->GetPlayer();
+	// Player must have rights to remove members
+	if (!_HasRankRight(player, GR_RIGHT_REMOVE))
+		SendCommandResult(session, GUILD_COMMAND_REMOVE, ERR_GUILD_PERMISSIONS);
+	else if (Member* member = GetMember(guid))
+	{
+		std::string name = member->GetName();
+		// Guild masters cannot be removed
+		if (member->IsRank(GR_GUILDMASTER))
+			SendCommandResult(session, GUILD_COMMAND_REMOVE, ERR_GUILD_LEADER_LEAVE);
+		// Do not allow to remove player with the same rank or higher
+		else
+		{
+			Member const* memberMe = GetMember(player->GetGUID());
+			if (!memberMe || member->IsRankNotLower(memberMe->GetRankId()))
+				SendCommandResult(session, GUILD_COMMAND_REMOVE, ERR_GUILD_RANK_TOO_HIGH_S, name);
+			else
+			{
+				// After call to DeleteMember pointer to member becomes invalid
+				DeleteMember(guid, false, true);
+				_LogEvent(GUILD_EVENT_LOG_UNINVITE_PLAYER, player->GetGUIDLow(), GUID_LOPART(guid));
+				_BroadcastEvent(GE_REMOVED, 0, name.c_str(), player->GetName().c_str());
+				SendCommandResult(session, GUILD_COMMAND_REMOVE, ERR_GUILD_COMMAND_SUCCESS, name);
+			}
+		}
+	}
 }
 
 void Guild::HandleUpdateMemberRank(WorldSession* session, uint64 guid, bool demote)
