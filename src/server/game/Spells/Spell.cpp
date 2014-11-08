@@ -87,6 +87,24 @@ SpellDestination::SpellDestination(WorldObject const& wObj)
     _position.SetOrientation(wObj.GetOrientation());
 }
 
+void SpellDestination::Relocate(Position const& pos)
+{
+	if (_transportGUID)
+	{
+		Position offset;
+		_position.GetPositionOffsetTo(pos, offset);
+		_transportOffset.RelocateOffset(offset);
+	}
+	_position.Relocate(pos);
+}
+
+void SpellDestination::RelocateOffset(Position const& offset)
+{
+	if (_transportGUID)
+		_transportOffset.RelocateOffset(offset);
+
+	_position.RelocateOffset(offset);
+}
 
 SpellCastTargets::SpellCastTargets() : m_elevation(0), m_speed(0), m_strTarget()
 {
@@ -400,6 +418,12 @@ void SpellCastTargets::SetDst(WorldObject const& wObj)
     m_targetMask |= TARGET_FLAG_DEST_LOCATION;
 }
 
+void SpellCastTargets::SetDst(SpellDestination const& spellDest)
+{
+	    m_dst = spellDest;
+	    m_targetMask |= TARGET_FLAG_DEST_LOCATION;
+}
+
 void SpellCastTargets::SetDst(SpellCastTargets const& spellTargets)
 {
     m_dst = spellTargets.m_dst;
@@ -417,6 +441,12 @@ void SpellCastTargets::ModDst(Position const& pos)
         m_dst._transportOffset.RelocateOffset(offset);
     }
     m_dst._position.Relocate(pos);
+}
+
+void SpellCastTargets::ModDst(SpellDestination const& spellDest)
+{
+	ASSERT(m_targetMask & TARGET_FLAG_DEST_LOCATION);
+	m_dst = spellDest;
 }
 
 void SpellCastTargets::RemoveDst()
@@ -1556,7 +1586,7 @@ void Spell::SelectImplicitDestDestTargets(SpellEffIndex effIndex, SpellImplicitT
         case TARGET_DEST_DEST:
             return;
         case TARGET_DEST_TRAJ:
-            SelectImplicitTrajTargets();
+			SelectImplicitTrajTargets(effIndex);
             return;
         default:
             break;
@@ -1701,140 +1731,158 @@ float tangent(float x)
 
 #define DEBUG_TRAJ(a) //a
 
-void Spell::SelectImplicitTrajTargets()
+void Spell::SelectImplicitTrajTargets(SpellEffIndex effIndex)
 {
-    if (!m_targets.HasTraj())
-        return;
+	if (!m_targets.HasTraj())
+		return;
 
-    float dist2d = m_targets.GetDist2d();
-    if (!dist2d)
-        return;
+	float dist2d = m_targets.GetDist2d();
+	if (!dist2d)
+		return;
 
-    float srcToDestDelta = m_targets.GetDstPos()->m_positionZ - m_targets.GetSrcPos()->m_positionZ;
+	float srcToDestDelta = m_targets.GetDstPos()->m_positionZ - m_targets.GetSrcPos()->m_positionZ;
 
-    std::list<WorldObject*> targets;
-    Trinity::WorldObjectSpellTrajTargetCheck check(dist2d, m_targets.GetSrcPos(), m_caster, m_spellInfo);
-    Trinity::WorldObjectListSearcher<Trinity::WorldObjectSpellTrajTargetCheck> searcher(m_caster, targets, check, GRID_MAP_TYPE_MASK_ALL);
-    SearchTargets<Trinity::WorldObjectListSearcher<Trinity::WorldObjectSpellTrajTargetCheck> > (searcher, GRID_MAP_TYPE_MASK_ALL, m_caster, m_targets.GetSrcPos(), dist2d);
-    if (targets.empty())
-        return;
+	std::list<WorldObject*> targets;
+	Trinity::WorldObjectSpellTrajTargetCheck check(dist2d, m_targets.GetSrcPos(), m_caster, m_spellInfo);
+	Trinity::WorldObjectListSearcher<Trinity::WorldObjectSpellTrajTargetCheck> searcher(m_caster, targets, check, GRID_MAP_TYPE_MASK_ALL);
+	SearchTargets<Trinity::WorldObjectListSearcher<Trinity::WorldObjectSpellTrajTargetCheck> >(searcher, GRID_MAP_TYPE_MASK_ALL, m_caster, m_targets.GetSrcPos(), dist2d);
+	if (targets.empty())
+		return;
 
-    targets.sort(Trinity::ObjectDistanceOrderPred(m_caster));
+	targets.sort(Trinity::ObjectDistanceOrderPred(m_caster));
 
-    float b = tangent(m_targets.GetElevation());
-    float a = (srcToDestDelta - dist2d * b) / (dist2d * dist2d);
-    if (a > -0.0001f)
-        a = 0;
-    DEBUG_TRAJ(sLog->outError(LOG_FILTER_SPELLS_AURAS, "Spell::SelectTrajTargets: a %f b %f", a, b);)
+	float b = tangent(m_targets.GetElevation());
+	float a = (srcToDestDelta - dist2d * b) / (dist2d * dist2d);
+	if (a > -0.0001f)
+		a = 0;
+	DEBUG_TRAJ(sLog->outError(LOG_FILTER_SPELLS, "Spell::SelectTrajTargets: a %f b %f", a, b);)
 
-    float bestDist = m_spellInfo->GetMaxRange(false);
+		float bestDist = m_spellInfo->GetMaxRange(false);
 
-    std::list<WorldObject*>::const_iterator itr = targets.begin();
-    for (; itr != targets.end(); ++itr)
-    {
-        if (Unit* unitTarget = (*itr)->ToUnit())
-            if (m_caster == *itr || m_caster->IsOnVehicle(unitTarget) || (unitTarget)->GetVehicle())//(*itr)->IsOnVehicle(m_caster))
-                continue;
+	std::list<WorldObject*>::const_iterator itr = targets.begin();
+	for (; itr != targets.end(); ++itr)
+	{
+		if (!m_caster->HasInLine(*itr, 5.0f))
+			continue;
 
-        const float size = std::max((*itr)->GetObjectSize() * 0.7f, 1.0f); // 1/sqrt(3)
-        // TODO: all calculation should be based on src instead of m_caster
-        const float objDist2d = m_targets.GetSrcPos()->GetExactDist2d(*itr) * std::cos(m_targets.GetSrcPos()->GetRelativeAngle(*itr));
-        const float dz = (*itr)->GetPositionZ() - m_targets.GetSrcPos()->m_positionZ;
+		if (m_spellInfo->CheckTarget(m_caster, *itr, true) != SPELL_CAST_OK)
+			continue;
 
-        DEBUG_TRAJ(sLog->outError(LOG_FILTER_SPELLS_AURAS, "Spell::SelectTrajTargets: check %u, dist between %f %f, height between %f %f.", (*itr)->GetEntry(), objDist2d - size, objDist2d + size, dz - size, dz + size);)
+		if (Unit* unitTarget = (*itr)->ToUnit())
+		{
+			if (m_caster == *itr || m_caster->IsOnVehicle(unitTarget) || unitTarget->GetVehicle())
+				continue;
 
-        float dist = objDist2d - size;
-        float height = dist * (a * dist + b);
-        DEBUG_TRAJ(sLog->outError(LOG_FILTER_SPELLS_AURAS, "Spell::SelectTrajTargets: dist %f, height %f.", dist, height);)
-        if (dist < bestDist && height < dz + size && height > dz - size)
-        {
-            bestDist = dist > 0 ? dist : 0;
-            break;
-        }
+			if (Creature* creatureTarget = unitTarget->ToCreature())
+			{
+				if (!(creatureTarget->GetCreatureTemplate()->type_flags & CREATURE_TYPEFLAGS_PROJECTILE_COLLISION))
+					continue;
+			}
+		}
+
+		const float size = std::max((*itr)->GetObjectSize() * 0.7f, 1.0f); // 1/sqrt(3)
+		/// @todo all calculation should be based on src instead of m_caster
+		const float objDist2d = m_targets.GetSrcPos()->GetExactDist2d(*itr) * std::cos(m_targets.GetSrcPos()->GetRelativeAngle(*itr));
+		const float dz = (*itr)->GetPositionZ() - m_targets.GetSrcPos()->m_positionZ;
+
+		DEBUG_TRAJ(TC_LOG_ERROR("spells", "Spell::SelectTrajTargets: check %u, dist between %f %f, height between %f %f.", (*itr)->GetEntry(), objDist2d - size, objDist2d + size, dz - size, dz + size);)
+
+			float dist = objDist2d - size;
+		float height = dist * (a * dist + b);
+		DEBUG_TRAJ(TC_LOG_ERROR("spells", "Spell::SelectTrajTargets: dist %f, height %f.", dist, height);)
+		if (dist < bestDist && height < dz + size && height > dz - size)
+		{
+			bestDist = dist > 0 ? dist : 0;
+			break;
+		}
 
 #define CHECK_DIST {\
-            DEBUG_TRAJ(sLog->outError(LOG_FILTER_SPELLS_AURAS, "Spell::SelectTrajTargets: dist %f, height %f.", dist, height);)\
-            if (dist > bestDist)\
-                continue;\
-            if (dist < objDist2d + size && dist > objDist2d - size)\
-            {\
-                bestDist = dist;\
-                break;\
-            }\
-        }
+	DEBUG_TRAJ(TC_LOG_ERROR("spells", "Spell::SelectTrajTargets: dist %f, height %f.", dist, height);)\
+		if (dist > bestDist)\
+		continue; \
+		if (dist < objDist2d + size && dist > objDist2d - size)\
+		{\
+		bestDist = dist; \
+		break; \
+		}\
+		}
 
-        if (!a)
-        {
-            height = dz - size;
-            dist = height / b;
-            CHECK_DIST;
+		if (!a)
+		{
+			height = dz - size;
+			dist = height / b;
+			CHECK_DIST;
 
-            height = dz + size;
-            dist = height / b;
-            CHECK_DIST;
+			height = dz + size;
+			dist = height / b;
+			CHECK_DIST;
 
-            continue;
-        }
+			continue;
+		}
 
-        height = dz - size;
-        float sqrt1 = b * b + 4 * a * height;
-        if (sqrt1 > 0)
-        {
-            sqrt1 = sqrt(sqrt1);
-            dist = (sqrt1 - b) / (2 * a);
-            CHECK_DIST;
-        }
+		height = dz - size;
+		float sqrt1 = b * b + 4 * a * height;
+		if (sqrt1 > 0)
+		{
+			sqrt1 = std::sqrt(sqrt1);
+			dist = (sqrt1 - b) / (2 * a);
+			CHECK_DIST;
+		}
 
-        height = dz + size;
-        float sqrt2 = b * b + 4 * a * height;
-        if (sqrt2 > 0)
-        {
-            sqrt2 = sqrt(sqrt2);
-            dist = (sqrt2 - b) / (2 * a);
-            CHECK_DIST;
+		height = dz + size;
+		float sqrt2 = b * b + 4 * a * height;
+		if (sqrt2 > 0)
+		{
+			sqrt2 = std::sqrt(sqrt2);
+			dist = (sqrt2 - b) / (2 * a);
+			CHECK_DIST;
 
-            dist = (-sqrt2 - b) / (2 * a);
-            CHECK_DIST;
-        }
+			dist = (-sqrt2 - b) / (2 * a);
+			CHECK_DIST;
+		}
 
-        if (sqrt1 > 0)
-        {
-            dist = (-sqrt1 - b) / (2 * a);
-            CHECK_DIST;
-        }
-    }
+		if (sqrt1 > 0)
+		{
+			dist = (-sqrt1 - b) / (2 * a);
+			CHECK_DIST;
+		}
+	}
 
-    if (m_targets.GetSrcPos()->GetExactDist2d(m_targets.GetDstPos()) > bestDist)
-    {
-        float x = m_targets.GetSrcPos()->m_positionX + std::cos(m_caster->GetOrientation()) * bestDist;
-        float y = m_targets.GetSrcPos()->m_positionY + std::sin(m_caster->GetOrientation()) * bestDist;
-        float z = m_targets.GetSrcPos()->m_positionZ + bestDist * (a * bestDist + b);
+	if (m_targets.GetSrcPos()->GetExactDist2d(m_targets.GetDstPos()) > bestDist)
+	{
+		float x = m_targets.GetSrcPos()->m_positionX + std::cos(m_caster->GetOrientation()) * bestDist;
+		float y = m_targets.GetSrcPos()->m_positionY + std::sin(m_caster->GetOrientation()) * bestDist;
+		float z = m_targets.GetSrcPos()->m_positionZ + bestDist * (a * bestDist + b);
 
-        if (itr != targets.end())
-        {
-            float distSq = (*itr)->GetExactDistSq(x, y, z);
-            float sizeSq = (*itr)->GetObjectSize();
-            sizeSq *= sizeSq;
-            DEBUG_TRAJ(sLog->outError(LOG_FILTER_SPELLS_AURAS, "Initial %f %f %f %f %f", x, y, z, distSq, sizeSq);)
-            if (distSq > sizeSq)
-            {
-                float factor = 1 - sqrt(sizeSq / distSq);
-                x += factor * ((*itr)->GetPositionX() - x);
-                y += factor * ((*itr)->GetPositionY() - y);
-                z += factor * ((*itr)->GetPositionZ() - z);
+		if (itr != targets.end())
+		{
+			float distSq = (*itr)->GetExactDistSq(x, y, z);
+			float sizeSq = (*itr)->GetObjectSize();
+			sizeSq *= sizeSq;
+			DEBUG_TRAJ(TC_LOG_ERROR("spells", "Initial %f %f %f %f %f", x, y, z, distSq, sizeSq);)
+			if (distSq > sizeSq)
+			{
+				float factor = 1 - std::sqrt(sizeSq / distSq);
+				x += factor * ((*itr)->GetPositionX() - x);
+				y += factor * ((*itr)->GetPositionY() - y);
+				z += factor * ((*itr)->GetPositionZ() - z);
 
-                distSq = (*itr)->GetExactDistSq(x, y, z);
-                DEBUG_TRAJ(sLog->outError(LOG_FILTER_SPELLS_AURAS, "Initial %f %f %f %f %f", x, y, z, distSq, sizeSq);)
-            }
-        }
+				distSq = (*itr)->GetExactDistSq(x, y, z);
+				DEBUG_TRAJ(TC_LOG_ERROR("spells", "Initial %f %f %f %f %f", x, y, z, distSq, sizeSq);)
+			}
+		}
 
-        Position trajDst;
-        trajDst.Relocate(x, y, z, m_caster->GetOrientation());
-        m_targets.ModDst(trajDst);
-    }
+		Position trajDst;
+		trajDst.Relocate(x, y, z, m_caster->GetOrientation());
+		SpellDestination dest(*m_targets.GetDst());
+		dest.Relocate(trajDst);
 
-    if (Vehicle* veh = m_caster->GetVehicleKit())
-        veh->SetLastShootPos(*m_targets.GetDstPos());
+		CallScriptDestinationTargetSelectHandlers(dest, effIndex, SpellImplicitTargetInfo(TARGET_DEST_TRAJ));
+		m_targets.ModDst(dest);
+	}
+
+	if (Vehicle* veh = m_caster->GetVehicleKit())
+		veh->SetLastShootPos(*m_targets.GetDstPos());
 }
 
 void Spell::SelectEffectTypeImplicitTargets(uint8 effIndex)
@@ -7666,6 +7714,20 @@ void Spell::CallScriptObjectTargetSelectHandlers(WorldObject*& target, SpellEffI
 
         (*scritr)->_FinishScriptCall();
     }
+}
+
+void Spell::CallScriptDestinationTargetSelectHandlers(SpellDestination& target, SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType)
+{
+	for (std::list<SpellScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+	{
+		(*scritr)->_PrepareScriptCall(SPELL_SCRIPT_HOOK_DESTINATION_TARGET_SELECT);
+		std::list<SpellScript::DestinationTargetSelectHandler>::iterator hookItrEnd = (*scritr)->OnDestinationTargetSelect.end(), hookItr = (*scritr)->OnDestinationTargetSelect.begin();
+		for (; hookItr != hookItrEnd; ++hookItr)
+		if (hookItr->IsEffectAffected(m_spellInfo, effIndex) && targetType.GetTarget() == hookItr->GetTarget())
+			hookItr->Call(*scritr, target);
+
+		(*scritr)->_FinishScriptCall();
+	}
 }
 
 bool Spell::CheckScriptEffectImplicitTargets(uint32 effIndex, uint32 effIndexToCheck)

@@ -3159,7 +3159,7 @@ class spell_round_up_horse : public SpellScriptLoader
                                 return;
 
                 PreventHitDefaultEffect(effIndex);
-            }
+			}
 
             void Register()
             {
@@ -5965,9 +5965,9 @@ class spell_glaive_thrower : public SpellScriptLoader
 
         class spell_glaive_thrower_SpellScript : public SpellScript
         {
-            PrepareSpellScript(spell_glaive_thrower_SpellScript)
+			PrepareSpellScript(spell_glaive_thrower_SpellScript)
 
-            void OnSummon(SpellEffIndex effIndex)
+			void OnSummon(SpellEffIndex effIndex)
             {
                 PreventHitDefaultEffect(effIndex);
 

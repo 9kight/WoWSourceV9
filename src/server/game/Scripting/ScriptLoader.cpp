@@ -475,8 +475,8 @@ void AddSC_boss_corborus(); //the stonecore
 void AddSC_boss_azil();
 void AddSC_boss_ozruk();
 void AddSC_boss_slabhide();
-void AddSC_instance_the_stonecore();
-void AddSC_the_stonecore();
+void AddSC_instance_stonecore();
+void AddSC_stonecore();
 
 //northrend
 void AddSC_boss_slad_ran();
@@ -1395,8 +1395,8 @@ void AddMaelstromScripts()
   AddSC_boss_azil();
   AddSC_boss_ozruk();
   AddSC_boss_slabhide();
-  AddSC_instance_the_stonecore();
-  AddSC_the_stonecore();
+  AddSC_instance_stonecore();
+  AddSC_stonecore();
 #endif
 }
 

@@ -16496,6 +16496,19 @@ void Unit::SendDurabilityLoss(Player* receiver, uint32 percent)
     receiver->GetSession()->SendPacket(&data);
 }
 
+void Unit::SetMeleeAnimKitId(uint16 animKitId)
+{
+	if (_meleeAnimKitId == animKitId)
+		return;
+
+	_meleeAnimKitId = animKitId;
+
+	WorldPacket data(SMSG_SET_MELEE_ANIM_KIT, 8 + 2);
+	data.appendPackGUID(GetGUID());
+	data << uint16(animKitId);
+	SendMessageToSet(&data, true);
+}
+
 void Unit::PlayOneShotAnimKit(uint32 id)
 {
     WorldPacket data(SMSG_PLAY_ONE_SHOT_ANIM_KIT, 7+2);

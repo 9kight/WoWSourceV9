@@ -494,6 +494,11 @@ struct Position
             pos->Relocate(m_positionX, m_positionY, m_positionZ, m_orientation);
     }
 
+	Position GetPosition() const
+	{
+		return *this;
+	}
+
     Position::PositionXYZStreamer PositionXYZStream()
     {
         return PositionXYZStreamer(*this);

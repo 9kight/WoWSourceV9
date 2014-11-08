@@ -65,6 +65,21 @@ bool InstanceScript::IsEncounterInProgress() const
     return false;
 }
 
+uint64 InstanceScript::GetObjectGuid(uint32 type) const
+{
+	ObjectGuidMap::const_iterator i = _objectGuids.find(type);
+	if (i != _objectGuids.end())
+		return i->second;
+	return 0;
+}
+
+void InstanceScript::SetHeaders(std::string const& dataHeaders)
+{
+	for (char header : dataHeaders)
+	if (isalpha(header))
+		headers.push_back(header);
+}
+
 void InstanceScript::LoadMinionData(const MinionData* data)
 {
     while (data->entry)
