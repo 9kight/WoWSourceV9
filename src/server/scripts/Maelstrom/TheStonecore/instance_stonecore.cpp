@@ -171,7 +171,7 @@ public:
 				slabhideIntro = EncounterState(data);
 				break;
 			case DATA_SLABHIDE_ROCK_WALL: // Handles rock walls
-				for (std::vector<ObjectGuid>::iterator itr = slabhideRockWallGUIDs.begin(); itr != slabhideRockWallGUIDs.end(); ++itr)
+				for (std::vector<uint64>::iterator itr = slabhideRockWallGUIDs.begin(); itr != slabhideRockWallGUIDs.end(); ++itr)
 					HandleGameObject((*itr), data ? true : false);
 				break;
 			default:

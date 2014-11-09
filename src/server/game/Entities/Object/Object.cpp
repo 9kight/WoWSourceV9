@@ -3315,3 +3315,10 @@ uint64 WorldObject::GetTransGUID() const
         return GetTransport()->GetGUID();
     return 0;
 }
+
+Position WorldObject::GetNearPosition(float dist, float angle)
+{
+	Position pos = GetPosition();
+	MovePosition(pos, dist, angle);
+	return pos;
+}

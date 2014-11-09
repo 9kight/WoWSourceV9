@@ -103,6 +103,9 @@ Position const SlabhideLandPos = { 1282.7f, 1229.77f, 247.155f, 3.82227f };
 
 class boss_slabhide : public CreatureScript
 {
+public:
+	boss_slabhide() : CreatureScript("boss_slabhide") { }
+
 	struct boss_slabhideAI : public BossAI
 	{
 		boss_slabhideAI(Creature* creature) : BossAI(creature, DATA_SLABHIDE)
@@ -296,10 +299,7 @@ class boss_slabhide : public CreatureScript
 		EventMap events;
 	};
 
-public:
-	boss_slabhide() : CreatureScript("boss_slabhide") { }
-	
-	CreatureAI* GetAI(Creature* creature) const
+	CreatureAI* GetAI(Creature* creature) const override
 	{
 		return new boss_slabhideAI(creature);
 	}
@@ -308,6 +308,9 @@ public:
 // 43242 - Lava Fissure
 class npc_lava_fissure : public CreatureScript
 {
+public:
+	npc_lava_fissure() : CreatureScript("npc_lava_fissure") { }
+
 	struct npc_lava_fissureAI : public ScriptedAI
 	{
 		npc_lava_fissureAI(Creature* creature) : ScriptedAI(creature)
@@ -340,10 +343,7 @@ class npc_lava_fissure : public CreatureScript
 		EventMap events;
 	};
 
-public:
-	npc_lava_fissure() : CreatureScript("npc_lava_fissure") { }
-
-	CreatureAI* GetAI(Creature* creature) const
+	CreatureAI* GetAI(Creature* creature) const override
 	{
 		return new npc_lava_fissureAI(creature);
 	}
@@ -352,6 +352,9 @@ public:
 // 43159 - Stalactite Trigger - Boss
 class npc_stalactite_trigger : public CreatureScript
 {
+public:
+	npc_stalactite_trigger() : CreatureScript("npc_stalactite_trigger") { }
+
 	struct npc_stalactite_triggerAI : public ScriptedAI
 	{
 		npc_stalactite_triggerAI(Creature* creature) : ScriptedAI(creature)
@@ -384,10 +387,7 @@ class npc_stalactite_trigger : public CreatureScript
 		EventMap events;
 	};
 
-public:
-	npc_stalactite_trigger() : CreatureScript("npc_stalactite_trigger") { }
-
-	CreatureAI* GetAI(Creature* creature) const
+	CreatureAI* GetAI(Creature* creature) const override
 	{
 		return new npc_stalactite_triggerAI(creature);
 	}
@@ -454,13 +454,13 @@ public:
 			dest.RelocateOffset(offset);
 		}
 
-		void Register()
+		void Register() override
 		{
 			OnDestinationTargetSelect += SpellDestinationTargetSelectFn(spell_s81028_s80650_stalactite_SpellScript::ModDestHeight, EFFECT_0, TARGET_DEST_CASTER_RANDOM);
 		}
 	};
 
-	SpellScript* GetSpellScript() const
+	SpellScript* GetSpellScript() const override
 	{
 		return new spell_s81028_s80650_stalactite_SpellScript();
 	}
@@ -486,13 +486,13 @@ public:
 			dest.Relocate(pos);
 		}
 
-		void Register()
+		void Register() override
 		{
 			OnDestinationTargetSelect += SpellDestinationTargetSelectFn(spell_stalactite_mod_dest_height_SpellScript::ModDestHeight, EFFECT_0, TARGET_DEST_CASTER);
 		}
 	};
 
-	SpellScript* GetSpellScript() const
+	SpellScript* GetSpellScript() const override
 	{
 		return new spell_stalactite_mod_dest_height_SpellScript();
 	}

@@ -20,6 +20,7 @@
 #include "SpellScript.h"
 #include "Vehicle.h"
 #include "stonecore.h"
+#include "MoveSplineInit.h"
 
 enum Spells
 {
@@ -165,7 +166,7 @@ public:
 
 		void JustDied(Unit* killer) override
 		{
-			me->Say(SAY_DEATH);
+			Talk(SAY_DEATH);
 		}
 
 		/*
@@ -225,7 +226,7 @@ public:
 			}
 		}
 
-		void UpdateAI(uint32 diff) override
+		void UpdateAI(uint32 const diff) override
 		{
 			if (!UpdateVictim())
 				return;
@@ -383,12 +384,12 @@ public:
 			if (victim->GetEntry() != NPC_DEVOUT_FOLLOWER)
 				return;
 
-			me->SetObjectScale(me->SetObjectScale() - 0.25f);
-			if (me->SetObjectScale() <= 0.0f)
+			me->SetObjectScale(me->GetObjectScale() - 0.25f);
+			if (me->GetObjectScale() <= 0.0f)
 				me->DespawnOrUnsummon(1000);
 		}
 
-		void UpdateAI(uint32 diff) override
+		void UpdateAI(uint32 const diff) override
 		{
 			events.Update(diff);
 
@@ -415,7 +416,7 @@ public:
 
 	CreatureAI* GetAI(Creature* creature) const override
 	{
-		return npc_gravity_well(creature);
+		return new npc_gravity_wellAI(creature);
 	}
 };
 
@@ -442,7 +443,7 @@ public:
 			events.ScheduleEvent(EVENT_SEISMIC_SHARD_MOUNT, 2400);
 		}
 
-		void UpdateAI(uint32 diff) override
+		void UpdateAI(uint32 const diff) override
 		{
 			events.Update(diff);
 
