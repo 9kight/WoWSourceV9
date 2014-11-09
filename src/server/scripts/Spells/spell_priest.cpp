@@ -1521,81 +1521,77 @@ class spell_pri_friendly_dispel: public SpellScriptLoader
 // Spirit of Redemption (Shapeshift) - 27827
 class spell_pri_spirit_of_redemption_form : public SpellScriptLoader
 {
-    public:
-        spell_pri_spirit_of_redemption_form() : SpellScriptLoader("spell_pri_spirit_of_redemption_form") { }
+public:
+	spell_pri_spirit_of_redemption_form() : SpellScriptLoader("spell_pri_spirit_of_redemption_form") { }
 
-        class spell_pri_spirit_of_redemption_form_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_pri_spirit_of_redemption_form_AuraScript);
+	class spell_pri_spirit_of_redemption_form_AuraScript : public AuraScript
+	{
+		PrepareAuraScript(spell_pri_spirit_of_redemption_form_AuraScript);
 
-            void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
-            {
-                if (Unit* caster = GetCaster())
-                {
-                    caster->RemoveAura(PRIEST_SPELL_SPIRIT_OF_REDEMPTION_IMMUNITY);
-                    caster->RemoveAura(PRIEST_SPELL_SPIRIT_OF_REDEMPTION_FORM);
-                    caster->RemoveAura(PRIEST_SPELL_SPIRIT_OF_REDEMPTION_ROOT);
-                    caster->setDeathState(JUST_DIED);
-                }
-            }
+		void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+		{
+			if (Unit* caster = GetCaster())
+			{
+				caster->RemoveAura(PRIEST_SPELL_SPIRIT_OF_REDEMPTION_FORM);
+				caster->setDeathState(JUST_DIED);
+			}
+		}
 
-            void Register()
-            {
-                OnEffectRemove += AuraEffectRemoveFn(spell_pri_spirit_of_redemption_form_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_WATER_BREATHING, AURA_EFFECT_HANDLE_REAL);
-            }
-        };
+		void Register()
+		{
+			OnEffectRemove += AuraEffectRemoveFn(spell_pri_spirit_of_redemption_form_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_WATER_BREATHING, AURA_EFFECT_HANDLE_REAL);
+		}
+	};
 
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_pri_spirit_of_redemption_form_AuraScript();
-        }
+	AuraScript* GetAuraScript() const
+	{
+		return new spell_pri_spirit_of_redemption_form_AuraScript();
+	}
 };
 
 // Spirit of Redemption - 20711
 class spell_pri_spirit_of_redemption : public SpellScriptLoader
 {
-    public:
-        spell_pri_spirit_of_redemption() : SpellScriptLoader("spell_pri_spirit_of_redemption") { }
+public:
+	spell_pri_spirit_of_redemption() : SpellScriptLoader("spell_pri_spirit_of_redemption") { }
 
-        class spell_pri_spirit_of_redemption_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_pri_spirit_of_redemption_AuraScript);
+	class spell_pri_spirit_of_redemption_AuraScript : public AuraScript
+	{
+		PrepareAuraScript(spell_pri_spirit_of_redemption_AuraScript);
 
-            void CalculateAmount(AuraEffect const* /*auraEffect*/, int32& amount, bool& /*canBeRecalculated*/)
-            {
-                amount = -1;
-            }
+		void CalculateAmount(AuraEffect const* /*auraEffect*/, int32& amount, bool& /*canBeRecalculated*/)
+		{
+			amount = -1;
+		}
 
-            void Absorb(AuraEffect* /*auraEffect*/, DamageInfo& dmgInfo, uint32& absorbAmount)
-            {
-                if (Unit* caster = GetCaster())
-                {
-                    if (dmgInfo.GetDamage() < caster->GetHealth())
-                        return;
+		void Absorb(AuraEffect* /*auraEffect*/, DamageInfo& dmgInfo, uint32& absorbAmount)
+		{
+			if (Unit* caster = GetCaster())
+			{
+				if (dmgInfo.GetDamage() < caster->GetHealth())
+					return;
 
-                    if (caster->HasAura(PRIEST_SPELL_SPIRIT_OF_REDEMPTION_SHAPESHIFT))
-                        return;
+				if (caster->HasAura(PRIEST_SPELL_SPIRIT_OF_REDEMPTION_SHAPESHIFT))
+					return;
 
-                    caster->CastSpell(caster, PRIEST_SPELL_SPIRIT_OF_REDEMPTION_FORM, true);
-                    caster->CastSpell(caster, PRIEST_SPELL_SPIRIT_OF_REDEMPTION_IMMUNITY, true);
-                    caster->CastSpell(caster, PRIEST_SPELL_SPIRIT_OF_REDEMPTION_ROOT, true);
-                    caster->CastSpell(caster, PRIEST_SPELL_SPIRIT_OF_REDEMPTION_SHAPESHIFT, true);
+				caster->CastSpell(caster, PRIEST_SPELL_SPIRIT_OF_REDEMPTION_FORM, true);
+				caster->CastSpell(caster, PRIEST_SPELL_SPIRIT_OF_REDEMPTION_SHAPESHIFT, true);
 
-                    absorbAmount = caster->GetHealth() - 1;
-                }
-            }
+				absorbAmount = caster->GetHealth() - 1;
+			}
+		}
 
-            void Register()
-            {
-                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pri_spirit_of_redemption_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
-                OnEffectAbsorb += AuraEffectAbsorbFn(spell_pri_spirit_of_redemption_AuraScript::Absorb, EFFECT_0);
-            }
-        };
+		void Register()
+		{
+			DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pri_spirit_of_redemption_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
+			OnEffectAbsorb += AuraEffectAbsorbFn(spell_pri_spirit_of_redemption_AuraScript::Absorb, EFFECT_0);
+		}
+	};
 
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_pri_spirit_of_redemption_AuraScript();
-        }
+	AuraScript* GetAuraScript() const
+	{
+		return new spell_pri_spirit_of_redemption_AuraScript();
+	}
 };
 
 // 81208,81206 Chakra: Serenity and Chakra: Sanctuary spell swap supressor
