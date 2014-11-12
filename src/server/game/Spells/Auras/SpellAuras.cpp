@@ -1269,6 +1269,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 break;
             }
             case SPELLFAMILY_DEATHKNIGHT:
+				// Rune Strike should always be useable when Blood Presence is active
+				if (target->HasAura(48263))
+				target->ModifyAuraState(AURA_STATE_DEFENSE, true);
+				else
+				target->ModifyAuraState(AURA_STATE_DEFENSE, false);
+				
                 if (GetSpellInfo()->Id == 51124) //Killing Machine
                 {
                     if (!caster || !caster->HasAura(90459)) // T11 4 Piece
