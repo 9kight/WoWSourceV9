@@ -84,6 +84,7 @@
 #include "MovementStructures.h"
 #include "MoveSplineInit.h"
 #include "InfoMgr.h"
+#include "AnticheatMgr.h"
 
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
 
@@ -26985,6 +26986,12 @@ void Player::RefundItem(Item* item)
     SaveInventoryAndGoldToDB(trans);
 
     CharacterDatabase.CommitTransaction(trans);
+	
+    // we save the data here to prevent spamming
+    sAnticheatMgr->SavePlayerData(this);
+
+    // in this way we prevent to spam the db by each report made!
+    // sAnticheatMgr->SavePlayerData(this);
 }
 
 void Player::SetRandomWinner(bool isWinner)

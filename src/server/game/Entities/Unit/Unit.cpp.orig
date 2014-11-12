@@ -16,7 +16,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "AnticheatMgr.h"
 #include "Unit.h"
 #include "Common.h"
 #include "Battlefield.h"
@@ -7141,46 +7140,36 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
             }
             switch (dummySpell->Id)
             {
-                case 86674: // Ancient Guardian - Holy
+               // Ancient Healer
+                case 86674:
                 {
-                    Unit* guardian = NULL;
-                    AuraEffect* dummy = GetAuraEffect(86669, EFFECT_1, GetGUID());
-                    if (!dummy || !victim)
-                        return false;
+                    int32 bp0 = damage;
+                    int32 bp1 = CalculatePct(bp0, 10);
+                    if (!bp0 || !bp1 || !victim) 
+                    return false;
+                    this->CastCustomSpell(victim, 86678, &bp0, &bp1, NULL, true, NULL, triggeredByAura);
+                    return true;
 
-                    // A maximum of 5 heals
-                    bool unsummon = dummy->GetAmount() == 4;
-                    int32 basepoints1 = damage * 0.1f;
-                    basepoints0 = damage - basepoints1;
-                    std::list<Creature*> MinionList;
-                    GetAllMinionsByEntry(MinionList, 46499);
-                    for (std::list<Creature*>::iterator itr = MinionList.begin(); itr != MinionList.end(); itr++)
-                    {
-                        guardian = (*itr);
-                        (*itr)->CastCustomSpell(victim, 86678, &basepoints0, &basepoints1, NULL, true);
-                        // Increase heal amount in dummy aura
-                        dummy->SetAmount(dummy->GetAmount() + 1);
-                    }
-                    if (guardian && unsummon)
-                    {
-                        guardian->ToCreature()->DespawnOrUnsummon();
-                        RemoveAurasDueToSpell(86669, GetGUID());
-                        RemoveAurasDueToSpell(86674, GetGUID());
-                    }
-                    break;
                 }
-                case 86703: // Ancient Guardian - Retri
+		// Ancient Crusader (guardian)
+		case 86703:
+		{
+			if(Unit* owner = GetCharmerOrOwner())
+			{
+			owner->CastSpell(owner, 86700, true);
+						return true;
+			}
+						break;
+		}
+		
+                // Ancient Crusader - Player
                 case 86701:
                 {
-                    Unit* caster = this;
-                    if (GetTypeId() != TYPEID_PLAYER)
-                        caster = GetOwner();
-                    if (!caster)
-                        return false;
-                    caster->CastSpell(caster, 86700, true);
-                    return true;
-                }
-                case 85803: // Selfless Healer
+                    target = this;
+                    triggered_spell_id = 86700;
+                    break;
+                }     
+           case 85803: // Selfless Healer
                 case 85804:
                 {
                     if (this == victim || triggeredByAura->GetEffIndex() != EFFECT_1)
@@ -13311,9 +13300,6 @@ void Unit::SetVisible(bool x)
 
 void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
 {
-    //if (this->ToPlayer())
-    //    sAnticheatMgr->DisableAnticheatDetection(this->ToPlayer());
-
     int32 main_speed_mod  = 0;
     float stack_bonus     = 1.0f;
     float non_stack_bonus = 1.0f;
@@ -16413,6 +16399,14 @@ bool Unit::HandleAuraRaidProcFromChargeWithValue(AuraEffect* triggeredByAura)
             return true;
         }
 
+  // Glyph of Prayer of Mending
+        if (HasAura(55685) && jumps == 4)
+        {
+            heal += heal * 0.6f;
+            CastCustomSpell(this, 33110, &heal, NULL, NULL, true, NULL, NULL, caster_guid);
+            return true;
+        }
+
 }
 bool Unit::HandleAuraRaidProcFromCharge(AuraEffect* triggeredByAura)
 {
@@ -19193,6 +19187,14 @@ void Unit::SetFacingToObject(WorldObject* object)
     // TODO: figure out under what conditions creature will move towards object instead of facing it where it currently is.
     SetFacingTo(GetAngle(object));
 }
+
+bool Unit::IsAboveGround() const
+{
+    float ground = GetPositionZ();
+    GetMap()->GetWaterOrGroundLevel(GetPositionX(), GetPositionY(), GetPositionZ(), &ground);
+
+    return G3D::fuzzyGt(GetPositionZ(), ground + 0.05f) || G3D::fuzzyLt(GetPositionZ(), ground - 0.05f);;
+};
 
 bool Unit::SetWalk(bool enable)
 {
