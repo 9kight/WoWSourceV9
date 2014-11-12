@@ -1978,30 +1978,60 @@ class spell_dru_swift_flight_passive : public SpellScriptLoader
 // -5217 - Tiger's Fury
 class spell_dru_tiger_s_fury : public SpellScriptLoader
 {
-    public:
-        spell_dru_tiger_s_fury() : SpellScriptLoader("spell_dru_tiger_s_fury") { }
+public:
+	spell_dru_tiger_s_fury() : SpellScriptLoader("spell_dru_tiger_s_fury") { }
 
-        class spell_dru_tiger_s_fury_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_dru_tiger_s_fury_SpellScript);
+	class spell_dru_tiger_s_fury_AuraScript : public AuraScript
+	{
+		PrepareAuraScript(spell_dru_tiger_s_fury_AuraScript);
 
-            void OnHit()
-            {
-                // King of the jungle
-                if (AuraEffect const* aurEff = GetHitUnit()->GetDummyAuraEffect(SPELLFAMILY_DRUID, 2850, EFFECT_1))
-                    GetHitUnit()->CastCustomSpell(SPELL_DRUID_TIGER_S_FURY_ENERGIZE, SPELLVALUE_BASE_POINT0, aurEff->GetAmount(), GetHitUnit(), true);
-            }
+		bool Validate(SpellInfo const* /*spell*/)
+		{
+			if (!sSpellMgr->GetSpellInfo(5217))
+				return false;
+			return true;
+		}
 
-            void Register()
-            {
-                AfterHit += SpellHitFn(spell_dru_tiger_s_fury_SpellScript::OnHit);
-            }
-        };
+		void AfterApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+		{
+			if (Unit* caster = GetCaster())
+			{
+				if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 2850, 1))
+				{
+					int32 bp0 = aurEff->GetAmount();
+					caster->CastCustomSpell(caster, 51178, &bp0, 0, 0, true); // King of the Jungle
+				}
+				if (caster->HasAura(80316)) // Primal Madness (rank 1)
+					caster->CastSpell(caster, 80879, true);
 
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_dru_tiger_s_fury_SpellScript();
-        }
+				if (caster->HasAura(80317)) // Primal Madness (rank 1)
+					caster->CastSpell(caster, 80886, true);
+			}
+		}
+
+		void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+		{
+			if (Unit* caster = GetCaster())
+			{
+				if (caster->HasAura(80316))
+					caster->RemoveAura(80879);
+
+				if (caster->HasAura(80317))
+					caster->RemoveAura(80886);
+			}
+		}
+
+		void Register()
+		{
+			AfterEffectApply += AuraEffectApplyFn(spell_dru_tiger_s_fury_AuraScript::AfterApply, EFFECT_0, SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, AURA_EFFECT_HANDLE_REAL);
+			AfterEffectRemove += AuraEffectRemoveFn(spell_dru_tiger_s_fury_AuraScript::AfterRemove, EFFECT_0, SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, AURA_EFFECT_HANDLE_REAL);
+		}
+	};
+
+	AuraScript* GetAuraScript() const
+	{
+		return new spell_dru_tiger_s_fury_AuraScript();
+	}
 };
 
 // -61391 - Typhoon

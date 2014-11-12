@@ -1620,6 +1620,9 @@ void AuraEffect::HandleModStealth(AuraApplication const* aurApp, uint8 mode, boo
             if (target->GetTypeId() == TYPEID_PLAYER)
                 target->RemoveByteFlag(PLAYER_FIELD_BYTES2, 3, PLAYER_FIELD_BYTE2_STEALTH);
         }
+        //Remove overkill after 20 seconds
+        if (Aura* overkill = target->GetAura(58427, target->GetGUID()))
+            overkill->SetDuration(20000);
     }
 
     // call functions which may have additional effects after chainging state of unit
