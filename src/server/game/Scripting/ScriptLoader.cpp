@@ -49,7 +49,6 @@ void AddSC_SmartSCripts();
 void AddSC_anticheat_commandscript();
 void AddSC_account_commandscript();
 void AddSC_achievement_commandscript();
-void AddSC_anticheat_commandscript();
 void AddSC_ban_commandscript();
 void AddSC_bf_commandscript();
 void AddSC_cast_commandscript();
