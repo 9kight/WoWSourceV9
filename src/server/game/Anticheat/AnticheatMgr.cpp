@@ -336,22 +336,22 @@ void AnticheatMgr::BuildReport(Player* player,uint8 reportType)
 		switch (reportType)
 			{
 			case 0:
-				str = "|cFFFF0000[AntiCheat]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Speed Cheater!";
+				str = "  |cFFFF0000[AntiCheat]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Speed Cheater!";
 				break;
 			case 1:
-				str = "|cFFFF0000[AntiCheat]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Fly Cheater!";
+				str = "  |cFFFF0000[AntiCheat]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Fly Cheater!";
 				break;
 			case 2:
-				str = "|cFFFF0000[AntiCheat]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Walk Water Cheater!";
+				str = "  |cFFFF0000[AntiCheat]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Walk Water Cheater!";
 				break;
 			case 3:
-				str = "|cFFFF0000[AntiCheat]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Jump Cheater!";
+				str = "  |cFFFF0000[AntiCheat]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Jump Cheater!";
 				break;
 			case 4:
-				str = "|cFFFF0000[AntiCheat]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Teleport Cheater!";
+				str = "  |cFFFF0000[AntiCheat]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Teleport Cheater!";
 				break;
 			case 5:
-				str = "|cFFFF0000[AntiCheat]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Climb cheater!";
+				str = "  |cFFFF0000[AntiCheat]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Climb cheater!";
 				break;
 			default:
 				break;
