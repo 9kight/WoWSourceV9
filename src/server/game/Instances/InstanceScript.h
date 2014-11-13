@@ -162,7 +162,7 @@ class InstanceScript : public ZoneScript
 		uint64 GetObjectGuid(uint32 type) const;
 		inline Creature* GetCreature(uint32 type)
 		{
-			return ObjectAccessor::GetObjectInMap<Creature>(GetObjectGuid(type), instance, nullptr);
+			return ObjectAccessor::GetObjectInMap<Creature>(GetObjectGuid(type), instance, 0);
 		}
 
         //Called when a player successfully enters the instance.

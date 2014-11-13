@@ -19,7 +19,6 @@
 #define DEF_STONECORE_H
 
 #define SCScriptName "instance_stonecore"
-#define DataHeader "SC"
 
 enum DataTypes
 {

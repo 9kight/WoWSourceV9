@@ -114,7 +114,7 @@ public:
 			events.ScheduleEvent(EVENT_FEAR, 8000);
 		}
 
-		void DamageTaken(Unit* /*attacker*/, uint32& damage) override
+		void DamageTaken(Unit* /*attacker*/, uint32& damage)
 		{
 			if (damage >= me->GetHealth())
 				damage = me->GetHealth() - 1;
@@ -160,7 +160,7 @@ public:
 			me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 		}
 
-		void MovementInform(uint32 type, uint32 pointId) override
+		void MovementInform(uint32 type, uint32 pointId)
 		{
 			if (type != POINT_MOTION_TYPE)
 				return;
@@ -201,7 +201,7 @@ public:
 			}
 		}
 
-		void UpdateAI(uint32 const diff) override
+		void UpdateAI(uint32 const diff)
 		{
 			// Only update events if Millhouse is aggressive
 			if (me->GetReactState() != REACT_AGGRESSIVE)
@@ -260,7 +260,7 @@ public:
 		EventMap events;
 	};
 
-	CreatureAI* GetAI(Creature* creature) const override
+	CreatureAI* GetAI(Creature* creature) const
 	{
 		return new npc_sc_millhouse_manastormAI(creature);
 	}
@@ -287,7 +287,7 @@ public:
 		}
 	};
 
-	SpellScript* GetSpellScript() const override
+	SpellScript* GetSpellScript() const
 	{
 		return new spell_force_of_earth_SpellScript();
 	}
@@ -309,13 +309,13 @@ public:
 				creature->SetHomePosition(creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation());
 		}
 
-		void Register() override
+		void Register()
 		{
 			OnEffectHitTarget += SpellEffectFn(spell_sc_anchor_here_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
 		}
 	};
 
-	SpellScript* GetSpellScript() const override
+	SpellScript* GetSpellScript() const
 	{
 		return new spell_sc_anchor_here_SpellScript();
 	}
@@ -331,7 +331,7 @@ public:
 	{
 		PrepareSpellScript(spell_sc_twilight_documents_SpellScript);
 
-		bool Validate(SpellInfo const* /*spell*/) override
+		bool Validate(SpellInfo const* /*spell*/)
 		{
 			if (!sObjectMgr->GetGameObjectTemplate(GAMEOBJECT_TWILIGHT_DOCUMENTS))
 				return false;
@@ -349,14 +349,14 @@ public:
 				GetCaster()->SummonGameObject(GAMEOBJECT_TWILIGHT_DOCUMENTS, loc->GetPositionX(), loc->GetPositionY(), loc->GetPositionZ(), loc->GetOrientation(), 0, 0, 0, 0, 7200);
 		}
 
-		void Register() override
+		void Register()
 		{
 			OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_sc_twilight_documents_SpellScript::SetTarget, EFFECT_0, TARGET_DEST_NEARBY_ENTRY);
 			OnEffectHit += SpellEffectFn(spell_sc_twilight_documents_SpellScript::SpawnGameObject, EFFECT_0, SPELL_EFFECT_DUMMY);
 		}
 	};
 
-	SpellScript* GetSpellScript() const override
+	SpellScript* GetSpellScript() const
 	{
 		return new spell_sc_twilight_documents_SpellScript();
 	}
@@ -387,13 +387,13 @@ public:
 			unitList.remove_if(JumpCheck());
 		}
 
-		void Register() override
+		void Register()
 		{
 			OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_sc_quake_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
 		}
 	};
 
-	SpellScript* GetSpellScript() const override
+	SpellScript* GetSpellScript() const
 	{
 		return new spell_sc_quake_SpellScript();
 	}
@@ -404,7 +404,7 @@ class at_sc_corborus_intro : public AreaTriggerScript
 public:
 	at_sc_corborus_intro() : AreaTriggerScript("at_sc_corborus_intro") { }
 
-	bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/) override
+	bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/)
 	{
 		if (InstanceScript* instance = player->GetInstanceScript())
 		if (Creature* corborus = ObjectAccessor::GetCreature(*player, instance->GetData64(DATA_CORBORUS)))
@@ -418,7 +418,7 @@ class at_sc_slabhide_intro : public AreaTriggerScript
 public:
 	at_sc_slabhide_intro() : AreaTriggerScript("at_sc_slabhide_intro") { }
 
-	bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/) override
+	bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/)
 	{
 		if (InstanceScript* instance = player->GetInstanceScript())
 		if (Creature* slabhide = ObjectAccessor::GetCreature(*player, instance->GetData64(DATA_SLABHIDE)))

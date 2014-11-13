@@ -132,7 +132,7 @@ public:
 			me->SetReactState(REACT_AGGRESSIVE);
 		}
 
-		void EnterCombat(Unit* /*victim*/) override
+		void EnterCombat(Unit* /*victim*/)
 		{
 			_EnterCombat();
 
@@ -142,7 +142,7 @@ public:
 			events.ScheduleEvent(EVENT_AIR_PHASE, 10000);
 		}
 
-		void JustDied(Unit* /*killer*/) override
+		void JustDied(Unit* /*killer*/)
 		{
 			_JustDied();
 
@@ -150,7 +150,7 @@ public:
 			DespawnAll();
 		}
 
-		void DoAction(int32 const action) override
+		void DoAction(int32 const action)
 		{
 			switch (action)
 			{
@@ -170,7 +170,7 @@ public:
 			}
 		}
 
-		void MovementInform(uint32 type, uint32 id) override
+		void MovementInform(uint32 type, uint32 id)
 		{
 			if (type != POINT_MOTION_TYPE && type != EFFECT_MOTION_TYPE)
 				return;
@@ -207,7 +207,7 @@ public:
 			}
 		}
 
-		void UpdateAI(uint32 const diff) override
+		void UpdateAI(uint32 const diff)
 		{
 			if (!UpdateVictim())
 				return;
@@ -299,7 +299,7 @@ public:
 		EventMap events;
 	};
 
-	CreatureAI* GetAI(Creature* creature) const override
+	CreatureAI* GetAI(Creature* creature) const
 	{
 		return new boss_slabhideAI(creature);
 	}
@@ -320,7 +320,7 @@ public:
 			events.ScheduleEvent(EVENT_LAVA_FISSURE_ERUPTION, 6000);
 		}
 
-		void UpdateAI(uint32 const diff) override
+		void UpdateAI(uint32 const diff)
 		{
 			events.Update(diff);
 
@@ -343,7 +343,7 @@ public:
 		EventMap events;
 	};
 
-	CreatureAI* GetAI(Creature* creature) const override
+	CreatureAI* GetAI(Creature* creature) const
 	{
 		return new npc_lava_fissureAI(creature);
 	}
@@ -365,7 +365,7 @@ public:
 			events.ScheduleEvent(EVENT_STALACTITE_MISSLE, 5600);
 		}
 
-		void UpdateAI(uint32 const diff) override
+		void UpdateAI(uint32 const diff)
 		{
 			events.Update(diff);
 
@@ -387,7 +387,7 @@ public:
 		EventMap events;
 	};
 
-	CreatureAI* GetAI(Creature* creature) const override
+	CreatureAI* GetAI(Creature* creature) const
 	{
 		return new npc_stalactite_triggerAI(creature);
 	}
@@ -423,14 +423,14 @@ public:
 			caster->CastSpell(caster, SPELL_STALACTITE_SUMMON_TRIGGER, true);
 		}
 
-		void Register() override
+		void Register()
 		{
 			OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_s81035_stalactite_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
 			OnHit += SpellHitFn(spell_s81035_stalactite_SpellScript::SummonStalactiteTrigger);
 		}
 	};
 
-	SpellScript* GetSpellScript() const override
+	SpellScript* GetSpellScript() const
 	{
 		return new spell_s81035_stalactite_SpellScript();
 	}
@@ -454,13 +454,13 @@ public:
 			dest.RelocateOffset(offset);
 		}
 
-		void Register() override
+		void Register()
 		{
 			OnDestinationTargetSelect += SpellDestinationTargetSelectFn(spell_s81028_s80650_stalactite_SpellScript::ModDestHeight, EFFECT_0, TARGET_DEST_CASTER_RANDOM);
 		}
 	};
 
-	SpellScript* GetSpellScript() const override
+	SpellScript* GetSpellScript() const
 	{
 		return new spell_s81028_s80650_stalactite_SpellScript();
 	}
@@ -486,13 +486,13 @@ public:
 			dest.Relocate(pos);
 		}
 
-		void Register() override
+		void Register()
 		{
 			OnDestinationTargetSelect += SpellDestinationTargetSelectFn(spell_stalactite_mod_dest_height_SpellScript::ModDestHeight, EFFECT_0, TARGET_DEST_CASTER);
 		}
 	};
 
-	SpellScript* GetSpellScript() const override
+	SpellScript* GetSpellScript() const
 	{
 		return new spell_stalactite_mod_dest_height_SpellScript();
 	}
@@ -508,7 +508,7 @@ public:
 	{
 		PrepareSpellScript(spell_s92306_crystal_storm_SpellScript);
 
-		bool Validate(SpellInfo const* /*spellInfo*/) override
+		bool Validate(SpellInfo const* /*spellInfo*/)
 		{
 			if (!sSpellMgr->GetSpellInfo(SPELL_CRYSTAL_STORM_TRIGGER))
 				return false;
@@ -522,13 +522,13 @@ public:
 				caster->CastSpell(caster, SPELL_CRYSTAL_STORM_TRIGGER, true);
 		}
 
-		void Register() override
+		void Register()
 		{
 			OnEffectHitTarget += SpellEffectFn(spell_s92306_crystal_storm_SpellScript::HandleDummyEffect, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
 		}
 	};
 
-	SpellScript* GetSpellScript() const override
+	SpellScript* GetSpellScript() const
 	{
 		return new spell_s92306_crystal_storm_SpellScript();
 	}
@@ -574,13 +574,13 @@ public:
 			unitList.remove_if(BehindObjectCheck(caster, goList));
 		}
 
-		void Register() override
+		void Register()
 		{
 			OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_s92300_crystal_storm_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
 		}
 	};
 
-	SpellScript* GetSpellScript() const override
+	SpellScript* GetSpellScript() const
 	{
 		return new spell_s92300_crystal_storm_SpellScript();
 	}

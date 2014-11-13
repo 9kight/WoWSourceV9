@@ -43,11 +43,10 @@ public:
 	{
 		instance_stonecore_InstanceScript(Map* map) : InstanceScript(map)
 		{
-			SetHeaders(DataHeader);
 			SetBossNumber(MAX_ENCOUNTER);
 		}
 
-		void OnGameObjectCreate(GameObject* go) override
+		void OnGameObjectCreate(GameObject* go)
 		{
 			switch (go->GetEntry())
 			{
@@ -63,7 +62,7 @@ public:
 			}
 		}
 
-		void OnCreatureCreate(Creature* creature) override
+		void OnCreatureCreate(Creature* creature)
 		{
 			switch (creature->GetEntry())
 			{
@@ -111,7 +110,7 @@ public:
 			}
 		}
 
-		bool SetBossState(uint32 type, EncounterState state) override
+		bool SetBossState(uint32 type, EncounterState state)
 		{
 			switch (type)
 			{
@@ -141,7 +140,7 @@ public:
 			return InstanceScript::SetBossState(type, state);
 		}
 
-		uint32 GetData(uint32 type) const override
+		uint32 GetData(uint32 type) const
 		{
 			switch (type)
 			{
@@ -154,7 +153,7 @@ public:
 			return 0;
 		}
 
-		void SetData(uint32 type, uint32 data) override
+		void SetData(uint32 type, uint32 data)
 		{
 			switch (type)
 			{
@@ -179,7 +178,7 @@ public:
 			}
 		}
 
-		uint64 GetData64(uint32 type) const override
+		uint64 GetData64(uint32 type) const
 		{
 			switch (type)
 			{
@@ -250,7 +249,7 @@ public:
 		EncounterState slabhideIntro;
 	};
 
-	InstanceScript* GetInstanceScript(InstanceMap* map) const override
+	InstanceScript* GetInstanceScript(InstanceMap* map) const
 	{
 		return new instance_stonecore_InstanceScript(map);
 	}
@@ -272,13 +271,13 @@ public:
 			dest.Relocate(pos);
 		}
 
-		void Register() override
+		void Register()
 		{
 			OnDestinationTargetSelect += SpellDestinationTargetSelectFn(spell_ring_wyrm_knockback_SpellScript::ModDest, EFFECT_0, TARGET_DEST_CASTER);
 		}
 	};
 
-	SpellScript* GetSpellScript() const override
+	SpellScript* GetSpellScript() const
 	{
 		return new spell_ring_wyrm_knockback_SpellScript();
 	}

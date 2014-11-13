@@ -90,7 +90,7 @@ public:
 			stateIntro = NOT_STARTED;
 		}
 
-		void Reset() override
+		void Reset()
 		{
 			_Reset();
 			countTrashingCharge = 0;
@@ -99,7 +99,7 @@ public:
 			events.ScheduleEvent(EVENT_SUBMERGE, 36000);
 		}
 
-		void DoAction(int32 const action) override
+		void DoAction(int32 const action)
 		{
 			switch (action)
 			{
@@ -125,7 +125,7 @@ public:
 			}
 		}
 
-		void UpdateAI(uint32 const diff) override
+		void UpdateAI(uint32 const diff)
 		{
 			if (!UpdateVictim() && stateIntro != IN_PROGRESS)
 				return;
@@ -229,7 +229,7 @@ public:
 			DoMeleeAttackIfReady();
 		}
 
-		void JustSummoned(Creature* summon) override
+		void JustSummoned(Creature* summon)
 		{
 			if (summon->GetEntry() != NPC_TRASHING_CHARGE)
 				return;
@@ -244,7 +244,7 @@ public:
 		uint32 countTrashingCharge;
 	};
 
-	CreatureAI* GetAI(Creature* creature) const override
+	CreatureAI* GetAI(Creature* creature) const
 	{
 		return new boss_corborusAI(creature);
 	}
@@ -266,13 +266,13 @@ public:
 			events.ScheduleEvent(EVENT_ROCK_BORE, urand(15000, 20000)); // Need sniffs for this timer
 		}
 
-		void IsSummonedBy(Unit* summoner) override
+		void IsSummonedBy(Unit* summoner)
 		{
 			me->SetInCombatState(false, summoner);
 			DoCast(SPELL_ROCK_BORER_EMERGE);
 		}
 
-		void UpdateAI(uint32 const diff) override
+		void UpdateAI(uint32 const diff)
 		{
 			if (!UpdateVictim() && me->GetReactState() != REACT_PASSIVE)
 				return;
@@ -306,7 +306,7 @@ public:
 		EventMap events;
 	};
 
-	CreatureAI* GetAI(Creature* creature) const override
+	CreatureAI* GetAI(Creature* creature) const
 	{
 		return new npc_rock_borerAI(creature);
 	}

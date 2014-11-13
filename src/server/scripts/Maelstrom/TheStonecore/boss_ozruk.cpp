@@ -80,7 +80,7 @@ public:
 	{
 		boss_ozrukAI(Creature* creature) : BossAI(creature, DATA_OZRUK) { }
 
-		void Reset() override
+		void Reset()
 		{
 			_Reset();
 
@@ -93,14 +93,14 @@ public:
 			RemoveBouncerSpikes();
 		}
 
-		void EnterCombat(Unit* /*victim*/) override
+		void EnterCombat(Unit* /*victim*/)
 		{
 			_EnterCombat();
 
 			Talk(SAY_AGGRO);
 		}
 
-		void JustSummoned(Creature* summon) override
+		void JustSummoned(Creature* summon)
 		{
 			if (summon->GetEntry() != NPC_RUPTURE_CONTROLLER)
 				return;
@@ -110,7 +110,7 @@ public:
 			summon->DespawnOrUnsummon(10000);
 		}
 
-		void DamageTaken(Unit* /*attacker*/, uint32 &damage) override
+		void DamageTaken(Unit* /*attacker*/, uint32 &damage)
 		{
 			if (!me->HealthBelowPctDamaged(25, damage) || me->HasAura(SPELL_ENRAGE))
 				return;
@@ -119,14 +119,14 @@ public:
 			Talk(SAY_ENRAGE);
 		}
 
-		void JustDied(Unit* killer) override
+		void JustDied(Unit* killer)
 		{
 			Talk(SAY_DEATH/*, killer*/); // receiver is the killer, sniff source!
 
 			RemoveBouncerSpikes();
 		}
 
-		void UpdateAI(uint32 const diff) override
+		void UpdateAI(uint32 const diff)
 		{
 			if (!UpdateVictim())
 				return;
@@ -190,7 +190,7 @@ public:
 		}
 	};
 
-	CreatureAI* GetAI(Creature* creature) const override
+	CreatureAI* GetAI(Creature* creature) const
 	{
 		return new boss_ozrukAI(creature);
 	}
@@ -267,13 +267,13 @@ public:
 				summon->EnterVehicle(caster, i);
 		}
 
-		void Register() override
+		void Register()
 		{
 			OnCast += SpellCastFn(spell_elementium_spike_shield_SpellScript::HandleBouncerSpikes);
 		}
 	};
 
-	SpellScript* GetSpellScript() const override
+	SpellScript* GetSpellScript() const
 	{
 		return new spell_elementium_spike_shield_SpellScript();
 	}

@@ -139,7 +139,7 @@ public:
 
 		Vehicle* vehicle;
 
-		void Reset() override
+		void Reset()
 		{
 			_Reset();
 
@@ -156,7 +156,7 @@ public:
 			events.ScheduleEvent(EVENT_SUMMON_WAVE_WEST, 40000);
 		}
 
-		void EnterCombat(Unit* /*victim*/) override
+		void EnterCombat(Unit* /*victim*/)
 		{
 			_EnterCombat();
 
@@ -164,13 +164,13 @@ public:
 			Talk(SAY_AGGRO);
 		}
 
-		void JustDied(Unit* killer) override
+		void JustDied(Unit* killer)
 		{
 			Talk(SAY_DEATH);
 		}
 
 		/*
-		void PassengerBoarded(Unit* who, int8 seatId, bool apply) override
+		void PassengerBoarded(Unit* who, int8 seatId, bool apply)
 		{
 		if (!apply || who->GetEntry() != NPC_SEISMIC_SHARD)
 		return;
@@ -187,7 +187,7 @@ public:
 		}
 		*/
 
-		void MovementInform(uint32 type, uint32 id) override
+		void MovementInform(uint32 type, uint32 id)
 		{
 			if (type != POINT_MOTION_TYPE && id != POINT_INTRO_MOVE)
 				return;
@@ -226,7 +226,7 @@ public:
 			}
 		}
 
-		void UpdateAI(uint32 const diff) override
+		void UpdateAI(uint32 const diff)
 		{
 			if (!UpdateVictim())
 				return;
@@ -321,7 +321,7 @@ public:
 		uint8 countSeismicShard;
 	};
 
-	CreatureAI* GetAI(Creature* creature) const override
+	CreatureAI* GetAI(Creature* creature) const
 	{
 		return new boss_high_priestess_azilAI(creature);
 	}
@@ -337,7 +337,7 @@ public:
 	{
 		npc_devout_followerAI(Creature* creature) : ScriptedAI(creature) { }
 
-		void IsSummonedBy(Unit* summoner) override
+		void IsSummonedBy(Unit* summoner)
 		{
 			if (summoner->GetEntry() != NPC_WORLDTRIGGER)
 				return;
@@ -355,7 +355,7 @@ public:
 		}
 	};
 
-	CreatureAI* GetAI(Creature* creature) const override
+	CreatureAI* GetAI(Creature* creature) const
 	{
 		return new npc_devout_followerAI(creature);
 	}
@@ -379,7 +379,7 @@ public:
 				me->DespawnOrUnsummon(23200);
 		}
 
-		void KilledUnit(Unit* victim) override
+		void KilledUnit(Unit* victim)
 		{
 			if (victim->GetEntry() != NPC_DEVOUT_FOLLOWER)
 				return;
@@ -389,7 +389,7 @@ public:
 				me->DespawnOrUnsummon(1000);
 		}
 
-		void UpdateAI(uint32 const diff) override
+		void UpdateAI(uint32 const diff)
 		{
 			events.Update(diff);
 
@@ -414,7 +414,7 @@ public:
 		EventMap events;
 	};
 
-	CreatureAI* GetAI(Creature* creature) const override
+	CreatureAI* GetAI(Creature* creature) const
 	{
 		return new npc_gravity_wellAI(creature);
 	}
@@ -443,7 +443,7 @@ public:
 			events.ScheduleEvent(EVENT_SEISMIC_SHARD_MOUNT, 2400);
 		}
 
-		void UpdateAI(uint32 const diff) override
+		void UpdateAI(uint32 const diff)
 		{
 			events.Update(diff);
 
@@ -488,7 +488,7 @@ public:
 		EventMap events;
 	};
 
-	CreatureAI* GetAI(Creature* creature) const override
+	CreatureAI* GetAI(Creature* creature) const
 	{
 		return new npc_seismic_shardAI(creature);
 	}
@@ -504,7 +504,7 @@ public:
 	{
 		PrepareSpellScript(spell_summon_wave_south_SpellScript);
 
-		bool Validate(SpellInfo const* /*spellInfo*/) override
+		bool Validate(SpellInfo const* /*spellInfo*/)
 		{
 			if (!sSpellMgr->GetSpellInfo(SPELL_SUMMON_ADD_SOUTH))
 				return false;
@@ -518,13 +518,13 @@ public:
 				GetCaster()->CastSpell(GetCaster(), SPELL_SUMMON_ADD_SOUTH, true);
 		}
 
-		void Register() override
+		void Register()
 		{
 			OnEffectHitTarget += SpellEffectFn(spell_summon_wave_south_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
 		}
 	};
 
-	SpellScript* GetSpellScript() const override
+	SpellScript* GetSpellScript() const
 	{
 		return new spell_summon_wave_south_SpellScript();
 	}
@@ -540,7 +540,7 @@ public:
 	{
 		PrepareSpellScript(spell_summon_wave_west_SpellScript);
 
-		bool Validate(SpellInfo const* /*spellInfo*/) override
+		bool Validate(SpellInfo const* /*spellInfo*/)
 		{
 			if (!sSpellMgr->GetSpellInfo(SPELL_SUMMON_ADD_WEST))
 				return false;
@@ -554,13 +554,13 @@ public:
 				GetCaster()->CastSpell(GetCaster(), SPELL_SUMMON_ADD_WEST, true);
 		}
 
-		void Register() override
+		void Register()
 		{
 			OnEffectHitTarget += SpellEffectFn(spell_summon_wave_west_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
 		}
 	};
 
-	SpellScript* GetSpellScript() const override
+	SpellScript* GetSpellScript() const
 	{
 		return new spell_summon_wave_west_SpellScript();
 	}
@@ -603,7 +603,7 @@ public:
 			GetCaster()->CastSpell(GetHitUnit(), SPELL_GRAVITY_WELL_DAMAGE, true);
 		}
 
-		void Register() override
+		void Register()
 		{
 			BeforeCast += SpellCastFn(spell_gravity_well_damage_nearby_SpellScript::SetRadiusMod);
 			OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_gravity_well_damage_nearby_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
@@ -611,7 +611,7 @@ public:
 		}
 	};
 
-	SpellScript* GetSpellScript() const override
+	SpellScript* GetSpellScript() const
 	{
 		return new spell_gravity_well_damage_nearby_SpellScript();
 	}
@@ -641,13 +641,13 @@ public:
 				SetHitDamage(int32(4000 - (200 * distance)));
 		}
 
-		void Register() override
+		void Register()
 		{
 			OnEffectHitTarget += SpellEffectFn(spell_gravity_well_damage_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
 		}
 	};
 
-	SpellScript* GetSpellScript() const override
+	SpellScript* GetSpellScript() const
 	{
 		return new spell_gravity_well_damage_SpellScript();
 	}
@@ -682,14 +682,14 @@ public:
 			unitList.remove_if(PulledRecentlyCheck());
 		}
 
-		void Register() override
+		void Register()
 		{
 			BeforeCast += SpellCastFn(spell_gravity_well_pull_SpellScript::SetRadiusMod);
 			OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_gravity_well_pull_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
 		}
 	};
 
-	SpellScript* GetSpellScript() const override
+	SpellScript* GetSpellScript() const
 	{
 		return new spell_gravity_well_pull_SpellScript();
 	}
@@ -710,13 +710,13 @@ public:
 			target = GetCaster()->FindNearestCreature(NPC_SEISMIC_SHARD, 50.0f);
 		}
 
-		void Register() override
+		void Register()
 		{
 			OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_seismic_shard_prepare_SpellScript::SetTarget, EFFECT_0, TARGET_UNIT_NEARBY_ENTRY);
 		}
 	};
 
-	SpellScript* GetSpellScript() const override
+	SpellScript* GetSpellScript() const
 	{
 		return new spell_seismic_shard_prepare_SpellScript();
 	}
@@ -745,14 +745,14 @@ public:
 				GetCaster()->EnterVehicle(GetHitUnit(), 0);
 		}
 
-		void Register() override
+		void Register()
 		{
 			OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_seismic_shard_change_seat_SpellScript::SetTarget, EFFECT_0, TARGET_UNIT_NEARBY_ENTRY);
 			OnEffectHitTarget += SpellEffectFn(spell_seismic_shard_change_seat_SpellScript::ChangeSeat, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
 		}
 	};
 
-	SpellScript* GetSpellScript() const override
+	SpellScript* GetSpellScript() const
 	{
 		return new spell_seismic_shard_change_seat_SpellScript();
 	}
@@ -779,13 +779,13 @@ public:
 			target->CastSpell(dynamicObject->GetPositionX(), dynamicObject->GetPositionY(), dynamicObject->GetPositionZ(), SPELL_SEISMIC_SHARD_MISSLE, true);
 		}
 
-		void Register() override
+		void Register()
 		{
 			OnEffectHitTarget += SpellEffectFn(spell_seismic_shard_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
 		}
 	};
 
-	SpellScript* GetSpellScript() const override
+	SpellScript* GetSpellScript() const
 	{
 		return new spell_seismic_shard_SpellScript();
 	}
