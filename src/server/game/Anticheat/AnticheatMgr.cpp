@@ -38,7 +38,7 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo /* movementInf
     if (m_Players[key].GetLastOpcode() == MSG_MOVE_JUMP && opcode == MSG_MOVE_JUMP)
     {
         BuildReport(player,JUMP_HACK_REPORT);
-        sLog->outError(LOG_FILTER_GENERAL, "AnticheatMgr:: Jump-Hack detected player GUID (low) %u",player->GetGUIDLow());
+		sLog->outWarn(LOG_FILTER_WARDEN, "AnticheatMgr:: Jump-Hack detected player GUID (low) %u", player->GetGUIDLow());
     }
 }
 
@@ -60,7 +60,7 @@ void AnticheatMgr::WalkOnWaterHackDetection(Player* player, MovementInfo /* move
         player->HasAuraType(SPELL_AURA_WATER_WALK))
         return;
 
-    sLog->outError(LOG_FILTER_GENERAL, "AnticheatMgr:: Walk on Water - Hack detected player GUID (low) %u",player->GetGUIDLow());
+	sLog->outWarn(LOG_FILTER_WARDEN, "AnticheatMgr:: Walk on Water - Hack detected player GUID (low) %u", player->GetGUIDLow());
     BuildReport(player,WALK_WATER_HACK_REPORT);
 
 }
@@ -79,7 +79,7 @@ void AnticheatMgr::FlyHackDetection(Player* player, MovementInfo /* movementInfo
         player->HasAuraType(SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED))
         return;
 
-    sLog->outError(LOG_FILTER_GENERAL, "AnticheatMgr:: Fly-Hack detected player GUID (low) %u",player->GetGUIDLow());
+	sLog->outWarn(LOG_FILTER_WARDEN, "AnticheatMgr:: Fly-Hack detected player GUID (low) %u", player->GetGUIDLow());
     BuildReport(player,FLY_HACK_REPORT);
 }
 
@@ -108,7 +108,7 @@ void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movem
     // we are not really walking there
     if (z_diff > 1.0f)
     {
-        sLog->outError(LOG_FILTER_GENERAL, "AnticheatMgr:: Teleport To Plane - Hack detected player GUID (low) %u",player->GetGUIDLow());
+		sLog->outWarn(LOG_FILTER_WARDEN, "AnticheatMgr:: Teleport To Plane - Hack detected player GUID (low) %u", player->GetGUIDLow());
         BuildReport(player,TELEPORT_PLANE_HACK_REPORT);
     }
 }
@@ -169,7 +169,7 @@ void AnticheatMgr::ClimbHackDetection(Player *player, MovementInfo movementInfo,
 
     if (angle > CLIMB_ANGLE)
     {
-        sLog->outError(LOG_FILTER_GENERAL, "AnticheatMgr:: Climb-Hack detected player GUID (low) %u", player->GetGUIDLow());
+		sLog->outWarn(LOG_FILTER_WARDEN, "AnticheatMgr:: Climb-Hack detected player GUID (low) %u", player->GetGUIDLow());
         BuildReport(player,CLIMB_HACK_REPORT);
     }
 }
@@ -217,7 +217,7 @@ void AnticheatMgr::SpeedHackDetection(Player* player,MovementInfo movementInfo)
     if (clientSpeedRate > speedRate)
     {
         BuildReport(player,SPEED_HACK_REPORT);
-        sLog->outError(LOG_FILTER_GENERAL, "AnticheatMgr:: Speed-Hack detected player GUID (low) %u",player->GetGUIDLow());
+		sLog->outWarn(LOG_FILTER_WARDEN, "AnticheatMgr:: Speed-Hack detected player GUID (low) %u", player->GetGUIDLow());
     }
 }
 
@@ -333,7 +333,29 @@ void AnticheatMgr::BuildReport(Player* player,uint8 reportType)
     {
         // display warning at the center of the screen, hacky way?
         std::string str = "";
-        str = "|cFFFF0000[AntiCheat]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible cheater!";
+		switch (reportType)
+			{
+			case 0:
+				str = "|cFFFF0000[AntiCheat]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Speed Cheater!";
+				break;
+			case 1:
+				str = "|cFFFF0000[AntiCheat]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Fly Cheater!";
+				break;
+			case 2:
+				str = "|cFFFF0000[AntiCheat]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Walk Water Cheater!";
+				break;
+			case 3:
+				str = "|cFFFF0000[AntiCheat]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Jump Cheater!";
+				break;
+			case 4:
+				str = "|cFFFF0000[AntiCheat]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Teleport Cheater!";
+				break;
+			case 5:
+				str = "|cFFFF0000[AntiCheat]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Climb cheater!";
+				break;
+			default:
+				break;
+			}
         WorldPacket data(SMSG_NOTIFICATION, (str.size()+1));
         data << str;
         sWorld->SendGlobalGMMessage(&data);
