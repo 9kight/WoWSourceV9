@@ -73,13 +73,6 @@ uint64 InstanceScript::GetObjectGuid(uint32 type) const
 	return 0;
 }
 
-void InstanceScript::SetHeaders(std::string const& dataHeaders)
-{
-	for (char header : dataHeaders)
-	if (isalpha(header))
-		headers.push_back(header);
-}
-
 void InstanceScript::LoadMinionData(const MinionData* data)
 {
     while (data->entry)
