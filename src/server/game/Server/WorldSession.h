@@ -1098,6 +1098,8 @@ class WorldSession
         uint32 recruiterId;
         bool isRecruiter;
         ACE_Based::LockedQueue<WorldPacket*, ACE_Thread_Mutex> _recvQueue;
+		uint32 expireTime;
+		bool forceExit;
         z_stream_s* _compressionStream;
 		uint64 m_currentBankerGUID;
 

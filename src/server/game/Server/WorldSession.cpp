@@ -119,6 +119,8 @@ WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8
     _filterAddonMessages(false),
     recruiterId(recruiter),
     isRecruiter(isARecruiter),
+	expireTime(60000), // 1 min after socket loss, session is deleted
+	forceExit(false),
     m_currentBankerGUID(0)
 {
     if (sock)
@@ -457,8 +459,12 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
         ///- Cleanup socket pointer if need
         if (m_Socket && m_Socket->IsClosed())
         {
-            m_Socket->RemoveReference();
-            m_Socket = NULL;
+			expireTime -= expireTime > diff ? diff : expireTime;
+			if (expireTime < diff || forceExit)
+			{
+				m_Socket->RemoveReference();
+				m_Socket = NULL;
+			}
         }
 
         if (!m_Socket)
@@ -484,7 +490,6 @@ void WorldSession::LogoutPlayer(bool Save)
             DoLootRelease(lguid);
 
         ///- If the player just died before logging out, make him appear as a ghost
-        //FIXME: logout must be delayed in case lost connection with client in time of combat
         if (_player->GetDeathTimer())
         {
             _player->getHostileRefManager().deleteReferences();
@@ -613,8 +618,11 @@ void WorldSession::KickPlayer(const char *reason)
 {
     sLog->outInfo(LOG_FILTER_KICK, "KICK: %u [%s]", GetAccountId(), reason);
 
-    if (m_Socket)
+	if (m_Socket)
+	{	
         m_Socket->CloseSocket();
+		forceExit = true;
+	}
 }
 
 void WorldSession::SendNotification(const char *format, ...)
