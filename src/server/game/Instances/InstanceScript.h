@@ -243,7 +243,6 @@ class InstanceScript : public ZoneScript
         bool IsInGuildGroup();
 
     protected:
-		void SetHeaders(std::string const& dataHeaders);
         void SetBossNumber(uint32 number) { bosses.resize(number); }
         void LoadDoorData(DoorData const* data);
         void LoadMinionData(MinionData const* data);
