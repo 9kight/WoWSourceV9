@@ -59,7 +59,8 @@ enum DruidSpells
     SPELL_DRUID_SURVIVAL_INSTINCTS            = 50322,
     SPELL_DRUID_SAVAGE_ROAR                   = 62071,
     SPELL_DRUID_TIGER_S_FURY_ENERGIZE         = 51178,
-    SPELL_DRUID_ITEM_T8_BALANCE_RELIC        = 64950
+    SPELL_DRUID_ITEM_T8_BALANCE_RELIC         = 64950,
+	SPELL_DRUID_LIFEBLOOM_HOT                 = 33763
 };
 
 // 2912, 5176, 78674 - Starfire, Wrath, and Starsurge
@@ -2535,6 +2536,36 @@ class spell_dru_wild_growth : public SpellScriptLoader
         {
             return new spell_dru_wild_growth_SpellScript();
         }
+};
+
+// 5185/8936/50464 Empowered Touch
+class spell_dru_empowered_touch : public SpellScriptLoader
+{
+public:
+	spell_dru_empowered_touch() :SpellScriptLoader("spell_dru_empowered_touch") {}
+	class spell_dru_empowered_touch_SpellScript : public SpellScript
+	{
+		PrepareSpellScript(spell_dru_empowered_touch_SpellScript);
+		void BeforeEffect(SpellEffIndex /*effIndex*/)
+		{
+			Unit* caster = GetCaster();
+			Unit* target = GetHitUnit();
+			if (!target || !caster)
+				return;
+			if (Aura* aur = target->GetAura(SPELL_DRUID_LIFEBLOOM_HOT))
+				if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 2251, EFFECT_1))
+					if (roll_chance_i(aurEff->GetAmount()))
+						aur->RefreshDuration();
+		}
+		void Register()
+		{
+			OnEffectHitTarget += SpellEffectFn(spell_dru_empowered_touch_SpellScript::BeforeEffect, EFFECT_0, SPELL_EFFECT_HEAL);
+		}
+	};
+	SpellScript* GetSpellScript() const
+	{
+		return new spell_dru_empowered_touch_SpellScript();
+	}
 };
 
 void AddSC_druid_spell_scripts()
