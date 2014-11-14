@@ -92,7 +92,7 @@ UPDATE `creature_template` SET `ScriptName` = '' WHERE entry =48791;
 UPDATE `creature_template` SET `AIName` = '' WHERE entry =48814;
 UPDATE `creature_template` SET `AIName` = '' WHERE entry =48812
 
-DELETE FROM skill_fishing_base_level WHERE entry IN (35,5498,5716,5425);
+DELETE FROM `skill_fishing_base_level` WHERE `entry` IN (35,5498,5716,5425);
 INSERT INTO `skill_fishing_base_level` VALUES ('35', '100');
 INSERT INTO `skill_fishing_base_level` VALUES ('5498', '100');
 INSERT INTO `skill_fishing_base_level` VALUES ('5716', '100');
