@@ -15708,17 +15708,6 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
         }
     }
 
-    if (quest->GetRewCurrencyCount() > 0)
-    {
-        for (uint32 i = 0; i < quest->GetRewCurrencyCount(); ++i)
-        {
-            if (uint32 currencyId = quest->RewardCurrencyId[i])
-            {
-                ModifyCurrency(currencyId, quest->RewardCurrencyCount[i]);
-            }
-        }
-    }
-
     for (uint8 i = 0; i < QUEST_REWARD_CURRENCY_COUNT; ++i)
         if (quest->RewardCurrencyId[i])
             ModifyCurrency(quest->RewardCurrencyId[i], quest->RewardCurrencyCount[i]);
