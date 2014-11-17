@@ -287,13 +287,13 @@ INSERT INTO `creature_loot_template` VALUES ('49078', '68783', '0', '1', '0', '1
 UPDATE `creature_template` SET lootid='49078' WHERE entry='49078';
 DELETE FROM `pickpocketing_loot_template` WHERE entry='40935';
 
-INSERT INTO `pickpocketing_loot_template` VALUES ('40935', '58263', '0.01', '1', '0', '', '');
-INSERT INTO `pickpocketing_loot_template` VALUES ('40935', '63293', '0.01', '1', '0', '', '');
-INSERT INTO `pickpocketing_loot_template` VALUES ('40935', '63300', '0.01', '1', '0', '', '');
-INSERT INTO `pickpocketing_loot_template` VALUES ('40935', '63312', '0.01', '1', '0', '', '');
-INSERT INTO `pickpocketing_loot_template` VALUES ('40935', '63321', '0.01', '1', '0', '', '');
-INSERT INTO `pickpocketing_loot_template` VALUES ('40935', '63327', '0.01', '1', '0', '', '');
-INSERT INTO `pickpocketing_loot_template` VALUES ('40935', '63349', '0.01', '1', '0', '', '');
+INSERT INTO `pickpocketing_loot_template` VALUES ('40935', '58263', '0.01', '1', '0', '0', '0');
+INSERT INTO `pickpocketing_loot_template` VALUES ('40935', '63293', '0.01', '1', '0', '0', '0');
+INSERT INTO `pickpocketing_loot_template` VALUES ('40935', '63300', '0.01', '1', '0', '0', '0');
+INSERT INTO `pickpocketing_loot_template` VALUES ('40935', '63312', '0.01', '1', '0', '0', '0');
+INSERT INTO `pickpocketing_loot_template` VALUES ('40935', '63321', '0.01', '1', '0', '0', '0');
+INSERT INTO `pickpocketing_loot_template` VALUES ('40935', '63327', '0.01', '1', '0', '0', '0');
+INSERT INTO `pickpocketing_loot_template` VALUES ('40935', '63349', '0.01', '1', '0', '0', '0');
 
 UPDATE `creature_template` SET pickpocketloot='40935' WHERE entry='40935';
 UPDATE `creature_template` SET pickpocketloot='40935' WHERE entry='49078';
