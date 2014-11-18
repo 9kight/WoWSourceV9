@@ -57,7 +57,7 @@ enum Spells
     H_SPELL_SERUM_TORMENT       = 89994,
 
     // Oathsworn Axemaster
-    SPELL_SKULL_CRUSH           = 44922,
+    SPELL_SKULL_CRUSH           = 84256,
     SPELL_SLAM                  = 82763,
 
     // Oathsworn Captain
