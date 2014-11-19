@@ -7740,7 +7740,6 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
     int32 precision = currency->Flags & CURRENCY_FLAG_HIGH_PRECISION ? CURRENCY_PRECISION : 1;
     uint32 oldTotalCount = 0;
     uint32 oldWeekCount = 0;
-    uint32 weekCap = 0;
     PlayerCurrenciesMap::iterator itr = _currencyStorage.find(id);
     if (itr == _currencyStorage.end())
     {
@@ -7755,17 +7754,17 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
     {
         oldTotalCount = itr->second.totalCount;
         oldWeekCount = itr->second.weekCount;
-        weekCap = itr->second.weekCap;
     }
 
     // count can't be more then weekCap if used (weekCap > 0)
-    if (!isRefund && weekCap && count > int32(weekCap))
-        count = int32(weekCap);
+    uint32 weekCap = GetCurrencyWeekCap(currency);
+    if (weekCap && count > int32(weekCap))
+        count = weekCap;
 
     // count can't be more then totalCap if used (totalCap > 0)
     uint32 totalCap = GetCurrencyTotalCap(currency);
-    if (!isRefund && totalCap && count > int32(totalCap))
-        count = int32(totalCap);
+    if (totalCap && count > int32(totalCap))
+        count = totalCap;
 
     int32 newTotalCount = int32(oldTotalCount) + count;
     if (newTotalCount < 0)
@@ -7776,25 +7775,18 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
         newWeekCount = 0;
 
     // if we get more then weekCap just set to limit
-    if (!isRefund && weekCap && int32(weekCap) < newWeekCount)
+    if (weekCap && int32(weekCap) < newWeekCount)
     {
         newWeekCount = int32(weekCap);
         // weekCap - oldWeekCount always >= 0 as we set limit before!
-        newTotalCount = int32(oldTotalCount + (weekCap - oldWeekCount));
-    }
-
-    // if conquest point exceeds weekcap
-    if(!isRefund && currency->ID == CURRENCY_TYPE_CONQUEST_POINTS && int32(oldWeekCount) + count > int32(_ConquestCurrencyTotalWeekCap))
-    {
-        newWeekCount = int32(_ConquestCurrencyTotalWeekCap);
-        newTotalCount = int32(oldTotalCount + (newWeekCount - oldWeekCount));
+        newTotalCount = oldTotalCount + (weekCap - oldWeekCount);
     }
 
     // if we get more then totalCap set to maximum;
     if (totalCap && int32(totalCap) < newTotalCount)
     {
         newTotalCount = int32(totalCap);
-        newWeekCount = int32(weekCap);
+        newWeekCount = weekCap;
     }
 
     if (uint32(newTotalCount) != oldTotalCount)
@@ -7803,15 +7795,15 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
             itr->second.state = PLAYERCURRENCY_CHANGED;
 
         itr->second.totalCount = newTotalCount;
-        itr->second.weekCount = isRefund ? oldWeekCount : newWeekCount;
+        itr->second.weekCount = newWeekCount;
 
-        if (!isRefund && count > 0)
+        if (count > 0)
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CURRENCY, id, count);
 
         if (currency->Category == CURRENCY_CATEGORY_META_CONQUEST)
         {
             // count was changed to week limit, now we can modify original points.
-            ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, count, printLog, ignoreMultipliers, isRefund);
+            ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, count, printLog);
             return;
         }
 
@@ -7820,6 +7812,8 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
         packet.WriteBit(weekCap != 0);
         packet.WriteBit(0); // hasSeasonCount
         packet.WriteBit(!printLog); // print in log
+
+        // if hasSeasonCount packet << uint32(seasontotalearned); TODO: save this in character DB and use it
 
         packet << uint32(newTotalCount / precision);
         packet << uint32(id);
