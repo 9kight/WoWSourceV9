@@ -7141,45 +7141,35 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
             }
             switch (dummySpell->Id)
             {
-                case 86674: // Ancient Guardian - Holy
-                {
-                    Unit* guardian = NULL;
-                    AuraEffect* dummy = GetAuraEffect(86669, EFFECT_1, GetGUID());
-                    if (!dummy || !victim)
-                        return false;
-
-                    // A maximum of 5 heals
-                    bool unsummon = dummy->GetAmount() == 4;
-                    int32 basepoints1 = damage * 0.1f;
-                    basepoints0 = damage - basepoints1;
-                    std::list<Creature*> MinionList;
-                    GetAllMinionsByEntry(MinionList, 46499);
-                    for (std::list<Creature*>::iterator itr = MinionList.begin(); itr != MinionList.end(); itr++)
-                    {
-                        guardian = (*itr);
-                        (*itr)->CastCustomSpell(victim, 86678, &basepoints0, &basepoints1, NULL, true);
-                        // Increase heal amount in dummy aura
-                        dummy->SetAmount(dummy->GetAmount() + 1);
-                    }
-                    if (guardian && unsummon)
-                    {
-                        guardian->ToCreature()->DespawnOrUnsummon();
-                        RemoveAurasDueToSpell(86669, GetGUID());
-                        RemoveAurasDueToSpell(86674, GetGUID());
-                    }
-                    break;
-                }
-                case 86703: // Ancient Guardian - Retri
-                case 86701:
-                {
-                    Unit* caster = this;
-                    if (GetTypeId() != TYPEID_PLAYER)
-                        caster = GetOwner();
-                    if (!caster)
-                        return false;
-                    caster->CastSpell(caster, 86700, true);
-                    return true;
-                }
+				// Ancient Healer
+			    case 86674:
+			    {
+			        int32 bp0 = damage;
+			        int32 bp1 = CalculatePct(bp0, 10);
+			        if (!bp0 || !bp1 || !victim)
+			          return false;
+			        this->CastCustomSpell(victim, 86678, &bp0, &bp1, NULL, true, NULL, triggeredByAura);
+			        return true;
+			    
+			    }
+			    	// Ancient Crusader (guardian)
+			    case 86703:
+			    {
+			        if (Unit* owner = GetCharmerOrOwner())
+			        {
+			          owner->CastSpell(owner, 86700, true);
+			          return true;
+			        }
+			        break;
+			    }
+			    
+			    	// Ancient Crusader - Player
+			    case 86701:
+			    {
+			        target = this;
+			        triggered_spell_id = 86700;
+			        break;
+			    }
                 case 85803: // Selfless Healer
                 case 85804:
                 {

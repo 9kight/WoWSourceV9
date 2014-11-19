@@ -4222,6 +4222,34 @@ void SpellMgr::LoadSpellInfoCorrections()
         switch (spellInfo->SpellFamilyName)
         {
             case SPELLFAMILY_PALADIN:
+				switch (spellInfo->Id)
+				{
+
+					// Ancient Fury
+				case 86704:
+					spellInfo->AttributesEx6 |= SPELL_ATTR6_NO_DONE_PCT_DAMAGE_MODS;
+					break;
+					// Ancient Crusader
+				case 86701:
+					spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(9); // 30 seconds
+					break;
+
+
+					// Ancient Healer
+				case 86674:
+					spellInfo->ProcCharges = 5;
+					break;
+					// Guardian of Ancient Kings
+				case 86150:
+					spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+					break;
+
+
+
+					break;
+				default:
+					break;
+				}
                 // Seals of the Pure should affect Seal of Righteousness
                 if (spellInfo->SpellIconID == 25 && spellInfo->Attributes & SPELL_ATTR0_PASSIVE)
                     spellInfo->Effects[EFFECT_0].SpellClassMask[1] |= 0x20000000;

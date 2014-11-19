@@ -66,6 +66,163 @@ enum PaladinSpells
     SPELL_GENERIC_BATTLEGROUND_DAMPENING         = 74411
 };
 
+enum PaladinGuardianOfAncientKingsSpells
+
+{
+
+	SPELL_PALADIN_GOAK_HOLY_SUMMON = 86669,
+	SPELL_PALADIN_GOAK_ANCIENT_HEALER = 86674,
+	SPELL_PALADIN_GOAK_PROTECTION_SUMMON = 86659,
+	SPELL_PALADIN_GOAK_RETRIBUTION_SUMMON = 86698,
+	SPELL_PALADIN_GOAK_ANCIENT_POWER = 86700,
+	SPELL_PALADIN_GOAK_ANCIENT_CRUSADER = 86701,
+	SPELL_PALADIN_GOAK_ANCIENT_CRUSADER_GUARDIAN = 86703,
+	SPELL_PALADIN_GOAK_ANCIENT_FURY = 86704,
+
+};
+
+// 86704 - Ancient Fury
+class spell_pal_ancient_fury : public SpellScriptLoader
+{
+public:
+	spell_pal_ancient_fury() : SpellScriptLoader("spell_pal_ancient_fury") { }
+
+	class spell_pal_ancient_fury_SpellScript : public SpellScript
+	{
+		PrepareSpellScript(spell_pal_ancient_fury_SpellScript);
+
+		void CountTargets(std::list<WorldObject*>& targetList)
+		{
+			_targetCount = targetList.size();
+		}
+
+		void ChangeDamage(SpellEffIndex /*effIndex*/)
+		{
+			Unit* caster = GetCaster();
+			Unit* target = GetHitUnit();
+
+			if (caster && target && _targetCount)
+			{
+				int32 damage = GetHitDamage();
+
+				if (Aura* aura = caster->GetAura(SPELL_PALADIN_GOAK_ANCIENT_POWER))
+				{
+					damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), damage, SPELL_DIRECT_DAMAGE);
+					damage = (damage * aura->GetStackAmount());
+
+					// "divided evenly among all targets"
+					damage /= _targetCount;
+				}
+
+				SetHitDamage(damage);
+			}
+		}
+	private:
+		uint32 _targetCount;
+
+		void Register()
+		{
+			OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pal_ancient_fury_SpellScript::CountTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+			OnEffectHitTarget += SpellEffectFn(spell_pal_ancient_fury_SpellScript::ChangeDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+		}
+	};
+
+	SpellScript* GetSpellScript() const
+	{
+		return new spell_pal_ancient_fury_SpellScript();
+	}
+};
+
+// 86698  - Guardian of Ancient Kings Retribution
+class spell_pal_guardian_of_ancient_kings_retri : public SpellScriptLoader
+{
+public:
+	spell_pal_guardian_of_ancient_kings_retri() : SpellScriptLoader("spell_pal_guardian_of_ancient_kings_retri") { }
+
+	class spell_pal_guardian_of_ancient_kings_retri_AuraScript : public AuraScript
+	{
+		PrepareAuraScript(spell_pal_guardian_of_ancient_kings_retri_AuraScript);
+
+		void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+		{
+			Unit* caster = GetCaster();
+			Unit* target = GetTarget();
+
+			if (caster && target)
+			{
+				if (GetStackAmount())
+				{
+					caster->CastSpell(target, SPELL_PALADIN_GOAK_ANCIENT_FURY, true);
+				}
+			}
+		}
+
+		void Register()
+		{
+			OnEffectRemove += AuraEffectRemoveFn(spell_pal_guardian_of_ancient_kings_retri_AuraScript::HandleRemove, EFFECT_2, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+		}
+	};
+
+	AuraScript* GetAuraScript() const
+	{
+		return new spell_pal_guardian_of_ancient_kings_retri_AuraScript();
+	}
+};
+
+// 86150 - Guardian of Ancient Kings action bar spell
+class spell_pal_guardian_of_ancient_kings : public SpellScriptLoader
+{
+public:
+	spell_pal_guardian_of_ancient_kings() : SpellScriptLoader("spell_pal_guardian_of_ancient_kings") { }
+
+	class spell_pal_guardian_of_ancient_kings_SpellScript : public SpellScript
+	{
+		PrepareSpellScript(spell_pal_guardian_of_ancient_kings_SpellScript);
+
+		void HandleDummy(SpellEffIndex /*effIndex*/)
+		{
+			if (Unit* caster = GetCaster())
+			{
+				if (Player* player = caster->ToPlayer())
+				{
+					switch (player->GetPrimaryTalentTree(player->GetActiveSpec()))
+					{
+						// Holy Guardian
+					case TALENT_TREE_PALADIN_HOLY:
+						caster->CastSpell(caster, SPELL_PALADIN_GOAK_HOLY_SUMMON, true);
+
+						// 5 stack buff
+						caster->CastSpell(caster, SPELL_PALADIN_GOAK_ANCIENT_HEALER, true);
+						break;
+						// Protection Guardian
+					case TALENT_TREE_PALADIN_PROTECTION:
+						caster->CastSpell(caster, SPELL_PALADIN_GOAK_PROTECTION_SUMMON, true);
+						break;
+						// Retribution Guardian
+					case TALENT_TREE_PALADIN_RETRIBUTION:
+						caster->CastSpell(caster, SPELL_PALADIN_GOAK_RETRIBUTION_SUMMON, true);
+
+						// Ancient Power proc buff
+						caster->CastSpell(caster, SPELL_PALADIN_GOAK_ANCIENT_CRUSADER, true);
+						break;
+					}
+				}
+			}
+		}
+
+		void Register()
+		{
+			OnEffectHitTarget += SpellEffectFn(spell_pal_guardian_of_ancient_kings_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+		}
+	};
+
+	SpellScript* GetSpellScript() const
+	{
+		return new spell_pal_guardian_of_ancient_kings_SpellScript();
+	}
+};
+
+
 // 31850 - Ardent Defender
 class spell_pal_ardent_defender : public SpellScriptLoader
 {
@@ -765,94 +922,6 @@ class spell_pal_holy_shock : public SpellScriptLoader
         SpellScript* GetSpellScript() const
         {
             return new spell_pal_holy_shock_SpellScript();
-        }
-};
-
-// Guardian of ancient kings
-class spell_pal_guardian : public SpellScriptLoader
-{
-    public:
-        spell_pal_guardian() : SpellScriptLoader("spell_pal_guardian") { }
-
-        class spell_pal_guardian_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_pal_guardian_SpellScript);
-
-            void HandleOnHit()
-            {
-                Unit* caster = GetCaster();
-                if (!caster)
-                    return;
-
-                // Choose which guardian to summon based on spec
-                switch (caster->ToPlayer()->GetPrimaryTalentTree(caster->ToPlayer()->GetActiveSpec()))
-                {
-                    case TALENT_TREE_PALADIN_HOLY:
-                        caster->RemoveAllMinionsByEntry(46499);
-                        caster->CastSpell(caster, 86669, true);
-                        caster->CastSpell(caster, 86674, true);
-                        break;
-                    case TALENT_TREE_PALADIN_PROTECTION:
-                        caster->RemoveAllMinionsByEntry(46490);
-                        caster->CastSpell(caster, 86659, true);
-                        break;
-                    case TALENT_TREE_PALADIN_RETRIBUTION:
-                        caster->RemoveAllMinionsByEntry(46506);
-                        caster->CastSpell(caster, 86698, true);
-                        caster->CastSpell(caster, 86701, true);
-                        break;
-                    default:
-                        return;
-                }
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_pal_guardian_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_pal_guardian_SpellScript();
-        }
-};
-
-// Melee guardian spell on duration end
-class spell_pal_guardian_triggered : public SpellScriptLoader
-{
-    public:
-        spell_pal_guardian_triggered() : SpellScriptLoader("spell_pal_guardian_triggered") { }
-
-        class spell_pal_guardian_triggered_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_pal_guardian_triggered_AuraScript);
-
-            void Remove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-            {
-                if (GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
-                    return;
-
-                Unit* target = GetTarget();
-                Aura* stacks = target->GetAura(86700, target->GetGUID());
-                if (!stacks)
-                    return;
-
-                int32 bp0 = sSpellMgr->GetSpellInfo(86704)->Effects[EFFECT_0].CalcValue(target) * stacks->GetStackAmount();
-                target->CastCustomSpell(target, 86704, &bp0, NULL, NULL, true);
-                target->RemoveAurasDueToSpell(86700);
-                target->RemoveAurasDueToSpell(86701);
-            }
-
-            void Register()
-            {
-                OnEffectRemove += AuraEffectRemoveFn(spell_pal_guardian_triggered_AuraScript::Remove, EFFECT_2, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_pal_guardian_triggered_AuraScript();
         }
 };
 
@@ -1884,6 +1953,9 @@ class spell_pal_judgements_of_the_bold : public SpellScriptLoader
 
 void AddSC_paladin_spell_scripts()
 {
+	new spell_pal_guardian_of_ancient_kings_retri();
+	new spell_pal_guardian_of_ancient_kings();
+	new spell_pal_ancient_fury();
     new spell_pal_ardent_defender();
     new spell_pal_blessing_of_faith();
     new spell_pal_blessing_of_sanctuary();
@@ -1909,8 +1981,6 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_word_of_glory();
     new spell_pal_sacred_shield();
     new spell_pal_consecration();
-    new spell_pal_guardian();
-    new spell_pal_guardian_triggered();
     new spell_paladin_divine_purpose();
     new spell_pal_cleanse();
     new spell_pal_exorcism();

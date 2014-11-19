@@ -1,17 +1,3 @@
--- Paladin new Script names
-
-DELETE FROM spell_script_names WHERE spell_id in(86150, 86698);
-INSERT INTO spell_script_names VALUES (86150, 'spell_pal_guardian_of_ancient_kings');
-INSERT INTO spell_script_names VALUES (86698, 'spell_pal_guardian_of_ancient_kings_retri');
-DELETE FROM spell_script_names WHERE spell_id=86704;
-INSERT INTO spell_script_names VALUES (86704, 'spell_pal_ancient_fury');
-delete from spell_script_names where spell_id in (46490,46499,46506);
-INSERT INTO spell_script_names VALUES 
-(46490, 'guard_guardian_of_ancient_kings'),
-(46499, 'guard_guardian_of_ancient_kings'),
-(46506, 'guard_guardian_of_ancient_kings');
-
-
 -- Stonecore Update SQL
 
 UPDATE creature_template SET mechanic_immune_mask=613097436, ScriptName='npc_shadow_obsidius' WHERE entry=40817;
