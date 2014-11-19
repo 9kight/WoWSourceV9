@@ -1241,6 +1241,16 @@ void Battleground::StartBattleground()
 
 void Battleground::AddPlayer(Player* player)
 {
+	if (player->getClass() == CLASS_DRUID)
+	{
+		//Check For Druid Flight form
+		if (player->HasAura(40120) || player->HasAura(33943))
+		{
+			player->RemoveAura(40120);
+			player->RemoveAura(33943);
+		}
+	}
+
     // remove afk from player
     if (player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK))
         player->ToggleAFK();
