@@ -627,12 +627,17 @@ class spell_gen_pet_summoned : public SpellScriptLoader
             void HandleScript(SpellEffIndex /*effIndex*/)
             {
                 Player* player = GetCaster()->ToPlayer();
+				
+                QueryResult result = CharacterDatabase.PQuery("SELECT currentPetSlot FROM characters WHERE guid = '%u'", player->GetGUIDLow());
+	            Field* fields = result->Fetch();
+	            PetSlot petslot = (PetSlot)fields[0].GetUInt8();
+
                 if (player->GetLastPetNumber())
                 {
                     PetType newPetType = (player->getClass() == CLASS_HUNTER) ? HUNTER_PET : SUMMON_PET;
                     if (Pet* newPet = new Pet(player, newPetType))
                     {
-                        PetData* t_pet = player->GetPetDatabySlot(0);
+                        PetData* t_pet = player->GetPetDatabySlot(petslot);
                         if (newPet->LoadPet(player, t_pet, true))
                         {
                             // revive the pet if it is dead

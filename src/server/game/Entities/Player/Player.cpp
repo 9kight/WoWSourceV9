@@ -17527,6 +17527,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     // set which actionbars the client has active - DO NOT REMOVE EVER AGAIN (can be changed though, if it does change fieldwise)
     SetByteValue(PLAYER_FIELD_BYTES, 2, fields[58].GetUInt8());
 
+	_currentPetSlot = (PetSlot)fields[60].GetUInt8();
     InitDisplayIds();
 
     // cleanup inventory related item value fields (its will be filled correctly in _LoadInventory)
@@ -18751,12 +18752,16 @@ void Player::_LoadMail()
 
 void Player::LoadPets()
 {
+    QueryResult result = CharacterDatabase.PQuery("SELECT currentPetSlot FROM characters WHERE guid = '%u'", this->GetGUIDLow());
+	Field* fields = result->Fetch();
+	PetSlot petslot = (PetSlot)fields[0].GetUInt8();
+	
     //Spawn Pet maybe Lastpetentry save in database
     if (IsInWorld())
     {
         Pet* pet = new Pet(this);
 
-        PetData* t_pet = GetPetDatabySlot(0);
+        PetData* t_pet = GetPetDatabySlot(petslot);
         if (!pet->LoadPet(this, t_pet, true))
             delete pet;
     }
@@ -19649,6 +19654,7 @@ void Player::SaveToDB(bool create /*=false*/)
         stmt->setUInt8(index++, GetByteValue(PLAYER_FIELD_BYTES, 2));
         stmt->setUInt32(index++, m_grantableLevels);
         stmt->setUInt32(index++, GetAchievementPoints());
+		stmt->setUInt8(index++, _currentPetSlot);
     }
     else
     {
@@ -19773,6 +19779,7 @@ void Player::SaveToDB(bool create /*=false*/)
         stmt->setUInt32(index++, GetAchievementPoints());
 
         stmt->setUInt8(index++, IsInWorld() ? 1 : 0);
+		stmt->setUInt8(index++, _currentPetSlot);
         // Index
         stmt->setUInt32(index++, GetGUIDLow());
     }
@@ -20871,6 +20878,14 @@ void Player::RemovePet(Pet* pet, PetSlot mode, bool returnreagent, bool logout)
             return;
     }
 
+    QueryResult result = CharacterDatabase.PQuery("SELECT currentPetSlot FROM characters WHERE guid = '%u'", this->GetGUIDLow());
+	Field* fields = result->Fetch();
+	PetSlot petslot = (PetSlot)fields[0].GetUInt8();
+
+    if (mode == PET_SAVE_AS_CURRENT)
+        mode = petslot;
+
+/*
     if (returnreagent && (pet || m_temporaryUnsummonedPetNumber) && !InBattleground())
     {
         //returning of reagents only for players, so best done here
@@ -20896,6 +20911,7 @@ void Player::RemovePet(Pet* pet, PetSlot mode, bool returnreagent, bool logout)
         }
         m_temporaryUnsummonedPetNumber = 0;
     }
+*/
 
     if (!pet || pet->GetOwnerGUID() != GetGUID())
         return;
@@ -20920,7 +20936,10 @@ void Player::RemovePet(Pet* pet, PetSlot mode, bool returnreagent, bool logout)
     // only if current pet in slot
     pet->SavePet(mode, logout);
 
-    SetMinion(pet, false, mode);
+    if (pet->getPetType() != HUNTER_PET)
+        SetMinion(pet, false, mode);
+    else
+        SetMinion(pet, false, petslot);
 
     pet->AddObjectToRemoveList();
     pet->m_removed = true;
