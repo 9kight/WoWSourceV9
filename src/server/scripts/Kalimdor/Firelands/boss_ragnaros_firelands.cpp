@@ -30,7 +30,6 @@
 #define NPC_SMASH             53266 // Sulfuras Smash main NPC trigger.
 #define NPC_PLATFORM_STALKER  53952 // For Dreadflames.
 #define ENGULFING_FLAME_COUNT 9     // Engulfing Flames count.
-#define GO_CACHE_OF_THE_FIRELORD 208967 // Loot chest
 #define GO_RAGNAROS_DOOR         209073 // Door
 enum Yells
 {
@@ -426,13 +425,23 @@ class boss_ragnaros_firelands: public CreatureScript
                 void KilledUnit(Unit * /*victim*/)
                 {
                     Talk(RAND(SAY_KILL_1, SAY_KILL_2, SAY_KILL_3));
+
                 }
 
                 void JustDied(Unit * /*victim*/)
                 {
                     if (IsHeroic())
                         Talk(SAY_DEATH_H);
-
+					
+					if (RAID_DIFFICULTY_10MAN_NORMAL)
+						me->SummonGameObject(GO_CACHE_OF_THE_FIRELORD_10N, 1016.043f, -57.436f, 55.333f, 3.151f, 0, 0, 0, 0, 30000);
+					if (RAID_DIFFICULTY_10MAN_HEROIC)
+						me->SummonGameObject(GO_CACHE_OF_THE_FIRELORD_10HC, 1016.043f, -57.436f, 55.333f, 3.151f, 0, 0, 0, 0, 30000);
+					if (RAID_DIFFICULTY_25MAN_NORMAL)
+						me->SummonGameObject(GO_CACHE_OF_THE_FIRELORD_25N, 1016.043f, -57.436f, 55.333f, 3.151f, 0, 0, 0, 0, 30000);
+					if (RAID_DIFFICULTY_25MAN_HEROIC)
+						me->SummonGameObject(GO_CACHE_OF_THE_FIRELORD_25HC, 1016.043f, -57.436f, 55.333f, 3.151f, 0, 0, 0, 0, 30000);
+					
                     if (HeartCheck)
                         me->SummonCreature(NPC_HEART_OF_RAGNAROS, me->GetPositionX(), me->GetPositionY(),
                                 me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 1000);
@@ -567,8 +576,7 @@ class boss_ragnaros_firelands: public CreatureScript
                         me->SetReactState(REACT_PASSIVE);
                         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                         me->RemoveAllAuras();
-                        me->SummonGameObject(GO_CACHE_OF_THE_FIRELORD, 1016.043f, -57.436f, 55.333f, 3.151f, 0, 0, 0, 0,
-                                30000);
+						
                         if (HeartCheck)
                             me->SummonCreature(NPC_HEART_OF_RAGNAROS, me->GetPositionX(), me->GetPositionY(),
                                     me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 1000);
