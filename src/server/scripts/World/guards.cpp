@@ -67,7 +67,7 @@ public:
 			}
 		}
 
-		void UpdateAI(uint32 diff)
+		void UpdateAI(uint32 const diff)
 		{
 			// All operations available only for Retribution Guardian
 			if (owner && isRetribution)
