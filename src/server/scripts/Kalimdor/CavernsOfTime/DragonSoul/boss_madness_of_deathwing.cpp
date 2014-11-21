@@ -88,6 +88,8 @@ enum Spells
     SPELL_SHRAPNEL            = 106791,
     SPELL_TETANUS             = 106728,
     SPELL_CORRUPTED_BLOOD     = 106835,
+
+	SPELL_PLAY_MOVIE          = 110112,
 };
 
 enum Texts
@@ -280,6 +282,7 @@ public:
 
 		void JustDied(Unit* /*kller*/)
 		{
+			DoCastAOE(SPELL_PLAY_MOVIE, true);
 			instance->SetBossState(DATA_PORTALS_ON_OFF, DONE);
 			if(instance)
 				instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me); // Remove
