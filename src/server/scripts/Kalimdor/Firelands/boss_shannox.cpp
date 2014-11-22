@@ -23,7 +23,6 @@
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "CreatureTextMgr.h"
-
 #include "firelands.h"
 
 enum Shannox_Yells
@@ -237,6 +236,17 @@ class boss_shannox: public CreatureScript
                         (*iter)->DespawnOrUnsummon();
                 }
 
+		void DespawnObjects(uint32 entry, float distance)
+		{
+                    std::list<GameObject*> firedoor;
+                    me->GetGameObjectListWithEntryInGrid(firedoor, 209066, 5000.0f);
+			
+		    if (!firedoor.empty())
+                    	for (std::list<GameObject*>::const_iterator itr = firedoor.begin(); itr != firedoor.end(); ++itr)                       
+				(*itr)->Delete();
+		}
+			
+
                 void SetData(uint32 type, uint32 data)
                 {
                     switch (type)
@@ -353,6 +363,8 @@ class boss_shannox: public CreatureScript
 
                     summons.DespawnAll();
                     instance->DoRemoveAurasDueToSpellOnPlayers(CRYSTAL_PRISON_EFFECT);
+
+		    DespawnObjects(209066, 50000.0f);
 
                     if (GetRageface())
                         GetRageface()->DisappearAndDie();

@@ -198,6 +198,16 @@ class boss_majordomus: public CreatureScript
                         summon->AI()->DoZoneInCombat();
                 }
 
+		void DespawnObjects(uint32 entry, float distance)
+		{
+                    std::list<GameObject*> firedoor;
+                    me->GetGameObjectListWithEntryInGrid(firedoor, 208873, 5000.0f);
+			
+		    if (!firedoor.empty())
+                    	for (std::list<GameObject*>::const_iterator itr = firedoor.begin(); itr != firedoor.end(); ++itr)                       
+				(*itr)->Delete();
+		}
+
                 void JustDied(Unit * /*victim*/)
                 {
                     if (instance)
@@ -208,6 +218,8 @@ class boss_majordomus: public CreatureScript
 
                     if (GameObject* firewall = me->FindNearestGameObject(208906, 5000.0f))
                         firewall->DestroyForNearbyPlayers();
+
+		    DespawnObjects(208873, 50000.0f);
 
                     Talk(SAY_ON_DEAD);
                     summons.DespawnAll();
