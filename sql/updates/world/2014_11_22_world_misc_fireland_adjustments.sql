@@ -1,6 +1,6 @@
 -- Shannox wp all entry
 DELETE FROM creature_addon WHERE guid IN (260587,299834,300073,300332);
-INSERT INTO `creature_addon` VALUES ('260587', '4004290', '0', '0', '1', '0', '');
+INSERT INTO `creature_addon` VALUES ('260587', '260587', '0', '0', '1', '0', '');
 INSERT INTO `creature_addon` VALUES ('299834', '299834', '0', '0', '1', '0', '');
 INSERT INTO `creature_addon` VALUES ('300073', '300073', '0', '0', '1', '0', '');
 INSERT INTO `creature_addon` VALUES ('300332', '300332', '0', '0', '1', '0', '');
