@@ -5502,3 +5502,76 @@ INSERT INTO `creature_loot_template` VALUES ('48943', '65168', '18.85', '1', '0'
 INSERT INTO `creature_loot_template` VALUES ('48943', '65169', '18.76', '1', '0', '1', '1');
 INSERT INTO `creature_loot_template` VALUES ('48943', '65170', '19.66', '1', '0', '1', '1');
 UPDATE `creature_template` SET lootid='48943' WHERE entry='48943';
+
+UPDATE creature_template SET MovementType=1 WHERE entry=48230;
+UPDATE creature SET MovementType=1 WHERE id=48230;
+UPDATE creature SET spawndist=4 WHERE id=48230;
+
+UPDATE creature_template SET MovementType=1 WHERE entry=48229;
+UPDATE creature SET MovementType=1 WHERE id=48229;
+UPDATE creature SET spawndist=2 WHERE id=48229;
+
+UPDATE creature_template SET MovementType=1 WHERE entry=48440;
+UPDATE creature SET MovementType=1 WHERE id=48440;
+UPDATE creature SET spawndist=1 WHERE id=48440;
+
+UPDATE creature_template SET MovementType=1 WHERE entry=48279;
+UPDATE creature SET MovementType=1 WHERE id=48279;
+UPDATE creature SET spawndist=5 WHERE id=48279;
+
+UPDATE creature_template SET MovementType=1 WHERE entry=48338;
+UPDATE creature SET MovementType=1 WHERE id=48338;
+UPDATE creature SET spawndist=7 WHERE id=48338;
+
+UPDATE creature_template SET MovementType=1 WHERE entry=48445;
+UPDATE creature SET MovementType=1 WHERE id=48445;
+UPDATE creature SET spawndist=3 WHERE id=48445;
+
+DELETE FROM creature_template_addon WHERE entry=48419;
+INSERT INTO `creature_template_addon` VALUES ('48419', '0', '0', '0', '0', '234', '');
+
+DELETE FROM creature_template_addon WHERE entry=48420;
+INSERT INTO `creature_template_addon` VALUES ('48420', '0', '0', '0', '0', '233', '');
+
+UPDATE creature_template SET MovementType=1 WHERE entry=48421;
+UPDATE creature SET MovementType=1 WHERE id=48421;
+UPDATE creature SET spawndist=4 WHERE id=48421;
+
+UPDATE creature_template SET MovementType=1 WHERE entry=48418;
+UPDATE creature SET MovementType=1 WHERE id=48418;
+UPDATE creature SET spawndist=3 WHERE id=48418;
+
+UPDATE creature_template SET MovementType=1 WHERE entry=48502;
+UPDATE creature SET MovementType=1 WHERE id=48502;
+UPDATE creature SET spawndist=3 WHERE id=48502;
+
+UPDATE creature_template SET MovementType=1 WHERE entry=48417;
+UPDATE creature SET MovementType=1 WHERE id=48417;
+UPDATE creature SET spawndist=3 WHERE id=48417;
+
+UPDATE creature_template SET MovementType=1 WHERE entry=48505;
+UPDATE creature SET MovementType=1 WHERE id=48505;
+UPDATE creature SET spawndist=3 WHERE id=48505;
+
+UPDATE creature_template SET MovementType=1 WHERE entry=48447;
+UPDATE creature SET MovementType=1 WHERE id=48447;
+UPDATE creature SET spawndist=11 WHERE id=48447;
+
+UPDATE creature_template SET MovementType=1 WHERE entry=48450;
+UPDATE creature SET MovementType=1 WHERE id=48450;
+UPDATE creature SET spawndist=11 WHERE id=48450;
+
+UPDATE creature_template SET MovementType=1 WHERE entry=48451;
+UPDATE creature SET MovementType=1 WHERE id=48451;
+UPDATE creature SET spawndist=11 WHERE id=48451;
+
+UPDATE creature_template SET MovementType=1 WHERE entry=48522;
+UPDATE creature SET MovementType=1 WHERE id=48522;
+UPDATE creature SET spawndist=3 WHERE id=48522;
+
+UPDATE creature_template SET MovementType=1 WHERE entry=48521;
+UPDATE creature SET MovementType=1 WHERE id=48521;
+UPDATE creature SET spawndist=3 WHERE id=48521;
+
+DELETE FROM creature_template_addon WHERE entry=46612;
+INSERT INTO `creature_template_addon` VALUES ('46612', '0', '0', '0', '1', '0', '');
