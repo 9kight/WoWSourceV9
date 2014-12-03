@@ -2316,7 +2316,8 @@ class Unit : public WorldObject
         void FocusTarget(Spell const* focusSpell, uint64 target);
         void ReleaseFocus(Spell const* focusSpell);
 
-        bool IsVisionObscured(Unit* target, bool ranged = false);
+        //bool IsVisionObscured(Unit* target, bool ranged = false);
+		bool IsVisionObscured(Unit* pVictim);
 
         // Done priotiy to setCanFly in script fix visual bug with movementflag (creature took flying animation on ground, walkin animation in air etc...)
         inline void DisableMovementFlagUpdate(bool s) { _disableMovementFlagUpdate = s; }
