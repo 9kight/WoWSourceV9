@@ -4196,6 +4196,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 100244: // Legendary Teleport into Nexus
                 spellInfo->AttributesEx10 |= SPELL_ATTR10_UNK6;
                 break;
+			case 76577: // Smoke Bomb
+				spellInfo->AttributesEx |= SPELL_ATTR1_NOT_BREAK_STEALTH;
+				break;
             case 99488:
                 spellInfo->Effects[0].MiscValue |= 16;
                 break;
@@ -4210,11 +4213,11 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_DEAD;
                 break;
           // ENDOF GUILD PERK SPELLS
-            case 88611: // Smoke bomb Aura
-                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(28);
-                spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(14);
-                spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_INTERFERE_TARGETTING;
-                break;
+            //case 88611: // Smoke bomb Aura
+            //    spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(28);
+            //    spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(14);
+            //    spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_INTERFERE_TARGETTING;
+            //    break;
             default:
                 break;
         }
