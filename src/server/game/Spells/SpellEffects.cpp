@@ -1403,15 +1403,15 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
 	}	
 		
        
-    switch (m_spellInfo->SpellFamilyName)
+    //switch (m_spellInfo->SpellFamilyName)
 
-    {
-       case SPELLFAMILY_ROGUE:
-       // Smoke Bomb
-       if (m_spellInfo->Id == 76577)
-       if (unitTarget->GetTypeId() == TYPEID_PLAYER)
-          unitTarget->CastSpell(unitTarget, 88611, true);
-    }		
+    //{
+    //   case SPELLFAMILY_ROGUE:
+    //   // Smoke Bomb
+    //   if (m_spellInfo->Id == 76577)
+    //   if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+    //      unitTarget->CastSpell(unitTarget, 88611, true);
+    //}		
 
     if (!m_spellAura || !unitTarget)
         return;
@@ -2687,6 +2687,10 @@ void Spell::EffectDistract(SpellEffIndex /*effIndex*/)
     // target must be OK to do this
     if (unitTarget->HasUnitState(UNIT_STATE_CONFUSED | UNIT_STATE_STUNNED | UNIT_STATE_FLEEING))
         return;
+
+	// Check if vision is obscured for that target
+	if (m_caster && m_caster->IsVisionObscured(unitTarget))
+		return;
 
     unitTarget->SetFacingTo(unitTarget->GetAngle(destTarget));
     unitTarget->ClearUnitState(UNIT_STATE_MOVING);
