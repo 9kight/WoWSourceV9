@@ -5388,11 +5388,20 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_NOT_INFRONT;
             }
 
-            if (!IsTriggered() && m_caster->GetEntry() != WORLD_TRIGGER) // Ignore LOS for gameobjects casts (wrongly casted by a trigger)
-                if (!(m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) && !DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, NULL, SPELL_DISABLE_LOS) && !m_caster->IsWithinLOSInMap(target))
-                    return IsTriggered() ? SPELL_FAILED_DONT_REPORT : SPELL_FAILED_LINE_OF_SIGHT;
-        }
-    }
+			if (m_caster->GetEntry() != WORLD_TRIGGER) // Ignore LOS for gameobjects casts (wrongly casted by a trigger)
+			{
+				if (!(m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) && !DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, NULL, SPELL_DISABLE_LOS) && !m_caster->IsWithinLOSInMap(target))
+					return SPELL_FAILED_LINE_OF_SIGHT;
+				if (m_caster->IsVisionObscured(target))
+				{
+					if (!(target->HasAura(51755) && m_spellInfo->Id != 6770 && m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE))
+					{
+						return SPELL_FAILED_VISION_OBSCURED; // smoke bomb, camouflage...
+					}
+				}
+			}
+		}
+	}
 
     // Check for line of sight for spells with dest
     if (m_targets.HasDst())
@@ -6420,8 +6429,8 @@ SpellCastResult Spell::CheckRange(bool strict)
             (m_spellInfo->FacingCasterFlags & SPELL_FACING_FLAG_INFRONT) && !m_caster->HasInArc(static_cast<float>(M_PI), target))
             return !(_triggeredCastFlags & TRIGGERED_DONT_REPORT_CAST_ERROR) ? SPELL_FAILED_UNIT_NOT_INFRONT : SPELL_FAILED_DONT_REPORT;
 
-        if (!(_triggeredCastFlags & TRIGGERED_IGNORE_AURA_INTERFERE_TARGETING) && m_caster->IsVisionObscured(target, range_type != SPELL_RANGE_MELEE))
-            return !(_triggeredCastFlags & TRIGGERED_DONT_REPORT_CAST_ERROR) ? SPELL_FAILED_VISION_OBSCURED : SPELL_FAILED_DONT_REPORT;
+     //   if (!(_triggeredCastFlags & TRIGGERED_IGNORE_AURA_INTERFERE_TARGETING) && m_caster->IsVisionObscured(target, range_type != SPELL_RANGE_MELEE))
+     //      return !(_triggeredCastFlags & TRIGGERED_DONT_REPORT_CAST_ERROR) ? SPELL_FAILED_VISION_OBSCURED : SPELL_FAILED_DONT_REPORT;
     }
 
     if (m_targets.HasDst() && !m_targets.HasTraj())
