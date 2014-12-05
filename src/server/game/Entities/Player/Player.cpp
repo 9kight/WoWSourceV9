@@ -9070,93 +9070,94 @@ void Player::CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 
 
 void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8 cast_count, uint32 glyphIndex)
 {
-    ItemTemplate const* proto = item->GetTemplate();
-    // special learning case
-    if (proto->Spells[0].SpellId == 483 || proto->Spells[0].SpellId == 55884)
-    {
-        uint32 learn_spell_id = proto->Spells[0].SpellId;
-        uint32 learning_spell_id = proto->Spells[1].SpellId;
+	ItemTemplate const* proto = item->GetTemplate();
+	// special learning case
+	if (proto->Spells[0].SpellId == 483 || proto->Spells[0].SpellId == 55884)
+	{
+		uint32 learn_spell_id = proto->Spells[0].SpellId;
+		uint32 learning_spell_id = proto->Spells[1].SpellId;
 
-        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(learn_spell_id);
-        if (!spellInfo)
-        {
-            sLog->outError(LOG_FILTER_PLAYER, "Player::CastItemUseSpell: Item (Entry: %u) in have wrong spell id %u, ignoring ", proto->ItemId, learn_spell_id);
-            SendEquipError(EQUIP_ERR_INTERNAL_BAG_ERROR, item, NULL);
-            return;
-        }
+		SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(learn_spell_id);
+		if (!spellInfo)
+		{
+			sLog->outError(LOG_FILTER_PLAYER, "Player::CastItemUseSpell: Item (Entry: %u) in have wrong spell id %u, ignoring ", proto->ItemId, learn_spell_id);
+			SendEquipError(EQUIP_ERR_INTERNAL_BAG_ERROR, item, NULL);
+			return;
+		}
 
-        Spell* spell = new Spell(this, spellInfo, TRIGGERED_NONE);
-        spell->m_CastItem = item;
-        spell->m_cast_count = cast_count;                   //set count of casts
-        spell->SetSpellValue(SPELLVALUE_BASE_POINT0, learning_spell_id);
-        spell->prepare(&targets);
-        return;
-    }
+		Spell* spell = new Spell(this, spellInfo, TRIGGERED_NONE);
+		spell->m_CastItem = item;
+		spell->m_cast_count = cast_count;                   //set count of casts
+		spell->SetSpellValue(SPELLVALUE_BASE_POINT0, learning_spell_id);
+		spell->prepare(&targets);
+		return;
+	}
 
-    // use triggered flag only for items with many spell casts and for not first cast
-    uint8 count = 0;
+	// use triggered flag only for items with many spell casts and for not first cast
+	uint8 count = 0;
 
-    // item spells casted at use
-    for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
-    {
-        _Spell const& spellData = proto->Spells[i];
+	// item spells cast at use
+	for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
+	{
+		_Spell const& spellData = proto->Spells[i];
 
-        // no spell
-        if (!spellData.SpellId)
-            continue;
+		// no spell
+		if (!spellData.SpellId)
+			continue;
 
-        // wrong triggering type
-        if (spellData.SpellTrigger != ITEM_SPELLTRIGGER_ON_USE)
-            continue;
+		// wrong triggering type
+		if (spellData.SpellTrigger != ITEM_SPELLTRIGGER_ON_USE)
+			continue;
 
-        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellData.SpellId);
-        if (!spellInfo)
-        {
-            sLog->outError(LOG_FILTER_PLAYER, "Player::CastItemUseSpell: Item (Entry: %u) in have wrong spell id %u, ignoring", proto->ItemId, spellData.SpellId);
-            continue;
-        }
+		SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellData.SpellId);
+		if (!spellInfo)
+		{
+			sLog->outError(LOG_FILTER_PLAYER, "Player::CastItemUseSpell: Item (Entry: %u) in have wrong spell id %u, ignoring", proto->ItemId, spellData.SpellId);
+			continue;
+		}
 
-        Spell* spell = new Spell(this, spellInfo, (count > 0) ? TRIGGERED_FULL_MASK : TRIGGERED_NONE);
-        spell->m_CastItem = item;
-        spell->m_cast_count = cast_count;                   // set count of casts
-        spell->m_glyphIndex = glyphIndex;                   // glyph index
-        spell->prepare(&targets);
+		Spell* spell = new Spell(this, spellInfo, (count > 0) ? TRIGGERED_FULL_MASK : TRIGGERED_NONE);
+		spell->m_CastItem = item;
+		spell->m_cast_count = cast_count;                   // set count of casts
+		spell->m_glyphIndex = glyphIndex;                   // glyph index
+		spell->prepare(&targets);
 
-        ++count;
-    }
+		++count;
+	}
 
-    // Item enchantments spells casted at use
-    for (uint8 e_slot = 0; e_slot < MAX_ENCHANTMENT_SLOT; ++e_slot)
-    {
-        if (e_slot > PRISMATIC_ENCHANTMENT_SLOT || e_slot < PROP_ENCHANTMENT_SLOT_0)    // not holding enchantment id
-            continue;
+	// Item enchantments spells cast at use
+	for (uint8 e_slot = 0; e_slot < MAX_ENCHANTMENT_SLOT; ++e_slot)
+	{
+		if (e_slot > PRISMATIC_ENCHANTMENT_SLOT && e_slot < PROP_ENCHANTMENT_SLOT_0)    // not holding enchantment id
+			continue;
 
-        uint32 enchant_id = item->GetEnchantmentId(EnchantmentSlot(e_slot));
-        SpellItemEnchantmentEntry const* pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
-        if (!pEnchant)
-            continue;
-        for (uint8 s = 0; s < MAX_ITEM_ENCHANTMENT_EFFECTS; ++s)
-        {
-            if (pEnchant->type[s] != ITEM_ENCHANTMENT_TYPE_USE_SPELL)
-                continue;
+		uint32 enchant_id = item->GetEnchantmentId(EnchantmentSlot(e_slot));
+		SpellItemEnchantmentEntry const* pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+		if (!pEnchant)
+			continue;
+		for (uint8 s = 0; s < MAX_ITEM_ENCHANTMENT_EFFECTS; ++s)
+		{
+			if (pEnchant->type[s] != ITEM_ENCHANTMENT_TYPE_USE_SPELL)
+				continue;
 
-            SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(pEnchant->spellid[s]);
-            if (!spellInfo)
-            {
-                sLog->outError(LOG_FILTER_PLAYER, "Player::CastItemUseSpell Enchant %i, cast unknown spell %i", pEnchant->ID, pEnchant->spellid[s]);
-                continue;
-            }
+			SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(pEnchant->spellid[s]);
+			if (!spellInfo)
+			{
+				sLog->outError(LOG_FILTER_PLAYER, "Player::CastItemUseSpell Enchant %i, cast unknown spell %i", pEnchant->ID, pEnchant->spellid[s]);
+				continue;
+			}
 
-            Spell* spell = new Spell(this, spellInfo, (count > 0) ? TRIGGERED_FULL_MASK : TRIGGERED_NONE);
-            spell->m_CastItem = item;
-            spell->m_cast_count = cast_count;               // set count of casts
-            spell->m_glyphIndex = glyphIndex;               // glyph index
-            spell->prepare(&targets);
+			Spell* spell = new Spell(this, spellInfo, (count > 0) ? TRIGGERED_FULL_MASK : TRIGGERED_NONE);
+			spell->m_CastItem = item;
+			spell->m_cast_count = cast_count;               // set count of casts
+			spell->m_glyphIndex = glyphIndex;               // glyph index
+			spell->prepare(&targets);
 
-            ++count;
-        }
-    }
+			++count;
+		}
+	}
 }
+
 
 void Player::_RemoveAllItemMods()
 {
@@ -23496,29 +23497,35 @@ void Player::SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint3
 
 void Player::ApplyEquipCooldown(Item* pItem)
 {
-    if (pItem->HasFlag(ITEM_FIELD_FLAGS, ITEM_PROTO_FLAG_NO_EQUIP_COOLDOWN))
-        return;
+	if (pItem->HasFlag(ITEM_FIELD_FLAGS, ITEM_PROTO_FLAG_NO_EQUIP_COOLDOWN))
+		return;
 
-    for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
-    {
-        _Spell const& spellData = pItem->GetTemplate()->Spells[i];
+	for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
+	{
+		_Spell const& spellData = pItem->GetTemplate()->Spells[i];
 
-        // no spell
-        if (!spellData.SpellId)
-            continue;
+		// no spell
+		if (!spellData.SpellId)
+			continue;
 
-        // wrong triggering type (note: ITEM_SPELLTRIGGER_ON_NO_DELAY_USE not have cooldown)
-        if (spellData.SpellTrigger != ITEM_SPELLTRIGGER_ON_USE)
-            continue;
+		// wrong triggering type (note: ITEM_SPELLTRIGGER_ON_NO_DELAY_USE not have cooldown)
+		if (spellData.SpellTrigger != ITEM_SPELLTRIGGER_ON_USE)
+			continue;
 
-        AddSpellCooldown(spellData.SpellId, pItem->GetEntry(), time(NULL) + 30);
+		// Don't replace longer cooldowns by equip cooldown if we have any.
+		SpellCooldowns::iterator itr = m_spellCooldowns.find(spellData.SpellId);
+		if (itr != m_spellCooldowns.end() && itr->second.itemid == pItem->GetEntry() && itr->second.end > time(NULL) + 30)
+			continue;
 
-        WorldPacket data(SMSG_ITEM_COOLDOWN, 12);
-        data << pItem->GetGUID();
-        data << uint32(spellData.SpellId);
-        GetSession()->SendPacket(&data);
-    }
+		AddSpellCooldown(spellData.SpellId, pItem->GetEntry(), time(NULL) + 30);
+
+		WorldPacket data(SMSG_ITEM_COOLDOWN, 12);
+		data << pItem->GetGUID();
+		data << uint32(spellData.SpellId);
+		GetSession()->SendPacket(&data);
+	}
 }
+
 
 void Player::resetSpells(bool myClassOnly)
 {
