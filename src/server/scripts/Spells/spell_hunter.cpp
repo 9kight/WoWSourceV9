@@ -760,10 +760,48 @@ public:
 };
 
 // -82692 - Foucus Fire
+// -82692 - Focus Fire
 class spell_hun_focus_fire : public SpellScriptLoader
 {
 public:
 	spell_hun_focus_fire() : SpellScriptLoader("spell_hun_focus_fire") { }
+
+	// SpellScript
+	class spell_hun_focus_fire_SpellScript : public SpellScript
+	{
+		PrepareSpellScript(spell_hun_focus_fire_SpellScript)
+
+			bool Validate(SpellInfo const* /*spellEntry*/)
+		{
+			if (!sSpellMgr->GetSpellInfo(82692))
+				return false;
+			return true;
+		}
+
+		SpellCastResult CheckPetFrenzy()
+		{
+			Unit * pet = GetCaster()->GetGuardianPet();
+			if (!pet)
+				return SPELL_FAILED_NO_PET;
+
+			if (pet->HasAura(19615))
+				return SPELL_CAST_OK;
+			else
+				return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+		}
+
+		void Register()
+		{
+			OnCheckCast += SpellCheckCastFn(spell_hun_focus_fire_SpellScript::CheckPetFrenzy);
+		}
+	};
+
+	SpellScript* GetSpellScript() const
+	{
+		return new spell_hun_focus_fire_SpellScript();
+	}
+
+	// AuraScript
 
 	class spell_hun_focus_fire_AuraScript : public AuraScript
 	{
@@ -800,57 +838,10 @@ public:
 		}
 	};
 
-	class spell_hun_focus_fire_SpellScript : public SpellScript
+	AuraScript* GetAuraScript() const
 	{
-		PrepareSpellScript(spell_hun_focus_fire_SpellScript);
-
-		SpellCastResult CheckCast(){
-			Unit* caster = GetCaster();
-			Pet* pet = caster->ToPlayer()->GetPet();
-			if (!pet || pet->isDead())
-				return SPELL_FAILED_NO_PET;
-			if (!pet->GetAura(19615))
-				return SPELL_FAILED_NO_CHARGES_REMAIN;
-			return SPELL_CAST_OK;
-		}
-
-		//void HandleDummy()
-		//{
-		//	if (Unit* pl = GetCaster())
-		//	{
-		//		if (Unit* pet = pl->GetGuardianPet())
-		//		{
-		//			if (Aura* frenzy = pet->GetAura(19615))
-		//			{
-		//				if (Aura* ff = pl->AddAura(83468, pl))
-		//				{
-		//					uint8 charges = frenzy->GetStackAmount();
-		//					ff->SetStackAmount(charges - 1);
-		//					int32 focus = pet->GetPower(POWER_FOCUS) + frenzy->GetStackAmount() * 4;
-		//					pet->SetPower(POWER_FOCUS, focus);
-		//					frenzy->Remove();
-		//				}
-		//			}
-		//		}
-		//	}
-		//}
-
-		void Register()
-		{
-			OnCheckCast += SpellCheckCastFn(spell_hun_focus_fire_SpellScript::CheckCast);
-			//OnCast += SpellCastFn(spell_hun_focus_fire_SpellScript::HandleDummy);
-		}
-	};
-
-		SpellScript* GetSpellScript() const
-		{
-			return new spell_hun_focus_fire_SpellScript();
-		}
-		AuraScript* GetAuraScript() const
-		{
-			return new spell_hun_focus_fire_AuraScript();
-		}
-
+		return new spell_hun_focus_fire_AuraScript();
+	}
 };
 
 // 56641 - Steady Shot
