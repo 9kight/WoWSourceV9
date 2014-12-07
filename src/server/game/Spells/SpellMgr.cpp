@@ -3255,6 +3255,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_1].MiscValue = 126;
                 spellInfo->Effects[EFFECT_1].TriggerSpell = 0;
                 break;
+			case 49028: // Dancing Rune Weapon
+				spellInfo->Effects[EFFECT_1].TriggerSpell = 0;
+				break;
             case 78835: // Ozruk - Elementium Spike Shield
             case 92429:
                 spellInfo->Effects[EFFECT_1].Effect = 0;
