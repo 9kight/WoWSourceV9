@@ -215,10 +215,13 @@ void BattlegroundBG::StartingEventOpenDoors()
 
 void BattlegroundBG::AddPlayer(Player* player)
 {
-    Battleground::AddPlayer(player);
-    BattlegroundBGScore* score = new BattlegroundBGScore;
+	Battleground::AddPlayer(player);
+	//create score and add it to map, default values are set in the constructor
+	BattlegroundBGScore* sc = new BattlegroundBGScore;
 
-    PlayerScores[player->GetGUID()] = score;
+	PlayerScores[player->GetGUID()] = sc;
+	sc->BgTeam = player->GetBGTeam();
+	sc->TalentTree = player->GetPrimaryTalentTree(player->GetActiveSpec());
 }
 
 void BattlegroundBG::HandleAreaTrigger(Player* /*player*/, uint32 /*trigger*/)
