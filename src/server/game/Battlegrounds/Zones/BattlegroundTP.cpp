@@ -174,11 +174,13 @@ void BattlegroundTP::StartingEventOpenDoors()
 
 void BattlegroundTP::AddPlayer(Player* player)
 {
-    Battleground::AddPlayer(player);
-    //create score and add it to map, default values are set in constructor
-    BattlegroundTPScore* const score = new BattlegroundTPScore;
+	Battleground::AddPlayer(player);
 
-    PlayerScores[player->GetGUID()] = score;
+	//create score and add it to map, default values are set in the constructor
+	BattlegroundTPScore* sc = new BattlegroundTPScore;
+	PlayerScores[player->GetGUID()] = sc;
+	sc->BgTeam = player->GetBGTeam();
+	sc->TalentTree = player->GetPrimaryTalentTree(player->GetActiveSpec());
 }
 
 void BattlegroundTP::RespawnFlag(uint32 team, bool captured)
