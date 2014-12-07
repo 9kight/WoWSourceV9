@@ -1605,7 +1605,7 @@ bool Pet::resetTalents()
             continue;
 
         TalentTabEntry const* talentTabInfo = sTalentTabStore.LookupEntry(talentInfo->TalentTab);
-27893
+
         if (!talentTabInfo)
             continue;
 
@@ -2173,8 +2173,6 @@ void Guardian::RecalculatePetScalingAttackSpeed(WeaponAttackType att)
         auraId = 89446;
     else if (IsPetGhoul())
         auraId = 51996;
-    else if (GetEntry() == 27893)
-        auraId = 51906;
     else if (GetEntry() == 510) // water elemental
         auraId = 89764;
 
