@@ -4219,59 +4219,59 @@ void Guild::_BroadcastEvent(GuildEvents guildEvent, uint64 guid, const char* par
 
 void Guild::SendBankList(WorldSession* session, uint8 tabId, bool withContent, bool withTabInfo) const
 {
-    Member const* member = GetMember(session->GetPlayer()->GetGUID());
-    if (!member) // Shouldn't happen, just in case
-        return;
+	Member const* member = GetMember(session->GetPlayer()->GetGUID());
+	if (!member) // Shouldn't happen, just in case
+		return;
 
-    ByteBuffer tabData;
-    WorldPacket data(SMSG_GUILD_BANK_LIST, 500);
-    data.WriteBit(0);
-    uint32 itemCount = 0;
-    if (withContent && _MemberHasTabRights(session->GetPlayer()->GetGUID(), tabId, GUILD_BANK_RIGHT_VIEW_TAB))
-        if (BankTab const* tab = GetBankTab(tabId))
-            for (uint8 slotId = 0; slotId < GUILD_BANK_MAX_SLOTS; ++slotId)
-                if (tab->GetItem(slotId))
-                    ++itemCount;
+	ByteBuffer tabData;
+	WorldPacket data(SMSG_GUILD_BANK_LIST, 500);
+	data.WriteBit(0);
+	uint32 itemCount = 0;
+	if (withContent && _MemberHasTabRights(session->GetPlayer()->GetGUID(), tabId, GUILD_BANK_RIGHT_VIEW_TAB))
+	if (BankTab const* tab = GetBankTab(tabId))
+	for (uint8 slotId = 0; slotId < GUILD_BANK_MAX_SLOTS; ++slotId)
+	if (tab->GetItem(slotId))
+		++itemCount;
 
-    data.WriteBits(itemCount, 20);
-    data.WriteBits(withTabInfo ? _GetPurchasedTabsSize() : 0, 22);
-    if (withContent && _MemberHasTabRights(session->GetPlayer()->GetGUID(), tabId, GUILD_BANK_RIGHT_VIEW_TAB))
-    {
-        if (BankTab const* tab = GetBankTab(tabId))
-        {
-            for (uint8 slotId = 0; slotId < GUILD_BANK_MAX_SLOTS; ++slotId)
-            {
-                if (Item* tabItem = tab->GetItem(slotId))
-                {
-                    data.WriteBit(0);
+	data.WriteBits(itemCount, 20);
+	data.WriteBits(withTabInfo ? _GetPurchasedTabsSize() : 0, 22);
+	if (withContent && _MemberHasTabRights(session->GetPlayer()->GetGUID(), tabId, GUILD_BANK_RIGHT_VIEW_TAB))
+	{
+		if (BankTab const* tab = GetBankTab(tabId))
+		{
+			for (uint8 slotId = 0; slotId < GUILD_BANK_MAX_SLOTS; ++slotId)
+			{
+				if (Item* tabItem = tab->GetItem(slotId))
+				{
+					data.WriteBit(0);
 
-                    uint32 enchants = 0;
-                    for (uint32 ench = 0; ench < MAX_ENCHANTMENT_SLOT; ++ench)
-                    {
-                        if (uint32 enchantId = tabItem->GetEnchantmentId(EnchantmentSlot(ench)))
-                        {
-                            tabData << uint32(enchantId);
-                            tabData << uint32(ench);
-                            ++enchants;
-                        }
-                    }
+					uint32 enchants = 0;
+					for (uint32 ench = 0; ench < MAX_ENCHANTMENT_SLOT; ++ench)
+					{
+						if (uint32 enchantId = tabItem->GetEnchantmentId(EnchantmentSlot(ench)))
+						{
+							tabData << uint32(enchantId);
+							tabData << uint32(ench);
+							++enchants;
+						}
+					}
 
-                    data.WriteBits(enchants, 23);
+					data.WriteBits(enchants, 23);
 
-                    tabData << uint32(0);
-                    tabData << uint32(0);
-                    tabData << uint32(0);
-                    tabData << uint32(tabItem->GetCount());                 // ITEM_FIELD_STACK_COUNT
-                    tabData << uint32(slotId);
-                    tabData << uint32(0);
-                    tabData << uint32(tabItem->GetEntry());
-                    tabData << uint32(tabItem->GetItemRandomPropertyId());
-                    tabData << uint32(abs(tabItem->GetSpellCharges()));     // Spell charges
-                    tabData << uint32(tabItem->GetItemSuffixFactor());      // SuffixFactor
-                }
-            }
-        }
-    }
+					tabData << uint32(0);
+					tabData << uint32(0);
+					tabData << uint32(0);
+					tabData << uint32(tabItem->GetCount());                 // ITEM_FIELD_STACK_COUNT
+					tabData << uint32(slotId);
+					tabData << uint32(0);
+					tabData << uint32(tabItem->GetEntry());
+					tabData << uint32(tabItem->GetItemRandomPropertyId());
+					tabData << uint32(abs(tabItem->GetSpellCharges()));     // Spell charges
+					tabData << uint32(tabItem->GetItemSuffixFactor());      // SuffixFactor
+				}
+			}
+		}
+	}
 
     if (withTabInfo)
     {
@@ -4303,7 +4303,6 @@ void Guild::SendBankList(WorldSession* session, uint8 tabId, bool withContent, b
 
     session->SendPacket(&data);
 
-    SendPermissions(session);
 
     sLog->outDebug(LOG_FILTER_GUILD, "WORLD: Sent (SMSG_GUILD_BANK_LIST)");
 }
