@@ -1,659 +1,718 @@
 /*
- * Copyright (C) 2005 - 2013 MaNGOS <http://www.getmangos.com/>
- *
- * Copyright (C) 2008 - 2013 Trinity <http://www.trinitycore.org/>
- *
- * Copyright (C) 2010 - 2013 ProjectSkyfire <http://www.projectskyfire.org/>
- *
- * Copyright (C) 2011 - 2013 ArkCORE <http://www.arkania.net/>
- *
- * Copyright (C) 2013 - 2014 WoWSource <http://www.wowsource.info/>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- */
+* Copyright (C) 2005 - 2013 MaNGOS <http://www.getmangos.com/>
+*
+* Copyright (C) 2008 - 2013 Trinity <http://www.trinitycore.org/>
+*
+* Copyright (C) 2010 - 2013 ProjectSkyfire <http://www.projectskyfire.org/>
+*
+* Copyright (C) 2011 - 2013 ArkCORE <http://www.arkania.net/>
+*
+* Copyright (C) 2013 - 2014 WoWSource <http://www.wowsource.info/>
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+*/
 
-#include "BattlegroundBFG.h"
-#include "Creature.h"
-#include "GameObject.h"
-#include "Language.h"
-#include "Object.h"
-#include "ObjectMgr.h"
-#include "BattlegroundMgr.h"
+#include "gamePCH.h"
 #include "Player.h"
+#include "Battleground.h"
+#include "BattlegroundBFG.h"
+#include "Language.h"
+#include "gamePCH.h"
 #include "World.h"
 #include "WorldPacket.h"
+#include "ObjectMgr.h"
+#include "BattlegroundMgr.h"
+#include "Battleground.h"
+#include "Creature.h"
+#include "Language.h"
+#include "Object.h"
+#include "Player.h"
+#include "Util.h"
 
-BattlegroundBG::BattlegroundBG()
+uint32 GILNEAS_BG_HonorScoreTicks[BG_HONOR_MODE_NUM] =
 {
-    BgObjects.resize(GILNEAS_OBJECT_MAX);
-    BgCreatures.resize(ALL_NODES_COUNT + 3); // +3 for aura triggers
+	330, // normal honor
+	200  // holiday
+};
 
-    StartMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_BG_BG_START_TWO_MINUTES;
-    StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_BG_START_ONE_MINUTE;
-    StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BG_BG_START_HALF_MINUTE;
-    StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_BG_HAS_BEGUN;
+uint32 GILNEAS_BG_Reputation[BG_HONOR_MODE_NUM][GILNEAS_BG_REWARD_NUM] =
+{
+	200, // normal honor
+	150  // holiday
+};
 
-    Reset();
+BattlegroundBFG::BattlegroundBFG()
+{
+	m_BuffChange = true;
+	BgObjects.resize(GILNEAS_BG_OBJECT_MAX);
+	BgCreatures.resize(GILNEAS_BG_ALL_NODES_COUNT + 3); // +3 for aura triggers
+
+	StartMessageIds[BG_STARTING_EVENT_FIRST] = LANG_BG_BG_START_TWO_MINUTES;
+	StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_BG_START_ONE_MINUTE;
+	StartMessageIds[BG_STARTING_EVENT_THIRD] = LANG_BG_BG_START_HALF_MINUTE;
+	StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_BG_HAS_BEGUN;
 }
 
-BattlegroundBG::~BattlegroundBG()
+BattlegroundBFG::~BattlegroundBFG() {}
+
+void BattlegroundBFG::PostUpdateImpl(uint32 diff)
 {
+	if (GetStatus() != STATUS_IN_PROGRESS)
+		return;
+
+	if (GetStatus() == STATUS_IN_PROGRESS)
+	{
+		int team_points[BG_TEAMS_COUNT] = { 0, 0 };
+
+		for (int node = 0; node < GILNEAS_BG_DYNAMIC_NODES_COUNT; ++node)
+		{
+			// 3 sec delay to spawn new a banner.
+			if (m_BannerTimers[node].timer)
+			{
+				if (m_BannerTimers[node].timer > diff)
+					m_BannerTimers[node].timer -= diff;
+				else
+				{
+					m_BannerTimers[node].timer = 0;
+					_CreateBanner(node, m_BannerTimers[node].type, m_BannerTimers[node].teamIndex, false);
+				}
+			}
+			// 1-minute cap timer on each node from a contested state.
+			if (m_NodeTimers[node])
+			{
+				if (m_NodeTimers[node] > diff)
+					m_NodeTimers[node] -= diff;
+				else
+				{
+					m_NodeTimers[node] = 0;
+
+					// Change from contested to occupied !
+					uint8 teamIndex = m_Nodes[node] - 1;
+					m_prevNodes[node] = m_Nodes[node];
+					m_Nodes[node] += 2;
+
+					// burn current contested banner
+					_DelBanner(node, GILNEAS_BG_NODE_TYPE_CONTESTED, teamIndex);
+
+					// create new occupied banner
+					_CreateBanner(node, GILNEAS_BG_NODE_TYPE_OCCUPIED, teamIndex, true);
+					_SendNodeUpdate(node);
+					_NodeOccupied(node, (teamIndex == 0) ? ALLIANCE : HORDE);
+
+					// Message to chatlog
+					if (teamIndex == 0)
+					{
+						// FIXME: need to fix Locales for team and nodes names.
+						SendMessage2ToAll(LANG_BG_BG_NODE_TAKEN, CHAT_MSG_BG_SYSTEM_ALLIANCE, NULL, LANG_BG_BG_ALLY, _GetNodeNameId(node));
+						PlaySoundToAll(GILNEAS_BG_SOUND_NODE_CAPTURED_ALLIANCE);
+					}
+					else
+					{
+						// FIXME: team and node names not localized
+						SendMessage2ToAll(LANG_BG_BG_NODE_TAKEN, CHAT_MSG_BG_SYSTEM_HORDE, NULL, LANG_BG_BG_HORDE, _GetNodeNameId(node));
+						PlaySoundToAll(GILNEAS_BG_SOUND_NODE_CAPTURED_HORDE);
+					}
+				}
+			}
+
+			for (int team = 0; team < BG_TEAMS_COUNT; ++team)
+			if (m_Nodes[node] == team + GILNEAS_BG_NODE_TYPE_OCCUPIED)
+				++team_points[team];
+		}
+
+		// Accumulate points
+		for (int team = 0; team < BG_TEAMS_COUNT; ++team)
+		{
+			int points = team_points[team];
+			if (!points)
+				continue;
+
+			m_lastTick[team] += diff;
+			if (m_lastTick[team] > GILNEAS_BG_TickIntervals[points])
+			{
+				m_lastTick[team] -= GILNEAS_BG_TickIntervals[points];
+				m_TeamScores[team] += GILNEAS_BG_TickPoints[points];
+				m_HonorScoreTicks[team] += GILNEAS_BG_TickPoints[points];
+				m_ReputationScoreTicks[team] += GILNEAS_BG_TickPoints[points];
+
+				if (m_ReputationScoreTicks[team] >= m_ReputationTicks)
+				{
+					(team == BG_TEAM_ALLIANCE) ? RewardReputationToTeam(509, 10, ALLIANCE) : RewardReputationToTeam(510, 10, HORDE);
+					m_ReputationScoreTicks[team] -= m_ReputationTicks;
+				}
+
+				if (m_HonorScoreTicks[team] >= m_HonorTicks)
+				{
+					RewardHonorToTeam(GetBonusHonorFromKill(1), (team == BG_TEAM_ALLIANCE) ? ALLIANCE : HORDE);    //BG=BFG
+					m_HonorScoreTicks[team] -= m_HonorTicks;
+				}
+
+				if (!m_IsInformedNearVictory && m_TeamScores[team] > GILNEAS_BG_WARNING_NEAR_VICTORY_SCORE)       //BG=BFG
+				{
+					if (team == BG_TEAM_ALLIANCE)
+						SendMessageToAll(LANG_BG_AB_A_NEAR_VICTORY, CHAT_MSG_BG_SYSTEM_NEUTRAL);
+					else
+						SendMessageToAll(LANG_BG_AB_H_NEAR_VICTORY, CHAT_MSG_BG_SYSTEM_NEUTRAL);
+
+					PlaySoundToAll(GILNEAS_BG_SOUND_NEAR_VICTORY);
+					m_IsInformedNearVictory = true;
+				}
+
+				if (m_TeamScores[team] > GILNEAS_BG_MAX_TEAM_SCORE)
+					m_TeamScores[team] = GILNEAS_BG_MAX_TEAM_SCORE;
+
+				if (team == BG_TEAM_ALLIANCE)
+					UpdateWorldState(GILNEAS_BG_OP_RESOURCES_ALLY, m_TeamScores[team]);
+
+				if (team == BG_TEAM_HORDE)
+					UpdateWorldState(GILNEAS_BG_OP_RESOURCES_HORDE, m_TeamScores[team]);
+				// update achievement flags
+				// we increased m_TeamScores[team] so we just need to check if it is 500 more than other teams resources
+				uint8 otherTeam = (team + 1) % BG_TEAMS_COUNT;
+				if (m_TeamScores[team] > m_TeamScores[otherTeam] + 500)
+					m_TeamScores500Disadvantage[otherTeam] = true;
+			}
+		}
+
+		// Test win condition
+		if (m_TeamScores[BG_TEAM_ALLIANCE] >= GILNEAS_BG_MAX_TEAM_SCORE)
+			EndBattleground(ALLIANCE);
+
+		if (m_TeamScores[BG_TEAM_HORDE] >= GILNEAS_BG_MAX_TEAM_SCORE)
+			EndBattleground(HORDE);
+	}
 }
 
-void BattlegroundBG::PostUpdateImpl(uint32 diff)
+void BattlegroundBFG::StartingEventCloseDoors()
 {
-    if (GetStatus() != STATUS_IN_PROGRESS)
-        return;
+	// Remove banners, auras and buffs
+	for (int object = GILNEAS_BG_OBJECT_BANNER_NEUTRAL; object < GILNEAS_BG_DYNAMIC_NODES_COUNT * 8; ++object)
+		SpawnBGObject(object, RESPAWN_ONE_DAY);
+	for (int i = 0; i < GILNEAS_BG_DYNAMIC_NODES_COUNT * 3; ++i)
+		SpawnBGObject(GILNEAS_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE + i, RESPAWN_ONE_DAY);
 
-    uint8 teamPoints[BG_TEAMS_COUNT] = { 0, 0 };
+	// Starting doors
+	DoorClose(GILNEAS_BG_OBJECT_GATE_A_1);
+	DoorClose(GILNEAS_BG_OBJECT_GATE_H_1);
 
-    for (uint8 node = 0; node < NODES_COUNT; ++node)
-    {
-        // 3sec delay to spawn new a banner
-        if (m_nodeInfo[node].timer)
-        {
-            if (m_nodeInfo[node].timer > diff)
-                m_nodeInfo[node].timer -= diff;
-            else
-            {
-                m_nodeInfo[node].timer = 0;
-                CreateBanner(node, m_nodeInfo[node].bannerType, m_nodeInfo[node].team, false);
-            }
-        }
-        // 1 minute cap timer on each node from a contested state.
-        if (m_nodeTimers[node])
-        {
-            if (m_nodeTimers[node] > diff)
-                m_nodeTimers[node] -= diff;
-            else
-            {
-                m_nodeTimers[node] = 0;
-
-                // Change from contested to occupied
-                uint8 const team = m_nodeInfo[node].team;
-                uint8 const contestedBanner = node * 8 + team + 3;
-                uint8 const occupiedBanner = node * 8 + team + 1;
-
-                // Burn current contested banner
-                DeleteBanner(contestedBanner);
-
-                // Create new occupied banner
-                CreateBanner(node, occupiedBanner, team, true);
-                SendNodeUpdate(node);
-                NodeOccupied(node, team == BG_TEAM_ALLIANCE ? ALLIANCE : HORDE);
-
-                // Message to chatlog
-                if (team == BG_TEAM_ALLIANCE)
-                {
-                    SendMessage2ToAll(LANG_BG_BG_NODE_TAKEN, CHAT_MSG_BG_SYSTEM_ALLIANCE, NULL, LANG_BG_BG_ALLY, GetNodeNameId(node));
-                    PlaySoundToAll(SOUND_NODE_CAPTURED_ALLIANCE);
-                }
-                else
-                {
-                    SendMessage2ToAll(LANG_BG_BG_NODE_TAKEN, CHAT_MSG_BG_SYSTEM_HORDE, NULL, LANG_BG_BG_HORDE, GetNodeNameId(node));
-                    PlaySoundToAll(SOUND_NODE_CAPTURED_HORDE);
-                }
-            }
-        }
-
-        for (uint8 n = 0; n < BG_TEAMS_COUNT; ++n)
-            teamPoints[n] = GetBasesAmount(n);
-    }
-
-    // Accumulate points
-    for (uint8 n = 0; n < BG_TEAMS_COUNT; ++n)
-    {
-        uint8 points = teamPoints[n];
-        if (!points)
-            continue;
-
-        m_lastTick[n] += diff;
-        uint32 const tickPoints = GilneasTickPoints[points];
-
-        if (m_lastTick[n] >= GilneasTickIntervals[points])
-        {
-            m_lastTick[n] -= GilneasTickIntervals[points];
-            m_TeamScores[n] += tickPoints;
-            m_honorScoreTicks[n] += tickPoints;
-
-            if (m_honorScoreTicks[n] >= m_honorTicks)
-            {
-                RewardHonorToTeam(GetBonusHonorFromKill(1), n == BG_TEAM_ALLIANCE ? ALLIANCE : HORDE);
-                m_honorScoreTicks[n] -= m_honorTicks;
-            }
-
-            // Resource warning (1800 resources)
-            if (!m_isInformedNearVictory && m_TeamScores[n] > RESOURCES_WARN)
-            {
-                if (n == BG_TEAM_ALLIANCE)
-                    SendMessageToAll(LANG_BG_AB_A_NEAR_VICTORY, CHAT_MSG_BG_SYSTEM_NEUTRAL);
-                else
-                    SendMessageToAll(LANG_BG_AB_H_NEAR_VICTORY, CHAT_MSG_BG_SYSTEM_NEUTRAL);
-
-                PlaySoundToAll(SOUND_NEAR_VICTORY);
-                m_isInformedNearVictory = true;
-            }
-
-            if (m_TeamScores[n] > MAX_GILNEAS_TEAM_SCORE)
-                m_TeamScores[n] = MAX_GILNEAS_TEAM_SCORE;
-
-            // Update worldstate
-            if (n == BG_TEAM_ALLIANCE)
-                UpdateWorldState(WORLDSTATE_ALLIANCE_SCORE, m_TeamScores[n]);
-            else
-                UpdateWorldState(WORLDSTATE_HORDE_SCORE, m_TeamScores[n]);
-
-            // Don't Get Cocky Kid
-            uint8 otherTeam = GetSecondTeam(n);
-            if (m_TeamScores[n] > m_TeamScores[otherTeam] + 500.0f)
-                dontGetCockyKid[otherTeam] = true;
-        }
-    }
-
-    // Test win condition
-    if (m_TeamScores[BG_TEAM_ALLIANCE] >= MAX_GILNEAS_TEAM_SCORE)
-        EndBattleground(ALLIANCE);
-
-    if (m_TeamScores[BG_TEAM_HORDE] >= MAX_GILNEAS_TEAM_SCORE)
-        EndBattleground(HORDE);
+	// Starting base spirit guides
+	_NodeOccupied(GILNEAS_BG_SPIRIT_ALIANCE, ALLIANCE);
+	_NodeOccupied(GILNEAS_BG_SPIRIT_HORDE, HORDE);
 }
 
-void BattlegroundBG::StartingEventCloseDoors()
+void BattlegroundBFG::StartingEventOpenDoors()
 {
-    // Remove banners, auras and buffs
-    for (uint8 n = 0; n < GILNEAS_OBJECT_MAX; ++n)
-    {
-        switch (n)
-        {
-            case OBJECT_GATE_A_1:
-            case OBJECT_GATE_A_2:
-            case OBJECT_GATE_H_1:
-            case OBJECT_GATE_H_2:
-                DoorClose(n);
-                SpawnBGObject(n, RESPAWN_IMMEDIATELY);
-                continue;
-        }
-        SpawnBGObject(n, RESPAWN_ONE_DAY);
-    }
+	for (int banner = GILNEAS_BG_OBJECT_BANNER_NEUTRAL, i = 0; i < 3; banner += 8, ++i)
+		SpawnBGObject(banner, RESPAWN_IMMEDIATELY);
+	for (int i = 0; i < GILNEAS_BG_DYNAMIC_NODES_COUNT; ++i)
+	{
+		uint8 buff = urand(0, 2);
+		SpawnBGObject(GILNEAS_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE + buff + i * 3, RESPAWN_IMMEDIATELY);
+	}
+	DoorOpen(GILNEAS_BG_OBJECT_GATE_A_1);
+	DoorOpen(GILNEAS_BG_OBJECT_GATE_H_1);
 
-    // Starting base spirit guides
-    NodeOccupied(GILNEAS_SPIRIT_ALIANCE, ALLIANCE);
-    NodeOccupied(GILNEAS_SPIRIT_HORDE, HORDE);
+	StartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, BG_EVENT_START_BATTLE);
 }
 
-void BattlegroundBG::StartingEventOpenDoors()
-{
-    for (uint8 n = OBJECT_GATE_A_1; n <= OBJECT_GATE_H_2; ++n)
-        DoorOpen(n);
-
-    for (uint8 n = 0; n < GILNEAS_OBJECT_MAX; ++n)
-        SpawnBGObject(n, RESPAWN_ONE_DAY);
-
-    for (uint8 n = 0; n < NODES_COUNT; ++n)
-    {
-        uint8 const buff = urand(0, 2);
-        SpawnBGObject(OBJECT_LIGHTHOUSE_SPEEDBUFF + n * 3 + buff, RESPAWN_IMMEDIATELY);
-    }
-
-    for (uint8 n = OBJECT_LIGHTHOUSE_BANNER_NEUTRAL; n <= OBJECT_MINE_BANNER_NEUTRAL; n += 8)
-        SpawnBGObject(n, RESPAWN_IMMEDIATELY);
-
-    StartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, GILNEAS_START_BATTLE);
-}
-
-void BattlegroundBG::AddPlayer(Player* player)
+void BattlegroundBFG::AddPlayer(Player* player)
 {
 	Battleground::AddPlayer(player);
 	//create score and add it to map, default values are set in the constructor
-	BattlegroundBGScore* sc = new BattlegroundBGScore;
-
+	BattlegroundBFGScore* sc = new BattlegroundBFGScore;
 	PlayerScores[player->GetGUID()] = sc;
+
 	sc->BgTeam = player->GetBGTeam();
 	sc->TalentTree = player->GetPrimaryTalentTree(player->GetActiveSpec());
 }
 
-void BattlegroundBG::HandleAreaTrigger(Player* /*player*/, uint32 /*trigger*/)
+void BattlegroundBFG::RemovePlayer(Player* /*player*/, uint64 /*guid*/, uint32 /*team*/) { }
+void BattlegroundBFG::HandleAreaTrigger(Player * /*Source*/, uint32 /*Trigger*/)
 {
-    if (GetStatus() != STATUS_IN_PROGRESS)
-        return;
+	// this is  wrong way to implement these things. On official it done by gameobject spell cast.
+	if (GetStatus() != STATUS_IN_PROGRESS)
+		return;
 }
 
-void BattlegroundBG::CreateBanner(uint8 node, uint8 type, uint32 team, bool delay)
+void BattlegroundBFG::_CreateBanner(uint8 node, uint8 type, uint8 teamIndex, bool delay)
 {
-    // Just put it into the queue
-    if (delay)
-    {
-        m_nodeInfo[node].timer = 2000;
-        m_nodeInfo[node].bannerType = type;
-        m_nodeInfo[node].team = team;
-        return;
-    }
+	// Just put it into the queue
+	if (delay)
+	{
+		m_BannerTimers[node].timer = 2000;
+		m_BannerTimers[node].type = type;
+		m_BannerTimers[node].teamIndex = teamIndex;
+		return;
+	}
 
-    SpawnBGObject(type, RESPAWN_IMMEDIATELY);
+	uint8 object = node * 8 + type + teamIndex;
+
+	SpawnBGObject(object, RESPAWN_IMMEDIATELY);
+
+	// Handle banner and auras
+	if (!type)
+		return;
+
+	object = node * 8 + ((type == GILNEAS_BG_NODE_TYPE_OCCUPIED) ? (3 + teamIndex) : 7);
+	SpawnBGObject(object, RESPAWN_IMMEDIATELY);
 }
 
-void BattlegroundBG::DeleteBanner(uint8 type)
+void BattlegroundBFG::_DelBanner(uint8 node, uint8 type, uint8 teamIndex)
 {
-    SpawnBGObject(type, RESPAWN_ONE_DAY);
+	uint8 object = node * 8 + type + teamIndex;
+	SpawnBGObject(object, RESPAWN_ONE_DAY);
+
+	// Handle banner and auras
+	if (!type)
+		return;
+
+	object = node * 8 + ((type == GILNEAS_BG_NODE_TYPE_OCCUPIED) ? (3 + teamIndex) : 7);
+	SpawnBGObject(object, RESPAWN_ONE_DAY);
 }
 
-int32 BattlegroundBG::GetNodeNameId(uint8 node) const
+int32 BattlegroundBFG::_GetNodeNameId(uint8 node)
 {
-    switch (node)
-    {
-        case NODE_LIGHTHOUSE:
-            return LANG_BG_BG_NODE_LIGHTHOUSE;
-        case NODE_WATERWORKS:
-            return LANG_BG_BG_NODE_WATERWORKS;
-        case NODE_MINE:
-            return LANG_BG_BG_NODE_MINE;
-    }
-
-    return 0;
+	switch (node)
+	{
+	case GILNEAS_BG_NODE_LIGHTHOUSE: return LANG_BG_BG_NODE_LIGHTHOUSE;
+	case GILNEAS_BG_NODE_WATERWORKS: return LANG_BG_BG_NODE_WATERWORKS;
+	case GILNEAS_BG_NODE_MINE: return LANG_BG_BG_NODE_MINE;
+	default:
+		ASSERT(0);
+	}
+	return 0;
 }
 
-void BattlegroundBG::FillInitialWorldStates(WorldPacket& data)
+void BattlegroundBFG::FillInitialWorldStates(WorldPacket& data)
 {
-    // Node icons
-    for (uint8 n = 0; n < NODES_COUNT; ++n)
-        data << uint32(GilneasNodeicons[n]) << uint32(m_nodeInfo[n].bannerType == (n * 8) ? 1 : 0);
+	const uint8 plusArray[] = { 0, 2, 3, 0, 1 };
 
-    // Node occupied states
-    for (uint8 n = 0; n < NODES_COUNT; ++n)
-        for (uint8 i = 0; i < 4; ++i)
-            data << uint32(GilneasNodestates[n] + i) << uint32(m_nodeInfo[n].bannerType == (n * 8 + i + 1) ? 1 : 0);
+	// Node icons
+	for (uint8 node = 0; node < GILNEAS_BG_DYNAMIC_NODES_COUNT; ++node)
+		data << uint32(GILNEAS_BG_OP_NODEICONS[node]) << uint32((m_Nodes[node] == 0) ? 1 : 0);
 
-    data << uint32(WORLDSTATE_ALLIANCE_BASES) << uint32(GetBasesAmount(BG_TEAM_ALLIANCE));
-    data << uint32(WORLDSTATE_HORDE_BASES) << uint32(GetBasesAmount(BG_TEAM_HORDE));
+	// Node occupied states
+	for (uint8 node = 0; node < GILNEAS_BG_DYNAMIC_NODES_COUNT; ++node)
+	for (uint8 i = 1; i < GILNEAS_BG_DYNAMIC_NODES_COUNT; ++i)
+		data << uint32(GILNEAS_BG_OP_NODESTATES[node] + plusArray[i]) << uint32((m_Nodes[node] == i) ? 1 : 0);
 
-    // Team scores
-    data << uint32(WORLDSTATE_MAX_SCORE) << uint32(MAX_GILNEAS_TEAM_SCORE);
-    data << uint32(WORLDSTATE_RESOURCES_WARN) << uint32(RESOURCES_WARN);
-    data << uint32(WORLDSTATE_ALLIANCE_SCORE) << uint32(m_TeamScores[BG_TEAM_ALLIANCE]);
-    data << uint32(WORLDSTATE_HORDE_SCORE) << uint32(m_TeamScores[BG_TEAM_HORDE]);
+	// How many bases each team owns
+	uint8 ally = 0, horde = 0;
+	for (uint8 node = 0; node < GILNEAS_BG_DYNAMIC_NODES_COUNT; ++node)
+	if (m_Nodes[node] == GILNEAS_BG_NODE_STATUS_ALLY_OCCUPIED)
+		++ally;
+	else if (m_Nodes[node] == GILNEAS_BG_NODE_STATUS_HORDE_OCCUPIED)
+		++horde;
 
-    // other unknown
-    //data << uint32(0x745) << uint32(0x2);           // 37 1861 unk
+	data << uint32(GILNEAS_BG_OP_OCCUPIED_BASES_ALLY) << uint32(ally);
+	data << uint32(GILNEAS_BG_OP_OCCUPIED_BASES_HORDE) << uint32(horde);
+
+	// Team scores
+	data << uint32(GILNEAS_BG_OP_RESOURCES_MAX) << uint32(GILNEAS_BG_MAX_TEAM_SCORE);
+	data << uint32(GILNEAS_BG_OP_RESOURCES_WARNING) << uint32(GILNEAS_BG_WARNING_NEAR_VICTORY_SCORE);
+	data << uint32(GILNEAS_BG_OP_RESOURCES_ALLY) << uint32(m_TeamScores[BG_TEAM_ALLIANCE]);
+	data << uint32(GILNEAS_BG_OP_RESOURCES_HORDE) << uint32(m_TeamScores[BG_TEAM_HORDE]);
+
+	// other unknown
+	//data << uint32(0x745) << uint32(0x2);           // 37 1861 unk
 }
 
-uint8 BattlegroundBG::GetBasesAmount(uint32 team) const
+void BattlegroundBFG::_SendNodeUpdate(uint8 node)
 {
-    uint8 teamIndex = 0;
-    for (uint8 n = 0; n < NODES_COUNT; ++n)
-    {
-        uint8 const occupiedBanner = n * 8 + team + 1;
-        if (m_nodeInfo[n].bannerType == occupiedBanner && m_nodeInfo[n].team == team)
-            ++teamIndex;
-    }
+	// Send to client owner node state updates to refresh map icons.
+	const uint8 plusArray[] = { 0, 2, 3, 0, 1 };
 
-    return teamIndex;
+	if (m_prevNodes[node])
+		UpdateWorldState(GILNEAS_BG_OP_NODESTATES[node] + plusArray[m_prevNodes[node]], 0);
+	else
+		UpdateWorldState(GILNEAS_BG_OP_NODEICONS[node], 0);
+
+	UpdateWorldState(GILNEAS_BG_OP_NODESTATES[node] + plusArray[m_Nodes[node]], 1);
+
+	// How many bases each team owns
+	uint8 ally = 0, horde = 0;
+
+	for (uint8 i = 0; i < GILNEAS_BG_DYNAMIC_NODES_COUNT; ++i)
+	if (m_Nodes[i] == GILNEAS_BG_NODE_STATUS_ALLY_OCCUPIED)
+		++ally;
+	else if (m_Nodes[i] == GILNEAS_BG_NODE_STATUS_HORDE_OCCUPIED)
+		++horde;
+
+	UpdateWorldState(GILNEAS_BG_OP_OCCUPIED_BASES_ALLY, ally);
+	UpdateWorldState(GILNEAS_BG_OP_OCCUPIED_BASES_HORDE, horde);
 }
 
-void BattlegroundBG::SendNodeUpdate(uint8 node)
+void BattlegroundBFG::_NodeOccupied(uint8 node, Team team)
 {
-    // Node icons
-    UpdateWorldState(GilneasNodeicons[node], m_nodeInfo[node].bannerType == (node * 8) ? 1 : 0);
+	if (!AddSpiritGuide(node, GILNEAS_BG_SpiritGuidePos[node][0], GILNEAS_BG_SpiritGuidePos[node][1], GILNEAS_BG_SpiritGuidePos[node][2], GILNEAS_BG_SpiritGuidePos[node][3], team))
+		sLog->outError(LOG_FILTER_BATTLEGROUND, "Failed to spawn spirit guide! point: %u, team: %u, ", node, team);
 
-    // Node occupied states
-    for (uint8 n = 0; n < 4; ++n)
-        UpdateWorldState(GilneasNodestates[node] + n, m_nodeInfo[node].bannerType == (node * 8 + n + 1) ? 1 : 0);
+	uint8 capturedNodes = 0;
+	for (uint8 i = 0; i < GILNEAS_BG_DYNAMIC_NODES_COUNT; ++i)
+	{
+		if (m_Nodes[node] == GetTeamIndexByTeamId(team) + GILNEAS_BG_NODE_TYPE_OCCUPIED && !m_NodeTimers[i])
+			++capturedNodes;
+	}
 
-    UpdateWorldState(WORLDSTATE_ALLIANCE_BASES, GetBasesAmount(BG_TEAM_ALLIANCE));
-    UpdateWorldState(WORLDSTATE_HORDE_BASES, GetBasesAmount(BG_TEAM_HORDE));
+	if (node >= GILNEAS_BG_DYNAMIC_NODES_COUNT) // only dynamic nodes, no start points
+		return;
+
+	Creature* trigger = BgCreatures[node + 5] ? GetBGCreature(node + 5): NULL; // 0-5 spirit guides
+
+	if (!trigger)
+		trigger = AddCreature(WORLD_TRIGGER, node + 5, team, GILNEAS_BG_NodePositions[node][0], GILNEAS_BG_NodePositions[node][1], GILNEAS_BG_NodePositions[node][2], GILNEAS_BG_NodePositions[node][3]);
+
+	// Add bonus honor aura trigger creature when node is occupied
+	// Cast bonus aura (+50% honor in 25yards)
+	// aura should only apply to players who have occupied the node, set correct faction for trigger
+	if (trigger)
+	{
+		trigger->setFaction(team == ALLIANCE ? 84 : 83);
+		trigger->CastSpell(trigger, SPELL_HONORABLE_DEFENDER_25Y, false);
+	}
 }
 
-void BattlegroundBG::NodeOccupied(uint8 node, uint32 team)
+void BattlegroundBFG::_NodeDeOccupied(uint8 node)
 {
-    if (!AddSpiritGuide(node, GilneasSpiritGuides[node][0], GilneasSpiritGuides[node][1], GilneasSpiritGuides[node][2], GilneasSpiritGuides[node][3], team))
-        return;
+	if (node >= GILNEAS_BG_DYNAMIC_NODES_COUNT)
+		return;
 
-    if (node >= NODES_COUNT)
-        return;
+	// Remove bonus honor aura trigger bunny when node is lost
+	if (node < GILNEAS_BG_DYNAMIC_NODES_COUNT)  // Only dynamic nodes, no start points
+		DelCreature(node + 5);                    // NULL checks are in DelCreature! 0-5 spirit guides
 
-    uint8 const triggerType = node * 8 + 5;
+	// Players waiting to resurrect at this node are sent to closest owned graveyard
+	std::vector<uint64> ghost_list = m_ReviveQueue[BgCreatures[node]];
+	if (!ghost_list.empty())
+	{
+		WorldSafeLocsEntry const *ClosestGrave = NULL;
+		for (std::vector<uint64>::const_iterator itr = ghost_list.begin(); itr != ghost_list.end(); ++itr)
+		{
+			Player* player = ObjectAccessor::FindPlayer(*itr);
+			if (!player)
+				continue;
 
-    Creature* trigger = GetBGCreature(triggerType);
+			if (!ClosestGrave)
+				ClosestGrave = GetClosestGraveYard(player);
 
-    if (!trigger)
-       trigger = AddCreature(WORLD_TRIGGER, triggerType, team, GilneasNodes[node][0], GilneasNodes[node][1], GilneasNodes[node][2], GilneasNodes[node][3]);
+			if (ClosestGrave)
+				player->TeleportTo(GetMapId(), ClosestGrave->x, ClosestGrave->y, ClosestGrave->z, player->GetOrientation());
+		}
+	}
 
-    if (trigger)
-    {
-        trigger->setFaction(team == ALLIANCE ? 84 : 83);
-        trigger->CastSpell(trigger, SPELL_HONORABLE_DEFENDER_25Y, false);
-    }
+	if (BgCreatures[node])
+		DelCreature(node);
+
+	// Buff object is not removed
 }
 
-void BattlegroundBG::NodeDeOccupied(uint8 node)
+/* Invoked if a player used a banner as a GameObject */
+void BattlegroundBFG::EventPlayerClickedOnFlag(Player* source, GameObject* /*target_obj*/)
 {
-    if (node >= NODES_COUNT)
-        return;
+	if (GetStatus() != STATUS_IN_PROGRESS)
+		return;
 
-    // Remove bonus honor aura trigger bunny when node is lost
-    DelCreature(node * 8 + 5);
+	uint8 node = GILNEAS_BG_NODE_LIGHTHOUSE;
+	GameObject* object = GetBgMap()->GetGameObject(BgObjects[node * 8 + 5]);
+	while ((node < GILNEAS_BG_DYNAMIC_NODES_COUNT) && ((!object) || (!source->IsWithinDistInMap(object, 10))))
+	{
+		++node;
+		object = GetBgMap()->GetGameObject(BgObjects[node * 8 + GILNEAS_BG_OBJECT_AURA_CONTESTED]);
+	}
 
-    // Players waiting to resurrect at this node are sent to closest owned graveyard
-    std::vector<uint64> ghostList = m_ReviveQueue[BgCreatures[node]];
-    if (!ghostList.empty())
-    {
-        WorldSafeLocsEntry const* closestGrave = NULL;
-        for (std::vector<uint64>::const_iterator itr = ghostList.begin(); itr != ghostList.end(); ++itr)
-        {
-            Player* const player = ObjectAccessor::FindPlayer(*itr);
-            if (!player)
-                continue;
+	if (node == GILNEAS_BG_DYNAMIC_NODES_COUNT)
+	{
+		// this means our player isn't close to any of banners - maybe cheater ??
+		return;
+	}
 
-            if (!closestGrave)
-                closestGrave = GetClosestGraveYard(player);
+	TeamId teamIndex = GetTeamIndexByTeamId(source->GetTeam());
 
-            if (closestGrave)
-                player->TeleportTo(GetMapId(), closestGrave->x, closestGrave->y, closestGrave->z, player->GetOrientation());
-        }
-    }
+	// Check if player really could use this banner, and has not cheated
+	if (!(m_Nodes[node] == 0 || teamIndex == m_Nodes[node] % 2))
+		return;
 
-    if (BgCreatures[node])
-        DelCreature(node);
+	source->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
+	uint32 sound = 0;
+	// If node is neutral, change to contested
+	if (m_Nodes[node] == GILNEAS_BG_NODE_TYPE_NEUTRAL)
+	{
+		UpdatePlayerScore(source, SCORE_BASES_ASSAULTED, 1);
+		m_prevNodes[node] = m_Nodes[node];
+		m_Nodes[node] = teamIndex + 1;
+
+		// burn current neutral banner
+		_DelBanner(node, GILNEAS_BG_NODE_TYPE_NEUTRAL, 0);
+
+		// create new contested banner
+		_CreateBanner(node, GILNEAS_BG_NODE_TYPE_CONTESTED, teamIndex, true);
+		_SendNodeUpdate(node);
+		m_NodeTimers[node] = GILNEAS_BG_FLAG_CAPTURING_TIME;
+
+		// FIXME: need to fix Locales for team and node names.
+		if (teamIndex == 0)
+			SendMessage2ToAll(LANG_BG_BG_NODE_CLAIMED, CHAT_MSG_BG_SYSTEM_ALLIANCE, source, _GetNodeNameId(node), LANG_BG_BG_ALLY);
+		else
+			SendMessage2ToAll(LANG_BG_BG_NODE_CLAIMED, CHAT_MSG_BG_SYSTEM_HORDE, source, _GetNodeNameId(node), LANG_BG_BG_HORDE);
+
+		sound = GILNEAS_BG_SOUND_NODE_CLAIMED;
+	}
+	// If node is contested
+	else if ((m_Nodes[node] == GILNEAS_BG_NODE_STATUS_ALLY_CONTESTED) || (m_Nodes[node] == GILNEAS_BG_NODE_STATUS_HORDE_CONTESTED))
+	{
+		// If last state is NOT occupied, change node to enemy-contested
+		if (m_prevNodes[node] < GILNEAS_BG_NODE_TYPE_OCCUPIED)
+		{
+			UpdatePlayerScore(source, SCORE_BASES_ASSAULTED, 1);
+			m_prevNodes[node] = m_Nodes[node];
+			m_Nodes[node] = teamIndex + GILNEAS_BG_NODE_TYPE_CONTESTED;
+
+			// burn current contested banner
+			_DelBanner(node, GILNEAS_BG_NODE_TYPE_CONTESTED, !teamIndex);
+
+			// create new contested banner
+			_CreateBanner(node, GILNEAS_BG_NODE_TYPE_CONTESTED, teamIndex, true);
+			_SendNodeUpdate(node);
+			m_NodeTimers[node] = GILNEAS_BG_FLAG_CAPTURING_TIME;
+
+			// FIXME: need to fix Locales for team and node names.
+			if (teamIndex == BG_TEAM_ALLIANCE)
+				SendMessage2ToAll(LANG_BG_BG_NODE_ASSAULTED, CHAT_MSG_BG_SYSTEM_ALLIANCE, source, _GetNodeNameId(node));
+			else
+				SendMessage2ToAll(LANG_BG_BG_NODE_ASSAULTED, CHAT_MSG_BG_SYSTEM_HORDE, source, _GetNodeNameId(node));
+		}
+		// If contested, change back to occupied
+		else
+		{
+			UpdatePlayerScore(source, SCORE_BASES_DEFENDED, 1);
+			m_prevNodes[node] = m_Nodes[node];
+			m_Nodes[node] = teamIndex + GILNEAS_BG_NODE_TYPE_OCCUPIED;
+
+			// burn current contested banner
+			_DelBanner(node, GILNEAS_BG_NODE_TYPE_CONTESTED, !teamIndex);
+
+			// create new occupied banner
+			_CreateBanner(node, GILNEAS_BG_NODE_TYPE_OCCUPIED, teamIndex, true);
+			_SendNodeUpdate(node);
+			m_NodeTimers[node] = 0;
+			_NodeOccupied(node, (teamIndex == BG_TEAM_ALLIANCE) ? ALLIANCE : HORDE);
+
+			// FIXME: need to fix Locales for team and node names.
+			if (teamIndex == BG_TEAM_ALLIANCE)
+				SendMessage2ToAll(LANG_BG_BG_NODE_DEFENDED, CHAT_MSG_BG_SYSTEM_ALLIANCE, source, _GetNodeNameId(node));
+			else
+				SendMessage2ToAll(LANG_BG_BG_NODE_DEFENDED, CHAT_MSG_BG_SYSTEM_HORDE, source, _GetNodeNameId(node));
+		}
+		sound = (teamIndex == BG_TEAM_ALLIANCE) ? GILNEAS_BG_SOUND_NODE_ASSAULTED_ALLIANCE : GILNEAS_BG_SOUND_NODE_ASSAULTED_HORDE;
+	}
+	// If node is occupied, change to enemy-contested
+	else
+	{
+		UpdatePlayerScore(source, SCORE_BASES_ASSAULTED, 1);
+		m_prevNodes[node] = m_Nodes[node];
+		m_Nodes[node] = teamIndex + GILNEAS_BG_NODE_TYPE_CONTESTED;
+
+		// burn current occupied banner
+		_DelBanner(node, GILNEAS_BG_NODE_TYPE_OCCUPIED, !teamIndex);
+
+		// create new contested banner
+		_CreateBanner(node, GILNEAS_BG_NODE_TYPE_CONTESTED, teamIndex, true);
+		_SendNodeUpdate(node);
+		_NodeDeOccupied(node);
+		m_NodeTimers[node] = GILNEAS_BG_FLAG_CAPTURING_TIME;
+
+		// FIXME: need to fix Locales for team and node names.
+		if (teamIndex == BG_TEAM_ALLIANCE)
+			SendMessage2ToAll(LANG_BG_BG_NODE_ASSAULTED, CHAT_MSG_BG_SYSTEM_ALLIANCE, source, _GetNodeNameId(node));
+		else
+			SendMessage2ToAll(LANG_BG_BG_NODE_ASSAULTED, CHAT_MSG_BG_SYSTEM_HORDE, source, _GetNodeNameId(node));
+
+		sound = (teamIndex == BG_TEAM_ALLIANCE) ? GILNEAS_BG_SOUND_NODE_ASSAULTED_ALLIANCE : GILNEAS_BG_SOUND_NODE_ASSAULTED_HORDE;
+	}
+
+	// If node is occupied again, send "X has taken the Y" msg.
+	if (m_Nodes[node] >= GILNEAS_BG_NODE_TYPE_OCCUPIED)
+	{
+		// FIXME: need to fix Locales for team and node names.
+		if (teamIndex == BG_TEAM_ALLIANCE)
+			SendMessage2ToAll(LANG_BG_BG_NODE_TAKEN, CHAT_MSG_BG_SYSTEM_ALLIANCE, NULL, LANG_BG_BG_ALLY, _GetNodeNameId(node));
+		else
+			SendMessage2ToAll(LANG_BG_BG_NODE_TAKEN, CHAT_MSG_BG_SYSTEM_HORDE, NULL, LANG_BG_BG_HORDE, _GetNodeNameId(node));
+	}
+	PlaySoundToAll(sound);
 }
 
-void BattlegroundBG::EventPlayerClickedOnFlag(Player* player, GameObject* /*gameobject*/)
+bool BattlegroundBFG::SetupBattleground()
 {
-    if (GetStatus() != STATUS_IN_PROGRESS)
-        return;
+	for (int i = 0; i < GILNEAS_BG_DYNAMIC_NODES_COUNT; ++i)
+	{
+		if (!AddObject(GILNEAS_BG_OBJECT_BANNER_NEUTRAL + 8 * i, GILNEAS_BG_OBJECTID_NODE_BANNER_0 + i, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, sin(GILNEAS_BG_NodePositions[i][3] / 2), cos(GILNEAS_BG_NodePositions[i][3] / 2), RESPAWN_ONE_DAY)
+			|| !AddObject(GILNEAS_BG_OBJECT_BANNER_CONT_A + 8 * i, GILNEAS_BG_OBJECTID_BANNER_CONT_A, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, sin(GILNEAS_BG_NodePositions[i][3] / 2), cos(GILNEAS_BG_NodePositions[i][3] / 2), RESPAWN_ONE_DAY)
+			|| !AddObject(GILNEAS_BG_OBJECT_BANNER_CONT_H + 8 * i, GILNEAS_BG_OBJECTID_BANNER_CONT_H, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, sin(GILNEAS_BG_NodePositions[i][3] / 2), cos(GILNEAS_BG_NodePositions[i][3] / 2), RESPAWN_ONE_DAY)
+			|| !AddObject(GILNEAS_BG_OBJECT_BANNER_ALLY + 8 * i, GILNEAS_BG_OBJECTID_BANNER_A, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, sin(GILNEAS_BG_NodePositions[i][3] / 2), cos(GILNEAS_BG_NodePositions[i][3] / 2), RESPAWN_ONE_DAY)
+			|| !AddObject(GILNEAS_BG_OBJECT_BANNER_HORDE + 8 * i, GILNEAS_BG_OBJECTID_BANNER_H, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, sin(GILNEAS_BG_NodePositions[i][3] / 2), cos(GILNEAS_BG_NodePositions[i][3] / 2), RESPAWN_ONE_DAY)
+			|| !AddObject(GILNEAS_BG_OBJECT_AURA_ALLY + 8 * i, GILNEAS_BG_OBJECTID_AURA_A, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, sin(GILNEAS_BG_NodePositions[i][3] / 2), cos(GILNEAS_BG_NodePositions[i][3] / 2), RESPAWN_ONE_DAY)
+			|| !AddObject(GILNEAS_BG_OBJECT_AURA_HORDE + 8 * i, GILNEAS_BG_OBJECTID_AURA_H, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, sin(GILNEAS_BG_NodePositions[i][3] / 2), cos(GILNEAS_BG_NodePositions[i][3] / 2), RESPAWN_ONE_DAY)
+			|| !AddObject(GILNEAS_BG_OBJECT_AURA_CONTESTED + 8 * i, GILNEAS_BG_OBJECTID_AURA_C, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, sin(GILNEAS_BG_NodePositions[i][3] / 2), cos(GILNEAS_BG_NodePositions[i][3] / 2), RESPAWN_ONE_DAY))
+		{
+			sLog->outError(LOG_FILTER_BATTLEGROUND, "BattleForGilneas: Failed to spawn some object Battleground not created!");
+			return false;
+		}
+	}
 
-    GameObject const* object = NULL;
-    int8 node = -1;
+	if (!AddObject(GILNEAS_BG_OBJECT_GATE_A_1, GILNEAS_BG_OBJECTID_GATE_A_1, GILNEAS_BG_DoorPositions[0][0], GILNEAS_BG_DoorPositions[0][1], GILNEAS_BG_DoorPositions[0][2], GILNEAS_BG_DoorPositions[0][3], GILNEAS_BG_DoorPositions[0][4], GILNEAS_BG_DoorPositions[0][5], GILNEAS_BG_DoorPositions[0][6], GILNEAS_BG_DoorPositions[0][7], RESPAWN_IMMEDIATELY)
+		|| !AddObject(GILNEAS_BG_OBJECT_GATE_H_1, GILNEAS_BG_OBJECTID_GATE_H_1, GILNEAS_BG_DoorPositions[2][0], GILNEAS_BG_DoorPositions[2][1], GILNEAS_BG_DoorPositions[2][2], GILNEAS_BG_DoorPositions[2][3], GILNEAS_BG_DoorPositions[2][4], GILNEAS_BG_DoorPositions[2][5], GILNEAS_BG_DoorPositions[2][6], GILNEAS_BG_DoorPositions[2][7], RESPAWN_IMMEDIATELY))
+	{
+		sLog->outError(LOG_FILTER_BATTLEGROUND, "BattleForGilneas: Failed to spawn door object Battleground not created!");
+		return false;
+	}
 
-    for (uint8 n = 0; n < NODES_COUNT; ++n)
-    {
-        for (uint8 i = OBJECT_LIGHTHOUSE_BANNER_NEUTRAL; i <= OBJECT_MINE_BANNER_HORDE; ++i)
-        {
-            // Do not check for aura triggers
-            switch (i)
-            {
-                case OBJECT_LIGHTHOUSE_AURA_ALLY:
-                case OBJECT_LIGHTHOUSE_AURA_HORDE:
-                case OBJECT_LIGHTHOUSE_AURA_CONTESTED:
-                case OBJECT_WATERWORKS_AURA_ALLY:
-                case OBJECT_WATERWORKS_AURA_HORDE:
-                case OBJECT_WATERWORKS_AURA_CONTESTED:
-                    continue;
-            }
+	// Buffs
+	for (int i = 0; i < GILNEAS_BG_DYNAMIC_NODES_COUNT; ++i)
+	{
+		if (!AddObject(GILNEAS_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE + 3 * i, Buff_Entries[0], GILNEAS_BG_BuffPositions[i][0], GILNEAS_BG_BuffPositions[i][1], GILNEAS_BG_BuffPositions[i][2], GILNEAS_BG_BuffPositions[i][3], 0, 0, sin(GILNEAS_BG_BuffPositions[i][3] / 2), cos(GILNEAS_BG_BuffPositions[i][3] / 2), RESPAWN_ONE_DAY)
+			|| !AddObject(GILNEAS_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE + 3 * i + 1, Buff_Entries[1], GILNEAS_BG_BuffPositions[i][0], GILNEAS_BG_BuffPositions[i][1], GILNEAS_BG_BuffPositions[i][2], GILNEAS_BG_BuffPositions[i][3], 0, 0, sin(GILNEAS_BG_BuffPositions[i][3] / 2), cos(GILNEAS_BG_BuffPositions[i][3] / 2), RESPAWN_ONE_DAY)
+			|| !AddObject(GILNEAS_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE + 3 * i + 2, Buff_Entries[2], GILNEAS_BG_BuffPositions[i][0], GILNEAS_BG_BuffPositions[i][1], GILNEAS_BG_BuffPositions[i][2], GILNEAS_BG_BuffPositions[i][3], 0, 0, sin(GILNEAS_BG_BuffPositions[i][3] / 2), cos(GILNEAS_BG_BuffPositions[i][3] / 2), RESPAWN_ONE_DAY))
+			sLog->outError(LOG_FILTER_BATTLEGROUND, "BattleForGilneas: Failed to spawn buff object!");
+	}
 
-            if (node != -1)
-                break;
-
-            object = GetBgMap()->GetGameObject(BgObjects[i]);
-            // Found correct banner and so the node
-            if (object && player->IsWithinDist(object, 10.0f, true))
-            {
-                node = GetNodeFromObjectType(i);
-                break;
-            }
-        }
-    }
-
-    if (node == -1)
-        return;
-
-    uint32 const team = player->GetTeamId();
-
-    player->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
-    uint32 sound = 0;
-
-    uint8 const neutralBanner = node * 8;
-    uint8 const occupiedBanner = node * 8 + GetSecondTeam(team) + 1;
-    uint8 const contestedBanner = node * 8 + GetSecondTeam(team) + 3;
-
-    // If node is neutral, change to contested
-    if (m_nodeInfo[node].bannerType == neutralBanner || m_nodeInfo[node].bannerType == occupiedBanner)
-    {
-        UpdatePlayerScore(player, SCORE_BASES_ASSAULTED, 1);
-
-        // Burn current neutral/occupied banner
-        DeleteBanner(m_nodeInfo[node].bannerType);
-
-        uint8 const createBanner = node * 8 + team + 3;
-        m_nodeInfo[node].bannerType = createBanner;
-        m_nodeInfo[node].team = team;
-
-        // Create new contested banner
-        CreateBanner(node, createBanner, team, true);
-        SendNodeUpdate(node);
-        m_nodeTimers[node] = FLAG_CAPTURING_TIMER;
-
-        if (team == BG_TEAM_ALLIANCE)
-            SendMessage2ToAll(LANG_BG_BG_NODE_CLAIMED, CHAT_MSG_BG_SYSTEM_ALLIANCE, player, GetNodeNameId(node), LANG_BG_BG_ALLY);
-        else
-            SendMessage2ToAll(LANG_BG_BG_NODE_CLAIMED, CHAT_MSG_BG_SYSTEM_HORDE, player, GetNodeNameId(node), LANG_BG_BG_HORDE);
-
-        sound = SOUND_NODE_CLAIMED;
-    }
-    // If node is contested
-    else if (m_nodeInfo[node].bannerType == contestedBanner)
-    {
-        UpdatePlayerScore(player, SCORE_BASES_DEFENDED, 1);
-
-        // Burn current contested banner
-        DeleteBanner(m_nodeInfo[node].bannerType);
-
-        uint8 const createBanner = node * 8 + team + 1;
-        m_nodeInfo[node].bannerType = createBanner;
-        m_nodeInfo[node].team = team;
-
-        // Create new occupied banner
-        CreateBanner(node, createBanner, team, true);
-        SendNodeUpdate(node);
-        m_nodeTimers[node] = 0;
-        NodeOccupied(node, team == BG_TEAM_ALLIANCE ? ALLIANCE : HORDE);
-
-        if (team == BG_TEAM_ALLIANCE)
-            SendMessage2ToAll(LANG_BG_BG_NODE_DEFENDED, CHAT_MSG_BG_SYSTEM_ALLIANCE, player, GetNodeNameId(node));
-        else
-            SendMessage2ToAll(LANG_BG_BG_NODE_DEFENDED, CHAT_MSG_BG_SYSTEM_HORDE, player, GetNodeNameId(node));
-
-        sound = (team == BG_TEAM_ALLIANCE) ? SOUND_NODE_ASSAULTED_ALLIANCE : SOUND_NODE_ASSAULTED_HORDE;
-    }
-
-    // If node is occupied again, send "X has taken the Y" message
-    if (m_nodeInfo[node].bannerType == occupiedBanner)
-    {
-        if (team == BG_TEAM_ALLIANCE)
-            SendMessage2ToAll(LANG_BG_BG_NODE_TAKEN, CHAT_MSG_BG_SYSTEM_ALLIANCE, NULL, LANG_BG_BG_ALLY, GetNodeNameId(node));
-        else
-            SendMessage2ToAll(LANG_BG_BG_NODE_TAKEN, CHAT_MSG_BG_SYSTEM_HORDE, NULL, LANG_BG_BG_HORDE, GetNodeNameId(node));
-    }
-
-    PlaySoundToAll(sound);
+	return true;
 }
 
-uint32 BattlegroundBG::GetSecondTeam(uint32 team) const
+void BattlegroundBFG::Reset()
 {
-    if (team == BG_TEAM_ALLIANCE)
-        return BG_TEAM_HORDE;
-    else
-        return BG_TEAM_ALLIANCE;
+	//call parent's class reset
+	Battleground::Reset();
+
+	m_TeamScores[BG_TEAM_ALLIANCE] = 0;
+	m_TeamScores[BG_TEAM_HORDE] = 0;
+	m_lastTick[BG_TEAM_ALLIANCE] = 0;
+	m_lastTick[BG_TEAM_HORDE] = 0;
+	m_HonorScoreTicks[BG_TEAM_ALLIANCE] = 0;
+	m_HonorScoreTicks[BG_TEAM_HORDE] = 0;
+	m_ReputationScoreTicks[BG_TEAM_ALLIANCE] = 0;
+	m_ReputationScoreTicks[BG_TEAM_HORDE] = 0;
+	m_IsInformedNearVictory = false;
+	bool isBGWeekend = sBattlegroundMgr->IsBGWeekend(GetTypeID());
+	m_HonorTicks = (isBGWeekend) ? GILNEAS_BG_BGWeekendHonorTicks : GILNEAS_BG_NotBGWeekendHonorTicks;
+	m_ReputationTicks = (isBGWeekend) ? GILNEAS_BG_BGWeekendRepTicks : GILNEAS_BG_NotBGWeekendRepTicks;
+	m_TeamScores500Disadvantage[BG_TEAM_ALLIANCE] = false;
+	m_TeamScores500Disadvantage[BG_TEAM_HORDE] = false;
+
+	for (uint8 i = 0; i < GILNEAS_BG_DYNAMIC_NODES_COUNT; ++i)
+	{
+		m_Nodes[i] = 0;
+		m_prevNodes[i] = 0;
+		m_NodeTimers[i] = 0;
+		m_BannerTimers[i].timer = 0;
+	}
+
+	for (uint8 i = 0; i < GILNEAS_BG_ALL_NODES_COUNT + 3; ++i)// +3 for aura triggers
+	if (BgCreatures[i])
+		DelCreature(i);
 }
 
-bool BattlegroundBG::SetupBattleground()
+void BattlegroundBFG::UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor)
 {
-    for (uint8 n = 0; n < GILNEAS_OBJECT_MAX; ++n)
-    {
-        if (!AddObject(gilneasStartingObjects[n].type,
-            gilneasStartingObjects[n].entry,
-            gilneasStartingObjects[n].x,
-            gilneasStartingObjects[n].y,
-            gilneasStartingObjects[n].z,
-            gilneasStartingObjects[n].o,
-            gilneasStartingObjects[n].rotation0,
-            gilneasStartingObjects[n].rotation1,
-            gilneasStartingObjects[n].rotation2,
-            gilneasStartingObjects[n].rotation3,
-            gilneasStartingObjects[n].respawnTime))
-        {
-            sLog->outError(LOG_FILTER_BATTLEGROUND, "Battle of Gilneas: Failed to spawn some objects! Battleground was not created!");
-            return false;
-        }
-    }
+	BattlegroundScoreMap::iterator itr = PlayerScores.find(Source->GetGUID());
 
-    return true;
+	if (itr == PlayerScores.end())      // player was not found...
+		return;
+
+	switch (type)
+	{
+	case SCORE_BASES_ASSAULTED:
+		((BattlegroundBFGScore*)itr->second)->BasesAssaulted += value;
+		Source->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, BG_OBJECTIVE_ASSAULT_BASE);
+		break;
+	case SCORE_BASES_DEFENDED:
+		((BattlegroundBFGScore*)itr->second)->BasesDefended += value;
+		Source->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, BG_OBJECTIVE_DEFEND_BASE);
+		break;
+	default:
+		Battleground::UpdatePlayerScore(Source, type, value, doAddHonor);
+		break;
+	}
 }
 
-void BattlegroundBG::Reset()
+void BattlegroundBFG::EndBattleground(uint32 winner)
 {
-    Battleground::Reset();
+	// Win reward
+	if (winner == ALLIANCE)
+		RewardHonorToTeam(GetBonusHonorFromKill(1), ALLIANCE);
 
-    for (uint8 n = 0; n < BG_TEAMS_COUNT; ++n)
-    {
-        m_TeamScores[n]             = 0;
-        m_lastTick[n]               = 0;
-        m_honorScoreTicks[n]        = 0;
-        dontGetCockyKid[n]          = false;
-    }
+	if (winner == HORDE)
+		RewardHonorToTeam(GetBonusHonorFromKill(1), HORDE);
 
-    for (uint8 n = 0; n < NODES_COUNT; ++n)
-    {
-        m_nodeTimers[n]  = 0;
-        m_nodeInfo[n].timer = 0;
-        m_nodeInfo[n].bannerType = n * 8;
-    }
+	// Complete map_end rewards (even if no team wins)
+	RewardHonorToTeam(GetBonusHonorFromKill(1), HORDE);
+	RewardHonorToTeam(GetBonusHonorFromKill(1), ALLIANCE);
 
-    for (uint8 n = 0; n < ALL_NODES_COUNT + 3; ++n) // +3 for aura triggers
-        if (BgCreatures[n])
-            DelCreature(n);
-
-    m_isInformedNearVictory = false;
-    m_BuffChange            = true;
-    bool isBGWeekend        = sBattlegroundMgr->IsBGWeekend(GetTypeID());
-    m_honorTicks            = isBGWeekend ? GilneasHonor[BG_HOLIDAY] : GilneasHonor[BG_NORMAL];
+	Battleground::EndBattleground(winner);
 }
 
-int8 BattlegroundBG::GetNodeFromObjectType(uint8 objectType) const
+WorldSafeLocsEntry const* BattlegroundBFG::GetClosestGraveYard(Player* player)
 {
-    int8 node = -1;
-    if (objectType >= OBJECT_LIGHTHOUSE_BANNER_NEUTRAL && objectType <= OBJECT_LIGHTHOUSE_AURA_CONTESTED)
-        node = NODE_LIGHTHOUSE;
-    else if (objectType >= OBJECT_WATERWORKS_BANNER_NEUTRAL && objectType <= OBJECT_WATERWORKS_AURA_CONTESTED)
-        node = NODE_WATERWORKS;
-    else if (objectType >= OBJECT_MINE_BANNER_NEUTRAL && objectType <= OBJECT_MINE_AURA_CONTESTED)
-        node = NODE_MINE;
+	TeamId teamIndex = GetTeamIndexByTeamId(player->GetTeam());
 
-    return node;
+	// Is there any occupied node for this team?
+	std::vector<uint8> nodes;
+	for (uint8 i = 0; i < GILNEAS_BG_DYNAMIC_NODES_COUNT; ++i)
+	if (m_Nodes[i] == teamIndex + 3)
+		nodes.push_back(i);
+
+	WorldSafeLocsEntry const* good_entry = NULL;
+
+	// If so, select the closest node to place ghost on
+	if (!nodes.empty())
+	{
+		float player_x = player->GetPositionX();
+		float player_y = player->GetPositionY();
+
+		float mindist = 999999.0f; // Temp Hack
+		for (uint8 i = 0; i < nodes.size(); ++i)
+		{
+			WorldSafeLocsEntry const* entry = sWorldSafeLocsStore.LookupEntry(GILNEAS_BG_GraveyardIds[nodes[i]]);
+
+			if (!entry)
+				continue;
+
+			float dist = (entry->x - player_x)*(entry->x - player_x) + (entry->y - player_y)*(entry->y - player_y);
+
+			if (mindist > dist)
+			{
+				mindist = dist;
+				good_entry = entry;
+			}
+		}
+		nodes.clear();
+	}
+
+	// If not, place ghost on starting location
+	if (!good_entry)
+		good_entry = sWorldSafeLocsStore.LookupEntry(GILNEAS_BG_GraveyardIds[teamIndex + 3]);
+
+	return good_entry;
 }
 
-void BattlegroundBG::UpdatePlayerScore(Player* player, uint32 type, uint32 value, bool doAddHonor)
+bool BattlegroundBFG::IsAllNodesControlledByTeam(uint32 team) const
 {
-    BattlegroundScoreMap::iterator itr = PlayerScores.find(player->GetGUID());
+	uint32 count = 0;
+	for (int i = 0; i < GILNEAS_BG_DYNAMIC_NODES_COUNT; ++i)
+	if ((team == ALLIANCE && m_Nodes[i] == GILNEAS_BG_NODE_STATUS_ALLY_OCCUPIED) || (team == HORDE && m_Nodes[i] == GILNEAS_BG_NODE_STATUS_HORDE_OCCUPIED))
+		++count;
 
-    if (itr == PlayerScores.end())
-        return;
-
-    switch (type)
-    {
-        case SCORE_BASES_ASSAULTED:
-            ((BattlegroundBGScore*)itr->second)->BasesAssaulted += value;
-            player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, OBJECTIVE_ASSAULT_BASE);
-            break;
-        case SCORE_BASES_DEFENDED:
-            ((BattlegroundBGScore*)itr->second)->BasesDefended += value;
-            player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, OBJECTIVE_DEFEND_BASE);
-            break;
-        default:
-            Battleground::UpdatePlayerScore(player, type, value, doAddHonor);
-            break;
-    }
-}
-
-void BattlegroundBG::EndBattleground(uint32 winner)
-{
-    // Win reward
-    if (winner == ALLIANCE)
-        RewardHonorToTeam(GetBonusHonorFromKill(1), ALLIANCE);
-
-    if (winner == HORDE)
-        RewardHonorToTeam(GetBonusHonorFromKill(1), HORDE);
-
-    // Complete rewards
-    RewardHonorToTeam(GetBonusHonorFromKill(1), HORDE);
-    RewardHonorToTeam(GetBonusHonorFromKill(1), ALLIANCE);
-
-    Battleground::EndBattleground(winner);
-}
-
-WorldSafeLocsEntry const* BattlegroundBG::GetClosestGraveYard(Player* player)
-{
-    uint32 const team = player->GetTeamId();
-
-    // Is there any occupied node for this team?
-    std::vector<uint8> nodes;
-    for (uint8 n = 0; n < NODES_COUNT; ++n)
-        if (m_nodeInfo[n].team == team)
-            nodes.push_back(n);
-
-    WorldSafeLocsEntry const* correctEntry = NULL;
-
-    // If so, select the closest node to place ghost on
-    if (!nodes.empty())
-    {
-        float const x = player->GetPositionX();
-        float const y = player->GetPositionY();
-
-        float minDist = 999999.0f; // Temp Hack
-        for (uint8 n = 0; n < nodes.size(); ++n)
-        {
-            WorldSafeLocsEntry const* const entry = sWorldSafeLocsStore.LookupEntry(GilneasGraveyardIds[nodes[n]]);
-
-            if (!entry || m_nodeInfo[n].team != team)
-                continue;
-
-            float const dist = (entry->x - x) * (entry->x - x) + (entry->y - y) * (entry->y - y);
-
-            if (minDist > dist)
-            {
-                minDist = dist;
-                correctEntry = entry;
-            }
-        }
-        nodes.clear();
-    }
-
-    // If not, place ghost on starting location
-    if (!correctEntry)
-        correctEntry = sWorldSafeLocsStore.LookupEntry(GilneasGraveyardIds[team + 3]);
-
-    return correctEntry;
-}
-
-bool BattlegroundBG::IsJuggerNotEligible(uint8 team) const
-{
-    if (m_TeamScores[team] == MAX_GILNEAS_TEAM_SCORE && m_TeamScores[GetSecondTeam(team)] == MAX_GILNEAS_TEAM_SCORE - 10.0f)
-        return true;
-
-    return false;
-}
-
-bool BattlegroundBG::IsDontGetCockyKidEligible(uint8 team) const
-{
-    return dontGetCockyKid[team];
-}
-
-bool BattlegroundBG::IsFullCoverageEligible(uint8 team) const
-{
-    uint32 count = 0;
-    for (uint8 n = 0; n < NODES_COUNT; ++n)
-        if (m_nodeInfo[n].bannerType == (n * 8 + team + 1))
-            ++count;
-
-    return count == NODES_COUNT;
+	return count == GILNEAS_BG_DYNAMIC_NODES_COUNT;
 }
