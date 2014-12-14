@@ -453,9 +453,11 @@ void BattlegroundSA::AddPlayer(Player* player)
             player->CastSpell(player, 12438, true);//Without this player falls before boat loads...
 
             if (urand(0, 1))
-                player->TeleportTo(607, 2682.936f, -830.368f, 15.0f, 2.895f, 0);
+                player->TeleportTo(607, 1600.381f, -106.263f, 8.8745f, 3.78f, 0);     //incorrect maybe i fix it in a better way
+				//player->TeleportTo(607, 2682.936f, -830.368f, 15.0f, 2.895f, 0);    // BlizzLike
             else
-                player->TeleportTo(607, 2577.003f, 980.261f, 15.0f, 0.807f, 0);
+                player->TeleportTo(607, 1605.7f, 53.16f, 9.1f, 0.0f, 0);              //incorrect
+				//player->TeleportTo(607, 2577.003f, 980.261f, 15.0f, 0.807f, 0);     // BlizzLike
 
         }
         else
@@ -527,9 +529,11 @@ void BattlegroundSA::TeleportPlayers()
                 player->CastSpell(player, 12438, true);     //Without this player falls before boat loads...
 
                 if (urand(0, 1))
-                    player->TeleportTo(607, 2682.936f, -830.368f, 15.0f, 2.895f, 0);
+					player->TeleportTo(607, 1600.381f, -106.263f, 8.8745f, 3.78f, 0);      //incorrect maybe i fix it in a better way
+				    //player->TeleportTo(607, 2682.936f, -830.368f, 15.0f, 2.895f, 0);     //Blizzlike
                 else
-                    player->TeleportTo(607, 2577.003f, 980.261f, 15.0f, 0.807f, 0);
+                    player->TeleportTo(607, 1605.7f, 53.16f, 9.1f, 0.0f, 0);            //incorrect
+				   //player->TeleportTo(607, 2577.003f, 980.261f, 15.0f, 0.807f, 0);       //Blizzlike
             }
             else
                 player->TeleportTo(607, 1209.7f, -65.16f, 70.1f, 0.0f, 0);
