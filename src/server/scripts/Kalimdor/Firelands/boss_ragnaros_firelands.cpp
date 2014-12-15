@@ -822,19 +822,30 @@ class boss_ragnaros_firelands: public CreatureScript
 
                             case EVENT_MOLTEN_SEED:
                             {
+								if(Unit* target = SelectTarget(SELECT_TARGET_NEAREST, 0, 200.0f, true))
+								{
+									DoCast(target, SPELL_MOLTEN_SEED_MISSILE);
+									me->SummonCreature(NPC_MOLTEN_SEED, target->GetPositionX(),
+										target->GetPositionY(), target->GetPositionZ(),
+										target->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 1000);
+								}
+								/*
                                 std::list<Unit*> targets;
-                                SelectTargetList(targets, RAID_MODE<int32>(10, 20, 10, 20), SELECT_TARGET_RANDOM,
+								SelectTargetList(targets, RAID_MODE<int32>(10, 20, 10, 20), SELECT_TARGET_NEAREST,
                                         200.0f, true);
                                 if (!targets.empty())
                                     for (std::list<Unit*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
                                     {
                                         DoCast((*itr), SPELL_MOLTEN_SEED_MISSILE);
+										
                                         me->SummonCreature(NPC_MOLTEN_SEED, (*itr)->GetPositionX(),
                                                 (*itr)->GetPositionY(), (*itr)->GetPositionZ(),
                                                 (*itr)->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 1000);
+										
                                     }
-
+								*/
                                 events.ScheduleEvent(EVENT_MOLTEN_SEED, 60000);
+								
                             }
                                 break;
 
@@ -1498,7 +1509,7 @@ class npc_molten_seed: public CreatureScript
                 {
                     if (m_uiMoltenInfernoTimer <= diff)
                     {
-                        DoCast(me, SPELL_MOLTEN_INFERNO);
+                        //DoCast(me, SPELL_MOLTEN_INFERNO);
                         DoCastAOE(SPELL_MOLTEN_SEED_MISSILE);
                         me->SummonCreature(NPC_MOLTEN_ELEMENTAL, me->GetPositionX(), me->GetPositionY(),
                                 me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 1000);
