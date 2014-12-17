@@ -3056,6 +3056,10 @@ void SpellMgr::LoadSpellCustomAttr()
             case 97238:
                 spellInfo->Effects[1].BasePoints = 0;
                 break;
+			case 63093: // Glyph oh Mirror Image force aura dummy
+				spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_APPLY_AURA;
+				spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
+				break;
             case 98474: // Flame Scyte
             case 100212: // Flame Scyte
             case 100213: // Flame Scyte
