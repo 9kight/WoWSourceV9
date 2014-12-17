@@ -98,9 +98,9 @@ class boss_alizabal : public CreatureScript
                 _Reset();
                 Hate = false;
                 Skewer = false;
-				Intro = false;
-				me->SetFullHealth();
-				instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+                Intro = false;
+                me->SetFullHealth();
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                 instance->HandleGameObject(instance->GetData64(GO_ALIZABAL_DOOR), false);
                 events.ScheduleEvent(EVENT_RANDOM_CAST, urand (80000, 10000));
             }
@@ -130,12 +130,12 @@ class boss_alizabal : public CreatureScript
 
             void EnterEvadeMode()
             {
-			    events.Reset();
+                events.Reset();
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 me->GetMotionMaster()->MoveTargetedHome();
                 //_DespawnAtEvade();
-				_Reset();
-				_EnterEvadeMode();
+                _Reset();
+                _EnterEvadeMode();
             }
 
             void DoAction(int32 const action)
