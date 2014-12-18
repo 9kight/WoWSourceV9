@@ -46,6 +46,11 @@ enum eEncounterYells
 	SAY_KILL_PLAYER_2 = 9,
 };
 
+enum Adds
+{
+    NPC_EARTH_SHARDS    = 45469,
+    NPC_MIND_FOG        = 40861,
+};
 enum Events
 {
 	EVENT_EARTH_SHARDS = 1,
