@@ -3113,6 +3113,9 @@ void SpellMgr::LoadSpellCustomAttr()
             case 99197:
                 spellInfo->Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_PROC_TRIGGER_SPELL_COPY;
                 break;
+			case 32612: //invisibility, effect used for glyph
+				spellInfo->Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_MOD_INCREASE_SPEED;
+				break;
             case 13809: // Ice Trap
             case 82941: // Ice Trap        - Trap Launcher
             case 1499:  // Freezing Trap
