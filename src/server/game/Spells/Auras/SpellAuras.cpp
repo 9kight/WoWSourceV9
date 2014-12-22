@@ -1429,7 +1429,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         if (target->GetTypeId() == TYPEID_PLAYER)
                             if (Unit* pet = target->ToPlayer()->GetPet())
                             {
-                                pet->CastSpell(pet, 96243, true);
+                                //pet->CastSpell(pet, 96243, true);
                                 pet->CombatStop();
                             }
                         break;

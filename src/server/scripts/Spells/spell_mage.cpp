@@ -78,11 +78,9 @@ enum MageSpells
     SPELL_MAGE_RITUAL_OF_REFRESHMENT_R3          = 92827,
 
     SPELL_MAGE_FINGERS_OF_FROST                  = 44544,
-    
-    SPELL_MAGE_GLYPH_OF_MIRROR_IMAGE             = 63093,
-    SPELL_MAGE_SUMMON_IMAGES_FROST               = 58832,
-    SPELL_MAGE_SUMMON_IMAGES_FIRE                = 88092,
-    SPELL_MAGE_SUMMON_IMAGES_ARCANE              = 88091,
+
+	SPELL_MAGE_INVISIBILITY_FADING               = 66,
+	SPELL_MAGE_INVISIBILITY_INVISIBLE            = 32612,
 };
 
 enum MageIcons
@@ -1716,77 +1714,96 @@ public:
     }
 };
 
-// 55342 - Mirror Image
-/// Updated 4.3.4
-class spell_mage_mirror_image : public SpellScriptLoader
+// 66 - Invisibility (Fading)
+class spell_mage_invisibility_fading : public SpellScriptLoader
 {
-    public:
-        spell_mage_mirror_image() : SpellScriptLoader("spell_mage_mirror_image") { }
+public:
+	spell_mage_invisibility_fading() : SpellScriptLoader("spell_mage_invisibility_fading") { }
 
-        class spell_mage_mirror_image_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_mage_mirror_image_SpellScript);
+	class spell_mage_invisibility_fading_AuraScript : public AuraScript
+	{
+		PrepareAuraScript(spell_mage_invisibility_fading_AuraScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_GLYPH_OF_MIRROR_IMAGE) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_MAGE_SUMMON_IMAGES_ARCANE) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_MAGE_SUMMON_IMAGES_FIRE) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_MAGE_SUMMON_IMAGES_FROST))
-                    return false;
-                return true;
-            }
+		bool Validate(SpellInfo const* /*spellInfo*/)
+		{
+			if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_INVISIBILITY_FADING))
+				return false;
+			return true;
+		}
 
-            void HandleDummy(SpellEffIndex /*effIndex*/)
-            {
-                Unit* caster = GetCaster();
+		void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+		{
+			// Cast Invisibility on Elemental
+			if (Unit* player = GetTarget()->ToPlayer())
+			{
+				if (Guardian* elemental = player->ToPlayer()->GetGuardianPet())
+				{
+					elemental->AttackStop();
+					elemental->InterruptNonMeleeSpells(false);
+					elemental->SendMeleeAttackStop();
+					elemental->AddAura(SPELL_MAGE_INVISIBILITY_FADING, elemental);
+				}
+			}
+		}
 
-                uint32 spellId = SPELL_MAGE_SUMMON_IMAGES_FROST;
+		void Register()
+		{
+			OnEffectApply += AuraEffectRemoveFn(spell_mage_invisibility_fading_AuraScript::HandleApply, EFFECT_1, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+		}
+	};
 
-                if (Player* player = caster->ToPlayer())
-                {
-                    bool hasGlyph = false;
+	AuraScript* GetAuraScript() const
+	{
+		return new spell_mage_invisibility_fading_AuraScript();
+	}
+};
 
-                    for (uint32 i = 0; i < MAX_GLYPH_SLOT_INDEX; ++i)
-                        if (uint32 glyphId = player->GetGlyph(player->GetActiveSpec(), i))
-                            if (GlyphPropertiesEntry const* glyph = sGlyphPropertiesStore.LookupEntry(glyphId))
-                                if (glyph->SpellId == SPELL_MAGE_GLYPH_OF_MIRROR_IMAGE)
-                                {
-                                    hasGlyph = true;
-                                    break;
-                                }
+// 32612 - Invisibility (Invisible)
+class spell_mage_invisibility_invisible : public SpellScriptLoader
+{
+public:
+	spell_mage_invisibility_invisible() : SpellScriptLoader("spell_mage_invisibility_invisible") { }
 
-                    if (hasGlyph)
-                    {
-                        switch (player->GetPrimaryTalentTree(player->GetActiveSpec()))
-                        {
+	class spell_mage_invisibility_invisible_AuraScript : public AuraScript
+	{
+		PrepareAuraScript(spell_mage_invisibility_invisible_AuraScript);
 
-                            case TALENT_TREE_MAGE_ARCANE:
-                                spellId = SPELL_MAGE_SUMMON_IMAGES_ARCANE;
-                                break;
-                            case TALENT_TREE_MAGE_FIRE:
-                                spellId = SPELL_MAGE_SUMMON_IMAGES_FIRE;
-                                break;
-                            case TALENT_TREE_MAGE_FROST:
-                                spellId = SPELL_MAGE_SUMMON_IMAGES_FROST;
-                                break;
-                        }
-                    }
-                }
+		bool Validate(SpellInfo const* /*spellInfo*/)
+		{
+			if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_INVISIBILITY_INVISIBLE))
+				return false;
+			return true;
+		}
 
-                caster->CastSpell(caster, spellId, true);
-            }
+		void RemoveEffect(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+		{
+			if (Unit* target = GetTarget())
+			{
+				if (target->isGuardian())
+				{
+					// Remove Invisibility from mage when elemental does an action
+					if (Unit* owner = target->GetOwner())
+						owner->RemoveAura(SPELL_MAGE_INVISIBILITY_INVISIBLE);
+				}
+				else
+				{
+					// Remove Invisibility from elemental when mage does an action
+					if (Guardian* elemental = target->ToPlayer()->GetGuardianPet())
+						elemental->RemoveAura(SPELL_MAGE_INVISIBILITY_INVISIBLE);
+				}
+			}
+		}
 
-            void Register()
-            {
-                OnEffectHit += SpellEffectFn(spell_mage_mirror_image_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
-            }
-        };
+		void Register()
+		{
+			OnEffectRemove += AuraEffectRemoveFn(spell_mage_invisibility_invisible_AuraScript::RemoveEffect, EFFECT_1, SPELL_AURA_MOD_INVISIBILITY, AURA_EFFECT_HANDLE_REAL);
+		}
+	};
 
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_mage_mirror_image_SpellScript();
-        }
+	AuraScript* GetAuraScript() const
+	{
+		return new spell_mage_invisibility_invisible_AuraScript();
+	}
 };
 
 
@@ -1822,4 +1839,6 @@ void AddSC_mage_spell_scripts()
     new spell_mage_ritual_of_refreshment();
     new spell_mage_pet_scaling_05();
     new spell_mage_icy_veins();
+	new spell_mage_invisibility_fading();
+	new spell_mage_invisibility_invisible();
 }

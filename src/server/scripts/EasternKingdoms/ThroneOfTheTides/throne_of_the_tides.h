@@ -73,9 +73,6 @@ enum CreatureIds
     NPC_GILGOBLIN_HUNTER        = 40935,
     NPC_FACELESS_WATCHER        = 40936,
 
-    NPC_EARTH_SHARD             = 45469,
-    NPC_MIND_FOG                = 40861,
-
     /* Gauntlet Event */
 
     NPC_LADY_NAZJAR_GAUNTLET    = 39959,

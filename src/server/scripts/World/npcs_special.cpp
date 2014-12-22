@@ -1846,51 +1846,153 @@ public:
     }
 };
 
+/*######
+## npc_mirror_image
+######*/
 class npc_mirror_image : public CreatureScript
 {
 public:
-    npc_mirror_image() : CreatureScript("npc_mirror_image") { }
+	npc_mirror_image() : CreatureScript("npc_mirror_image") { }
 
-    struct npc_mirror_imageAI : CasterAI
-    {
-        npc_mirror_imageAI(Creature* creature) : CasterAI(creature) {}
+	struct npc_mirror_imageAI : CasterAI
+	{
+		npc_mirror_imageAI(Creature* creature) : CasterAI(creature) {}
+		uint32 damagespellid;
+		uint32 istantspellid;
+		uint32 checkTimer;
+		uint32 blastcd;
+		float followdist;
 
-        void InitializeAI()
-        {
-            CasterAI::InitializeAI();
-            Unit* owner = me->GetOwner();
-            if (!owner)
-                return;
-            // Inherit Master's Threat List (not yet implemented)
-            owner->CastSpell((Unit*)NULL, 58838, true);
-            // here mirror image casts on summoner spell (not present in client dbc) 49866
-            // here should be auras (not present in client dbc): 35657, 35658, 35659, 35660 selfcasted by mirror images (stats related?)
-            // Clone Me!
-            owner->CastSpell(me, 45204, false);
-            me->SetReactState(REACT_AGGRESSIVE);
-        }
+		void InitializeAI()
+		{
+			CasterAI::InitializeAI();
+			Unit* owner = me->GetOwner();
+			if (!owner)
+				return;
+			// Inherit Master's Threat List (not yet implemented)
+			owner->CastSpell((Unit*)NULL, 58838, true);
+			// here mirror image casts on summoner spell (not present in client dbc) 49866
+			// here should be auras (not present in client dbc): 35657, 35658, 35659, 35660 selfcasted by mirror images (stats related?)
 
-        // Do not reload Creature templates on evade mode enter - prevent visual lost
-        void EnterEvadeMode()
-        {
-            if (me->IsInEvadeMode() || !me->isAlive())
-                return;
+			owner->CastSpell(me, 45204, true); // Clone Me!
+			owner->CastSpell(me, 41054, true); // Clone main hand
+			owner->CastSpell(me, 45205, true); // Clone off hand
+			damagespellid = 59638;
+			istantspellid = 59637;
+			blastcd = 0;
+			followdist = PET_FOLLOW_DIST * 2;
+			//check on glyph of mirror image & spec
+			owner = me->ToTempSummon()->GetSummoner();
+			if (owner->ToPlayer() && owner->HasAura(63093)){
+				if (owner->ToPlayer()->GetPrimaryTalentTree(owner->ToPlayer()->GetActiveSpec()) == TALENT_TREE_MAGE_ARCANE)
+					damagespellid = 88084;
+				else if (owner->ToPlayer()->GetPrimaryTalentTree(owner->ToPlayer()->GetActiveSpec()) == TALENT_TREE_MAGE_FIRE)
+					damagespellid = 88082;
+			}
+			checkTimer = 250;
+		}
 
-            Unit* owner = me->GetCharmerOrOwner();
+		void UpdateAI(const uint32 diff)
+		{
+			if (checkTimer <= diff)
+			{
+				if (!me->GetOwner() || !me->GetOwner()->ToPlayer())
+					return;
+				Player* owner = me->GetOwner()->ToPlayer();
+				//actions by mirror images
+				if (owner->isInCombat()){
+					if (Unit* target = owner->GetSelectedUnit()){
+						if (target->HasAuraTypeWithFamilyFlags(SPELL_AURA_MOD_CONFUSE, SPELLFAMILY_MAGE, 0x01000000))
+						{
+							Aura* poly = NULL;
+							if (target->HasAura(118))            //polymorph sheep
+								poly = target->GetAura(118);
+							else if (target->HasAura(28272))     //polymorph pig
+								poly = target->GetAura(28272);
+							else if (target->HasAura(28271))     //polymorph turtle
+								poly = target->GetAura(28271);
+							else if (target->HasAura(61305))     //polymorph black cat
+								poly = target->GetAura(61305);
+							else if (target->HasAura(61721))     //polymorph rabbit
+								poly = target->GetAura(61721);
+							else if (target->HasAura(61780))     //polymorph turkey
+								poly = target->GetAura(61780);
 
-            me->CombatStop(true);
-            if (owner && !me->HasUnitState(UNIT_STATE_FOLLOW))
-            {
-                me->GetMotionMaster()->Clear(false);
-                me->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, me->GetFollowAngle(), MOTION_SLOT_ACTIVE);
-            }
-        }
-    };
+							if (poly != NULL && poly->GetCasterGUID() == owner->GetGUID()){
+								// will get back to the caster if his/her target is polymorphed
+								me->GetMotionMaster()->Clear(false);
+								me->GetMotionMaster()->MoveFollow(owner, followdist, me->GetFollowAngle(), MOTION_SLOT_ACTIVE);
+								checkTimer = 200;
+							}
+						}
+						else
+						{
+							if (owner->isMoving())
+							{
+								//when in combat and moving will cast fire blast (if avaible) and follow
+								if (blastcd <= diff)
+								{
+									me->CastSpell(target, istantspellid);
+									blastcd = 6000;
+								}
+								me->GetMotionMaster()->Clear(false);
+								me->GetMotionMaster()->MoveFollow(owner, followdist, me->GetFollowAngle(), MOTION_SLOT_ACTIVE);
+								if (blastcd == 6000) //will wait a gcd after casting a blast
+									checkTimer = 1500;
+								else
+									checkTimer = 200;
+							}
+							else
+							{
+								if (blastcd <= diff && damagespellid == 59638 && roll_chance_i(30))
+								{ //while in combat and not moving will randomly cast fire blast if avaible (if glyphed will no longer cast Fire Blast)
+									me->CastSpell(target, istantspellid);
+									blastcd = 6000;
+									checkTimer = 1500;
+								}
+								else
+								{ // or frostbolt/fireball/arcaneblast
+									me->CastSpell(target, damagespellid);
+									checkTimer = 2500;
+								}
+							}
+						}
+					}
+				}
+				else{
+					me->GetMotionMaster()->Clear(false);
+					me->GetMotionMaster()->MoveFollow(owner, followdist, me->GetFollowAngle(), MOTION_SLOT_ACTIVE);
+					checkTimer = 200;
+				}
+			}
+			else
+				checkTimer -= diff;
+			if (blastcd >= diff)
+				blastcd -= diff;
 
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_mirror_imageAI(creature);
-    }
+		}
+
+		// Do not reload Creature templates on evade mode enter - prevent visual lost
+		void EnterEvadeMode()
+		{
+			if (me->IsInEvadeMode() || !me->isAlive())
+				return;
+
+			Unit* owner = me->GetCharmerOrOwner();
+
+			me->CombatStop(true);
+			if (owner && !me->HasUnitState(UNIT_STATE_FOLLOW))
+			{
+				me->GetMotionMaster()->Clear(false);
+				me->GetMotionMaster()->MoveFollow(owner, followdist, me->GetFollowAngle(), MOTION_SLOT_ACTIVE);
+			}
+		}
+	};
+
+	CreatureAI* GetAI(Creature* creature) const
+	{
+		return new npc_mirror_imageAI(creature);
+	}
 };
 
 class npc_mage_orb : public CreatureScript

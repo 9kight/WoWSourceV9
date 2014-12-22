@@ -3056,6 +3056,10 @@ void SpellMgr::LoadSpellCustomAttr()
             case 97238:
                 spellInfo->Effects[1].BasePoints = 0;
                 break;
+			case 63093: // Glyph oh Mirror Image force aura dummy
+				spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_APPLY_AURA;
+				spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
+				break;
             case 98474: // Flame Scyte
             case 100212: // Flame Scyte
             case 100213: // Flame Scyte
@@ -3109,6 +3113,9 @@ void SpellMgr::LoadSpellCustomAttr()
             case 99197:
                 spellInfo->Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_PROC_TRIGGER_SPELL_COPY;
                 break;
+			case 32612: //invisibility, effect used for glyph
+				spellInfo->Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_MOD_INCREASE_SPEED;
+				break;
             case 13809: // Ice Trap
             case 82941: // Ice Trap        - Trap Launcher
             case 1499:  // Freezing Trap

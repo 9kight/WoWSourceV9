@@ -932,24 +932,14 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     break;
                 }
                 case 31216: // Mirror Image
-				case 47243: // Mirror Image
-				case 47244: // Mirror Image
                 {
-                    SetSpellBonusDamage(int32(GetOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FROST) * 0.33f));
-                    SetSpellBonusDamage(int32(GetOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE) * 0.33f));
-                    SetSpellBonusDamage(int32(GetOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_ARCANE) * 0.33f));
-		
-                    // Finaly Done Weapon Cloning
-                    if (uint32 weapon = m_owner->GetUInt32Value(PLAYER_VISIBLE_ITEM_16_ENTRYID))
-                    {
-                        SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID, weapon);
-                    }
-                    SetDisplayId(m_owner->GetDisplayId());
-                    if (pInfo)
-                    {
-                        SetCreateHealth(m_owner->GetMaxHealth() / 2.5);
-                        SetCreateMana(m_owner->GetMaxPower(POWER_MANA) / 1.5);
-                    }
+					SetSpellBonusDamage(int32(GetOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FROST) * 0.33f));
+					SetDisplayId(m_owner->GetDisplayId());
+					if (pInfo)
+					{
+						SetCreateHealth(m_owner->GetMaxHealth() / 2.5);
+						SetCreateMana(m_owner->GetMaxPower(POWER_MANA) / 1.5);
+					}
                     break;
 				}
                 case 27829: // Ebon Gargoyle
