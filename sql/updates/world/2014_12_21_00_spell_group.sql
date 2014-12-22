@@ -10,7 +10,7 @@ DELETE FROM `spell_group_stack_rules` WHERE `group_id`='2020';
 INSERT INTO `spell_group_stack_rules` (`group_id`, `stack_rule`) VALUES ('2020', '1');
 -- Ranks rule --
 DELETE FROM `spell_ranks` WHERE `first_spell_id`='51699';
-INSERT INTO `world_genesis`.`spell_ranks` (`first_spell_id`, `spell_id`, `rank`) VALUES
+INSERT INTO `spell_ranks` (`first_spell_id`, `spell_id`, `rank`) VALUES
 ('51699', '51699', '1'),
 ('51699', '51700', '2'),
 ('51699', '51701', '3');
