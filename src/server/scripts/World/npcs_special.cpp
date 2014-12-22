@@ -3659,6 +3659,87 @@ public:
 	}
 };
 
+class npc_t12_fiery_imp : public CreatureScript
+{
+public:
+    npc_t12_fiery_imp() : CreatureScript("npc_t12_fiery_imp") { }
+
+    struct npc_t12_fiery_impAI : CasterAI
+    {
+        npc_t12_fiery_impAI(Creature* creature) : CasterAI(creature) {}
+        uint32 checkTimer;
+        float followdist;
+
+        void InitializeAI()
+        {
+            CasterAI::InitializeAI();
+            Unit* owner = me->GetOwner();
+            if (!owner)
+                return;
+            followdist = PET_FOLLOW_DIST *2;
+            owner = me->ToTempSummon()->GetSummoner();
+            checkTimer = 250;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (checkTimer <= diff)
+            {
+                if (!me->GetOwner() || !me->GetOwner()->ToPlayer())
+                    return;
+                Player* owner = me->GetOwner()->ToPlayer();
+                //actions by the fiery imp
+                if(owner->isInCombat()){
+                    if (Unit* target =owner->GetSelectedUnit())
+                    {
+                      
+                        if (me->HasUnitState(UNIT_STATE_CASTING))
+                        { //does not interrupt himself while casting
+                            checkTimer=200;
+                        }
+                        else
+                        {
+                            // flame blast spam on target
+                            me->CastSpell(target, 99226);
+                            checkTimer=2500;
+                        } 
+                    }
+                }
+                else
+                { //if out of combat will simply follow the caster
+                    me->GetMotionMaster()->Clear(false);
+                    me->GetMotionMaster()->MoveFollow(owner, followdist, me->GetFollowAngle(), MOTION_SLOT_ACTIVE);
+                    checkTimer=200;
+                }            
+            }
+            else
+                checkTimer -=diff;
+
+        }
+
+        // Do not reload Creature templates on evade mode enter - prevent visual lost
+        void EnterEvadeMode()
+        {
+            if (me->IsInEvadeMode() || !me->isAlive())
+                return;
+
+            Unit* owner = me->GetCharmerOrOwner();
+
+            me->CombatStop(true);
+            if (owner && !me->HasUnitState(UNIT_STATE_FOLLOW))
+            {
+                me->GetMotionMaster()->Clear(false);
+                me->GetMotionMaster()->MoveFollow(owner, followdist, me->GetFollowAngle(), MOTION_SLOT_ACTIVE);
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_t12_fiery_impAI(creature);
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -3703,4 +3784,5 @@ void AddSC_npcs_special()
     new npc_Tentacle_of_the_Old_Ones();
     new npc_remove_phase_auras();
     new npc_dancing_rune_weapon();
+	new npc_t12_fiery_imp();
 }
