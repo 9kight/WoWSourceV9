@@ -2,8 +2,6 @@
 -- Stack rule: 2020 spell_group is not in use --
 DELETE FROM `spell_group` WHERE `id`='2020';
 INSERT INTO `spell_group` (`id`, `spell_id`) VALUES
-('2020', '51701'),
-('2020', '51700'),
 ('2020', '51699'),
 ('2020', '51698');
 DELETE FROM `spell_group_stack_rules` WHERE `group_id`='2020';
