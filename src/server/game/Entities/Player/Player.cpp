@@ -1671,6 +1671,15 @@ void Player::Update(uint32 p_time)
 	    TeleportTo(530,-1890.4f,5398.62f,-12.42f,4.04241f);
 	}
 
+	if ((GetMap()->IsRaid()) && (GetGroup() != NULL) && GetMap()->Is25ManRaid() && (GetGroup()->GetMembersCount() > 25))
+	{
+	    TeleportTo(530,-1890.4f,5398.62f,-12.42f,4.04241f);
+	}
+	if ((GetMap()->IsRaid()) && (GetGroup() != NULL) && !GetMap()->Is25ManRaid()  && (GetGroup()->GetMembersCount() > 10))
+	{
+	    TeleportTo(530,-1890.4f,5398.62f,-12.42f,4.04241f);
+	}
+
     //used to implement delayed far teleports
     SetCanDelayTeleport(true);
     Unit::Update(p_time);
