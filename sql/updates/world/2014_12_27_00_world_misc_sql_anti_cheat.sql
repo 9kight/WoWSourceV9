@@ -11,4 +11,4 @@ INSERT INTO `spell_lINked_spell`(`spell_trigger`,`spell_effect`,`type`,`req_aura
 (6544,66601,0,0,'Fix Anticheat spell Heroic Leap Warrior'),
 (100,66601,0,0,'Fix Anticheat spell Charge Warrior'),
 (97640,66601,0,0,'Fix Anticheat spell Leap of Faith Priest'),
-(1706,66601,0,0,'Fix Anticheat spell Leap of Faith Priest');
+(1706,66601,0,0,'Fix Anticheat spell Levitate Priest');
