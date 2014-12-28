@@ -9902,49 +9902,49 @@ ReputationRank Unit::GetReactionTo(Unit const* target) const
 
 ReputationRank Unit::GetFactionReactionTo(FactionTemplateEntry const* factionTemplateEntry, Unit const* target)
 {
-    // always neutral when no template entry found
-    if (!factionTemplateEntry)
-        return REP_NEUTRAL;
+	// always neutral when no template entry found
+	if (!factionTemplateEntry)
+		return REP_NEUTRAL;
 
-    FactionTemplateEntry const* targetFactionTemplateEntry = target->getFactionTemplateEntry();
-    if (!targetFactionTemplateEntry)
-        return REP_NEUTRAL;
+	FactionTemplateEntry const* targetFactionTemplateEntry = target->getFactionTemplateEntry();
+	if (!targetFactionTemplateEntry)
+		return REP_NEUTRAL;
 
-    if (Player const* targetPlayerOwner = target->GetAffectingPlayer())
-    {
-        // check contested flags
-        if (factionTemplateEntry->factionFlags & FACTION_TEMPLATE_FLAG_CONTESTED_GUARD
-            && targetPlayerOwner->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_CONTESTED_PVP))
-            return REP_HOSTILE;
-        if (ReputationRank const* repRank = targetPlayerOwner->GetReputationMgr().GetForcedRankIfAny(factionTemplateEntry))
-            return *repRank;
-        if (!target->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_IGNORE_REPUTATION))
-        {
-            if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionTemplateEntry->faction))
-            {
-                if (factionEntry->CanHaveReputation())
-                {
-                    // CvP case - check reputation, don't allow state higher than neutral when at war
-                    ReputationRank repRank = targetPlayerOwner->GetReputationMgr().GetRank(factionEntry);
-                    if (targetPlayerOwner->GetReputationMgr().IsAtWar(factionEntry))
-                        repRank = std::min(REP_NEUTRAL, repRank);
-                    return repRank;
-                }
-            }
-        }
-    }
+	if (Player const* targetPlayerOwner = target->GetAffectingPlayer())
+	{
+		// check contested flags
+		if (factionTemplateEntry->factionFlags & FACTION_TEMPLATE_FLAG_CONTESTED_GUARD
+			&& targetPlayerOwner->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_CONTESTED_PVP))
+			return REP_HOSTILE;
+		if (ReputationRank const* repRank = targetPlayerOwner->GetReputationMgr().GetForcedRankIfAny(factionTemplateEntry))
+			return *repRank;
+		if (!target->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_IGNORE_REPUTATION))
+		{
+			if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionTemplateEntry->faction))
+			{
+				if (factionEntry->CanHaveReputation())
+				{
+					// CvP case - check reputation, don't allow state higher than neutral when at war
+					ReputationRank repRank = targetPlayerOwner->GetReputationMgr().GetRank(factionEntry);
+					if (targetPlayerOwner->GetReputationMgr().IsAtWar(factionEntry))
+						repRank = std::min(REP_NEUTRAL, repRank);
+					return repRank;
+				}
+			}
+		}
+	}
 
-    // common faction based check
-    if (factionTemplateEntry->IsHostileTo(*targetFactionTemplateEntry))
-        return REP_HOSTILE;
-    if (factionTemplateEntry->IsFriendlyTo(*targetFactionTemplateEntry))
-        return REP_FRIENDLY;
-    if (targetFactionTemplateEntry->IsFriendlyTo(*factionTemplateEntry))
-        return REP_FRIENDLY;
-    if (factionTemplateEntry->factionFlags & FACTION_TEMPLATE_FLAG_HOSTILE_BY_DEFAULT)
-        return REP_HOSTILE;
-    // neutral by default
-    return REP_NEUTRAL;
+	// common faction based check
+	if (factionTemplateEntry->IsHostileTo(*targetFactionTemplateEntry))
+		return REP_HOSTILE;
+	if (factionTemplateEntry->IsFriendlyTo(*targetFactionTemplateEntry))
+		return REP_FRIENDLY;
+	if (targetFactionTemplateEntry->IsFriendlyTo(*factionTemplateEntry))
+		return REP_FRIENDLY;
+	if (factionTemplateEntry->factionFlags & FACTION_TEMPLATE_FLAG_HOSTILE_BY_DEFAULT)
+		return REP_HOSTILE;
+	// neutral by default
+	return REP_NEUTRAL;
 }
 
 bool Unit::IsHostileTo(Unit const* unit) const
@@ -10781,18 +10781,18 @@ Unit* Unit::GetMagicHitRedirectTarget(Unit* victim, SpellInfo const* spellInfo)
 
 Unit* Unit::GetMeleeHitRedirectTarget(Unit* victim, SpellInfo const* spellInfo)
 {
-    AuraEffectList const& hitTriggerAuras = victim->GetAuraEffectsByType(SPELL_AURA_ADD_CASTER_HIT_TRIGGER);
-    for (AuraEffectList::const_iterator i = hitTriggerAuras.begin(); i != hitTriggerAuras.end(); ++i)
-    {
-        if (Unit* magnet = (*i)->GetBase()->GetCaster())
-            if (_IsValidAttackTarget(magnet, spellInfo) && roll_chance_i((*i)->GetAmount())
-                && IsInRange(magnet, 0.0f, (*i)->GetSpellInfo()->Effects[(*i)->GetEffIndex()].CalcRadius()))
-            {
-                (*i)->GetBase()->DropCharge(AURA_REMOVE_BY_EXPIRE);
-                return magnet;
-            }
-    }
-    return victim;
+	AuraEffectList const& hitTriggerAuras = victim->GetAuraEffectsByType(SPELL_AURA_ADD_CASTER_HIT_TRIGGER);
+	for (AuraEffectList::const_iterator i = hitTriggerAuras.begin(); i != hitTriggerAuras.end(); ++i)
+	{
+		if (Unit* magnet = (*i)->GetBase()->GetCaster())
+		if (_IsValidAttackTarget(magnet, spellInfo) && roll_chance_i((*i)->GetAmount())
+			&& IsInRange(magnet, 0.0f, (*i)->GetSpellInfo()->Effects[(*i)->GetEffIndex()].CalcRadius()))
+		{
+			(*i)->GetBase()->DropCharge(AURA_REMOVE_BY_EXPIRE);
+			return magnet;
+		}
+	}
+	return victim;
 }
 
 Unit* Unit::GetFirstControlled() const
@@ -12941,123 +12941,125 @@ bool Unit::IsValidAttackTarget(Unit const* target) const
 // function based on function Unit::CanAttack from 13850 client
 bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell, WorldObject const* obj) const
 {
-    ASSERT(target);
+	ASSERT(target);
 
-    // can't attack self
-    if (this == target)
-        return false;
+	bool areaSpell = false;
+	if (bySpell)
+		areaSpell = bySpell->IsAffectingArea();
 
-    if (target->GetEntry() == 53087 || target->GetEntry() == 52577)
-        return true;
+	// can't attack self
+	if (this == target)
+		return false;
 
-    // can't attack unattackable units or GMs
-    if (target->HasUnitState(UNIT_STATE_UNATTACKABLE)
-        || (target->GetTypeId() == TYPEID_PLAYER && target->ToPlayer()->isGameMaster()))
-        return false;
+	if (target->GetEntry() == 53087 || target->GetEntry() == 52577)
+		return true;
 
-    // can't attack own vehicle or passenger
-    if (m_vehicle)
-        if (IsOnVehicle(target) || m_vehicle->GetBase()->IsOnVehicle(target))
-            return false;
+	// can't attack unattackable units or GMs
+	if (target->HasUnitState(UNIT_STATE_UNATTACKABLE)
+		|| (target->GetTypeId() == TYPEID_PLAYER && target->ToPlayer()->isGameMaster()))
+		return false;
 
-    // can't attack invisible (ignore stealth for aoe spells) also if the area being looked at is from a spell use the dynamic object created instead of the casting unit.
-    if ((!bySpell || !(bySpell->AttributesEx6 & SPELL_ATTR6_CAN_TARGET_INVISIBLE))
-        && (obj ? (!obj->canSeeOrDetect(target, bySpell && bySpell->IsAffectingArea()
-        && (obj->GetTypeId() != TYPEID_GAMEOBJECT || obj->ToGameObject()->GetGoType() != GAMEOBJECT_TYPE_TRAP)))
-        : !canSeeOrDetect(target, bySpell && bySpell->IsAffectingArea())
-        && GetGoType() != GAMEOBJECT_TYPE_TRAP))
+	// can't attack own vehicle or passenger
+	if (m_vehicle)
+	if (IsOnVehicle(target) || m_vehicle->GetBase()->IsOnVehicle(target))
+		return false;
 
-    // can't attack dead
-    if ((!bySpell || !bySpell->IsAllowingDeadTarget()) && !target->isAlive())
-       return false;
+	// can't attack invisible (ignore stealth for aoe spells) also if the area being looked at is from a spell use the dynamic object created instead of the casting unit.
+	if ((!bySpell || !(bySpell->AttributesEx6 & SPELL_ATTR6_CAN_TARGET_INVISIBLE))
+		&& (obj ? (!obj->canSeeOrDetect(target, bySpell && bySpell->IsAffectingArea()
+		&& (obj->GetTypeId() != TYPEID_GAMEOBJECT || obj->ToGameObject()->GetGoType() != GAMEOBJECT_TYPE_TRAP)))
+		: !canSeeOrDetect(target, bySpell && bySpell->IsAffectingArea())
+		&& GetGoType() != GAMEOBJECT_TYPE_TRAP))
 
-    // can't attack untargetable
-    if ((!bySpell || !(bySpell->AttributesEx6 & SPELL_ATTR6_CAN_TARGET_UNTARGETABLE))
-        && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
-        return false;
+	// can't attack dead
+	if ((!bySpell || !bySpell->IsAllowingDeadTarget()) && !target->isAlive())
+		return false;
 
-    if (Player const* playerAttacker = ToPlayer())
-    {
-        if (playerAttacker->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_UNK19))
-            return false;
-    }
+	// can't attack untargetable
+	if ((!bySpell || !(bySpell->AttributesEx6 & SPELL_ATTR6_CAN_TARGET_UNTARGETABLE))
+		&& target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+		return false;
 
-    // check flags
-    if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_TAXI_FLIGHT | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_UNK_16)
-        || (!HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC))
-        || (!target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC)))
-        return false;
+	if (Player const* playerAttacker = ToPlayer())
+	{
+		if (playerAttacker->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_UNK19))
+			return false;
+	}
 
-    if ((!bySpell || !(bySpell->AttributesEx8 & SPELL_ATTR8_ATTACK_IGNORE_IMMUNE_TO_PC_FLAG))
-        && (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC))
-        // check if this is a world trigger cast - GOs are using world triggers to cast their spells, so we need to ignore their immunity flag here, this is a temp workaround, needs removal when go cast is implemented properly
-        && GetEntry() != WORLD_TRIGGER)
-        return false;
+	// check flags
+	if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_TAXI_FLIGHT | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_UNK_16)
+		|| (!HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC))
+		|| (!target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC)))
+		return false;
 
-    // CvC case - can attack each other only when one of them is hostile
-    if (!HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) && !target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE))
-        return GetReactionTo(target) <= REP_HOSTILE || target->GetReactionTo(this) <= REP_HOSTILE;
+	if ((!bySpell || !(bySpell->AttributesEx8 & SPELL_ATTR8_ATTACK_IGNORE_IMMUNE_TO_PC_FLAG))
+		&& (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC))
+		// check if this is a world trigger cast - GOs are using world triggers to cast their spells, so we need to ignore their immunity flag here, this is a temp workaround, needs removal when go cast is implemented properly
+		&& GetEntry() != WORLD_TRIGGER)
+		return false;
 
-    // PvP, PvC, CvP case
-    // can't attack friendly targets
-    if ( GetReactionTo(target) > REP_NEUTRAL
-        || target->GetReactionTo(this) > REP_NEUTRAL)
-        return false;
+	// CvC case - can attack each other only when one of them is hostile
+	if (!HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) && !target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE))
+		return GetReactionTo(target) <= REP_HOSTILE || target->GetReactionTo(this) <= REP_HOSTILE;
 
-    // Not all neutral creatures can be attacked
-    if (GetReactionTo(target) == REP_NEUTRAL &&
-        target->GetReactionTo(this) == REP_NEUTRAL)
-    {
-        if  (!(target->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER) &&
-            !(target->GetTypeId() == TYPEID_UNIT && GetTypeId() == TYPEID_UNIT))
-        {
-            Player const* player = target->GetTypeId() == TYPEID_PLAYER ? target->ToPlayer() : ToPlayer();
-            Unit const* creature = target->GetTypeId() == TYPEID_UNIT ? target : this;
+	// PvP, PvC, CvP case
+	// can't attack friendly targets
+	if (GetReactionTo(target) > REP_NEUTRAL
+		|| target->GetReactionTo(this) > REP_NEUTRAL)
+		return false;
 
-            if (FactionTemplateEntry const* factionTemplate = creature->getFactionTemplateEntry())
-            {
-                if (!(player->GetReputationMgr().GetForcedRankIfAny(factionTemplate)))
-                    if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionTemplate->faction))
-                        if (FactionState const* repState = player->GetReputationMgr().GetState(factionEntry))
-                            if (!(repState->Flags & FACTION_FLAG_AT_WAR))
-                                return false;
+	// Not all neutral creatures can be attacked
+	if (GetReactionTo(target) == REP_NEUTRAL &&
+		target->GetReactionTo(this) == REP_NEUTRAL)
+	{
+		if (!(target->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER) &&
+			!(target->GetTypeId() == TYPEID_UNIT && GetTypeId() == TYPEID_UNIT))
+		{
+			Player const* player = target->GetTypeId() == TYPEID_PLAYER ? target->ToPlayer() : ToPlayer();
+			Unit const* creature = target->GetTypeId() == TYPEID_UNIT ? target : this;
 
-            }
-        }
-    }
+			{
+				if (FactionTemplateEntry const* factionTemplate = creature->getFactionTemplateEntry())
+				if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionTemplate->faction))
+				if (FactionState const* repState = player->GetReputationMgr().GetState(factionEntry))
+				if (!(repState->Flags & FACTION_FLAG_AT_WAR))
+					return false;
+			}
+		}
+	}
 
-    Creature const* creatureAttacker = ToCreature();
-    if (creatureAttacker && creatureAttacker->GetCreatureTemplate()->type_flags & CREATURE_TYPEFLAGS_PARTY_MEMBER)
-        return false;
+	Creature const* creatureAttacker = ToCreature();
+	if (creatureAttacker && creatureAttacker->GetCreatureTemplate()->type_flags & CREATURE_TYPEFLAGS_PARTY_MEMBER)
+		return false;
 
-    Player const* playerAffectingAttacker = HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) ? GetAffectingPlayer() : NULL;
-    Player const* playerAffectingTarget = target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) ? target->GetAffectingPlayer() : NULL;
+	Player const* playerAffectingAttacker = HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) ? GetAffectingPlayer() : NULL;
+	Player const* playerAffectingTarget = target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) ? target->GetAffectingPlayer() : NULL;
 
-    // check duel - before sanctuary checks
-    if (playerAffectingAttacker && playerAffectingTarget)
-        if (playerAffectingAttacker->duel && playerAffectingAttacker->duel->opponent == playerAffectingTarget && playerAffectingAttacker->duel->startTime != 0)
-            return true;
+	// check duel - before sanctuary checks
+	if (playerAffectingAttacker && playerAffectingTarget)
+	if (playerAffectingAttacker->duel && playerAffectingAttacker->duel->opponent == playerAffectingTarget && playerAffectingAttacker->duel->startTime != 0)
+		return true;
 
-    // PvP case - can't attack when attacker or target are in sanctuary
-    // however, 13850 client doesn't allow to attack when one of the unit's has sanctuary flag and is pvp
-    if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE)
-        && ((target->GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_SANCTUARY) || (GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_SANCTUARY)))
-        return false;
+	// PvP case - can't attack when attacker or target are in sanctuary
+	// however, 13850 client doesn't allow to attack when one of the unit's has sanctuary flag and is pvp
+	if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE)
+		&& ((target->GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_SANCTUARY) || (GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_SANCTUARY)))
+		return false;
 
-    // additional checks - only PvP case
-    if (playerAffectingAttacker && playerAffectingTarget)
-    {
-        if (target->GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_PVP)
-            return true;
+	// additional checks - only PvP case
+	if (playerAffectingAttacker && playerAffectingTarget)
+	{
+		if (target->GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_PVP)
+			return true;
 
-        if (GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_FFA_PVP
-            && target->GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_FFA_PVP)
-            return true;
+		if (GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_FFA_PVP
+			&& target->GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_FFA_PVP)
+			return true;
 
-        return (GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_UNK1)
-            || (target->GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_UNK1);
-    }
-    return true;
+		return (GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_UNK1)
+			|| (target->GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_UNK1);
+	}
+	return true;
 }
 
 bool Unit::IsValidAssistTarget(Unit const* target) const
@@ -13068,91 +13070,90 @@ bool Unit::IsValidAssistTarget(Unit const* target) const
 // function based on function Unit::CanAssist from 13850 client
 bool Unit::_IsValidAssistTarget(Unit const* target, SpellInfo const* bySpell) const
 {
-    ASSERT(target);
+	ASSERT(target);
 
-    // can assist to self
-    if (this == target)
-        return true;
+	// can assist to self
+	if (this == target)
+		return true;
 
-    // can't assist unattackable units or GMs
-    if (target->HasUnitState(UNIT_STATE_UNATTACKABLE)
-        || (target->GetTypeId() == TYPEID_PLAYER && target->ToPlayer()->isGameMaster()))
-        return false;
+	// can't assist unattackable units or GMs
+	if (target->HasUnitState(UNIT_STATE_UNATTACKABLE)
+		|| (target->GetTypeId() == TYPEID_PLAYER && target->ToPlayer()->isGameMaster()))
+		return false;
 
-    // can't assist own vehicle or passenger
-    if (m_vehicle)
-        if (IsOnVehicle(target) || m_vehicle->GetBase()->IsOnVehicle(target))
-            return false;
+	// can't assist own vehicle or passenger
+	if (m_vehicle)
+	if (IsOnVehicle(target) || m_vehicle->GetBase()->IsOnVehicle(target))
+		return false;
 
-    // can't assist invisible
-    if ((!bySpell || !(bySpell->AttributesEx6 & SPELL_ATTR6_CAN_TARGET_INVISIBLE)) && !canSeeOrDetect(target, bySpell && bySpell->IsAffectingArea()))
-        return false;
+	// can't assist invisible
+	if ((!bySpell || !(bySpell->AttributesEx6 & SPELL_ATTR6_CAN_TARGET_INVISIBLE)) && !canSeeOrDetect(target, bySpell && bySpell->IsAffectingArea()))
+		return false;
 
-    // can't assist dead
-    if ((!bySpell || !bySpell->IsAllowingDeadTarget()) && !target->isAlive())
-       return false;
+	// can't assist dead
+	if ((!bySpell || !bySpell->IsAllowingDeadTarget()) && !target->isAlive())
+		return false;
 
-    // can't assist untargetable
-    if ((!bySpell || !(bySpell->AttributesEx6 & SPELL_ATTR6_CAN_TARGET_UNTARGETABLE))
-        && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
-        return false;
+	// can't assist untargetable
+	if ((!bySpell || !(bySpell->AttributesEx6 & SPELL_ATTR6_CAN_TARGET_UNTARGETABLE))
+		&& target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+		return false;
 
-    if (!bySpell || !(bySpell->AttributesEx6 & SPELL_ATTR6_ASSIST_IGNORE_IMMUNE_FLAG))
-    {
-        if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE))
-        {
-            if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC))
-                return false;
-        }
-        else
-        {
-            if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC))
-                return false;
-        }
-    }
+	if (!bySpell || !(bySpell->AttributesEx6 & SPELL_ATTR6_ASSIST_IGNORE_IMMUNE_FLAG))
+	{
+		if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE))
+		{
+			if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC))
+				return false;
+		}
+		else
+		{
+			if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC))
+				return false;
+		}
+	}
 
-    // can't assist non-friendly targets
-    if (GetReactionTo(target) <= REP_NEUTRAL
-        && target->GetReactionTo(this) <= REP_NEUTRAL
-        && (!ToCreature() || !(ToCreature()->GetCreatureTemplate()->type_flags & CREATURE_TYPEFLAGS_PARTY_MEMBER)))
-        return false;
+	// can't assist non-friendly targets
+	if (GetReactionTo(target) <= REP_NEUTRAL
+		&& target->GetReactionTo(this) <= REP_NEUTRAL
+		&& (!ToCreature() || !(ToCreature()->GetCreatureTemplate()->type_flags & CREATURE_TYPEFLAGS_PARTY_MEMBER)))
+		return false;
 
-    // PvP case
-    if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE))
-    {
-        Player const* targetPlayerOwner = target->GetAffectingPlayer();
-        if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE))
-        {
-            Player const* selfPlayerOwner = GetAffectingPlayer();
-            if (selfPlayerOwner && targetPlayerOwner)
-            {
-                // can't assist player which is dueling someone
-                if (selfPlayerOwner != targetPlayerOwner
-                    && targetPlayerOwner->duel)
-                    return false;
-            }
-            // can't assist player in ffa_pvp zone from outside
-            if ((target->GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_FFA_PVP)
-                && !(GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_FFA_PVP))
-                return false;
-            // can't assist player out of sanctuary from sanctuary if has pvp enabled
-            if (target->GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_PVP)
-                if ((GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_SANCTUARY) && !(target->GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_SANCTUARY))
-                    return false;
-        }
-    }
-    // PvC case - player can assist creature only if has specific type flags
-    // !target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) &&
-    else if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE)
-        && (!bySpell || !(bySpell->AttributesEx6 & SPELL_ATTR6_ASSIST_IGNORE_IMMUNE_FLAG))
-        && !((target->GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_PVP)))
-    {
-        if (Creature const* creatureTarget = target->ToCreature())
-            return creatureTarget->GetCreatureTemplate()->type_flags & CREATURE_TYPEFLAGS_PARTY_MEMBER || creatureTarget->GetCreatureTemplate()->type_flags & CREATURE_TYPEFLAGS_AID_PLAYERS;
-    }
-    return true;
+	// PvP case
+	if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE))
+	{
+		Player const* targetPlayerOwner = target->GetAffectingPlayer();
+		if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE))
+		{
+			Player const* selfPlayerOwner = GetAffectingPlayer();
+			if (selfPlayerOwner && targetPlayerOwner)
+			{
+				// can't assist player which is dueling someone
+				if (selfPlayerOwner != targetPlayerOwner
+					&& targetPlayerOwner->duel)
+					return false;
+			}
+			// can't assist player in ffa_pvp zone from outside
+			if ((target->GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_FFA_PVP)
+				&& !(GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_FFA_PVP))
+				return false;
+			// can't assist player out of sanctuary from sanctuary if has pvp enabled
+			if (target->GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_PVP)
+			if ((GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_SANCTUARY) && !(target->GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_SANCTUARY))
+				return false;
+		}
+	}
+	// PvC case - player can assist creature only if has specific type flags
+	// !target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) &&
+	else if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE)
+		&& (!bySpell || !(bySpell->AttributesEx6 & SPELL_ATTR6_ASSIST_IGNORE_IMMUNE_FLAG))
+		&& !((target->GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_PVP)))
+	{
+		if (Creature const* creatureTarget = target->ToCreature())
+			return creatureTarget->GetCreatureTemplate()->type_flags & CREATURE_TYPEFLAGS_PARTY_MEMBER || creatureTarget->GetCreatureTemplate()->type_flags & CREATURE_TYPEFLAGS_AID_PLAYERS;
+	}
+	return true;
 }
-
 int32 Unit::ModifyHealth(int32 dVal)
 {
     int32 gain = 0;

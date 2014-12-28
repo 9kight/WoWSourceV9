@@ -28,7 +28,7 @@ AnticheatMgr::~AnticheatMgr()
     m_Players.clear();
 }
 
-void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo /* movementInfo */,uint32 opcode)
+void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo movementInfo,uint32 opcode)
 {
     if ((sWorld->getIntConfig(CONFIG_ANTICHEAT_DETECTIONS_ENABLED) & JUMP_HACK_DETECTION) == 0)
         return;
@@ -37,12 +37,12 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo /* movementInf
 
     if (m_Players[key].GetLastOpcode() == MSG_MOVE_JUMP && opcode == MSG_MOVE_JUMP)
     {
-        BuildReport(player,JUMP_HACK_REPORT);
-		sLog->outWarn(LOG_FILTER_WARDEN, "AnticheatMgr:: Jump-Hack detected player GUID (low) %u", player->GetGUIDLow());
+        //BuildReport(player,JUMP_HACK_REPORT);
+        sLog->outInfo(LOG_FILTER_CHARACTER, "AnticheatMgr:: Jump-Hack detected player GUID (low) %u",player->GetGUIDLow());
     }
 }
 
-void AnticheatMgr::WalkOnWaterHackDetection(Player* player, MovementInfo /* movementInfo */)
+void AnticheatMgr::WalkOnWaterHackDetection(Player* player, MovementInfo movementInfo)
 {
     if ((sWorld->getIntConfig(CONFIG_ANTICHEAT_DETECTIONS_ENABLED) & WALK_WATER_HACK_DETECTION) == 0)
         return;
@@ -60,12 +60,20 @@ void AnticheatMgr::WalkOnWaterHackDetection(Player* player, MovementInfo /* move
         player->HasAuraType(SPELL_AURA_WATER_WALK))
         return;
 
-	sLog->outWarn(LOG_FILTER_WARDEN, "AnticheatMgr:: Walk on Water - Hack detected player GUID (low) %u", player->GetGUIDLow());
-    BuildReport(player,WALK_WATER_HACK_REPORT);
+    float x, y, z;
+    player->GetPosition(x, y, z);
+    float ground_Z = player->GetMap()->GetHeight(x, y, z);
+    float z_diff = fabs(ground_Z - z);
+	
+	if (player->getClass() == CLASS_PRIEST && z_diff > 0 && z_diff < 10)
+		return;
+	
+    sLog->outInfo(LOG_FILTER_CHARACTER, "AnticheatMgr:: Walk on Water - Hack detected player GUID (low) %u",player->GetGUIDLow());
+    //BuildReport(player,WALK_WATER_HACK_REPORT);
 
 }
 
-void AnticheatMgr::FlyHackDetection(Player* player, MovementInfo /* movementInfo */)
+void AnticheatMgr::FlyHackDetection(Player* player, MovementInfo movementInfo)
 {
     if ((sWorld->getIntConfig(CONFIG_ANTICHEAT_DETECTIONS_ENABLED) & FLY_HACK_DETECTION) == 0)
         return;
@@ -78,9 +86,9 @@ void AnticheatMgr::FlyHackDetection(Player* player, MovementInfo /* movementInfo
         player->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) ||
         player->HasAuraType(SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED))
         return;
-
-	sLog->outWarn(LOG_FILTER_WARDEN, "AnticheatMgr:: Fly-Hack detected player GUID (low) %u", player->GetGUIDLow());
-    BuildReport(player,FLY_HACK_REPORT);
+		
+    sLog->outInfo(LOG_FILTER_CHARACTER, "AnticheatMgr:: Fly-Hack detected player GUID (low) %u",player->GetGUIDLow());
+    //BuildReport(player,FLY_HACK_REPORT);
 }
 
 void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movementInfo)
@@ -96,20 +104,21 @@ void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movem
 
     if (movementInfo.HasMovementFlag(MOVEMENTFLAG_FALLING))
         return;
-
+		
     //DEAD_FALLING was deprecated
     //if (player->getDeathState() == DEAD_FALLING)
     //    return;
+	
     float x, y, z;
     player->GetPosition(x, y, z);
     float ground_Z = player->GetMap()->GetHeight(x, y, z);
     float z_diff = fabs(ground_Z - z);
-
+		
     // we are not really walking there
     if (z_diff > 1.0f)
     {
-		sLog->outWarn(LOG_FILTER_WARDEN, "AnticheatMgr:: Teleport To Plane - Hack detected player GUID (low) %u", player->GetGUIDLow());
-        BuildReport(player,TELEPORT_PLANE_HACK_REPORT);
+        sLog->outInfo(LOG_FILTER_CHARACTER, "AnticheatMgr:: Teleport To Plane - Hack detected player GUID (low) %u",player->GetGUIDLow());
+        //BuildReport(player,TELEPORT_PLANE_HACK_REPORT);
     }
 }
 
@@ -167,10 +176,10 @@ void AnticheatMgr::ClimbHackDetection(Player *player, MovementInfo movementInfo,
 
     float angle = Position::NormalizeOrientation(tan(deltaZ/deltaXY));
 
-    if (angle > CLIMB_ANGLE)
+    if (angle < CLIMB_ANGLE)
     {
-		sLog->outWarn(LOG_FILTER_WARDEN, "AnticheatMgr:: Climb-Hack detected player GUID (low) %u", player->GetGUIDLow());
-        BuildReport(player,CLIMB_HACK_REPORT);
+        sLog->outInfo(LOG_FILTER_CHARACTER, "AnticheatMgr:: Climb-Hack detected player GUID (low) %u", player->GetGUIDLow());
+        //BuildReport(player,CLIMB_HACK_REPORT);
     }
 }
 
@@ -180,45 +189,238 @@ void AnticheatMgr::SpeedHackDetection(Player* player,MovementInfo movementInfo)
         return;
 
     uint32 key = player->GetGUIDLow();
-
+		
     // We also must check the map because the movementFlag can be modified by the client.
     // If we just check the flag, they could always add that flag and always skip the speed hacking detection.
     // 369 == DEEPRUN TRAM
-	if (m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_ASCENDING) && player->GetMapId() == 369)
+	// 607 == Strand of The Ancients
+    if (m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY) && (player->GetMapId() == 369 || player->GetMapId() == 607))
         return;
 
+	if (player->GetSession()->GetSecurity() > 0)
+	    return;
+
+	if (!player->isAlive())
+	    return;
+
     uint32 distance2D = (uint32)movementInfo.pos.GetExactDist2d(&m_Players[key].GetLastMovementInfo().pos);
+
+	if (distance2D > 500)
+	    return;
+
+	if (distance2D < 100 && player->getClass() == CLASS_PRIEST && player->isInCombat())
+	    return;
+
+	if (player->GetAreaId() == 4281 || player->GetAreaId() == 4342 || player->GetAreaId() == 5154 || player->GetAreaId() == 4395 ||
+	player->GetAreaId() == 5926 || player->GetAreaId() == 5738 || player->GetAreaId() == 5535 || player->GetAreaId() == 5004 ||
+	player->GetAreaId() == 5088 || player->GetAreaId() == 5303 || player->GetAreaId() == 4753 || player->GetAreaId() == 4752)
+	    return;
+
+	if (player->HasAura(66601))
+	    return;
+
+	if (player->HasAura(66602))
+	{
+	    player->RemoveAura(66602);
+	}
+
+	if (player->HasAura(605))
+	    return;
+
+	if (player->HasAura(51690))
+	{
+	    player->CastSpell(player, 66601, true);
+	    return;
+	}
+
+    float x, y, z;
+    player->GetPosition(x, y, z);
+    float ground_Z = player->GetMap()->GetHeight(x, y, z);
+    float z_diff = fabs(ground_Z - z);	
+	WorldSession* s = player->GetSession();
+	if ( player->GetMap()->IsDungeon() || player->GetMap()->IsRaid() || player->GetMap()->IsBattlegroundOrArena())
+	    if ((distance2D > 50 && player->GetMapId() == 566) || (distance2D > 40 && player->GetMapId() != 566))
+	        if (z_diff > 1.0f && !player->isGameMaster())
+	            if (!player->HasUnitMovementFlag(MOVEMENTFLAG_FALLING) && player->isAlive())
+		            s->KickPlayer("Player::Update");			
+
+	if ((player->GetMap()->IsDungeon() || player->GetMap()->IsRaid() || player->GetMap()->IsBattlegroundOrArena() || player->GetMapId() == 732 || player->GetMapId() == 861) && (player->HasAura(33943) || player->HasAura(40120)))
+	{
+	    player->RemoveAura(33943);
+		player->RemoveAura(40120);
+	}
+
     uint8 moveType = 0;
+	uint32 maxSpeed = 0;
 
     // we need to know HOW is the player moving
     // TO-DO: Should we check the incoming movement flags?
     if (player->HasUnitMovementFlag(MOVEMENTFLAG_SWIMMING))
+    {
         moveType = MOVE_SWIM;
-    else if (player->IsFlying())
-        moveType = MOVE_FLIGHT;
-    else if (player->HasUnitMovementFlag(MOVEMENTFLAG_WALKING))
-        moveType = MOVE_WALK;
-    else
-        moveType = MOVE_RUN;
+        maxSpeed = 11;
+        if (player->HasAura(8326) || player->HasAura(20584)) //Ghost
+            maxSpeed += 5;
 
+        if (player->HasAura(86510)) //Epic Swimming Mount
+            maxSpeed += 20;
+
+        if (player->HasAura(95664)) //Advanced Swimming Mount
+            maxSpeed += 15;
+
+        if (player->HasAura(73701)) //Sea Legs
+            maxSpeed += 5;
+
+        if (player->HasAura(98718)) //Subdued Seahorse
+            maxSpeed = 41;
+
+        if (player->HasAura(75207)) //Abyssal Seahorse
+            maxSpeed = 56;
+    }
+    else if (player->IsFlying() && player->HasAuraType(SPELL_AURA_MOUNTED))
+    {
+        moveType = MOVE_FLIGHT;
+
+        if (player->HasSpell(90265)) //master riding
+            maxSpeed = 40;
+        else if (player->HasSpell(34091)) //artisan riding
+            maxSpeed = 33;
+        else if (player->HasSpell(34090))
+            maxSpeed = 20;
+
+        //extra checks
+        if (maxSpeed < 25)
+        {
+            if (player->HasAura(86459)) //Mount Speed Mod: Standard Flying Mount
+                maxSpeed = 36;
+
+            if (player->HasAura(86460)) //Mount Speed Mod: Epic Flying Mount
+                maxSpeed = 49;
+        }
+
+        if (player->HasAura(32223)) //Crusader Aura
+            maxSpeed += 9;
+
+        if (player->HasAura(51983)) //On a Pale Horse Rank 1
+            maxSpeed += 5;
+        if (player->HasAura(51986)) //On a Pale Horse Rank 2
+            maxSpeed += 9;
+        
+        if (player->HasAura(26023) || player->HasAura(26022)) //Pursuit of Justice
+            maxSpeed += 19;
+    }
+ 	else if (player->IsFlying() && !player->HasAuraType(SPELL_AURA_MOUNTED))
+	{
+	    maxSpeed = 1;
+
+        if (player->HasAura(98619)) //Wings of Flame
+            maxSpeed += 11;
+
+        if (player->HasAura(33943)) //Flight Form
+            maxSpeed += 20;
+
+        if (player->HasAura(40120)) //Swift Flight Form
+            maxSpeed += 35;
+			
+        if (player->HasAura(59640)) //Underbelly Elixir
+            maxSpeed += 20;			
+	}
+    else if (player->HasAuraType(SPELL_AURA_MOUNTED))
+    {
+        if (player->HasSpell(33391)) //journeyman riding
+            maxSpeed = 25;
+        else if (player->HasSpell(33388)) //apprentice riding
+            maxSpeed = 21;
+
+        //extra checks
+        if (maxSpeed < 17)
+        {
+            if (player->HasAura(86458)) //Mount Speed Mod: Epic Ground Mount
+                maxSpeed = 21;
+
+            if (player->HasAura(86457)) //Mount Speed Mod: Standard Ground Mount
+                maxSpeed = 17;
+        }
+
+        if (player->HasAura(32223)) //Crusader Aura
+            maxSpeed += 5;
+
+        if (player->HasAura(51983)) //On a Pale Horse Rank 1
+            maxSpeed += 3;
+        if (player->HasAura(51986)) //On a Pale Horse Rank 2
+            maxSpeed += 5;
+        
+        if (player->HasAura(26023) || player->HasAura(26022)) //Pursuit of Justice
+            maxSpeed += 5;			
+    }
+    else if (player->HasUnitMovementFlag(MOVEMENTFLAG_WALKING))
+    {
+        moveType = MOVE_WALK;
+        maxSpeed = 6;
+    }
+    else
+    {
+        moveType = MOVE_RUN;
+        maxSpeed = 16;
+			
+		if (z_diff > 1.0f)
+		    maxSpeed = 40;
+		
+        if (player->HasAura(33943)) //Flight Form
+            maxSpeed += 20;
+
+        if (player->HasAura(40120)) //Swift Flight Form
+            maxSpeed += 33;
+
+        if (player->HasAura(8326) || player->HasAura(20584)) //Ghost
+            maxSpeed += 5;
+
+        if (player->HasAura(26023) || player->HasAura(26022)) //Pursuit of Justice
+            maxSpeed += 5;
+
+        if (player->HasAura(51721) || player->HasAura(54055)) //Dominion over Acherus
+            maxSpeed += 8;
+
+        if (player->HasAura(48265)) //Unholy Presence
+            maxSpeed += 2;
+
+        if (player->HasAura(23451) || player->HasAura(23978)) //Speed
+            maxSpeed += 10;
+
+        if (player->HasAura(68992)) //Dark flight
+            maxSpeed += 4;
+
+        if (player->HasAura(2983) || player->HasAura(1850)) //Sprint, Dash
+            maxSpeed += 7;
+			
+        if (player->HasAura(36554)) //Shadowstep
+            maxSpeed += 8;			
+    }
+    
+    if (player->HasUnitMovementFlag(MOVEMENTFLAG_FALLING))
+    {
+        maxSpeed = 60;
+    }
+			
     // how many yards the player can do in one sec.
-    uint32 speedRate = (uint32)(player->GetSpeed(UnitMoveType(moveType)) + movementInfo.j_xyspeed);
 
     // how long the player took to move to here.
     uint32 timeDiff = getMSTimeDiff(m_Players[key].GetLastMovementInfo().time,movementInfo.time);
-
+			
     if (!timeDiff)
         timeDiff = 1;
-
+		
     // this is the distance doable by the player in 1 sec, using the time done to move to this point.
     uint32 clientSpeedRate = distance2D * 1000 / timeDiff;
 
     // we did the (uint32) cast to accept a margin of tolerance
-    if (clientSpeedRate > speedRate)
+    if (clientSpeedRate > maxSpeed)
     {
-        BuildReport(player,SPEED_HACK_REPORT);
-		sLog->outWarn(LOG_FILTER_WARDEN, "AnticheatMgr:: Speed-Hack detected player GUID (low) %u", player->GetGUIDLow());
-    }
+		WorldSession* s = player->GetSession();
+	    s->KickPlayer("AnticheatMgr::SpeedHackDetection");
+        //BuildReport(player,SPEED_HACK_REPORT);
+        sLog->outInfo(LOG_FILTER_CHARACTER, "AnticheatMgr:: Speed-Hack detected player GUID (low) %u",player->GetGUIDLow());
+    }				
 }
 
 void AnticheatMgr::StartScripts()
@@ -333,29 +535,7 @@ void AnticheatMgr::BuildReport(Player* player,uint8 reportType)
     {
         // display warning at the center of the screen, hacky way?
         std::string str = "";
-		switch (reportType)
-			{
-			case 0:
-				str = "  |cFFFF0000[AntiCheat]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Speed Cheater!";
-				break;
-			case 1:
-				str = "  |cFFFF0000[AntiCheat]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Fly Cheater!";
-				break;
-			case 2:
-				str = "  |cFFFF0000[AntiCheat]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Walk Water Cheater!";
-				break;
-			case 3:
-				str = "  |cFFFF0000[AntiCheat]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Jump Cheater!";
-				break;
-			case 4:
-				str = "  |cFFFF0000[AntiCheat]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Teleport Cheater!";
-				break;
-			case 5:
-				str = "  |cFFFF0000[AntiCheat]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Climb cheater!";
-				break;
-			default:
-				break;
-			}
+        str = "|cFFFFFC00[AC]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName()) + "|cFF00FFFF] Possible cheater!";
         WorldPacket data(SMSG_NOTIFICATION, (str.size()+1));
         data << str;
         sWorld->SendGlobalGMMessage(&data);
@@ -453,4 +633,4 @@ void AnticheatMgr::ResetDailyReportStates()
 {
      for (AnticheatPlayersDataMap::iterator it = m_Players.begin(); it != m_Players.end(); ++it)
          m_Players[(*it).first].SetDailyReportState(false);
-}	
+}

@@ -280,10 +280,11 @@ void GameObject::Update(uint32 diff)
     {
         if (!AIM_Initialize())
             sLog->outError(LOG_FILTER_GENERAL, "Could not initialize GameObjectAI");
-    } else
+    }
+    else
         AI()->UpdateAI(diff);
 
-    if (IS_MO_TRANSPORT_GUID(GetGUID()))
+	if (IS_MO_TRANSPORT_GUID(GetGUID()))
     {
         //((Transport*)this)->Update(p_time);
         return;
@@ -299,13 +300,14 @@ void GameObject::Update(uint32 diff)
                 {
                     // Arming Time for GAMEOBJECT_TYPE_TRAP (6)
                     GameObjectTemplate const* goInfo = GetGOInfo();
-                    // Bombs
-                    if (goInfo->trap.type == 2)
-                        m_cooldownTime = time(NULL) + 10;   // Hardcoded tooltip value
-                    else if (Unit* owner = GetOwner())
-                        m_cooldownTime = time(NULL) + goInfo->trap.startDelay;
-                    m_lootState = GO_READY;
-                    break;
+					// Bombs
+					if (goInfo->trap.type == 2)
+						m_cooldownTime = time(NULL) + 10; // Hardcoded tooltip value
+					else if (Unit* owner = GetOwner())
+						m_cooldownTime = time(NULL) + goInfo->trap.startDelay;
+
+					m_lootState = GO_READY;
+					break;
                 }
                 case GAMEOBJECT_TYPE_FISHINGNODE:
                 {
@@ -317,13 +319,13 @@ void GameObject::Update(uint32 diff)
                         if (caster && caster->GetTypeId() == TYPEID_PLAYER)
                         {
                             SetGoState(GO_STATE_ACTIVE);
-                            SetUInt32Value(GAMEOBJECT_FLAGS, GO_FLAG_NODESPAWN);
+							SetUInt32Value(GAMEOBJECT_FLAGS, GO_FLAG_NODESPAWN);
 
                             UpdateData udata(caster->GetMapId());
                             WorldPacket packet;
                             BuildValuesUpdateBlockForPlayer(&udata, caster->ToPlayer());
-                            udata.BuildPacket(&packet);
-                            caster->ToPlayer()->GetSession()->SendPacket(&packet);
+                            if (udata.BuildPacket(&packet))
+                                caster->ToPlayer()->GetSession()->SendPacket(&packet);
 
                             SendCustomAnim(GetGoAnimProgress());
                         }
@@ -369,7 +371,7 @@ void GameObject::Update(uint32 diff)
                             Unit* caster = GetOwner();
                             if (caster && caster->GetTypeId() == TYPEID_PLAYER)
                             {
-                                caster->ToPlayer()->RemoveGameObject(this, false);
+                                caster->FinishSpell(CURRENT_CHANNELED_SPELL);
 
                                 WorldPacket data(SMSG_FISH_ESCAPED, 0);
                                 caster->ToPlayer()->GetSession()->SendPacket(&data);
@@ -409,7 +411,7 @@ void GameObject::Update(uint32 diff)
                 if (goInfo->type == GAMEOBJECT_TYPE_TRAP)
                 {
                     if (m_cooldownTime >= time(NULL))
-                        return;
+                        break;
 
                     // Type 2 - Bomb (will go away after casting it's spell)
                     if (goInfo->trap.type == 2)
@@ -426,7 +428,7 @@ void GameObject::Update(uint32 diff)
                     bool IsBattlegroundTrap = false;
                     //FIXME: this is activation radius (in different casting radius that must be selected from spell data)
                     //TODO: move activated state code (cast itself) to GO_ACTIVATED, in this place only check activating and set state
-                    float radius = (float)(goInfo->trap.radius) / 2; // TODO rename radius to diameter (goInfo->trap.radius) should be (goInfo->trap.diameter)
+                    float radius = (float)(goInfo->trap.radius)/3*2; // TODO rename radius to diameter (goInfo->trap.radius) should be (goInfo->trap.diameter)
                     if (!radius)
                     {
                         if (goInfo->trap.cooldown != 3)            // cast in other case (at some triggering/linked go/etc explicit call)
@@ -448,29 +450,18 @@ void GameObject::Update(uint32 diff)
                     // search unfriendly creature
                     if (owner)                    // hunter trap
                     {
-                        std::list<Unit*> possibleTargets;
-                        Trinity::AnyUnfriendlyNoTotemUnitInObjectRangeCheck checker(this, owner, radius);
-                        Trinity::UnitListSearcher<Trinity::AnyUnfriendlyNoTotemUnitInObjectRangeCheck> searcher(this, possibleTargets, checker);
+						Trinity::AnyUnfriendlyNoTotemUnitInObjectRangeCheck checker(this, owner, radius);
+						Trinity::UnitSearcher<Trinity::AnyUnfriendlyNoTotemUnitInObjectRangeCheck> searcher(this, ok, checker);
                         VisitNearbyGridObject(radius, searcher);
-                        if (possibleTargets.empty())
-                            VisitNearbyWorldObject(radius, searcher);
-
-                        Unit *realtarget = NULL;
-                        for (std::list<Unit*>::iterator itr = possibleTargets.begin(); itr != possibleTargets.end(); ++itr)
-                        {
-                            if (!realtarget || GetExactDist2dSq((*itr)->GetPositionX(), (*itr)->GetPositionY()) < GetExactDist2dSq(realtarget->GetPositionX(), realtarget->GetPositionY()))
-                                realtarget = *itr;
-                        }
-
-                        ok = realtarget;
+                        if (!ok) VisitNearbyWorldObject(radius, searcher);
                     }
                     else                                        // environmental trap
                     {
                         // environmental damage spells already have around enemies targeting but this not help in case not existed GO casting support
                         // affect only players
                         Player* player = NULL;
-                        Trinity::AnyPlayerInObjectRangeCheck checker(this, radius);
-                        Trinity::PlayerSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(this, player, checker);
+						Trinity::AnyPlayerInObjectRangeCheck checker(this, radius);
+						Trinity::PlayerSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(this, player, checker);
                         VisitNearbyWorldObject(radius, searcher);
                         ok = player;
                     }
@@ -479,17 +470,11 @@ void GameObject::Update(uint32 diff)
                     {
                         // some traps do not have spell but should be triggered
                         if (goInfo->trap.spellId)
-                        {
-                            SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(goInfo->trap.spellId);
-                            if (owner && !owner->_IsValidAttackTarget(ok, spellInfo, this))
-                                break;
-                            else
-                                CastSpell(ok, goInfo->trap.spellId);
-                        }
+                            CastSpell(ok, goInfo->trap.spellId);
 
-                        // Player traps should activate PvP mode
-                        if (owner && owner->GetTypeId() == TYPEID_PLAYER)
-                            owner->CombatStart(ok, false);
+						// Player traps should activate PvP mode
+						if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+							owner->CombatStart(ok, false);
 
                         m_cooldownTime = time(NULL) + (goInfo->trap.cooldown ? goInfo->trap.cooldown :  uint32(4));   // template or 4 seconds
 
@@ -529,7 +514,7 @@ void GameObject::Update(uint32 diff)
                 case GAMEOBJECT_TYPE_GOOBER:
                     if (m_cooldownTime < time(NULL))
                     {
-                        RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+						RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
 
                         SetLootState(GO_JUST_DEACTIVATED);
                         m_cooldownTime = 0;
@@ -596,7 +581,7 @@ void GameObject::Update(uint32 diff)
             {
                 SendObjectDeSpawnAnim(GetGUID());
                 //reset flags
-                SetUInt32Value(GAMEOBJECT_FLAGS, GetGOInfo()->flags);
+				SetUInt32Value(GAMEOBJECT_FLAGS, GetGOInfo()->flags);
             }
 
             if (!m_respawnDelayTime)
@@ -622,6 +607,7 @@ void GameObject::Update(uint32 diff)
     }
     sScriptMgr->OnGameObjectUpdate(this, diff);
 }
+
 
 void GameObject::Refresh()
 {
@@ -1000,33 +986,33 @@ bool GameObject::ActivateToQuest(Player* target) const
 
 void GameObject::TriggeringLinkedGameObject(uint32 trapEntry, Unit* target)
 {
-    GameObjectTemplate const* trapInfo = sObjectMgr->GetGameObjectTemplate(trapEntry);
-    if (!trapInfo || trapInfo->type != GAMEOBJECT_TYPE_TRAP)
-        return;
+	GameObjectTemplate const* trapInfo = sObjectMgr->GetGameObjectTemplate(trapEntry);
+	if (!trapInfo || trapInfo->type != GAMEOBJECT_TYPE_TRAP)
+		return;
 
-    SpellInfo const* trapSpell = sSpellMgr->GetSpellInfo(trapInfo->trap.spellId);
-    if (!trapSpell)                                          // checked at load already
-        return;
+	SpellInfo const* trapSpell = sSpellMgr->GetSpellInfo(trapInfo->trap.spellId);
+	if (!trapSpell)                                          // checked at load already
+		return;
 
-    float range = float(target->GetSpellMaxRangeForTarget(GetOwner(), trapSpell));
+	float range = float(target->GetSpellMaxRangeForTarget(GetOwner(), trapSpell));
 
-    // search nearest linked GO
-    GameObject* trapGO = NULL;
-    {
-        // using original GO distance
-        CellCoord p(Trinity::ComputeCellCoord(GetPositionX(), GetPositionY()));
-        Cell cell(p);
+	// search nearest linked GO
+	GameObject* trapGO = NULL;
+	{
+		// using original GO distance
+		CellCoord p(Trinity::ComputeCellCoord(GetPositionX(), GetPositionY()));
+		Cell cell(p);
 
-        Trinity::NearestGameObjectEntryInObjectRangeCheck go_check(*target, trapEntry, range);
-        Trinity::GameObjectLastSearcher<Trinity::NearestGameObjectEntryInObjectRangeCheck> checker(this, trapGO, go_check);
+		Trinity::NearestGameObjectEntryInObjectRangeCheck go_check(*target, trapEntry, range);
+		Trinity::GameObjectLastSearcher<Trinity::NearestGameObjectEntryInObjectRangeCheck> checker(this, trapGO, go_check);
 
-        TypeContainerVisitor<Trinity::GameObjectLastSearcher<Trinity::NearestGameObjectEntryInObjectRangeCheck>, GridTypeMapContainer > object_checker(checker);
-        cell.Visit(p, object_checker, *GetMap(), *target, range);
-    }
+		TypeContainerVisitor<Trinity::GameObjectLastSearcher<Trinity::NearestGameObjectEntryInObjectRangeCheck>, GridTypeMapContainer > object_checker(checker);
+		cell.Visit(p, object_checker, *GetMap(), *target, range);
+	}
 
-    // found correct GO
-    if (trapGO)
-        trapGO->CastSpell(target, trapInfo->trap.spellId);
+	// found correct GO
+	if (trapGO)
+		trapGO->CastSpell(target, trapInfo->trap.spellId);
 }
 
 GameObject* GameObject::LookupFishingHoleAround(float range)
@@ -1703,52 +1689,50 @@ void GameObject::Use(Unit* user)
 
 void GameObject::CastSpell(Unit* target, uint32 spellId)
 {
-    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
-    if (!spellInfo)
-        return;
+	SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
+	if (!spellInfo)
+		return;
 
-    bool self = false;
-    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-    {
-        if (spellInfo->Effects[i].TargetA.GetTarget() == TARGET_UNIT_CASTER)
-        {
-            self = true;
-            break;
-        }
-    }
+	bool self = false;
+	for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+	{
+		if (spellInfo->Effects[i].TargetA.GetTarget() == TARGET_UNIT_CASTER)
+		{
+			self = true;
+			break;
+		}
+	}
 
-    if (self)
-    {
-        if (target)
-            target->CastSpell(target, spellInfo, true);
-        return;
-    }
+	if (self)
+	{
+		if (target)
+			target->CastSpell(target, spellInfo, true);
+		return;
+	}
 
-    //summon world trigger
-    Creature* trigger = SummonTrigger(GetPositionX(), GetPositionY(), GetPositionZ(), 0, spellInfo->CalcCastTime() + 100);
-    if (!trigger)
-        return;
+	//summon world trigger
+	Creature* trigger = SummonTrigger(GetPositionX(), GetPositionY(), GetPositionZ(), 0, spellInfo->CalcCastTime() + 100);
+	if (!trigger)
+		return;
 
-    trigger->SetGoType(GetGoType());
-
-    if (Unit* owner = GetOwner())
-    {
-        if (owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE))
-            trigger->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
-        trigger->setFaction(owner->getFaction());
-        if (owner->GetTypeId() == TYPEID_PLAYER)
-            trigger->SetPhaseMask(owner->GetPhaseMask(), false);
-        // needed for GO casts for proper target validation checks
-        trigger->SetOwnerGUID(owner->GetGUID());
-        trigger->CastSpell(target ? target : trigger, spellInfo, true, 0, 0, owner->GetGUID());
-    }
-    else
-    {
-        trigger->setFaction(14);
-        // Set owner guid for target if no owner available - needed by trigger auras
-        // - trigger gets despawned and there's no caster avalible (see AuraEffect::TriggerSpell())
-        trigger->CastSpell(target ? target : trigger, spellInfo, true, 0, 0, target ? target->GetGUID() : 0);
-    }
+	if (Unit* owner = GetOwner())
+	{
+		if (owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE))
+			trigger->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
+		trigger->setFaction(owner->getFaction());
+		if (owner->GetTypeId() == TYPEID_PLAYER)
+			trigger->SetPhaseMask(owner->GetPhaseMask(), false);
+		// needed for GO casts for proper target validation checks
+		trigger->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, owner->GetGUID());
+		trigger->CastSpell(target ? target : trigger, spellInfo, true, 0, 0, owner->GetGUID());
+	}
+	else
+	{
+		trigger->setFaction(14);
+		// Set owner guid for target if no owner available - needed by trigger auras
+		// - trigger gets despawned and there's no caster avalible (see AuraEffect::TriggerSpell())
+		trigger->CastSpell(target ? target : trigger, spellInfo, true, 0, 0, target ? target->GetGUID() : 0);
+	}
 }
 
 void GameObject::SendCustomAnim(uint32 anim)

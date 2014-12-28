@@ -4463,6 +4463,38 @@ public:
     }
 };
 
+// 66601,'spell_gen_fix_anticheat'
+class spell_gen_fix_anticheat : public SpellScriptLoader
+{
+public:
+    spell_gen_fix_anticheat() : SpellScriptLoader("spell_gen_fix_anticheat") { }
+    class spell_gen_fix_anticheat_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_gen_fix_anticheat_AuraScript)
+
+        void HandleOnEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* caster = GetCaster();
+
+            if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            if (Aura* aur = caster->GetAura(66601))
+                aur->SetDuration(1000);
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_gen_fix_anticheat_AuraScript::HandleOnEffectApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_gen_fix_anticheat_AuraScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -4570,4 +4602,5 @@ void AddSC_generic_spell_scripts()
     new spell_gen_blessing_of_khazgoroth();
     new spell_gen_tipping_of_scales();
 	new spell_gen_mixology_bonus();
+	new spell_gen_fix_anticheat();
 }
