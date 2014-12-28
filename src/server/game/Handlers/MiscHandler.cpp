@@ -176,6 +176,11 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
 {
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Recvd CMSG_WHO Message");
 
+	time_t now = time(NULL);
+    if (now - timeLastWhoCommand < 8)
+        return;
+    else timeLastWhoCommand = now;
+
     uint32 matchcount = 0;
 
     uint32 level_min, level_max, racemask, classmask, zones_count, str_count;
