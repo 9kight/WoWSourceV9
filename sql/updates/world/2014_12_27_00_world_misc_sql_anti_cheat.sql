@@ -13,4 +13,5 @@ INSERT INTO `spell_linked_spell`(`spell_trigger`,`spell_effect`,`type`,`req_aura
 (80964,66601,1,0,'Fix Anticheat spell Skull Bash Bear'),
 (80965,66601,1,0,'Fix Anticheat spell Skull Bash Cat'),
 (16979,66601,0,0,'Fix Feral Charge - Anticheat Blue Aura'),
-(49376,66601,0,0,'Fix Feral Charge - Anticheat Blue Aura');
+(49376,66601,0,0,'Fix Feral Charge - Anticheat Blue Aura'),
+(74434,66601,0,0,'Fix Anticheat Soulburn - Warlock');
