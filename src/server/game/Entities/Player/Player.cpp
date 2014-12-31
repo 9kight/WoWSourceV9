@@ -7545,6 +7545,7 @@ void Player::_LoadCurrency(PreparedQueryResult result)
         cur.weekCount = fields[1].GetUInt32();
         cur.totalCount = fields[2].GetUInt32();
         cur.weekCap = fields[3].GetUInt32(); // GetCurrencyWeekCap(currency);
+		cur.seasonCount = fields[3].GetUInt32();
 
 
         // load total conquest cap. should be after insert.
@@ -7585,6 +7586,7 @@ void Player::_SaveCurrency(SQLTransaction& trans)
                 stmt->setUInt32(2, itr->second.weekCount);
                 stmt->setUInt32(3, itr->second.totalCount);
                 stmt->setUInt32(4, itr->second.weekCap);
+				stmt->setUInt32(4, itr->second.seasonCount);
                 trans->Append(stmt);
                 break;
             case PLAYERCURRENCY_CHANGED:
@@ -7592,6 +7594,7 @@ void Player::_SaveCurrency(SQLTransaction& trans)
                 stmt->setUInt32(0, itr->second.weekCount);
                 stmt->setUInt32(1, itr->second.totalCount);
                 stmt->setUInt32(2, itr->second.weekCap);
+				stmt->setUInt32(4, itr->second.seasonCount);
                 stmt->setUInt32(3, GetGUIDLow());
                 stmt->setUInt16(4, itr->first);
                 trans->Append(stmt);
@@ -7626,14 +7629,14 @@ void Player::SendNewCurrency(uint32 id) const
     packet.WriteBit(weekCount);
     packet.WriteBits(0, 4); // some flags
     packet.WriteBit(weekCap);
-    packet.WriteBit(0);     // season total earned
+	packet.WriteBit(itr->second.seasonCount > 0 ? 1 : 0);     // season total earned
 
     currencyData << uint32(itr->second.totalCount / precision);
     if (weekCap)
         currencyData << uint32(weekCap);
 
-    //if (seasonTotal)
-    //    currencyData << uint32(seasonTotal / precision);
+	if (itr->second.seasonCount > 0)
+		currencyData << uint32(itr->second.seasonCount / precision);
 
     currencyData << uint32(entry->ID);
     if (weekCount)
@@ -7667,14 +7670,14 @@ void Player::SendCurrencies() const
         packet.WriteBit(weekCount);
         packet.WriteBits(0, 4); // some flags
         packet.WriteBit(weekCap);
-        packet.WriteBit(0);     // season total earned
+		packet.WriteBit(itr->second.seasonCount > 0 ? 1 : 0);     // season total earned
 
         currencyData << uint32(itr->second.totalCount / precision);
         if (weekCap)
             currencyData << uint32(weekCap);
 
-        //if (seasonTotal)
-        //    currencyData << uint32(seasonTotal / precision);
+		if (itr->second.seasonCount > 0)
+			currencyData << uint32(itr->second.seasonCount / precision);
 
         currencyData << uint32(entry->ID);
         if (weekCount)
@@ -7740,6 +7743,12 @@ bool Player::HasCurrency(uint32 id, uint32 count) const
     return itr != _currencyStorage.end() && itr->second.totalCount >= count;
 }
 
+bool Player::HasCurrencySeasonCount(uint32 id, uint32 count) const
+{
+	PlayerCurrenciesMap::const_iterator itr = _currencyStorage.find(id);
+	return itr != _currencyStorage.end() && itr->second.seasonCount >= count;
+}
+
 void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bool ignoreMultipliers/* = false*/, bool isRefund)
 {
     if (!count)
@@ -7754,6 +7763,8 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
     int32 precision = currency->Flags & CURRENCY_FLAG_HIGH_PRECISION ? CURRENCY_PRECISION : 1;
     uint32 oldTotalCount = 0;
     uint32 oldWeekCount = 0;
+	uint32 oldSeasonCount = 0;
+
     PlayerCurrenciesMap::iterator itr = _currencyStorage.find(id);
     if (itr == _currencyStorage.end())
     {
@@ -7761,6 +7772,7 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
         cur.state = PLAYERCURRENCY_NEW;
         cur.totalCount = 0;
         cur.weekCount = 0;
+		cur.seasonCount = 0;
         _currencyStorage[id] = cur;
         itr = _currencyStorage.find(id);
     }
@@ -7768,7 +7780,12 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
     {
         oldTotalCount = itr->second.totalCount;
         oldWeekCount = itr->second.weekCount;
+		oldSeasonCount = itr->second.seasonCount;
     }
+
+
+	// seasonCount
+	int32 newSeasonCount = int32(oldSeasonCount) + (!isRefund ? (count > 0 ? count : 0) : 0);
 
     // count can't be more then weekCap if used (weekCap > 0)
     uint32 weekCap = GetCurrencyWeekCap(currency);
@@ -7810,6 +7827,7 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
 
         itr->second.totalCount = newTotalCount;
         itr->second.weekCount = newWeekCount;
+		itr->second.seasonCount = newSeasonCount;
 
         if (count > 0)
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CURRENCY, id, count);
@@ -7824,10 +7842,12 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
         WorldPacket packet(SMSG_UPDATE_CURRENCY, 12);
 
         packet.WriteBit(weekCap != 0);
-        packet.WriteBit(0); // hasSeasonCount
+		packet.WriteBit(itr->second.seasonCount > 0 ? 1 : 0); // hasSeasonCount
         packet.WriteBit(!printLog); // print in log
 
-        // if hasSeasonCount packet << uint32(seasontotalearned); TODO: save this in character DB and use it
+
+		if (itr->second.seasonCount > 0)
+			packet << uint32(itr->second.seasonCount / CURRENCY_PRECISION);
 
         packet << uint32(newTotalCount / precision);
         packet << uint32(id);
@@ -22173,39 +22193,33 @@ bool Player::BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uin
             return false;
         }
 
-        for (uint8 i = 0; i < MAX_ITEM_EXT_COST_ITEMS; ++i)
-        {
-            if (iece->RequiredItem[i] && !HasItemCount(iece->RequiredItem[i], (iece->RequiredItemCount[i] * stacks)))
-            {
-                SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
-                return false;
-            }
-        }
+		for (uint8 i = 0; i < MAX_ITEM_EXT_COST_ITEMS; ++i)
+		{
+			if (iece->RequiredItem[i] && !HasItemCount(iece->RequiredItem[i], (iece->RequiredItemCount[i] * stacks)))
+			{
+				SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
+				return false;
+			}
+		}
 
-        for (uint8 i = 0; i < MAX_ITEM_EXT_COST_CURRENCIES; ++i)
-        {
-            if (!iece->RequiredCurrency[i])
-                continue;
+		for (uint8 i = 0; i < MAX_ITEM_EXT_COST_CURRENCIES; ++i)
+		{
+			if (!iece->RequiredCurrency[i])
+				continue;
 
-            CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(iece->RequiredCurrency[i]);
-            if (!entry)
-            {
-                SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, currency, 0); // Find correct error
-                return false;
-            }
+			CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(iece->RequiredCurrency[i]);
+			if (!entry)
+			{
+				SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, currency, 0); // Find correct error
+				return false;
+			}
 
-            if (iece->RequirementFlags & (ITEM_EXT_COST_CURRENCY_REQ_IS_SEASON_EARNED_1 << i))
-            {
-                // Not implemented
-                SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL); // Find correct error
-                return false;
-            }
-            else if (!HasCurrency(iece->RequiredCurrency[i], (iece->RequiredCurrencyCount[i] * stacks))) 
-            {
-                SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL); // Find correct error
-                return false;
-            }
-        }
+			if (!HasCurrency(iece->RequiredCurrency[i], (iece->RequiredCurrencyCount[i])))
+			{
+				SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL); // Find correct error
+				return false;
+			}
+		}
 
         // check for personal arena rating requirement
         if (GetMaxPersonalArenaRatingRequirement(iece->RequiredArenaSlot) < iece->RequiredPersonalArenaRating)
@@ -22362,29 +22376,42 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
             }
         }
 
-        for (uint8 i = 0; i < MAX_ITEM_EXT_COST_CURRENCIES; ++i)
-        {
-            if (!iece->RequiredCurrency[i])
-                continue;
+		for (uint8 i = 0; i < MAX_ITEM_EXT_COST_CURRENCIES; ++i)
+		{
+			if (!iece->RequiredCurrency[i])
+				continue;
 
-            CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(iece->RequiredCurrency[i]);
-            if (!entry)
-            {
-                SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, item, 0);
-                return false;
-            }
+			CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(iece->RequiredCurrency[i]);
+			if (!entry)
+			{
+				SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, item, 0);
+				return false;
+			}
 
-            if (iece->RequirementFlags & (ITEM_EXT_COST_CURRENCY_REQ_IS_SEASON_EARNED_1 << i))
-            {
-                SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL); // Find correct error
-                return false;
-            }
-            else if (!HasCurrency(iece->RequiredCurrency[i], iece->RequiredCurrencyCount[i] * stacks)) 
-            {
-                SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
-                return false;
-            }
-        }
+			// See if we mush check CurrentAmount or TotalSeasonAmount
+			uint32 checkValue = entry->TotalCap;
+			if (entry->ID == CURRENCY_TYPE_CONQUEST_POINTS)
+				checkValue = 600000;
+
+			if (checkValue != 0 && iece->RequiredCurrencyCount[i] * stacks > checkValue)
+			{
+				// Check for total season amount
+				if (!HasCurrencySeasonCount(iece->RequiredCurrency[i], iece->RequiredCurrencyCount[i] * stacks))
+				{
+					SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
+					return false;
+				}
+			}
+			else
+			{
+				// Check for current amount
+				if (!HasCurrency(iece->RequiredCurrency[i], iece->RequiredCurrencyCount[i] * stacks))
+				{
+					SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
+					return false;
+				}
+			}
+		}
 
         // check for personal arena rating requirement
         if (GetMaxPersonalArenaRatingRequirement(iece->RequiredArenaSlot) < iece->RequiredPersonalArenaRating)
