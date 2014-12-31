@@ -6558,15 +6558,17 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                         ToPlayer()->AddSpellCooldown(dummySpell->Id, 0, time(NULL) + cooldown);
                     return true;
                 }
-                case 33881: // Nature's Ward
-                case 33882:
-                {
-                    if (GetHealthPct() > 50.0f || !roll_chance_i(triggerAmount))
-                        return false;
-                    CastSpell(this, 45281, true);
-                    triggered_spell_id = 774;
-                    break;
-                }
+				// Nature's Ward
+				case 33881:                      // Rank 1
+				case 33882:                      // Rank 2
+				{
+					if (HealthAbovePct(50))
+						return false;
+
+						CastSpell(this, 45281, true);
+						CastSpell(this, 774, true);
+					break;
+				}
                 // Glyph of Bloodletting
                 case 54815:
                 {
