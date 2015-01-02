@@ -2111,8 +2111,8 @@ void World::Update(uint32 diff)
     if (m_gameTime > m_NextGuildReset)
         ResetGuildCap();
 
-    if (m_gameTime > m_NextCurrencyReset)
-        ResetCurrencyWeekCap();
+	/*if (m_gameTime > m_NextCurrencyReset)
+	ResetCurrencyWeekCap();*/
 
     /// <ul><li> Handle auctions when the timer has passed
     if (m_timers[WUPDATE_AUCTIONS].Passed())
@@ -2928,29 +2928,29 @@ void World::InitMonthlyQuestResetTime()
 
 void World::InitRandomBGResetTime()
 {
-    time_t bgtime = uint64(sWorld->getWorldState(WS_BG_DAILY_RESET_TIME));
-    if (!bgtime)
-        m_NextRandomBGReset = time_t(time(NULL));         // game time not yet init
+	time_t bgtime = uint64(sWorld->getWorldState(WS_BG_DAILY_RESET_TIME));
+	if (!bgtime)
+		m_NextRandomBGReset = time_t(time(NULL));         // game time not yet init
 
-    // generate time by config
-    time_t curTime = time(NULL);
-    tm localTm = *localtime(&curTime);
-    localTm.tm_hour = getIntConfig(CONFIG_RANDOM_BG_RESET_HOUR);
-    localTm.tm_min = 0;
-    localTm.tm_sec = 0;
+	// generate time by config
+	time_t curTime = time(NULL);
+	tm localTm = *localtime(&curTime);
+	localTm.tm_hour = getIntConfig(CONFIG_RANDOM_BG_RESET_HOUR);
+	localTm.tm_min = 0;
+	localTm.tm_sec = 0;
 
-    // current day reset time
-    time_t nextDayResetTime = mktime(&localTm);
+	// current day reset time
+	time_t nextDayResetTime = mktime(&localTm);
 
-    // next reset time before current moment
-    if (curTime >= nextDayResetTime)
-        nextDayResetTime += DAY;
+	// next reset time before current moment
+	if (curTime >= nextDayResetTime)
+		nextDayResetTime += DAY;
 
-    // normalize reset time
-    m_NextRandomBGReset = bgtime < curTime ? nextDayResetTime - DAY : nextDayResetTime;
+	// normalize reset time
+	m_NextRandomBGReset = bgtime < curTime ? nextDayResetTime - DAY : nextDayResetTime;
 
-    if (!bgtime)
-        sWorld->setWorldState(WS_BG_DAILY_RESET_TIME, uint64(m_NextRandomBGReset));
+	if (!bgtime)
+		sWorld->setWorldState(WS_BG_DAILY_RESET_TIME, uint64(m_NextRandomBGReset));
 }
 
 void World::InitGuildResetTime()
@@ -2982,31 +2982,31 @@ void World::InitGuildResetTime()
 
 void World::InitCurrencyResetTime()
 {
-    time_t currencytime = uint64(sWorld->getWorldState(WS_CURRENCY_RESET_TIME));
-    if (!currencytime)
-        m_NextCurrencyReset = time_t(time(NULL));         // game time not yet init
+	time_t currencytime = uint64(sWorld->getWorldState(WS_CURRENCY_RESET_TIME));
+	if (!currencytime)
+		m_NextCurrencyReset = time_t(time(NULL));         // game time not yet init
 
-    // generate time by config
-    time_t curTime = time(NULL);
-    tm localTm = *localtime(&curTime);
+	// generate time by config
+	time_t curTime = time(NULL);
+	tm localTm = *localtime(&curTime);
 
-    localTm.tm_wday = getIntConfig(CONFIG_CURRENCY_RESET_DAY);
-    localTm.tm_hour = getIntConfig(CONFIG_CURRENCY_RESET_HOUR);
-    localTm.tm_min = 0;
-    localTm.tm_sec = 0;
+	localTm.tm_wday = getIntConfig(CONFIG_CURRENCY_RESET_DAY);
+	localTm.tm_hour = getIntConfig(CONFIG_CURRENCY_RESET_HOUR);
+	localTm.tm_min = 0;
+	localTm.tm_sec = 0;
 
-    // current week reset time
-    time_t nextWeekResetTime = mktime(&localTm);
+	// current week reset time
+	time_t nextWeekResetTime = mktime(&localTm);
 
-    // next reset time before current moment
-    if (curTime >= nextWeekResetTime)
-        nextWeekResetTime += getIntConfig(CONFIG_CURRENCY_RESET_INTERVAL) * DAY;
+	// next reset time before current moment
+	if (curTime >= nextWeekResetTime)
+		nextWeekResetTime += getIntConfig(CONFIG_CURRENCY_RESET_INTERVAL) * DAY;
 
-    // normalize reset time
-    m_NextCurrencyReset = currencytime < curTime ? nextWeekResetTime - getIntConfig(CONFIG_CURRENCY_RESET_INTERVAL) * DAY : nextWeekResetTime;
+	// normalize reset time
+	m_NextCurrencyReset = currencytime < curTime ? nextWeekResetTime - getIntConfig(CONFIG_CURRENCY_RESET_INTERVAL) * DAY : nextWeekResetTime;
 
-    if (!currencytime)
-        sWorld->setWorldState(WS_CURRENCY_RESET_TIME, uint64(m_NextCurrencyReset));
+	if (!currencytime)
+		sWorld->setWorldState(WS_CURRENCY_RESET_TIME, uint64(m_NextCurrencyReset));
 }
 
 void World::ResetDailyQuests()
@@ -3030,14 +3030,20 @@ void World::ResetDailyQuests()
 
 void World::ResetCurrencyWeekCap()
 {
-    CharacterDatabase.Execute("UPDATE `character_currency` SET `week_count` = 0");
+	CharacterDatabase.Execute("UPDATE `character_currency` SET `week_count` = 0");
 
-    for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
-        if (itr->second->GetPlayer())
-            itr->second->GetPlayer()->ResetCurrencyWeekCap();
+	// Calculating week cap for conquest points
+	CharacterDatabase.Execute("UPDATE character_currency_weekcap SET week_cap = ROUND(1.4326 * (1511.26 / (1 + 1639.28 / exp(0.00412 * `max_week_rating`))) + 857.15) WHERE `source`=0 AND `max_week_rating` BETWEEN 1500 AND 3000");
+	CharacterDatabase.PExecute("UPDATE character_currency_weekcap SET week_cap = '%u' WHERE `source`=0 AND `max_week_rating` < 1500", 1350);
+	CharacterDatabase.Execute("UPDATE character_currency_weekcap SET week_cap =3000 WHERE `source`=0 AND `max_week_rating` > 3000");
+	CharacterDatabase.Execute("UPDATE character_currency_weekcap SET max_week_rating=0");
 
-    m_NextCurrencyReset = time_t(m_NextCurrencyReset + DAY * getIntConfig(CONFIG_CURRENCY_RESET_INTERVAL));
-    sWorld->setWorldState(WS_CURRENCY_RESET_TIME, uint64(m_NextCurrencyReset));
+	for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+	if (itr->second->GetPlayer())
+		itr->second->GetPlayer()->ResetCurrencyWeekCap();
+
+	m_NextCurrencyReset = time_t(m_NextCurrencyReset + DAY * getIntConfig(CONFIG_CURRENCY_RESET_INTERVAL));
+	sWorld->setWorldState(WS_CURRENCY_RESET_TIME, uint64(m_NextCurrencyReset));
 }
 
 void World::LoadDBAllowedSecurityLevel()

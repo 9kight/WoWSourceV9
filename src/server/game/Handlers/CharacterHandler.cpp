@@ -219,6 +219,10 @@ bool LoginQueryHolder::Initialize()
     stmt->setUInt32(0, lowGuid);
     res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOAD_CURRENCY, stmt);
 
+	stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_PLAYER_CURRENCY_WEEK_CAP);
+	stmt->setUInt32(0, lowGuid);
+	res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOAD_CURRENCY_WEEK_CAP, stmt);
+
     //Pets
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_PET_SLOTS);
     stmt->setUInt32(0, lowGuid);

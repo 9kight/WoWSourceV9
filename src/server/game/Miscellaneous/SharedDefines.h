@@ -3823,6 +3823,13 @@ enum DungeonStatusFlag
     RAID_STATUSFLAG_25MAN_HEROIC = 0x08
 };
 
+enum ConquestPointsSources
+{
+	CP_SOURCE_ARENA = 0,
+	CP_SOURCE_RATED_BG = 1,
+	CP_SOURCE_MAX
+};
+
 #define VOID_STORAGE_UNLOCK       100*GOLD
 #define VOID_STORAGE_STORE_ITEM   25*GOLD
 #define VOID_STORAGE_MAX_DEPOSIT  9

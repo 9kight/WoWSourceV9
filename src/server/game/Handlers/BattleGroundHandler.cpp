@@ -850,7 +850,7 @@ void WorldSession::HandleRequestRatedBgStats(WorldPacket& recvData)
     data << uint8(3);   // BG type (10vs10 - 15vs15) ?
     data << uint32(0);  // unk
     data << uint32(0);  // unk
-    data << _player->GetCurrencyCurrentWeekCap(CURRENCY_TYPE_CONQUEST_META_BG, true);
+	data << _player->GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_RBG, true);
     data << uint32(0);  // unk
     data << uint32(0);  // unk
     data << _player->GetCurrency(CURRENCY_TYPE_CONQUEST_POINTS, true);

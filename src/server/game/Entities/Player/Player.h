@@ -193,7 +193,6 @@ struct PlayerCurrency
    PlayerCurrencyState state;
    uint32 totalCount;
    uint32 weekCount;
-   uint32 weekCap;
    uint32 seasonCount;
 };
 
@@ -898,10 +897,11 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOAD_VOID_STORAGE            = 33,
     PLAYER_LOGIN_QUERY_LOAD_CURRENCY                = 34,
     PLAYER_LOGIN_QUERY_LOAD_CUF_PROFILES            = 35,
-    PLAYER_LOGIN_QUERY_LOAD_PETS                    = 36,
-    PLAYER_LOGIN_QUERY_LOAD_PETS_SPELLS             = 37,
-    PLAYER_LOGIN_QUERY_LOAD_PETS_AURA               = 38,
-    PLAYER_LOGIN_QUERY_LOAD_PETS_COOLDOWN           = 39,
+	PLAYER_LOGIN_QUERY_LOAD_CURRENCY_WEEK_CAP       = 36,
+    PLAYER_LOGIN_QUERY_LOAD_PETS                    = 37,
+    PLAYER_LOGIN_QUERY_LOAD_PETS_SPELLS             = 38,
+    PLAYER_LOGIN_QUERY_LOAD_PETS_AURA               = 39,
+    PLAYER_LOGIN_QUERY_LOAD_PETS_COOLDOWN           = 40,
     MAX_PLAYER_LOGIN_QUERY
 };
 
@@ -1487,7 +1487,6 @@ class Player : public Unit, public GridObject<Player>
         uint32 GetCurrencyOnWeek(uint32 id, bool precision) const;
         /// return week cap by currency id
         uint32 GetCurrencyWeekCap(uint32 id, bool precision) const;
-        uint32 GetCurrencyCurrentWeekCap(uint32 id, bool precision) const;
         /// return presence related currency
         bool HasCurrency(uint32 id, uint32 count) const;
 		/// return if players has earned count currency during the season
@@ -1505,7 +1504,7 @@ class Player : public Unit, public GridObject<Player>
           * @param  printLog used on SMSG_UPDATE_CURRENCY
           * @param  ignore gain multipliers
         */
-        void ModifyCurrency(uint32 id, int32 count, bool printLog = true, bool ignoreMultipliers = false, bool isRefund = false);
+		void ModifyCurrency(uint32 id, int32 count, bool printLog = true, bool ignoreMultipliers = false, bool refund = false, bool ignoreCap = false);
 
         void ApplyEquipCooldown(Item* pItem);
         void QuickEquipItem(uint16 pos, Item* pItem);
@@ -1661,6 +1660,7 @@ class Player : public Unit, public GridObject<Player>
         void ResetWeeklyQuestStatus();
         void ResetMonthlyQuestStatus();
         void ResetSeasonalQuestStatus(uint16 event_id);
+		void UpdateMaxWeekRating(ConquestPointsSources source, uint8 slot);
 
         uint16 FindQuestSlot(uint32 quest_id) const;
         uint32 GetQuestSlotQuestId(uint16 slot) const { return GetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET + QUEST_ID_OFFSET); }
@@ -2950,6 +2950,7 @@ class Player : public Unit, public GridObject<Player>
         void _LoadTalents(PreparedQueryResult result);
         void _LoadInstanceTimeRestrictions(PreparedQueryResult result);
         void _LoadCurrency(PreparedQueryResult result);
+		void _LoadCurrencyWeekCap(PreparedQueryResult result);
         void _LoadCUFProfiles(PreparedQueryResult result);
 
         /*********************************************************/
@@ -2975,6 +2976,7 @@ class Player : public Unit, public GridObject<Player>
         void _SaveStats(SQLTransaction& trans);
         void _SaveInstanceTimeRestrictions(SQLTransaction& trans);
         void _SaveCurrency(SQLTransaction& trans);
+		void _SaveCurrencyWeekCap(SQLTransaction& trans);
         void _SaveCUFProfiles(SQLTransaction& trans);
         void _SavePets(SQLTransaction& trans);
 
@@ -3026,8 +3028,12 @@ class Player : public Unit, public GridObject<Player>
          */
         uint32 GetCurrencyTotalCap(CurrencyTypesEntry const* currency) const;
 
+		// Currency Week Cap
+		uint16 m_maxWeekRating[CP_SOURCE_MAX];
+		uint16 m_conquestPointsWeekCap[CP_SOURCE_MAX];
+
         /// Updates weekly conquest point cap (dynamic cap)
-        void UpdateConquestCurrencyCap();
+		void UpdateConquestCurrencyCap(uint32 currency);
 
         VoidStorageItem* _voidStorageItems[VOID_STORAGE_MAX_SLOT];
 
