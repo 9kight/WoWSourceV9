@@ -275,8 +275,16 @@ void PathGenerator::BuildPolyPath(Vector3 const& startPos, Vector3 const& endPos
     {
         for (; pathStartIndex < _polyLength; ++pathStartIndex)
         {
-            // here to carch few bugs
-            ASSERT(_pathPolyRefs[pathStartIndex] != INVALID_POLYREF);
+			// here to catch few bugs
+			if (_pathPolyRefs[pathStartIndex] == INVALID_POLYREF)
+			{
+				sLog->outDebug(LOG_FILTER_MAPS, "Invalid poly ref in BuildPolyPath. _polyLength: %u, pathStartIndex: %u,"
+					" startPos: %s, endPos: %s, mapid: %u",
+					_polyLength, pathStartIndex, startPos.toString().c_str(), endPos.toString().c_str(),
+					_sourceUnit->GetMapId());
+
+				break;
+			}
 
             if (_pathPolyRefs[pathStartIndex] == startPoly)
             {
