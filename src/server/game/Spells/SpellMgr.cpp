@@ -2802,6 +2802,18 @@ void SpellMgr::LoadSpellCustomAttr()
 
         switch (spellInfo->Id)
         {
+			case 84617: // Revealing Strike
+            case 58684: // Savage Combat (Rank 1)
+            case 58683: // Savage Combat (Rank 2)
+            case 79140: // Vendetta
+            case 79124: // Blackjack (Rank 1)
+            case 79126: // Blackjack (Rank 2)
+            case 51693: // Waylay
+            case 93068: // Master Poisoner
+            case 91021: // Find Weakness
+            case 16511: // Hemorrhage
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+                break;
             case 60256:
                 //Crashes client on pressing ESC (Maybe because of ReqSpellFocus and GameObject)
                 spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
