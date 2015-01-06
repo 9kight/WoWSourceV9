@@ -298,7 +298,7 @@ void GuildFinderMgr::DeleteGuild(uint32 guildId)
         trans->Append(stmt);
 
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GUILD_FINDER_GUILD_SETTINGS);
-        stmt->setUInt32(0, (*itr).GetGuildId());
+        stmt->setUInt32(0, itr->GetGuildId());
         trans->Append(stmt);
             
         CharacterDatabase.CommitTransaction(trans);
