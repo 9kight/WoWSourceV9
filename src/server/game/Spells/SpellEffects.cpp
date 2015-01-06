@@ -856,6 +856,14 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
         // special cases
         switch (triggered_spell_id)
         {
+			// Soulstone Resurrection
+		    case 6203:
+			    if (m_caster && unitTarget && unitTarget->isDead())
+			    {
+				   unitTarget->CastSpell(unitTarget, 3026);
+				   return;
+			    }
+			break;
             // Vanish (not exist)
             case 18461:
             {
