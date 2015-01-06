@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 WoW Source  <http://wowsource.info/>
+ * Copyright (C) 2014 WoW Source  <http://wowsource.info/>
  *
  * Dont Share The SourceCode
  * and read our WoWSource Terms
@@ -188,6 +188,7 @@ class boss_bethtilac: public CreatureScript
                 EventMap events;
                 int8 Devastion;
                 bool _moveup;
+				bool AggroResetTime;
 
                 void InitializeAI()
                 {
@@ -216,6 +217,8 @@ class boss_bethtilac: public CreatureScript
                         _moveup = false;
                         return;
                     }
+					
+					AggroResetTime = false;
 
                     AchievementChecker = true;
                     if (instance)
@@ -302,7 +305,19 @@ class boss_bethtilac: public CreatureScript
                 {
                     if (!UpdateVictim())
                         return;
-
+						
+					if (AggroResetTime)
+                    {
+                    //Attack random Gamers
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 100.0f, true))
+                        {
+                        me->AddThreat(target, 1.0f);
+                        me->TauntApply(target);
+                        AttackStart(target);
+                        }
+                    AggroResetTime = false;
+					}
+					
                     events.Update(diff);
 
                     if (me->HasUnitState(UNIT_STATE_CASTING))
@@ -346,6 +361,7 @@ class boss_bethtilac: public CreatureScript
                             case EVENT_PHASE_UPPER:
                                 me->SetCanFly(true);
                                 me->SetDisableGravity(true);
+								AggroResetTime = true;
                                 me->AddAura(SPELL_WEB_SILK, me);
                                 me->GetMotionMaster()->MovePoint(POINT_UP, upPos);
                                 _moveup = true;
