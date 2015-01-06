@@ -305,7 +305,7 @@ class boss_bethtilac: public CreatureScript
                 {
                     if (!UpdateVictim())
                         return;
-						
+					
 					if (AggroResetTime)
                     {
                     //Attack random Gamers
