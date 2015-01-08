@@ -130,7 +130,6 @@ struct MinionInfo
 
 typedef std::multimap<uint32 /*entry*/, DoorInfo> DoorInfoMap;
 typedef std::pair<DoorInfoMap::const_iterator, DoorInfoMap::const_iterator> DoorInfoMapBounds;
-typedef std::map<uint32 /*type*/, uint64 /*guid*/> ObjectGuidMap;
 typedef std::map<uint32 /*entry*/, MinionInfo> MinionInfoMap;
 
 class InstanceScript : public ZoneScript
@@ -158,12 +157,6 @@ class InstanceScript : public ZoneScript
         //Used by the map's CanEnter function.
         //This is to prevent players from entering during boss encounters.
         virtual bool IsEncounterInProgress() const;
-
-		uint64 GetObjectGuid(uint32 type) const;
-		inline Creature* GetCreature(uint32 type)
-		{
-			return ObjectAccessor::GetObjectInMap<Creature>(GetObjectGuid(type), instance, 0);
-		}
 
         //Called when a player successfully enters the instance.
         virtual void OnPlayerEnter(Player* /*player*/) {}
@@ -256,12 +249,10 @@ class InstanceScript : public ZoneScript
         std::string LoadBossState(char const* data);
         std::string GetBossSaveData();
     private:
-		std::vector<char> headers;
         std::vector<BossInfo> bosses;
         DoorInfoMap doors;
         MinionInfoMap minions;
         uint32 completedEncounters; // completed encounter mask, bit indexes are DungeonEncounter.dbc boss numbers, used for packets
-		ObjectGuidMap _objectGuids;
 };
 
 template<class AI, class T>

@@ -2156,8 +2156,7 @@ enum Emote
     EMOTE_STATE_STRANGULATE             = 473,
     EMOTE_STATE_READY_SPELL_OMNI        = 474,
     EMOTE_STATE_HOLD_JOUST              = 475,
-    EMOTE_ONESHOT_CRY_JAINA             = 476,
-	EMOTE_ONESHOT_KNOCKDOWN				= 477
+    EMOTE_ONESHOT_CRY_JAINA             = 476
 };
 
 // AnimationData.dbc
@@ -2813,7 +2812,7 @@ enum CreatureTypeFlags
     CREATURE_TYPEFLAGS_EXOTIC           = 0x00010000,         // Can be tamed by hunter as exotic pet
     CREATURE_TYPEFLAGS_UNK17            = 0x00020000,         // ? Related to vehicles/pvp?
     CREATURE_TYPEFLAGS_UNK18            = 0x00040000,         // ? Related to vehicle/siege weapons?
-	CREATURE_TYPEFLAGS_PROJECTILE_COLLISION = 0x00080000,	  // Projectiles can collide with this creature - interacts with TARGET_DEST_TRAJ
+	CREATURE_TYPEFLAGS_UNK19            = 0x00080000,	      // Projectiles can collide with this creature - interacts with TARGET_DEST_TRAJ
     CREATURE_TYPEFLAGS_UNK20            = 0x00100000,
     CREATURE_TYPEFLAGS_UNK21            = 0x00200000,
     CREATURE_TYPEFLAGS_UNK22            = 0x00400000,

@@ -1,229 +1,182 @@
 /*
-* Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+* Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
 *
-* This program is free software; you can redistribute it and/or modify it
-* under the terms of the GNU General Public License as published by the
-* Free Software Foundation; either version 2 of the License, or (at your
-* option) any later version.
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
 *
-* This program is distributed in the hope that it will be useful, but WITHOUT
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-* more details.
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
 *
-* You should have received a copy of the GNU General Public License along
-* with this program. If not, see <http://www.gnu.org/licenses/>.
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#include "ScriptMgr.h"
-#include "ScriptedCreature.h"
-#include "SpellScript.h"
-#include "Vehicle.h"
-#include "stonecore.h"
+/*
+* TODO: grip and seismic shard part is unfinished...
+*/
+#include "the_stonecore.h"
+#include "ScriptPCH.h"
 #include "MoveSplineInit.h"
+#include "Vehicle.h"
+#include "ScriptedCreature.h"
 
 enum Spells
 {
-	SPELL_ENERGY_SHIELD = 82858,
-
 	SPELL_CURSE_OF_BLOOD = 79345,
 	SPELL_FORCE_GRIP = 79351,
+	SPELL_FORCE_GRIP_DOWN = 79359,
+	SPELL_FORCE_GRIP_UP = 79358,
 	SPELL_SUMMON_GRAVITY_WELL = 79340,
-	SPELL_EARTH_FURY_ENERGY_SHIELD = 79050,
-
-	// Gravity Well
-	SPELL_GRAVITY_WELL_VISUAL = 79245,
-	SPELL_GRAVITY_WELL_AURA_DAMAGE = 79244,
-	SPELL_GRAVITY_WELL_AURA_PULL = 79333,
-
-	SPELL_GRAVITY_WELL_DAMAGE = 79249,
-	SPELL_GRAVITY_WELL_PULL = 79332,
-
-	// Fury of Earth phase
-	SPELL_EARTH_FURY_CASTING_VISUAL = 79002,
-	SPELL_SEISMIC_SHARD_SUMMON_1 = 86860,
-	SPELL_SEISMIC_SHARD_SUMMON_2 = 86858,
-	SPELL_SEISMIC_SHARD_SUMMON_3 = 86856,
+	SPELL_SEISMIC_SHARD = 79002, // visual
+	SPELL_SEISMIC_SHARD_CHARGE = 79014, // damage + leap
+	SPELL_SEISMIC_SHARD_PULL = 86862, // pulls the shard -> makes it enter vehicle
+	SPELL_SEISMIC_SHARD_TAR = 80511, // target visual
+	SPELL_SEISMIC_SHARD_THROW = 79015, // throw visual
+	SPELL_SEISMIC_SHARD_SUMM_1 = 86856, // summons shards
+	SPELL_SEISMIC_SHARD_SUMM_2 = 86858,
+	SPELL_SEISMIC_SHARD_SUMM_3 = 86860,
 	SPELL_SEISMIC_SHARD_VISUAL = 79009,
-	SPELL_SEISMIC_SHARD_PREPARE = 86862,
-	SPELL_SEISMIC_SHARD_TARGETING = 80511,
-	SPELL_SEISMIC_SHARD_LAUNCH = 79015,
-	SPELL_SEISMIC_SHARD_MISSLE = 79014,
-	SPELL_EJECT_ALL_PASSENGERS = 68576,
+	SPELL_ENERGY_SHIELD = 82858,
 
-	// Add wave spells
-	SPELL_SUMMON_WAVE_SOUTH = 79200,
-	SPELL_SUMMON_WAVE_WEST = 79196,
-	SPELL_SUMMON_ADD_SOUTH = 79193,
-	SPELL_SUMMON_ADD_WEST = 79199,
-};
+	SPELL_GRAVITY_WELL_VIS_1 = 79245, // after 8 sec - removed
+	SPELL_GRAVITY_WELL_PERIODIC = 79244,
+	SPELL_GRAVITY_WELL_SCRIPT = 79251,
+	SPELL_GRAVITY_WELL_DMG = 79249,
+	SPELL_GRAVITY_WELL_PULL = 79333,
+	SPELL_GRAVITY_WELL_SCALE = 92475, // hc only
 
-enum NPCs
-{
-	NPC_DEVOUT_FOLLOWER = 42428,
-	NPC_SEISMIC_SHARD = 42355,
-};
-
-enum Texts
-{
-	SAY_AGGRO = 0,
-	SAY_PHASE_TWO = 1,
-	SAY_DEATH = 2,
+	SPELL_RIDE_VEHICLE = 46598,
 };
 
 enum Events
 {
-	EVENT_NONE,
-
-	EVENT_INTRO_MOVE,
-
-	EVENT_CURSE_OF_BLOOD,
-	EVENT_FORCE_GRIP,
-	EVENT_SUMMON_GRAVITY_WELL,
-	EVENT_ENERGY_SHIELD,
-	EVENT_EARTH_FURY,
-
-	EVENT_SUMMON_WAVE_SOUTH,
-	EVENT_SUMMON_WAVE_WEST,
-
-	EVENT_GRAVITY_WELL_AURA_DAMAGE,
-	EVENT_GRAVITY_WELL_AURA_PULL,
-
-	// Phase 2: Fury of Earth
-	EVENT_EARTH_FURY_FLY_UP,
-	EVENT_EARTH_FURY_FLY_ABOVE_PLATFORM,
-	EVENT_EARTH_FURY_CHECK_SEAT0,
-	EVENT_EARTH_FURY_LAUNCH_SHARD,
-	EVENT_EARTH_FURY_FLY_DOWN,
-	EVENT_START_ATTACK,
-
-	EVENT_LAUNCH,
-	EVENT_SEISMIC_SHARD_MOUNT
+	EVENT_CURSE_OF_BLOOD = 1,
+	EVENT_FORCE_GRIP = 2,
+	EVENT_SEISMIC_SHARD = 3,
+	EVENT_SEISMIC_SHARD_THROW = 4,
+	EVENT_SHIELD_PHASE_END = 5,
+	EVENT_GRAVITY_WELL = 6,
+	EVENT_ENERGY_SHIELD = 7,
+	EVENT_ENERGY_SHIELD_END = 8,
+	EVENT_ADDS_SUMMON = 9,
 };
 
-enum EventGroups
+enum Phases
 {
-	EVENT_GROUP_PHASE_ONE,
-	EVENT_GROUP_ADDS,
+	PHASE_NORMAL = 1,
+	PHASE_SHIELD = 2
 };
 
-enum Points
+enum Misc
 {
-	POINT_NONE,
-
-	POINT_INTRO_MOVE,
-	POINT_FLY_UP,
-	POINT_ABOVE_PLATFORM,
-	POINT_PLATFORM,
-	POINT_GROUND,
+	VEHICLE_GRIP = 892,
+	VEHICLE_NORMAL = 903,
+	POINT_FLY = 1,
+	POINT_PLATFORM = 2,
 };
 
-Position const GroundPos = { 1331.82f, 980.314f, 207.542f };
-Position const AbovePlatformPos = { 1336.21f, 960.813f, 215.0f };
+enum Quotes
+{
+	SAY_AGGRO = 1,
+	SAY_DEATH = 2,
+	SAY_SLAY = 3,
+	SAY_SHIELD = 4
+};
 
-// TO-DO:
-// - Find out why NPCs summoned by boss are usually two times bigger than their normal size.
-// - Find more sniffs and script Force Grip spell (79351) 
+static const Position summonPos[2] =
+{
+	{ 1271.93f, 1042.73f, 210.0f, 0.0f }, // W
+	{ 1250.99f, 949.48f, 205.5f, 0.0f }   // E
+};
 
-class boss_high_priestess_azil : public CreatureScript
+class boss_azil : public CreatureScript
 {
 public:
-	boss_high_priestess_azil() : CreatureScript("boss_high_priestess_azil") { }
+	boss_azil() : CreatureScript("boss_priestess_azil") {}
 
-	struct boss_high_priestess_azilAI : public BossAI
+	struct boss_azilAI : public BossAI
 	{
-		boss_high_priestess_azilAI(Creature* creature) : BossAI(creature, DATA_HIGH_PRIESTESS_AZIL), vehicle(creature->GetVehicleKit())
+		boss_azilAI(Creature * creature) : BossAI(creature, DATA_HIGH_PRIESTESS_AZIL), vehicle(creature->GetVehicleKit())
 		{
 			ASSERT(vehicle);
 		}
 
-		Vehicle* vehicle;
-
 		void Reset()
 		{
+			seismicShards = 0;
+			me->SetReactState(REACT_AGGRESSIVE);
+			me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
 			_Reset();
-
-			me->SetCanFly(false);
-			me->SetDisableGravity(false);
-			me->SetReactState(REACT_PASSIVE);
-
-			events.ScheduleEvent(EVENT_INTRO_MOVE, 2000);
-			events.ScheduleEvent(EVENT_CURSE_OF_BLOOD, 6000, EVENT_GROUP_PHASE_ONE);
-			events.ScheduleEvent(EVENT_FORCE_GRIP, urand(8000, 10000), EVENT_GROUP_PHASE_ONE);
-			events.ScheduleEvent(EVENT_SUMMON_GRAVITY_WELL, 16000, EVENT_GROUP_PHASE_ONE);
-			events.ScheduleEvent(EVENT_ENERGY_SHIELD, urand(35000, 36000));
-			events.ScheduleEvent(EVENT_SUMMON_WAVE_SOUTH, 0);
-			events.ScheduleEvent(EVENT_SUMMON_WAVE_WEST, 40000);
 		}
 
-		void EnterCombat(Unit* /*victim*/)
+		void EnterCombat(Unit * /*victim*/)
 		{
-			_EnterCombat();
-
-			DoCast(SPELL_ENERGY_SHIELD);
 			Talk(SAY_AGGRO);
+			me->GetMotionMaster()->MoveJump(1332.59f, 983.41f, 207.62f, 10.0f, 10.0f);
+			events.SetPhase(PHASE_NORMAL);
+			events.ScheduleEvent(EVENT_FORCE_GRIP, 10000);
+			events.ScheduleEvent(EVENT_ENERGY_SHIELD, 45000);
+			events.ScheduleEvent(EVENT_CURSE_OF_BLOOD, urand(5000, 8000));
+			events.ScheduleEvent(EVENT_GRAVITY_WELL, urand(3000, 5000));
+			events.ScheduleEvent(EVENT_ADDS_SUMMON, urand(10000, 15000));
+			_EnterCombat();
 		}
 
-		void JustDied(Unit* killer)
+		void SpellHit(Unit * /*caster*/, const SpellInfo *spell)
+		{
+			Spell * curSpell = me->GetCurrentSpell(CURRENT_GENERIC_SPELL);
+			if (curSpell && curSpell->m_spellInfo->Id == SPELL_FORCE_GRIP)
+			for (uint8 i = 0; i < 3; ++i)
+			if (spell->Effects[i].Effect == SPELL_EFFECT_INTERRUPT_CAST)
+				me->InterruptSpell(CURRENT_GENERIC_SPELL, false);
+		}
+
+		void JustSummoned(Creature * summon)
+		{
+			BossAI::JustSummoned(summon);
+		}
+
+		void KilledUnit(Unit * victim)
+		{
+			if (victim->GetTypeId() == TYPEID_PLAYER)
+				Talk(SAY_SLAY);
+		}
+
+		void JustDied(Unit * /*killer*/)
 		{
 			Talk(SAY_DEATH);
+			_JustDied();
 		}
-
-		/*
-		void PassengerBoarded(Unit* who, int8 seatId, bool apply)
-		{
-		if (!apply || who->GetEntry() != NPC_SEISMIC_SHARD)
-		return;
-
-		Movement::MoveSplineInit init(who);
-		init.DisableTransportPathTransformations();
-		if (seatId == 0)
-		init.MoveTo(12.13748f, 0.0f, 2.442475f);
-		else if (seatId == 1)
-		init.MoveTo(12.13748f, 17.5f, 11.19248f);
-		else
-		init.MoveTo(12.13748f, -17.5f, 11.19248f);
-		init.Launch();
-		}
-		*/
 
 		void MovementInform(uint32 type, uint32 id)
 		{
-			if (type != POINT_MOTION_TYPE && id != POINT_INTRO_MOVE)
-				return;
-
 			switch (id)
 			{
-			case POINT_INTRO_MOVE:
-				me->RemoveAurasDueToSpell(SPELL_ENERGY_SHIELD);
-				me->SetReactState(REACT_AGGRESSIVE);
-				break;
-			case POINT_FLY_UP:
-				me->SetCanFly(true);
-				me->SetDisableGravity(true);
-				events.ScheduleEvent(EVENT_EARTH_FURY_FLY_ABOVE_PLATFORM, 1000);
-				break;
-			case POINT_ABOVE_PLATFORM:
-				me->SetFacingTo(5.218534f);
-				DoCast(SPELL_EARTH_FURY_CASTING_VISUAL);
-				DoCast(SPELL_SEISMIC_SHARD_SUMMON_1);
-				DoCast(SPELL_SEISMIC_SHARD_SUMMON_2);
-				DoCast(SPELL_SEISMIC_SHARD_SUMMON_3);
-				events.ScheduleEvent(EVENT_EARTH_FURY_CHECK_SEAT0, 6700);
-				break;
-			case POINT_GROUND:
-				DoCast(SPELL_EJECT_ALL_PASSENGERS);
-				me->SetCanFly(false);
-				me->SetDisableGravity(false);
-				me->SetReactState(REACT_AGGRESSIVE);
-				// Find more sniffs to correct these timers, this was copied from Reset() void.
-				events.ScheduleEvent(EVENT_CURSE_OF_BLOOD, 6000, EVENT_GROUP_PHASE_ONE);
-				events.ScheduleEvent(EVENT_FORCE_GRIP, urand(8000, 10000), EVENT_GROUP_PHASE_ONE);
-				events.ScheduleEvent(EVENT_SUMMON_GRAVITY_WELL, 16000, EVENT_GROUP_PHASE_ONE);
-				break;
-			default:
+			case POINT_PLATFORM:
+				events.ScheduleEvent(EVENT_SHIELD_PHASE_END, 30000);
+				Movement::MoveSplineInit init(me);
+				init.SetFacing(me->GetHomePosition().GetOrientation());
+				DoCast(SPELL_SEISMIC_SHARD);
+				events.ScheduleEvent(EVENT_SEISMIC_SHARD, 4000);
+				if (vehicle)
+				{
+					first = true;
+					vehicle->InstallAccessory(NPC_SEISMIC_SHARD, 0, true, TEMPSUMMON_DEAD_DESPAWN, 0);
+					vehicle->InstallAccessory(NPC_SEISMIC_SHARD, 1, true, TEMPSUMMON_DEAD_DESPAWN, 0);
+				}
 				break;
 			}
+		}
+
+		void OnInstallAccessory(Vehicle* veh, Creature* accessory)
+		{
+			accessory->CastSpell(accessory, SPELL_SEISMIC_SHARD_VISUAL);
+			accessory->setActive(true);
 		}
 
 		void UpdateAI(uint32 const diff)
@@ -236,78 +189,102 @@ public:
 			if (me->HasUnitState(UNIT_STATE_CASTING))
 				return;
 
-			while (uint32 eventId = events.ExecuteEvent())
+			if (uint32 eventId = events.ExecuteEvent())
 			{
 				switch (eventId)
 				{
-				case EVENT_INTRO_MOVE:
-					me->GetMotionMaster()->MoveJump(GroundPos, me->GetSpeed(MOVE_FLIGHT), 1.918408f, POINT_INTRO_MOVE);
-					break;
 				case EVENT_CURSE_OF_BLOOD:
-					if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
-						DoCast(target, SPELL_CURSE_OF_BLOOD);
-					events.ScheduleEvent(EVENT_CURSE_OF_BLOOD, urand(13000, 15000), EVENT_GROUP_PHASE_ONE);
+					DoCastVictim(SPELL_CURSE_OF_BLOOD);
+					events.ScheduleEvent(EVENT_CURSE_OF_BLOOD, urand(8000, 10000), 0, PHASE_NORMAL);
 					break;
 				case EVENT_FORCE_GRIP:
+					vehicle->SetVehicleId(VEHICLE_GRIP);
 					DoCastVictim(SPELL_FORCE_GRIP);
-					events.ScheduleEvent(EVENT_CURSE_OF_BLOOD, urand(13000, 15000), EVENT_GROUP_PHASE_ONE);
+					events.ScheduleEvent(EVENT_FORCE_GRIP, urand(15000, 20000), 0, PHASE_NORMAL);
 					break;
-				case EVENT_SUMMON_GRAVITY_WELL:
-					if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
-						DoCast(target, SPELL_SUMMON_GRAVITY_WELL);
-					events.ScheduleEvent(EVENT_SUMMON_GRAVITY_WELL, urand(13000, 15000), EVENT_GROUP_PHASE_ONE);
+				case EVENT_GRAVITY_WELL:
+					DoCastRandom(SPELL_SUMMON_GRAVITY_WELL, 100.0f, false);
+					events.ScheduleEvent(EVENT_GRAVITY_WELL, urand(15000, 20000), 0, PHASE_NORMAL);
+					break;
+				case EVENT_SEISMIC_SHARD:
+					if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+					{
+						target->GetPosition(&shardPos);
+						DoCast(SPELL_SEISMIC_SHARD_PULL);
+						me->CastSpell(shardPos.GetPositionX(), shardPos.GetPositionY(), shardPos.GetPositionZ(), SPELL_SEISMIC_SHARD_TAR, false);
+						DoCast(SPELL_SEISMIC_SHARD_THROW);
+						events.ScheduleEvent(EVENT_SEISMIC_SHARD_THROW, 3000);
+					}
+					if (seismicShards < 2)
+					{
+						++seismicShards;
+						events.ScheduleEvent(EVENT_SEISMIC_SHARD, 7000);
+					}
+					break;
+				case EVENT_SEISMIC_SHARD_THROW:
+					if (Unit* passenger = vehicle->GetPassenger((first ? 0 : 1)))
+					{
+						if (passenger)
+						{
+							passenger->ExitVehicle();
+							passenger->CastSpell(shardPos.GetPositionX(), shardPos.GetPositionY(), shardPos.GetPositionZ(), SPELL_SEISMIC_SHARD_CHARGE, false);
+							passenger->ToCreature()->DespawnOrUnsummon(3000);
+							first = false;
+						}
+					}
 					break;
 				case EVENT_ENERGY_SHIELD:
-					events.CancelEventGroup(EVENT_GROUP_PHASE_ONE);
-					DoCast(SPELL_EARTH_FURY_ENERGY_SHIELD);
-					events.ScheduleEvent(EVENT_EARTH_FURY, 0);
-					break;
-				case EVENT_EARTH_FURY:
-					countSeismicShard = 3;
+					Talk(SAY_SHIELD);
+					me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+					me->GetMotionMaster()->Clear();
+					me->GetMotionMaster()->MoveIdle();
+					vehicle->SetVehicleId(VEHICLE_NORMAL);
 					me->SetReactState(REACT_PASSIVE);
-					me->SetFacingTo(5.862942f);
-					events.ScheduleEvent(EVENT_EARTH_FURY_FLY_UP, 1600);
+					me->SetUInt64Value(UNIT_FIELD_TARGET, 0);
+					events.SetPhase(PHASE_SHIELD);
+					DoCast(SPELL_ENERGY_SHIELD);
+					seismicShards = 0;
+					events.ScheduleEvent(EVENT_ENERGY_SHIELD_END, 2000);
 					break;
-				case EVENT_EARTH_FURY_FLY_UP:
-					Talk(SAY_PHASE_TWO);
-					me->GetMotionMaster()->MovePoint(POINT_FLY_UP, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 5);
+				case EVENT_ENERGY_SHIELD_END: // fly up
+					me->GetMotionMaster()->MoveJump(me->GetHomePosition(), 30.0f, 30.0f, POINT_PLATFORM);
 					break;
-				case EVENT_EARTH_FURY_FLY_ABOVE_PLATFORM:
-					me->GetMotionMaster()->MovePoint(POINT_ABOVE_PLATFORM, AbovePlatformPos);
-					break;
-				case EVENT_EARTH_FURY_CHECK_SEAT0:
-					if (!vehicle->GetPassenger(0))
-						DoCast(SPELL_SEISMIC_SHARD_PREPARE);
-					events.ScheduleEvent(EVENT_EARTH_FURY_LAUNCH_SHARD, 1800);
-					break;
-				case EVENT_EARTH_FURY_LAUNCH_SHARD:
-					if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+				case EVENT_SHIELD_PHASE_END:
+					me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+					me->RemoveAurasDueToSpell(SPELL_SEISMIC_SHARD);
+					me->RemoveAurasDueToSpell(SPELL_ENERGY_SHIELD);
+					if (Unit * victim = me->GetVictim())
 					{
-						me->SetFacingToObject(target);
-						DoCast(target, SPELL_SEISMIC_SHARD_TARGETING);
-						DoCast(SPELL_SEISMIC_SHARD_LAUNCH);
-						countSeismicShard -= 1;
+						me->SetReactState(REACT_AGGRESSIVE);
+						DoStartMovement(victim);
 					}
-					events.ScheduleEvent(countSeismicShard > 0 ? EVENT_EARTH_FURY_CHECK_SEAT0 : EVENT_EARTH_FURY_FLY_DOWN, 4800);
+					events.SetPhase(PHASE_NORMAL);
+					events.RescheduleEvent(EVENT_CURSE_OF_BLOOD, urand(8000, 10000), 0, PHASE_NORMAL);
+					events.RescheduleEvent(EVENT_GRAVITY_WELL, urand(15000, 20000), 0, PHASE_NORMAL);
+					events.RescheduleEvent(EVENT_FORCE_GRIP, urand(10000, 12000), 0, PHASE_NORMAL);
+					events.ScheduleEvent(EVENT_ENERGY_SHIELD, urand(40000, 45000), 0, PHASE_NORMAL);
 					break;
-				case EVENT_EARTH_FURY_FLY_DOWN:
+				case EVENT_ADDS_SUMMON:
 				{
-												  me->RemoveAurasDueToSpell(SPELL_EARTH_FURY_CASTING_VISUAL);
-												  me->RemoveAurasDueToSpell(SPELL_EARTH_FURY_ENERGY_SHIELD);
-												  Position pos = me->GetPosition();
-												  pos.m_positionZ = me->GetMap()->GetHeight(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
-												  me->GetMotionMaster()->MovePoint(POINT_GROUND, pos);
-												  break;
+										  if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
+										  {
+											  uint8 amount = 3;
+											  uint8 pos = urand(0, 1);
+											  if (events.IsInPhase(PHASE_SHIELD))
+												  amount = urand(8, 10);
+											  for (int i = 0; i < amount; ++i)
+											  {
+												  Position tarPos;
+												  me->GetRandomPoint(summonPos[pos], 5.0f, tarPos);
+												  if (Creature * summon = me->SummonCreature(NPC_FOLLOWER, tarPos, TEMPSUMMON_DEAD_DESPAWN, 1000))
+												  {
+													  summon->AI()->AttackStart(target);
+													  summon->AI()->DoZoneInCombat();
+												  }
+											  }
+										  }
+										  events.ScheduleEvent(EVENT_ADDS_SUMMON, urand(10000, 12000));
 				}
-				case EVENT_SUMMON_WAVE_SOUTH:
-					if (Creature* worldtrigger = me->FindNearestCreature(NPC_WORLDTRIGGER, 150.0f))
-						worldtrigger->CastSpell(worldtrigger, SPELL_SUMMON_WAVE_SOUTH);
-					events.ScheduleEvent(EVENT_SUMMON_WAVE_SOUTH, 12000);
-					break;
-				case EVENT_SUMMON_WAVE_WEST:
-					if (Creature* worldtrigger = me->FindNearestCreature(NPC_WORLDTRIGGER, 150.0f))
-						worldtrigger->CastSpell(worldtrigger, SPELL_SUMMON_WAVE_WEST);
-					events.ScheduleEvent(EVENT_SUMMON_WAVE_WEST, 20000);
 					break;
 				default:
 					break;
@@ -316,493 +293,93 @@ public:
 
 			DoMeleeAttackIfReady();
 		}
-
 	private:
-		uint8 countSeismicShard;
+		bool first;
+		Vehicle* vehicle;
+		uint8 seismicShards;
+		Position shardPos;
 	};
 
-	CreatureAI* GetAI(Creature* creature) const
+	CreatureAI * GetAI(Creature * creature) const
 	{
-		return new boss_high_priestess_azilAI(creature);
+		return new boss_azilAI(creature);
 	}
 };
 
-// 42428 - Devout Follower 
-class npc_devout_follower : public CreatureScript
+class npc_gravity_well_azil : public CreatureScript
 {
 public:
-	npc_devout_follower() : CreatureScript("npc_devout_follower") { }
+	npc_gravity_well_azil() : CreatureScript("npc_gravity_well_azil") {}
 
-	struct npc_devout_followerAI : public ScriptedAI
+	struct npc_gravity_well_azilAI : public ScriptedAI
 	{
-		npc_devout_followerAI(Creature* creature) : ScriptedAI(creature) { }
+		npc_gravity_well_azilAI(Creature * creature) : ScriptedAI(creature) {}
 
-		void IsSummonedBy(Unit* summoner)
+		void Reset()
 		{
-			if (summoner->GetEntry() != NPC_WORLDTRIGGER)
-				return;
+			DoCast(SPELL_GRAVITY_WELL_VIS_1);
+			active = false;
+			activeTimer = 8000;
+			if (!IsHeroic())
+				me->DespawnOrUnsummon(20000);
+			killCount = 0;
+		}
 
-			if (Unit* target = me->SelectNearestPlayer(200.0f))
+		void SpellHitTarget(Unit * target, const SpellInfo * spell)
+		{
+			if (target->isAlive() && spell->Id == SPELL_GRAVITY_WELL_SCRIPT)
 			{
-				me->AddThreat(target, 0.0f);
-				me->SetInCombatWith(target);
-				target->SetInCombatWith(me);
-				DoStartMovement(target);
-				me->Attack(target, true);
+				int bp = IsHeroic() ? 20000 : 10000; // evtl needs to be increased / lowered
+				uint32 distFkt = uint32(me->GetDistance(target)) * 5;
+				bp -= (bp * distFkt) / 100;
+
+				me->CastCustomSpell(target, SPELL_GRAVITY_WELL_DMG, &bp, NULL, NULL, true);
 			}
-			else
-				me->GetMotionMaster()->MovePoint(POINT_NONE, summoner->GetPosition());
-		}
-	};
-
-	CreatureAI* GetAI(Creature* creature) const
-	{
-		return new npc_devout_followerAI(creature);
-	}
-};
-
-// 42499 - Gravity Well
-class npc_gravity_well : public CreatureScript
-{
-public:
-	npc_gravity_well() : CreatureScript("npc_gravity_well") { }
-
-	struct npc_gravity_wellAI : public ScriptedAI
-	{
-		npc_gravity_wellAI(Creature* creature) : ScriptedAI(creature)
-		{
-			me->SetReactState(REACT_PASSIVE);
-			DoCast(SPELL_GRAVITY_WELL_VISUAL);
-			events.ScheduleEvent(EVENT_GRAVITY_WELL_AURA_DAMAGE, 3200);
-			events.ScheduleEvent(EVENT_GRAVITY_WELL_AURA_PULL, 4500);
-			if (!me->GetMap()->IsHeroic())
-				me->DespawnOrUnsummon(23200);
 		}
 
-		void KilledUnit(Unit* victim)
+		void KilledUnit(Unit * victim)
 		{
-			if (victim->GetEntry() != NPC_DEVOUT_FOLLOWER)
-				return;
-
-			me->SetObjectScale(me->GetObjectScale() - 0.25f);
-			if (me->GetObjectScale() <= 0.0f)
-				me->DespawnOrUnsummon(1000);
-		}
-
-		void UpdateAI(uint32 const diff)
-		{
-			events.Update(diff);
-
-			while (uint32 eventId = events.ExecuteEvent())
+			if (IsHeroic() && victim->GetEntry() == NPC_FOLLOWER)
 			{
-				switch (eventId)
+				if (killCount == 3)
+					me->DespawnOrUnsummon();
+				else
 				{
-				case EVENT_GRAVITY_WELL_AURA_DAMAGE:
-					me->RemoveAurasDueToSpell(SPELL_GRAVITY_WELL_VISUAL);
-					DoCast(SPELL_GRAVITY_WELL_AURA_DAMAGE);
-					break;
-				case EVENT_GRAVITY_WELL_AURA_PULL:
-					DoCast(SPELL_GRAVITY_WELL_AURA_PULL);
-					break;
-				default:
-					break;
+					DoCast(me, SPELL_GRAVITY_WELL_SCALE, true);
+					++killCount;
 				}
 			}
 		}
 
-	private:
-		EventMap events;
-	};
-
-	CreatureAI* GetAI(Creature* creature) const
-	{
-		return new npc_gravity_wellAI(creature);
-	}
-};
-
-// 42355 - Seismic Shard
-class npc_seismic_shard : public CreatureScript
-{
-public:
-	npc_seismic_shard() : CreatureScript("npc_seismic_shard") { }
-
-	struct npc_seismic_shardAI : public ScriptedAI
-	{
-		npc_seismic_shardAI(Creature* creature) : ScriptedAI(creature)
-		{
-			instance = creature->GetInstanceScript();
-			me->SetDisableGravity(true);
-			me->SetReactState(REACT_PASSIVE);
-			DoCast(SPELL_SEISMIC_SHARD_VISUAL);
-
-			Movement::MoveSplineInit init(me);
-			FillPath(me->GetPosition(), init.Path());
-			init.SetFly();
-			init.Launch();
-
-			events.ScheduleEvent(EVENT_SEISMIC_SHARD_MOUNT, 2400);
-		}
-
 		void UpdateAI(uint32 const diff)
 		{
-			events.Update(diff);
-
-			while (uint32 eventId = events.ExecuteEvent())
+			if (!active)
 			{
-				switch (eventId)
+				if (activeTimer <= diff)
 				{
-				case EVENT_SEISMIC_SHARD_MOUNT:
-					if (Creature* highPriestAzil = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HIGH_PRIESTESS_AZIL)))
-					if (Vehicle* vehicle = highPriestAzil->GetVehicleKit())
-						me->EnterVehicle(highPriestAzil, vehicle->GetNextEmptySeat(0, false)->first);
-					break;
-				default:
-					break;
+					active = true;
+					me->RemoveAurasDueToSpell(SPELL_GRAVITY_WELL_VIS_1);
+					DoCast(me, SPELL_GRAVITY_WELL_PERIODIC, true);
+					DoCast(me, SPELL_GRAVITY_WELL_PULL, true);
 				}
+				else activeTimer -= diff;
 			}
-
 		}
 
 	private:
-		void FillPath(Position const& pos, Movement::PointsArray& path)
-		{
-			G3D::Vector3 point;
-
-			point.x = pos.GetPositionX();
-			point.y = pos.GetPositionY();
-			point.z = pos.GetPositionZ();
-
-			point.x -= 1.0f;
-			path.push_back(point);
-
-			point.x += 1.0f;
-			path.push_back(point);
-
-			point.z += 25.0f;
-			path.push_back(point);
-
-			path.push_back(point);
-		}
-
-		InstanceScript* instance;
-		EventMap events;
+		bool active;
+		uint32 activeTimer;
+		uint8 killCount;
 	};
 
-	CreatureAI* GetAI(Creature* creature) const
+	CreatureAI * GetAI(Creature * creature) const
 	{
-		return new npc_seismic_shardAI(creature);
+		return new npc_gravity_well_azilAI(creature);
 	}
 };
 
-// 79200 - Summon Follower
-class spell_summon_wave_south : public SpellScriptLoader
+void AddSC_boss_azil()
 {
-public:
-	spell_summon_wave_south() : SpellScriptLoader("spell_summon_wave_south") { }
-
-	class spell_summon_wave_south_SpellScript : public SpellScript
-	{
-		PrepareSpellScript(spell_summon_wave_south_SpellScript);
-
-		bool Validate(SpellInfo const* /*spellInfo*/)
-		{
-			if (!sSpellMgr->GetSpellInfo(SPELL_SUMMON_ADD_SOUTH))
-				return false;
-			return true;
-		}
-
-		void HandleScript(SpellEffIndex /*effIndex*/)
-		{
-			Unit* caster = GetCaster();
-			for (uint8 i = 0; i < 3; i++)
-				GetCaster()->CastSpell(GetCaster(), SPELL_SUMMON_ADD_SOUTH, true);
-		}
-
-		void Register()
-		{
-			OnEffectHitTarget += SpellEffectFn(spell_summon_wave_south_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
-		}
-	};
-
-	SpellScript* GetSpellScript() const
-	{
-		return new spell_summon_wave_south_SpellScript();
-	}
-};
-
-// 79196 - Summon Follower
-class spell_summon_wave_west : public SpellScriptLoader
-{
-public:
-	spell_summon_wave_west() : SpellScriptLoader("spell_summon_wave_west") { }
-
-	class spell_summon_wave_west_SpellScript : public SpellScript
-	{
-		PrepareSpellScript(spell_summon_wave_west_SpellScript);
-
-		bool Validate(SpellInfo const* /*spellInfo*/)
-		{
-			if (!sSpellMgr->GetSpellInfo(SPELL_SUMMON_ADD_WEST))
-				return false;
-			return true;
-		}
-
-		void HandleScript(SpellEffIndex /*effIndex*/)
-		{
-			Unit* caster = GetCaster();
-			for (uint8 i = 0; i < 10; i++)
-				GetCaster()->CastSpell(GetCaster(), SPELL_SUMMON_ADD_WEST, true);
-		}
-
-		void Register()
-		{
-			OnEffectHitTarget += SpellEffectFn(spell_summon_wave_west_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
-		}
-	};
-
-	SpellScript* GetSpellScript() const
-	{
-		return new spell_summon_wave_west_SpellScript();
-	}
-};
-
-// 79251 - Gravity Well (casts damage spell on units within 10 yards)
-class PlayerPetOrDevoutFollowerCheck
-{
-public:
-	bool operator()(WorldObject* object) const
-	{
-		// Valid targets are players, pets and Devout Followers
-		if (Creature* creature = object->ToCreature())
-			return (!creature->ToPet() && object->GetEntry() != NPC_DEVOUT_FOLLOWER);
-		return (!object->ToPlayer());
-	}
-};
-
-class spell_gravity_well_damage_nearby : public SpellScriptLoader
-{
-public:
-	spell_gravity_well_damage_nearby() : SpellScriptLoader("spell_gravity_well_damage_nearby") { }
-
-	class spell_gravity_well_damage_nearby_SpellScript : public SpellScript
-	{
-		PrepareSpellScript(spell_gravity_well_damage_nearby_SpellScript);
-
-		void SetRadiusMod()
-		{
-			GetSpell()->SetSpellValue(SPELLVALUE_RADIUS_MOD, int32(GetCaster()->GetObjectScale() * 10000 * 2 / 3));
-		}
-
-		void FilterTargets(std::list<WorldObject*>& unitList)
-		{
-			unitList.remove_if(PlayerPetOrDevoutFollowerCheck());
-		}
-
-		void HandleScript(SpellEffIndex /*effIndex*/)
-		{
-			GetCaster()->CastSpell(GetHitUnit(), SPELL_GRAVITY_WELL_DAMAGE, true);
-		}
-
-		void Register()
-		{
-			BeforeCast += SpellCastFn(spell_gravity_well_damage_nearby_SpellScript::SetRadiusMod);
-			OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_gravity_well_damage_nearby_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
-			OnEffectHitTarget += SpellEffectFn(spell_gravity_well_damage_nearby_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
-		}
-	};
-
-	SpellScript* GetSpellScript() const
-	{
-		return new spell_gravity_well_damage_nearby_SpellScript();
-	}
-};
-
-// 79249 - Gravity Well (damage)
-class spell_gravity_well_damage : public SpellScriptLoader
-{
-public:
-	spell_gravity_well_damage() : SpellScriptLoader("spell_gravity_well_damage") { }
-
-	class spell_gravity_well_damage_SpellScript : public SpellScript
-	{
-		PrepareSpellScript(spell_gravity_well_damage_SpellScript);
-
-		void CalculateDamage(SpellEffIndex /*effIndex*/)
-		{
-			Unit* target = GetHitUnit();
-			if (!target)
-				return;
-
-			float distance = GetCaster()->GetDistance2d(target);
-
-			if (target->GetEntry() == NPC_DEVOUT_FOLLOWER)
-				SetHitDamage(int32(200000 - (1000 * distance))); //need more research on this formula, damage values from sniffs: 189264, 190318, 190478, 196134, 197672, 199735
-			else
-				SetHitDamage(int32(4000 - (200 * distance)));
-		}
-
-		void Register()
-		{
-			OnEffectHitTarget += SpellEffectFn(spell_gravity_well_damage_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
-		}
-	};
-
-	SpellScript* GetSpellScript() const
-	{
-		return new spell_gravity_well_damage_SpellScript();
-	}
-};
-
-// 79332 - Gravity Well (pull units within 10 yards)
-class PulledRecentlyCheck
-{
-public:
-	bool operator()(WorldObject* object) const
-	{
-		return (object->ToUnit() && object->ToUnit()->HasAura(SPELL_GRAVITY_WELL_PULL));
-	}
-};
-
-class spell_gravity_well_pull : public SpellScriptLoader
-{
-public:
-	spell_gravity_well_pull() : SpellScriptLoader("spell_gravity_well_pull") { }
-
-	class spell_gravity_well_pull_SpellScript : public SpellScript
-	{
-		PrepareSpellScript(spell_gravity_well_pull_SpellScript);
-
-		void SetRadiusMod()
-		{
-			GetSpell()->SetSpellValue(SPELLVALUE_RADIUS_MOD, int32(GetCaster()->GetObjectScale() * 10000 * 2 / 3));
-		}
-
-		void FilterTargets(std::list<WorldObject*>& unitList)
-		{
-			unitList.remove_if(PulledRecentlyCheck());
-		}
-
-		void Register()
-		{
-			BeforeCast += SpellCastFn(spell_gravity_well_pull_SpellScript::SetRadiusMod);
-			OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_gravity_well_pull_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
-		}
-	};
-
-	SpellScript* GetSpellScript() const
-	{
-		return new spell_gravity_well_pull_SpellScript();
-	}
-};
-
-// 86862 - Seismic Shard (forces target to cast 86863)
-class spell_seismic_shard_prepare : public SpellScriptLoader
-{
-public:
-	spell_seismic_shard_prepare() : SpellScriptLoader("spell_seismic_shard_prepare") { }
-
-	class spell_seismic_shard_prepare_SpellScript : public SpellScript
-	{
-		PrepareSpellScript(spell_seismic_shard_prepare_SpellScript);
-
-		void SetTarget(WorldObject*& target)
-		{
-			target = GetCaster()->FindNearestCreature(NPC_SEISMIC_SHARD, 50.0f);
-		}
-
-		void Register()
-		{
-			OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_seismic_shard_prepare_SpellScript::SetTarget, EFFECT_0, TARGET_UNIT_NEARBY_ENTRY);
-		}
-	};
-
-	SpellScript* GetSpellScript() const
-	{
-		return new spell_seismic_shard_prepare_SpellScript();
-	}
-};
-
-// 86863 - Seismic Shard (moves shard to seat 0)
-class spell_seismic_shard_change_seat : public SpellScriptLoader
-{
-public:
-	spell_seismic_shard_change_seat() : SpellScriptLoader("spell_seismic_shard_change_seat") { }
-
-	class spell_seismic_shard_change_seat_SpellScript : public SpellScript
-	{
-		PrepareSpellScript(spell_seismic_shard_change_seat_SpellScript);
-
-		void SetTarget(WorldObject*& target)
-		{
-			if (InstanceScript* instance = GetCaster()->GetInstanceScript())
-				target = ObjectAccessor::GetCreature(*GetCaster(), instance->GetData64(DATA_HIGH_PRIESTESS_AZIL));
-		}
-
-		void ChangeSeat(SpellEffIndex /*effIndex*/)
-		{
-			GetCaster()->ExitVehicle();
-			if (GetHitUnit()->IsVehicle())
-				GetCaster()->EnterVehicle(GetHitUnit(), 0);
-		}
-
-		void Register()
-		{
-			OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_seismic_shard_change_seat_SpellScript::SetTarget, EFFECT_0, TARGET_UNIT_NEARBY_ENTRY);
-			OnEffectHitTarget += SpellEffectFn(spell_seismic_shard_change_seat_SpellScript::ChangeSeat, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
-		}
-	};
-
-	SpellScript* GetSpellScript() const
-	{
-		return new spell_seismic_shard_change_seat_SpellScript();
-	}
-};
-
-// 79015 - Seismic Shard (launches shard)
-class spell_seismic_shard : public SpellScriptLoader
-{
-public:
-	spell_seismic_shard() : SpellScriptLoader("spell_seismic_shard") { }
-
-	class spell_seismic_shard_SpellScript : public SpellScript
-	{
-		PrepareSpellScript(spell_seismic_shard_SpellScript);
-
-		void HandleScript(SpellEffIndex /*effIndex*/)
-		{
-			Creature* target = GetHitUnit()->ToCreature();
-			if (!target)
-				return;
-
-			target->ExitVehicle();
-			DynamicObject* dynamicObject = GetCaster()->GetDynObject(SPELL_SEISMIC_SHARD_TARGETING);
-			target->CastSpell(dynamicObject->GetPositionX(), dynamicObject->GetPositionY(), dynamicObject->GetPositionZ(), SPELL_SEISMIC_SHARD_MISSLE, true);
-		}
-
-		void Register()
-		{
-			OnEffectHitTarget += SpellEffectFn(spell_seismic_shard_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
-		}
-	};
-
-	SpellScript* GetSpellScript() const
-	{
-		return new spell_seismic_shard_SpellScript();
-	}
-};
-
-void AddSC_boss_high_priestess_azil()
-{
-	new boss_high_priestess_azil();
-	new npc_devout_follower();
-	new npc_gravity_well();
-	new npc_seismic_shard();
-	new spell_summon_wave_south();
-	new spell_summon_wave_west();
-	new spell_gravity_well_damage_nearby();
-	new spell_gravity_well_damage();
-	new spell_gravity_well_pull();
-	new spell_seismic_shard_prepare();
-	new spell_seismic_shard_change_seat();
-	new spell_seismic_shard();
+	new boss_azil();
+	new npc_gravity_well_azil();
 }

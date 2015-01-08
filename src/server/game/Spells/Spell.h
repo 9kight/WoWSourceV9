@@ -87,9 +87,6 @@ struct SpellDestination
     SpellDestination(Position const& pos);
     SpellDestination(WorldObject const& wObj);
 
-	void Relocate(Position const& pos);
-	void RelocateOffset(Position const& offset);
-
     WorldLocation _position;
     uint64 _transportGUID;
     Position _transportOffset;
@@ -147,10 +144,8 @@ class SpellCastTargets
         void SetDst(float x, float y, float z, float orientation, uint32 mapId = MAPID_INVALID);
         void SetDst(Position const& pos);
         void SetDst(WorldObject const& wObj);
-		void SetDst(SpellDestination const& spellDest);
         void SetDst(SpellCastTargets const& spellTargets);
         void ModDst(Position const& pos);
-		void ModDst(SpellDestination const& spellDest);
         void RemoveDst();
 
         bool HasSrc() const { return GetTargetMask() & TARGET_FLAG_SOURCE_LOCATION; }
@@ -377,7 +372,7 @@ class Spell
         void SelectImplicitCasterObjectTargets(SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType);
         void SelectImplicitTargetObjectTargets(SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType);
         void SelectImplicitChainTargets(SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType, WorldObject* target, uint32 effMask);
-		void SelectImplicitTrajTargets(SpellEffIndex effIndex);
+		void SelectImplicitTrajTargets();
 
         void SelectEffectTypeImplicitTargets(uint8 effIndex);
 
@@ -667,7 +662,6 @@ class Spell
         void CallScriptDispel();
         void CallScriptObjectAreaTargetSelectHandlers(std::list<WorldObject*>& targets, SpellEffIndex effIndex);
         void CallScriptObjectTargetSelectHandlers(WorldObject*& target, SpellEffIndex effIndex);
-		void CallScriptDestinationTargetSelectHandlers(SpellDestination& target, SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType);
         bool CheckScriptEffectImplicitTargets(uint32 effIndex, uint32 effIndexToCheck);
         std::list<SpellScript*> m_loadedScripts;
 

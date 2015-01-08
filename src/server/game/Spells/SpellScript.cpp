@@ -249,8 +249,8 @@ bool SpellScript::TargetHook::CheckEffect(SpellInfo const* spellEntry, uint8 eff
             {
                 case TARGET_OBJECT_TYPE_SRC: // EMPTY
                      return false;
-				case TARGET_OBJECT_TYPE_DEST: // DEST
-					return dest;
+				case TARGET_OBJECT_TYPE_DEST: // EMPTY
+					return false;
                 default:
                     switch (targetInfo.GetReferenceType())
                     {
@@ -293,18 +293,6 @@ void SpellScript::ObjectTargetSelectHandler::Call(SpellScript* spellScript, Worl
     (spellScript->*pObjectTargetSelectHandlerScript)(target);
 }
 
-SpellScript::DestinationTargetSelectHandler::DestinationTargetSelectHandler(SpellDestinationTargetSelectFnType _DestinationTargetSelectHandlerScript, uint8 _effIndex, uint16 _targetType)
-: TargetHook(_effIndex, _targetType, false)
-{
-	DestinationTargetSelectHandlerScript = _DestinationTargetSelectHandlerScript;
-}
-
-void SpellScript::DestinationTargetSelectHandler::Call(SpellScript* spellScript, SpellDestination& target)
-{
-	(spellScript->*DestinationTargetSelectHandlerScript)(target);
-}
-
-
 bool SpellScript::_Validate(SpellInfo const* entry)
 {
     for (std::list<EffectHandler>::iterator itr = OnEffectLaunch.begin(); itr != OnEffectLaunch.end(); ++itr)
@@ -330,10 +318,6 @@ bool SpellScript::_Validate(SpellInfo const* entry)
     for (std::list<ObjectTargetSelectHandler>::iterator itr = OnObjectTargetSelect.begin(); itr != OnObjectTargetSelect.end(); ++itr)
         if (!(*itr).GetAffectedEffectsMask(entry))
             sLog;
-
-	for (std::list<DestinationTargetSelectHandler>::iterator itr = OnDestinationTargetSelect.begin(); itr != OnDestinationTargetSelect.end(); ++itr)
-		if (!(*itr).GetAffectedEffectsMask(entry))
-			sLog;
 
     return _SpellScript::_Validate(entry);
 }
@@ -636,17 +620,6 @@ int32 SpellScript::GetEffectValue()
         return 0;
     }
     return m_spell->damage;
-}
-
-void SpellScript::SetEffectValue(int32 value)
-{
-	if (!IsInEffectHook())
-	{
-		sLog->outError(LOG_FILTER_TSCR, "Script: `%s` Spell: `%u`: function SpellScript::SetEffectValue was called, but function has no effect in current hook!", m_scriptName->c_str(), m_scriptSpellId);
-		return;
-	}
-
-	m_spell->damage = value;
 }
 
 Item* SpellScript::GetCastItem()
@@ -986,7 +959,6 @@ bool AuraScript::_IsDefaultActionPrevented()
         case AURA_SCRIPT_HOOK_EFFECT_ABSORB:
         case AURA_SCRIPT_HOOK_EFFECT_SPLIT:
         case AURA_SCRIPT_HOOK_PREPARE_PROC:
-		case AURA_SCRIPT_HOOK_PROC:
         case AURA_SCRIPT_HOOK_EFFECT_PROC:
             return m_defaultActionPrevented;
         default:
@@ -1005,7 +977,6 @@ void AuraScript::PreventDefaultAction()
         case AURA_SCRIPT_HOOK_EFFECT_ABSORB:
         case AURA_SCRIPT_HOOK_EFFECT_SPLIT:
         case AURA_SCRIPT_HOOK_PREPARE_PROC:
-		case AURA_SCRIPT_HOOK_PROC:
         case AURA_SCRIPT_HOOK_EFFECT_PROC:
             m_defaultActionPrevented = true;
             break;

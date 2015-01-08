@@ -65,14 +65,6 @@ bool InstanceScript::IsEncounterInProgress() const
     return false;
 }
 
-uint64 InstanceScript::GetObjectGuid(uint32 type) const
-{
-	ObjectGuidMap::const_iterator i = _objectGuids.find(type);
-	if (i != _objectGuids.end())
-		return i->second;
-	return 0;
-}
-
 void InstanceScript::LoadMinionData(const MinionData* data)
 {
     while (data->entry)

@@ -474,11 +474,11 @@ void AddSC_kezan();
 void AddSC_deepholm();
 void AddSC_lost_isle();
 void AddSC_boss_corborus(); //the stonecore
-void AddSC_boss_high_priestess_azil();
+void AddSC_boss_azil();
 void AddSC_boss_ozruk();
 void AddSC_boss_slabhide();
-void AddSC_instance_stonecore();
-void AddSC_stonecore();
+void AddSC_instance_the_stonecore();
+void AddSC_the_stonecore();
 
 //northrend
 void AddSC_boss_slad_ran();
@@ -1396,11 +1396,11 @@ void AddMaelstromScripts()
   AddSC_deepholm();
   AddSC_lost_isle();
   AddSC_boss_corborus(); //the stonecore
-  AddSC_boss_high_priestess_azil();
+  AddSC_boss_azil();
   AddSC_boss_ozruk();
   AddSC_boss_slabhide();
-  AddSC_instance_stonecore();
-  AddSC_stonecore();
+  AddSC_instance_the_stonecore();
+  AddSC_the_stonecore();
 #endif
 }
 

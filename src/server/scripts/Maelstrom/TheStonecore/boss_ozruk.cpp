@@ -1,129 +1,101 @@
 /*
-* Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+* Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
 *
-* This program is free software; you can redistribute it and/or modify it
-* under the terms of the GNU General Public License as published by the
-* Free Software Foundation; either version 2 of the License, or (at your
-* option) any later version.
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
 *
-* This program is distributed in the hope that it will be useful, but WITHOUT
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-* more details.
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
 *
-* You should have received a copy of the GNU General Public License along
-* with this program. If not, see <http://www.gnu.org/licenses/>.
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#include "ScriptMgr.h"
-#include "ScriptedCreature.h"
-#include "SpellScript.h"
-#include "SpellAuraEffects.h"
-#include "Vehicle.h"
-#include "stonecore.h"
+#include "the_stonecore.h"
+#include "ScriptPCH.h"
 
 enum Spells
 {
-	SPELL_ELEMENTIUM_BULWARK = 78939,
-	SPELL_GROUND_SLAM = 78903,
-	SPELL_ELEMENTIUM_SPIKE_SHIELD = 78835,
-	SPELL_SHATTER = 78807,
+	SPELL_RUPTURE_PERIODIC = 92393,
+	SPELL_SPIKE_SHIELD = 78835,
 	SPELL_ENRAGE = 80467,
+	SPELL_SHATTER = 78807,
+	SPELL_GROUND_SLAM = 78903,
+	SPELL_BULWARK = 78939,
+	SPELL_PARALYZE = 92426,
 
-	// Rupture Controller and Rupture
-	SPELL_RUPTURE = 92393,
-	//  SPELL_RUPTURE_SUMMON_CENTER?  = 95669, // summons rupture 8 yards front
-	//  SPELL_RUPTURE_SUMMON_LEFT?    = 95348, // summons rupture 3 yards left?
-	//  SPELL_RUPTURE_SUMMON_RIGHT?   = 92383, // summons rupture 3 yards right?
-	SPELL_RUPTURE_DAMAGE = 92381,
-};
-
-enum NPCs
-{
-	NPC_BOUNCER_SPIKE = 42189,
-	NPC_RUPTURE_CONTROLLER = 49597,
-	NPC_RUPTURE = 49576,
-};
-
-enum Texts
-{
-	SAY_AGGRO = 0,
-	SAY_ELEMENTIUM_BULWARK = 1,
-	SAY_ELEMENTIUM_SPIKE_SHIELD = 2,
-	SAY_ENRAGE = 3,
-	SAY_DEATH = 4,
+	SPELL_RUPTURE_DAM = 92381,
 };
 
 enum Events
 {
-	EVENT_NONE,
-
-	EVENT_ELEMENTIUM_BULWARK,
-	EVENT_GROUND_SLAM,
-	EVENT_ELEMENTIUM_SPIKE_SHIELD,
-	EVENT_SHATTER,
-	EVENT_ENRAGE,
-
-	EVENT_START_ATTACK,
+	EVENT_BULWARK = 1,
+	EVENT_GROUND_SLAM = 2,
+	EVENT_GROUND_SLAM_END = 3,
+	EVENT_SHATTER = 4,
+	EVENT_PARALYZE = 5,
+	EVENT_SPIKE_SHIELD = 6
 };
 
-// TO-DO:
-// - Find heroic sniffs and spawn Ruptures using spells commented above.
-// - Make Bouncer Spikes enter ozruk without jump animation.
+enum Quotes
+{
+	SAY_AGGRO = 1,
+	SAY_SHIELD = 2,
+	SAY_SLAY = 3,
+	SAY_DEATH = 4
+
+};
 
 class boss_ozruk : public CreatureScript
 {
 public:
-	boss_ozruk() : CreatureScript("boss_ozruk") { }
+	boss_ozruk() : CreatureScript("boss_ozruk") {}
 
 	struct boss_ozrukAI : public BossAI
 	{
-		boss_ozrukAI(Creature* creature) : BossAI(creature, DATA_OZRUK) { }
+		boss_ozrukAI(Creature * creature) : BossAI(creature, DATA_OZRUK) {}
 
 		void Reset()
 		{
+			enraged = false;
 			_Reset();
-
-			me->SetReactState(REACT_AGGRESSIVE);
-
-			events.ScheduleEvent(EVENT_ELEMENTIUM_BULWARK, 5000);
-			events.ScheduleEvent(EVENT_GROUND_SLAM, 10000);
-			events.ScheduleEvent(EVENT_ELEMENTIUM_SPIKE_SHIELD, 13000);
-
-			RemoveBouncerSpikes();
 		}
 
-		void EnterCombat(Unit* /*victim*/)
+		void EnterCombat(Unit * /*who*/)
 		{
-			_EnterCombat();
-
 			Talk(SAY_AGGRO);
+			events.ScheduleEvent(EVENT_BULWARK, 10000);
+			events.ScheduleEvent(EVENT_GROUND_SLAM, 30000);
+			events.ScheduleEvent(EVENT_SPIKE_SHIELD, 15000);
+			if (!IsHeroic())
+				events.ScheduleEvent(EVENT_SHATTER, 10000);
+			_EnterCombat();
 		}
 
-		void JustSummoned(Creature* summon)
+		void JustSummoned(Creature * summon)
 		{
-			if (summon->GetEntry() != NPC_RUPTURE_CONTROLLER)
-				return;
-
-			summon->SetReactState(REACT_PASSIVE);
-			summon->CastSpell(summon, SPELL_RUPTURE, true);
-			summon->DespawnOrUnsummon(10000);
+			if (summon->GetEntry() == NPC_RUPTURE_CONTROLLER)
+			{
+				summon->CastSpell(summon, SPELL_RUPTURE_PERIODIC, false);
+				summon->DespawnOrUnsummon(5000);
+			}
 		}
 
-		void DamageTaken(Unit* /*attacker*/, uint32 &damage)
+		void JustDied(Unit * /*killer*/)
 		{
-			if (!me->HealthBelowPctDamaged(25, damage) || me->HasAura(SPELL_ENRAGE))
-				return;
-
-			DoCast(me, SPELL_ENRAGE);
-			Talk(SAY_ENRAGE);
+			Talk(SAY_DEATH);
+			_JustDied();
 		}
 
-		void JustDied(Unit* killer)
+		void KilledUnit(Unit * victim)
 		{
-			Talk(SAY_DEATH/*, killer*/); // receiver is the killer, sniff source!
-
-			RemoveBouncerSpikes();
+			if (victim->GetTypeId() == TYPEID_PLAYER)
+				Talk(SAY_SLAY);
 		}
 
 		void UpdateAI(uint32 const diff)
@@ -133,155 +105,120 @@ public:
 
 			events.Update(diff);
 
-			if (me->HasUnitState(UNIT_STATE_CASTING) || me->HasAura(SPELL_ELEMENTIUM_SPIKE_SHIELD))
+			if (me->HasUnitState(UNIT_STATE_CASTING))
 				return;
 
-			while (uint32 eventId = events.ExecuteEvent())
+			if (uint32 eventId = events.ExecuteEvent())
 			{
 				switch (eventId)
 				{
-				case EVENT_ELEMENTIUM_BULWARK:
-					DoCast(me, SPELL_ELEMENTIUM_BULWARK);
-					Talk(SAY_ELEMENTIUM_BULWARK);
+				case EVENT_BULWARK:
+					DoCast(SPELL_BULWARK);
+					events.ScheduleEvent(EVENT_BULWARK, urand(30000, 35000));
 					break;
 				case EVENT_GROUND_SLAM:
 					me->SetReactState(REACT_PASSIVE);
-					me->AttackStop();
-					DoCast(me, SPELL_GROUND_SLAM);
-					events.ScheduleEvent(EVENT_START_ATTACK, 4600);
+					me->GetMotionMaster()->Clear();
+					me->GetMotionMaster()->MoveIdle();
+					me->SetUInt64Value(UNIT_FIELD_TARGET, 0);
+					me->SetFacingToObject(me->GetVictim());
+					DoCast(SPELL_GROUND_SLAM);
+					events.ScheduleEvent(EVENT_GROUND_SLAM, 30000);
+					events.ScheduleEvent(EVENT_GROUND_SLAM_END, 4500);
 					break;
-				case EVENT_ELEMENTIUM_SPIKE_SHIELD:
-					DoCast(me, SPELL_ELEMENTIUM_SPIKE_SHIELD);
-					Talk(SAY_ELEMENTIUM_SPIKE_SHIELD);
-					events.ScheduleEvent(EVENT_SHATTER, 10000);
+				case EVENT_GROUND_SLAM_END:
+					me->SetReactState(REACT_AGGRESSIVE);
+					if (Unit * victim = me->GetVictim())
+					{
+						me->SetUInt64Value(UNIT_FIELD_TARGET, victim->GetGUID());
+						DoStartMovement(victim);
+					}
 					break;
 				case EVENT_SHATTER:
-					RemoveBouncerSpikes();
-					me->SetReactState(REACT_PASSIVE);
-					me->AttackStop();
-					DoCast(me, SPELL_SHATTER);
-					events.ScheduleEvent(EVENT_START_ATTACK, 4600);
-					// Spells are cast in same order everytime after Shatter, so we schedule them here 
-					events.ScheduleEvent(EVENT_ELEMENTIUM_BULWARK, urand(3000, 4000));
-					events.ScheduleEvent(EVENT_GROUND_SLAM, urand(7000, 9000));
-					events.ScheduleEvent(EVENT_ELEMENTIUM_SPIKE_SHIELD, urand(10000, 12000));
+					DoCast(SPELL_SHATTER);
+					if (!IsHeroic())
+						events.ScheduleEvent(EVENT_SHATTER, urand(20000, 25000));
 					break;
-				case EVENT_START_ATTACK:
-					me->SetReactState(REACT_AGGRESSIVE);
+				case EVENT_PARALYZE:
+					DoCast(SPELL_PARALYZE);
+					events.ScheduleEvent(EVENT_SHATTER, 3000);
+					break;
+				case EVENT_SPIKE_SHIELD:
+					Talk(SAY_SHIELD);
+					DoCast(SPELL_SPIKE_SHIELD);
+					events.ScheduleEvent(EVENT_SPIKE_SHIELD, 45000);
+					if (IsHeroic())
+						events.ScheduleEvent(EVENT_PARALYZE, urand(7000, 8000));
 					break;
 				default:
 					break;
 				}
 			}
 
+			if (!enraged && me->HealthBelowPct(30))
+			{
+				enraged = true;
+				DoCast(SPELL_ENRAGE);
+			}
+
 			DoMeleeAttackIfReady();
 		}
-
-		void RemoveBouncerSpikes()
-		{
-			Vehicle* vehicle = me->GetVehicleKit();
-			if (!vehicle)
-				return;
-
-			for (uint8 i = 0; i < vehicle->GetAvailableSeatCount(); i++)
-			if (Unit* passenger = vehicle->GetPassenger(i))
-			if (Creature* creature = passenger->ToCreature())
-				creature->RemoveFromWorld();
-		}
+	private:
+		bool enraged;
 	};
 
-	CreatureAI* GetAI(Creature* creature) const
+	CreatureAI * GetAI(Creature * creature) const
 	{
 		return new boss_ozrukAI(creature);
 	}
 };
 
-// 92393 - Rupture
-class spell_rupture : public SpellScriptLoader
+class spell_rupture_periodic : public SpellScriptLoader
 {
 public:
-	spell_rupture() : SpellScriptLoader("spell_rupture") { }
+	spell_rupture_periodic() : SpellScriptLoader("spell_rupture_periodic") { }
 
-	class spell_rupture_AuraScript : public AuraScript
+	class spell_rupture_periodic_AuraScript : public AuraScript
 	{
-		PrepareAuraScript(spell_rupture_AuraScript);
+		PrepareAuraScript(spell_rupture_periodic_AuraScript)
 
 		void HandleEffectPeriodic(AuraEffect const* aurEff)
 		{
-			Unit* caster = GetCaster();
-
-			float dist = aurEff->GetTickNumber() * 8.0f;
-
-			// probably hack, should use spells (see Spells enum above)
-			Position pos = caster->GetNearPosition(dist, 0.0f);
-			SummonRupture(caster, pos);
-
-			pos = caster->GetNearPosition(dist, 0.2f);
-			SummonRupture(caster, pos);
-
-			pos = caster->GetNearPosition(dist, -0.2f);
-			SummonRupture(caster, pos);
-		}
-
-		void SummonRupture(Unit* caster, Position pos)
-		{
-			Creature* rupture = caster->SummonCreature(NPC_RUPTURE, pos, TEMPSUMMON_TIMED_DESPAWN, 2500);
-			if (!rupture)
+			Unit * caster = GetCaster();
+			if (!caster)
 				return;
 
-			rupture->SetReactState(REACT_PASSIVE);
-			rupture->CastSpell(rupture, SPELL_RUPTURE_DAMAGE, true);
+			Position pos;
+			float dist = aurEff->GetTickNumber() * 5.0f;
+			caster->GetNearPosition(pos, dist, 0.0f);
+
+			for (int i = 0; i<3; ++i)
+			{
+				if (i == 1)
+					caster->MovePosition(pos, 3.0f, M_PI / 2);
+				else if (i == 2)
+					caster->MovePosition(pos, 6.0f, -M_PI / 2);
+
+				if (Creature * creature = caster->SummonCreature(NPC_RUPTURE, pos, TEMPSUMMON_TIMED_DESPAWN, 1000))
+					creature->CastSpell(creature, SPELL_RUPTURE_DAM, false);
+			}
+
 		}
 
 		void Register()
 		{
-			OnEffectPeriodic += AuraEffectPeriodicFn(spell_rupture_AuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+			OnEffectPeriodic += AuraEffectPeriodicFn(spell_rupture_periodic_AuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
 		}
 	};
 
 	AuraScript* GetAuraScript() const
 	{
-		return new spell_rupture_AuraScript();
-	}
-};
-
-// 78835 - Elementium Spike Shield
-class spell_elementium_spike_shield : public SpellScriptLoader
-{
-public:
-	spell_elementium_spike_shield() : SpellScriptLoader("spell_elementium_spike_shield") { }
-
-	class spell_elementium_spike_shield_SpellScript : public SpellScript
-	{
-		PrepareSpellScript(spell_elementium_spike_shield_SpellScript);
-
-		void HandleBouncerSpikes()
-		{
-			Unit* caster = GetCaster();
-			Vehicle* vehicle = caster->GetVehicleKit();
-			if (!vehicle)
-				return;
-
-			for (uint8 i = 0; i < vehicle->GetAvailableSeatCount(); i++)
-			if (Creature* summon = caster->SummonCreature(NPC_BOUNCER_SPIKE, caster->GetPosition(), TEMPSUMMON_TIMED_DESPAWN, 10000))
-				summon->EnterVehicle(caster, i);
-		}
-
-		void Register()
-		{
-			OnCast += SpellCastFn(spell_elementium_spike_shield_SpellScript::HandleBouncerSpikes);
-		}
-	};
-
-	SpellScript* GetSpellScript() const
-	{
-		return new spell_elementium_spike_shield_SpellScript();
+		return new spell_rupture_periodic_AuraScript();
 	}
 };
 
 void AddSC_boss_ozruk()
 {
 	new boss_ozruk();
-	new spell_rupture();
-	new spell_elementium_spike_shield();
-}
+	new spell_rupture_periodic();
+};
