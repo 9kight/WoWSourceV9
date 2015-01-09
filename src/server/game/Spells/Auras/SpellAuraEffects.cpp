@@ -2758,8 +2758,6 @@ void AuraEffect::HandleAuraMounted(AuraApplication const* aurApp, uint8 mode, bo
                     displayId = 0;
         }
 
-        if (target->ToPlayer())
-            target->ToPlayer()->UnsummonPetTemporaryIfAny();
         target->Mount(displayId, vehicleId, creatureEntry);
 
         // cast speed aura
