@@ -226,8 +226,69 @@ public:
 	}
 };
 
+enum Teleporter
+{
+	SPELL_TELEPORT_VISUAL = 87459,
+};
+
+class stonecore_teleport : public CreatureScript
+{
+public:
+	stonecore_teleport() : CreatureScript("stonecore_teleport") { }
+
+	bool OnGossipHello(Player* player, Creature* me)
+	{
+		player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Return to Entrance.", GOSSIP_SENDER_MAIN, 0);
+		if (InstanceScript* instance = me->GetInstanceScript())
+		{
+			if (instance->GetBossState(DATA_CORBORUS) == DONE)
+				player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport To Corborus", GOSSIP_SENDER_MAIN, 1);
+			if (instance->GetBossState(DATA_SLABHIDE) == DONE)
+				player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport To Slabhide", GOSSIP_SENDER_MAIN, 2);
+			if (instance->GetBossState(DATA_OZRUK) == DONE)
+				player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport To Ozruk", GOSSIP_SENDER_MAIN, 3);
+		}
+		player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Nevermind.", GOSSIP_SENDER_MAIN, 5);
+
+		player->PlayerTalkClass->SendGossipMenu(9425, me->GetGUID());
+		return true;
+	}
+
+	bool OnGossipSelect(Player * player, Creature * Creature, uint32 sender, uint32 uiAction)
+	{
+		player->PlayerTalkClass->ClearMenus();
+		switch (uiAction)
+		{
+		case 0:
+			player->CastSpell(player, SPELL_TELEPORT_VISUAL);
+			player->TeleportTo(725, 853.70, 999.90, 317.33, 0.29); // Retorn To Base
+			break;
+		case 1:
+			player->CastSpell(player, SPELL_TELEPORT_VISUAL);
+			player->TeleportTo(725, 1152.48, 897.27, 285.03, 1.30); // Corborus
+			break;
+		case 2:
+			player->CastSpell(player, SPELL_TELEPORT_VISUAL);
+			player->TeleportTo(725, 1286.24, 1217.99, 246.95, 6.19); // Slabhide
+			break;
+		case 3:
+			player->CastSpell(player, SPELL_TELEPORT_VISUAL);
+			player->TeleportTo(725, 1467.99, 1060.72, 216.38, 3.48); // Ozruk
+			break;
+
+		case 5:
+		{
+				  player->PlayerTalkClass->SendCloseGossip();
+		}
+			break;
+		}
+		return true;
+	}
+};
+
 void AddSC_the_stonecore()
 {
 	new mob_rock_borer();
 	new mob_millhouse_manastorm();
+	new stonecore_teleport();
 }

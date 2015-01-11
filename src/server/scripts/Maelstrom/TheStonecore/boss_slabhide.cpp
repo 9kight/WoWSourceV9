@@ -90,6 +90,11 @@ public:
 			_EnterCombat();
 		}
 
+		void JustDied(Unit* /*killer*/)
+		{
+			_JustDied();
+		}
+
 		void JustSummoned(Creature* summon)
 		{
 			// Don't despawn triggers on death / evade

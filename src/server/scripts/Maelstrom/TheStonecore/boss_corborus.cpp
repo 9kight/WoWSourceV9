@@ -81,6 +81,11 @@ class boss_corborus : public CreatureScript
 			events.ScheduleEvent(EVENT_SUBMERGE, 30000, 0, PHASE_NORMAL);
 		}
 
+		void JustDied(Unit* /*killer*/)
+		{
+			_JustDied();
+		}
+
 		void JustSummoned(Creature * summon)
 		{
 			if (summon->GetEntry() == NPC_THRASHING_CHARGE)
